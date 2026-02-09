@@ -36,13 +36,15 @@ it('defines user client user proposals invoices and media relationships', functi
         'notes' => 'Feature placement',
     ]);
 
+    $clientUserReturnType = (new ReflectionMethod(Client::class, 'clientUser'))
+        ->getReturnType()?->getName();
     $proposalsReturnType = (new ReflectionMethod(Client::class, 'proposals'))
         ->getReturnType()?->getName();
     $invoicesReturnType = (new ReflectionMethod(Client::class, 'invoices'))
         ->getReturnType()?->getName();
 
     expect($client->user())->toBeInstanceOf(BelongsTo::class)
-        ->and($client->clientUser())->toBeInstanceOf(HasOne::class)
+        ->and($clientUserReturnType)->toBe(HasOne::class)
         ->and($proposalsReturnType)->toBe(HasMany::class)
         ->and($invoicesReturnType)->toBe(HasMany::class)
         ->and($client->instagramMedia())->toBeInstanceOf(BelongsToMany::class)
