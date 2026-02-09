@@ -38,3 +38,6 @@ All notable changes to this project will be documented in this file.
 - RFC 010: added feature coverage in `tests/Feature/Models/ScheduledPostTest.php` for factory defaults/states, relationship typing, nullable client linkage, and user relationship behavior.
 - RFC 011: configured `campaign_media` pivot relationships on `Client::instagramMedia()` and `InstagramMedia::clients()` with pivot fields and timestamps.
 - RFC 011: added feature coverage in `tests/Feature/Models/CampaignMediaPivotTest.php` for pivot data access, timestamp tracking, and attach/detach behavior from both relationship sides.
+- RFC 012: added model policies in `app/Policies/` for `InstagramAccount`, `Client`, `Proposal`, `Invoice`, `ScheduledPost`, and `InstagramMedia`.
+- RFC 012: enforced ownership and workflow authorization rules including proposal send restrictions, draft-only invoice edits/deletes, and prevention of deleting a user's last Instagram account.
+- RFC 012: added feature coverage in `tests/Feature/Authorization/ModelPoliciesTest.php` for policy auto-discovery, authorized/unauthorized outcomes across policy methods, and HTTP `403` responses for denied access.
