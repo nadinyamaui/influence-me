@@ -20,3 +20,6 @@ All notable changes to this project will be documented in this file.
 - RFC 006: expanded `Client` model with casts and full influencer/portal/proposal/invoice/campaign-media relationships and added `User::clients()`.
 - RFC 006: added `ClientFactory` with realistic defaults and `brand`/`individual` states.
 - RFC 006: added feature coverage in `tests/Feature/Models/ClientTest.php` for default records, states, and relationship definitions.
+- RFC 007: added `ClientUser` authenticatable model with factory trait, notifiable trait, fillable/hidden attributes, hashed password cast, and `client` relationship.
+- RFC 007: added `ClientUserFactory` with default credential generation and automatic client linkage.
+- RFC 007: added feature coverage in `tests/Feature/Models/ClientUserTest.php` for hashed password persistence, relationship wiring, and session guard authentication behavior.
