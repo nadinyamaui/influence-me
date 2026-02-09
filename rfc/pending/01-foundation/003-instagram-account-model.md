@@ -9,7 +9,13 @@ Create the `InstagramAccount` Eloquent model with relationships, casts, factory,
 
 ## Model: `App\Models\InstagramAccount`
 
-### Fillable
+### Mass Assignment
+Use:
+```php
+protected $guarded = [];
+```
+
+Expected persisted attributes:
 `user_id`, `instagram_user_id`, `username`, `name`, `biography`, `profile_picture_url`, `account_type`, `followers_count`, `following_count`, `media_count`, `access_token`, `token_expires_at`, `is_primary`, `last_synced_at`, `sync_status`, `last_sync_error`
 
 ### Casts
@@ -59,7 +65,7 @@ public function primaryInstagramAccount(): HasOne
 - `app/Models/User.php` (add relationships)
 
 ## Acceptance Criteria
-- [ ] Model created with all fillable fields and casts
+- [ ] Model created with `protected $guarded = [];` and required casts
 - [ ] Relationships defined with return type hints
 - [ ] Factory produces valid model instances
 - [ ] `access_token` is stored encrypted

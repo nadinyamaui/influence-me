@@ -9,7 +9,13 @@ Create the `InstagramMedia` Eloquent model with relationships, casts, and factor
 
 ## Model: `App\Models\InstagramMedia`
 
-### Fillable
+### Mass Assignment
+Use:
+```php
+protected $guarded = [];
+```
+
+Expected persisted attributes:
 `instagram_account_id`, `instagram_media_id`, `media_type`, `caption`, `permalink`, `media_url`, `thumbnail_url`, `published_at`, `like_count`, `comments_count`, `saved_count`, `shares_count`, `reach`, `impressions`, `engagement_rate`
 
 ### Casts
@@ -40,7 +46,7 @@ protected function casts(): array
 - `database/factories/InstagramMediaFactory.php`
 
 ## Acceptance Criteria
-- [ ] Model created with all fillable fields and casts
+- [ ] Model created with `protected $guarded = [];` and required casts
 - [ ] Relationships defined with return type hints
 - [ ] Factory produces valid model instances with all states
 - [ ] Tests verify factory and relationships

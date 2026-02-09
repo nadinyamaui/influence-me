@@ -28,6 +28,7 @@ Route::livewire('schedule', 'schedule.index')
 - Client: dropdown of clients (or All)
 - Instagram Account: dropdown
 - Date range: from/to
+- Apply all filters in the Livewire component query (not by filtering data in Blade)
 
 **Timeline List:**
 Each entry shows:
@@ -84,6 +85,7 @@ Update sidebar `href="#"` for "Schedule" to `route('schedule.index')`.
 - [ ] Page renders at `/schedule` with chronological list
 - [ ] Posts grouped by day
 - [ ] Filters work: status, client, account, date range
+- [ ] Filter logic is implemented in the Livewire component query layer
 - [ ] Create modal works with all fields
 - [ ] Edit modal pre-fills existing data
 - [ ] Status can be changed (Planned → Published/Cancelled)

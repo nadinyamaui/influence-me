@@ -9,7 +9,13 @@ Create `Invoice` and `InvoiceItem` Eloquent models with relationships, casts, an
 
 ## Model: `App\Models\Invoice`
 
-### Fillable
+### Mass Assignment
+Use:
+```php
+protected $guarded = [];
+```
+
+Expected persisted attributes:
 `user_id`, `client_id`, `invoice_number`, `status`, `due_date`, `subtotal`, `tax_rate`, `tax_amount`, `total`, `stripe_payment_link`, `stripe_session_id`, `paid_at`, `notes`
 
 ### Casts
@@ -48,7 +54,13 @@ protected function casts(): array
 
 ## Model: `App\Models\InvoiceItem`
 
-### Fillable
+### Mass Assignment
+Use:
+```php
+protected $guarded = [];
+```
+
+Expected persisted attributes:
 `invoice_id`, `description`, `quantity`, `unit_price`, `total`
 
 ### Casts
@@ -88,7 +100,7 @@ public function invoices(): HasMany
 - `app/Models/User.php` (add relationship)
 
 ## Acceptance Criteria
-- [ ] Both models created with fillable fields and casts
+- [ ] Both models created with `protected $guarded = [];` and required casts
 - [ ] Relationships defined with return type hints
 - [ ] `calculateTotals()` correctly sums line items
 - [ ] `generateInvoiceNumber()` produces sequential numbers

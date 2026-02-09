@@ -9,7 +9,13 @@ Create the `AudienceDemographic` Eloquent model with relationships, casts, and f
 
 ## Model: `App\Models\AudienceDemographic`
 
-### Fillable
+### Mass Assignment
+Use:
+```php
+protected $guarded = [];
+```
+
+Expected persisted attributes:
 `instagram_account_id`, `type`, `dimension`, `value`, `recorded_at`
 
 ### Casts
@@ -39,7 +45,7 @@ protected function casts(): array
 - `database/factories/AudienceDemographicFactory.php`
 
 ## Acceptance Criteria
-- [ ] Model created with all fillable fields and casts
+- [ ] Model created with `protected $guarded = [];` and required casts
 - [ ] Relationship defined with return type hint
 - [ ] Factory produces valid instances with all states
 - [ ] Tests verify factory and relationship

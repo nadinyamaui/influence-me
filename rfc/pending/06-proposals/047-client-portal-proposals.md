@@ -31,6 +31,7 @@ Route::livewire('portal/proposals/{proposal}', 'portal.proposals.show')
 | Actions | View |
 
 Filter by status. Only show proposals with status `Sent`, `Approved`, `Rejected`, or `Revised` (not `Draft`).
+Implement filtering in the Livewire component query, not in Blade.
 
 ### Proposal Detail: `resources/views/pages/portal/proposals/show.blade.php`
 
@@ -64,6 +65,7 @@ Update `href="#"` for "Proposals" to `route('portal.proposals.index')`.
 
 ## Acceptance Criteria
 - [ ] Proposals list shows only sent/approved/rejected/revised proposals
+- [ ] Filter logic is implemented in the Livewire component query layer
 - [ ] Proposal detail renders markdown correctly
 - [ ] Data scoped to authenticated client
 - [ ] Cannot view draft proposals
