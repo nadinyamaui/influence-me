@@ -1,9 +1,9 @@
 {
     "mcpServers": {
         "laravel-boost": {
-            "command": "C:\\Users\\nadin\\.config\\herd\\bin\\php84\\php.exe",
+            "command": "/Users/nadinyamaui/Library/Application Support/Herd/bin/php84",
             "args": [
-                "C:\\laragon\\www\\influence-me\\artisan",
+                "/Users/nadinyamaui/Herd/isp-buddy/artisan",
                 "boost:mcp"
             ]
         }
