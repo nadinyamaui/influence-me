@@ -22,9 +22,11 @@ class ProposalFactory extends Factory
      */
     public function definition(): array
     {
+        $user = User::factory()->create();
+
         return [
-            'user_id' => User::factory(),
-            'client_id' => Client::factory(),
+            'user_id' => $user->id,
+            'client_id' => Client::factory()->for($user),
             'title' => fake()->sentence(6),
             'content' => sprintf(
                 "# %s\n\n%s\n\n## Deliverables\n\n- %s\n- %s",

@@ -12,6 +12,7 @@ it('creates valid proposal records with factory defaults and casts', function ()
 
     expect($proposal->user)->toBeInstanceOf(User::class)
         ->and($proposal->client)->toBeInstanceOf(Client::class)
+        ->and($proposal->client->user_id)->toBe($proposal->user_id)
         ->and($proposal->title)->not->toBeEmpty()
         ->and($proposal->content)->toContain('#')
         ->and($proposal->status)->toBeInstanceOf(ProposalStatus::class)
