@@ -24,7 +24,7 @@ All notable changes to this project will be documented in this file.
 - RFC 007: added `ClientUserFactory` with default credential generation and automatic client linkage.
 - RFC 007: added feature coverage in `tests/Feature/Models/ClientUserTest.php` for hashed password persistence, relationship wiring, and session guard authentication behavior.
 - RFC 009: added `Invoice` and `InvoiceItem` models with guarded attributes, required enum/date/decimal/datetime casts, and influencer/client/item relationships.
-- RFC 009: added `Invoice::calculateTotals()` and `Invoice::generateInvoiceNumber()` for invoice total recalculation and sequential `INV-YYYY-NNNN` numbering.
+- RFC 009: added `Invoice::calculateTotals()` and automatic ID-based invoice numbering (uses the persisted invoice ID as `invoice_number`).
 - RFC 009: added `InvoiceFactory` default/state generation (`draft`, `sent`, `paid`, `overdue`) and `InvoiceItemFactory` realistic line-item generation.
 - RFC 009: added `User::invoices()` relationship for influencer-owned invoices.
 - RFC 009: added feature coverage in `tests/Feature/Models/InvoiceTest.php` for factory defaults/states, relationship typing, totals calculation, and invoice numbering behavior.

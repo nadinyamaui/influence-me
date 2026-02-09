@@ -7,6 +7,7 @@ use App\Models\Client;
 use App\Models\Invoice;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Str;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Invoice>
@@ -29,7 +30,7 @@ class InvoiceFactory extends Factory
         return [
             'user_id' => User::factory(),
             'client_id' => Client::factory(),
-            'invoice_number' => Invoice::generateInvoiceNumber(),
+            'invoice_number' => 'pending-'.(string) Str::uuid(),
             'status' => InvoiceStatus::Draft,
             'due_date' => now()->addDays(fake()->numberBetween(7, 45))->toDateString(),
             'subtotal' => $subtotal,

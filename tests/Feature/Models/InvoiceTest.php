@@ -13,7 +13,7 @@ it('creates valid invoice records with factory defaults and casts', function ():
 
     expect($invoice->user)->toBeInstanceOf(User::class)
         ->and($invoice->client)->toBeInstanceOf(Client::class)
-        ->and($invoice->invoice_number)->toStartWith('INV-'.now()->format('Y').'-')
+        ->and($invoice->invoice_number)->toBe((string) $invoice->id)
         ->and($invoice->status)->toBeInstanceOf(InvoiceStatus::class)
         ->and($invoice->due_date)->not->toBeNull();
 });
@@ -74,14 +74,10 @@ it('recalculates totals from invoice items', function (): void {
         ->and((float) $invoice->total)->toBe(220.0);
 });
 
-it('generates sequential invoice numbers', function (): void {
-    $year = now()->format('Y');
+it('uses invoice id as invoice number', function (): void {
+    $invoice = Invoice::factory()->create();
 
-    Invoice::factory()->create([
-        'invoice_number' => "INV-{$year}-0001",
-    ]);
-
-    expect(Invoice::generateInvoiceNumber())->toBe("INV-{$year}-0002");
+    expect($invoice->invoice_number)->toBe((string) $invoice->id);
 });
 
 it('defines invoice item invoice relationship and casts', function (): void {

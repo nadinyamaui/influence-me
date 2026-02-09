@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Str;
 
 class Invoice extends Model
 {
@@ -14,6 +15,23 @@ class Invoice extends Model
     use HasFactory;
 
     protected $guarded = [];
+
+    protected static function booted(): void
+    {
+        static::creating(function (self $invoice): void {
+            if (blank($invoice->invoice_number)) {
+                $invoice->invoice_number = 'pending-'.(string) Str::uuid();
+            }
+        });
+
+        static::created(function (self $invoice): void {
+            if (str_starts_with($invoice->invoice_number, 'pending-')) {
+                $invoice->forceFill([
+                    'invoice_number' => (string) $invoice->id,
+                ])->saveQuietly();
+            }
+        });
+    }
 
     /**
      * Get the attributes that should be cast.
@@ -74,23 +92,4 @@ class Invoice extends Model
         ])->save();
     }
 
-    /**
-     * Generate the next sequential invoice number using INV-YYYY-NNNN format.
-     */
-    public static function generateInvoiceNumber(): string
-    {
-        $year = now()->format('Y');
-        $prefix = "INV-{$year}-";
-
-        $latestInvoiceNumber = static::query()
-            ->where('invoice_number', 'like', "{$prefix}%")
-            ->orderByDesc('invoice_number')
-            ->value('invoice_number');
-
-        $nextSequence = $latestInvoiceNumber
-            ? ((int) substr($latestInvoiceNumber, -4)) + 1
-            : 1;
-
-        return sprintf('%s%04d', $prefix, $nextSequence);
-    }
 }
