@@ -23,6 +23,10 @@ All notable changes to this project will be documented in this file.
 - RFC 007: added `ClientUser` authenticatable model with factory trait, notifiable trait, fillable/hidden attributes, hashed password cast, and `client` relationship.
 - RFC 007: added `ClientUserFactory` with default credential generation and automatic client linkage.
 - RFC 007: added feature coverage in `tests/Feature/Models/ClientUserTest.php` for hashed password persistence, relationship wiring, and session guard authentication behavior.
+- RFC 008: added `Proposal` model with guarded attributes, enum/datetime casts, and `user`/`client` relationships.
+- RFC 008: added `ProposalFactory` with markdown defaults and `draft`, `sent`, `approved`, `rejected`, and `revised` states.
+- RFC 008: added `User::proposals()` relationship for influencer proposal ownership.
+- RFC 008: added feature coverage in `tests/Feature/Models/ProposalTest.php` for defaults, factory states, and relationship return types.
 - RFC 009: added `Invoice` and `InvoiceItem` models with guarded attributes, required enum/date/decimal/datetime casts, and influencer/client/item relationships.
 - RFC 009: added `Invoice::calculateTotals()` and automatic ID-based invoice numbering (uses the persisted invoice ID as `invoice_number`).
 - RFC 009: added `InvoiceFactory` default/state generation (`draft`, `sent`, `paid`, `overdue`) and `InvoiceItemFactory` realistic line-item generation.

@@ -89,6 +89,14 @@ class User extends Authenticatable
     }
 
     /**
+     * Get all proposals created by the influencer.
+     */
+    public function proposals(): HasMany
+    {
+        return $this->hasMany(Proposal::class);
+    }
+
+    /**
      * Get all invoices for the influencer.
      */
     public function invoices(): HasMany
