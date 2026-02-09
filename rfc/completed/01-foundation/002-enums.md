@@ -66,7 +66,7 @@ Idle, Syncing, Failed
 - `app/Enums/SyncStatus.php`
 
 ## Acceptance Criteria
-- [ ] All enums are backed string enums
-- [ ] Keys use TitleCase convention
-- [ ] Values are lowercase strings
-- [ ] Unit tests verify enum values and cases
+- [x] All enums are backed string enums
+- [x] Keys use TitleCase convention
+- [x] Values are lowercase strings
+- [x] Unit tests verify enum values and cases
