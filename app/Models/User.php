@@ -79,4 +79,12 @@ class User extends Authenticatable
     {
         return $this->hasOne(InstagramAccount::class)->where('is_primary', true);
     }
+
+    /**
+     * Get all clients for the influencer.
+     */
+    public function clients(): HasMany
+    {
+        return $this->hasMany(Client::class);
+    }
 }
