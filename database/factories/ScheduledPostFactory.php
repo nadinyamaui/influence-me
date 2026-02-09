@@ -1,0 +1,64 @@
+<?php
+
+namespace Database\Factories;
+
+use App\Enums\ScheduledPostStatus;
+use App\Models\Client;
+use App\Models\InstagramAccount;
+use App\Models\ScheduledPost;
+use App\Models\User;
+use Illuminate\Database\Eloquent\Factories\Factory;
+
+/**
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\ScheduledPost>
+ */
+class ScheduledPostFactory extends Factory
+{
+    protected $model = ScheduledPost::class;
+
+    /**
+     * Define the model's default state.
+     *
+     * @return array<string, mixed>
+     */
+    public function definition(): array
+    {
+        return [
+            'user_id' => User::factory(),
+            'client_id' => fn (array $attributes): int => Client::factory()->create([
+                'user_id' => $attributes['user_id'],
+            ])->id,
+            'instagram_account_id' => fn (array $attributes): int => InstagramAccount::factory()->create([
+                'user_id' => $attributes['user_id'],
+            ])->id,
+            'title' => fake()->sentence(6),
+            'description' => fake()->optional()->paragraph(),
+            'scheduled_at' => now()->addHours(fake()->numberBetween(1, 168)),
+            'status' => ScheduledPostStatus::Planned,
+        ];
+    }
+
+    public function planned(): static
+    {
+        return $this->state(fn (array $attributes): array => [
+            'status' => ScheduledPostStatus::Planned,
+            'scheduled_at' => now()->addHours(fake()->numberBetween(1, 168)),
+        ]);
+    }
+
+    public function published(): static
+    {
+        return $this->state(fn (array $attributes): array => [
+            'status' => ScheduledPostStatus::Published,
+            'scheduled_at' => now()->subHours(fake()->numberBetween(1, 168)),
+        ]);
+    }
+
+    public function cancelled(): static
+    {
+        return $this->state(fn (array $attributes): array => [
+            'status' => ScheduledPostStatus::Cancelled,
+            'scheduled_at' => now()->addHours(fake()->numberBetween(1, 168)),
+        ]);
+    }
+}

@@ -28,3 +28,7 @@ All notable changes to this project will be documented in this file.
 - RFC 009: added `InvoiceFactory` default/state generation (`draft`, `sent`, `paid`, `overdue`) and `InvoiceItemFactory` realistic line-item generation.
 - RFC 009: added `User::invoices()` relationship for influencer-owned invoices.
 - RFC 009: added feature coverage in `tests/Feature/Models/InvoiceTest.php` for factory defaults/states, relationship typing, totals calculation, and invoice numbering behavior.
+- RFC 010: added `ScheduledPost` model with guarded attributes, required enum/datetime casts, and `user`/`client`/`instagramAccount` relationships.
+- RFC 010: added `ScheduledPostFactory` with default planned future posts and `planned`, `published`, and `cancelled` states.
+- RFC 010: added `User::scheduledPosts()` relationship for influencer-owned scheduled posts.
+- RFC 010: added feature coverage in `tests/Feature/Models/ScheduledPostTest.php` for factory defaults/states, relationship typing, nullable client linkage, and user relationship behavior.
