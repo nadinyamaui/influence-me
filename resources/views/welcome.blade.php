@@ -72,7 +72,7 @@ details > summary::-webkit-details-marker { display: none; }
                         <span class="text-slate-300">Operating System.</span>
                     </h1>
                     <p class="mt-8 text-lg font-medium text-slate-500 max-w-lg leading-relaxed">
-                        Stop managing your business in DMs. Sync Instagram, generate proposals, and get paid-all in one unified interface.
+                        Stop managing your business in DMs. Sync Instagram, generate proposals, and get paid—all in one unified interface.
                     </p>
                 </div>
 
