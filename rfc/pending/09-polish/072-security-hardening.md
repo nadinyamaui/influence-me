@@ -32,9 +32,12 @@ Verify all forms have `@csrf` (Livewire handles this automatically).
 Verify webhook route is excluded (#054).
 
 ### Mass Assignment Audit
-Review all model `$fillable` arrays to ensure no over-assignment:
-- No `id`, `user_id` (set programmatically), or sensitive fields in fillable
-- Verify no model uses `$guarded = []`
+Standardize model mass assignment to:
+- `protected $guarded = [];`
+
+Then verify over-assignment is prevented by validation + authorization boundaries:
+- Sensitive ownership fields (for example `user_id`) are set programmatically in Livewire/actions/services
+- IDs and guarded business state fields are never accepted from untrusted input without explicit authorization
 
 ### Content Security Policy
 Add CSP headers via middleware (optional, discuss with user):
@@ -54,7 +57,7 @@ Verify all form requests have proper validation rules:
 
 ## Files to Modify
 - `bootstrap/app.php` — rate limiting, middleware
-- Review all models for `$fillable` audit
+- Review all models for `protected $guarded = [];` consistency and input-boundary safety
 - Review all Form Requests for completeness
 
 ## Acceptance Criteria

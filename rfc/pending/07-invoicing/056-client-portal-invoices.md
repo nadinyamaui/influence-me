@@ -32,6 +32,7 @@ Route::livewire('portal/invoices/{invoice}', 'portal.invoices.show')
 | Actions | View, Pay (if unpaid + has payment link) |
 
 Filter by status (Sent, Paid, Overdue). Only show non-Draft invoices.
+Implement filtering in the Livewire component query, not in Blade.
 
 ### Invoice Detail: `resources/views/pages/portal/invoices/show.blade.php`
 
@@ -72,6 +73,7 @@ Update `href="#"` for "Invoices" to `route('portal.invoices.index')`.
 
 ## Acceptance Criteria
 - [ ] Invoice list shows non-draft invoices for client
+- [ ] Filter logic is implemented in the Livewire component query layer
 - [ ] Invoice detail displays line items and totals
 - [ ] "Pay Now" button links to Stripe payment page
 - [ ] Paid invoices show paid confirmation

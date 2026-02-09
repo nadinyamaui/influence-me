@@ -9,7 +9,13 @@ Create the `Proposal` Eloquent model with relationships, casts, and factory. Upd
 
 ## Model: `App\Models\Proposal`
 
-### Fillable
+### Mass Assignment
+Use:
+```php
+protected $guarded = [];
+```
+
+Expected persisted attributes:
 `user_id`, `client_id`, `title`, `content`, `status`, `revision_notes`, `sent_at`, `responded_at`
 
 ### Casts
@@ -51,7 +57,7 @@ public function proposals(): HasMany
 - `app/Models/User.php` (add relationship)
 
 ## Acceptance Criteria
-- [ ] Model created with all fillable fields and casts
+- [ ] Model created with `protected $guarded = [];` and required casts
 - [ ] Relationships defined with return type hints
 - [ ] Factory produces valid instances with all states
 - [ ] User model has `proposals()` relationship

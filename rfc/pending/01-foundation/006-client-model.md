@@ -9,7 +9,13 @@ Create the `Client` Eloquent model with relationships, casts, and factory. Also 
 
 ## Model: `App\Models\Client`
 
-### Fillable
+### Mass Assignment
+Use:
+```php
+protected $guarded = [];
+```
+
+Expected persisted attributes:
 `user_id`, `name`, `email`, `company_name`, `type`, `phone`, `notes`
 
 ### Casts
@@ -49,7 +55,7 @@ public function clients(): HasMany
 - `app/Models/User.php` (add relationship)
 
 ## Acceptance Criteria
-- [ ] Model created with all fillable fields and casts
+- [ ] Model created with `protected $guarded = [];` and required casts
 - [ ] Relationships defined with return type hints
 - [ ] Factory produces valid instances with states
 - [ ] User model has `clients()` relationship

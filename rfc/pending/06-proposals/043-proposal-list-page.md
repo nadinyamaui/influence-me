@@ -26,6 +26,7 @@ Route::livewire('proposals', 'proposals.index')
 **Filters:**
 - Status: All, Draft, Sent, Approved, Rejected, Revised (Flux UI select)
 - Client: dropdown of user's clients (or All)
+- Apply filters in the Livewire component query builder (not in Blade)
 
 **Table:**
 | Column | Content |
@@ -56,6 +57,7 @@ Update sidebar `href="#"` for "Proposals" to `route('proposals.index')`.
 - [ ] Lists only proposals belonging to authenticated user
 - [ ] Status filter works with correct badge colors
 - [ ] Client filter works
+- [ ] Filter logic is implemented in the Livewire component query layer
 - [ ] Pagination works
 - [ ] Empty state shown when no proposals
 - [ ] Feature test verifies list and filters

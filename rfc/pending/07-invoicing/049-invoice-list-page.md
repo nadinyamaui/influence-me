@@ -31,6 +31,7 @@ Route::livewire('invoices', 'invoices.index')
 **Filters:**
 - Status: All, Draft, Sent, Paid, Overdue, Cancelled
 - Client: dropdown of user's clients
+- Apply filters in the Livewire component query builder (not in Blade)
 
 **Table:**
 | Column | Content |
@@ -61,6 +62,7 @@ Update sidebar `href="#"` for "Invoices" to `route('invoices.index')`.
 - [ ] Summary cards show correct totals
 - [ ] Status filter works with badge colors
 - [ ] Client filter works
+- [ ] Filter logic is implemented in the Livewire component query layer
 - [ ] Due dates highlighted when overdue
 - [ ] Pagination works
 - [ ] Empty state shown

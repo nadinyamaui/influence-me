@@ -27,6 +27,7 @@ Route::livewire('clients', 'clients.index')
 **Search & Filters:**
 - Search input: filters by name, email, or company_name (debounced, `wire:model.live.debounce.300ms`)
 - Type filter: dropdown with All, Brand, Individual
+- Apply filtering in the Livewire component query (not by filtering collections in Blade)
 
 **Table/List:**
 | Column | Content |
@@ -57,6 +58,7 @@ Update sidebar `href="#"` for "Clients" to `route('clients.index')`.
 - [ ] Lists only clients belonging to authenticated user
 - [ ] Search filters by name, email, company
 - [ ] Type filter works
+- [ ] Filter logic is implemented in the Livewire component query layer
 - [ ] Pagination works
 - [ ] Empty state shown when no clients
 - [ ] Sidebar link active state works

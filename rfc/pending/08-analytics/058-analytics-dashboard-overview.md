@@ -25,6 +25,7 @@ Route::livewire('analytics', 'analytics.index')
 - "Analytics" title
 - Time period selector: 7 days, 30 days, 90 days, All Time (Flux UI button group)
 - Account filter: All accounts or specific account (dropdown, if multiple)
+- Apply period/account filters in the Livewire component query builder (not in Blade)
 
 **Overview Cards (4-column grid):**
 
@@ -76,6 +77,7 @@ Update sidebar `href="#"` for "Analytics" to `route('analytics.index')`.
 - [ ] Overview cards show correct aggregate metrics
 - [ ] Time period selector filters data correctly
 - [ ] Account filter works
+- [ ] Filter logic is implemented in the Livewire component query layer
 - [ ] Numbers formatted nicely (K/M suffixes, percentages)
 - [ ] Placeholder sections ready for charts
 - [ ] Feature test verifies metric calculations

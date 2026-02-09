@@ -9,7 +9,13 @@ Create the `ScheduledPost` Eloquent model with relationships, casts, and factory
 
 ## Model: `App\Models\ScheduledPost`
 
-### Fillable
+### Mass Assignment
+Use:
+```php
+protected $guarded = [];
+```
+
+Expected persisted attributes:
 `user_id`, `client_id`, `instagram_account_id`, `title`, `description`, `scheduled_at`, `status`
 
 ### Casts
@@ -49,7 +55,7 @@ public function scheduledPosts(): HasMany
 - `app/Models/User.php` (add relationship)
 
 ## Acceptance Criteria
-- [ ] Model created with all fillable fields and casts
+- [ ] Model created with `protected $guarded = [];` and required casts
 - [ ] Relationships defined with return type hints
 - [ ] Client relationship is nullable
 - [ ] Factory produces valid instances with all states

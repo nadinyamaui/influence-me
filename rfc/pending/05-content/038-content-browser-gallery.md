@@ -28,6 +28,7 @@ Route::livewire('content', 'content.index')
 - Instagram account: dropdown of connected accounts (if multiple)
 - Date range: from/to date pickers
 - Sort by: Most Recent, Most Liked, Highest Reach, Best Engagement (Flux UI select)
+- Apply all filter conditions in the Livewire component query builder (not in Blade)
 
 **Gallery Grid:**
 - Responsive grid: 4 columns on desktop, 2 on mobile
@@ -68,6 +69,7 @@ $media = InstagramMedia::query()
 ## Acceptance Criteria
 - [ ] Page renders at `/content` with grid of media
 - [ ] Filters work: media type, account, date range
+- [ ] Filter logic is implemented in the Livewire component query layer
 - [ ] Sort options work
 - [ ] Thumbnails display correctly
 - [ ] Metric overlays visible
