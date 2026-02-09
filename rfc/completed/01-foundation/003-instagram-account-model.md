@@ -65,9 +65,9 @@ public function primaryInstagramAccount(): HasOne
 - `app/Models/User.php` (add relationships)
 
 ## Acceptance Criteria
-- [ ] Model created with `protected $guarded = [];` and required casts
-- [ ] Relationships defined with return type hints
-- [ ] Factory produces valid model instances
-- [ ] `access_token` is stored encrypted
-- [ ] User model has `instagramAccounts()` and `primaryInstagramAccount()` relationships
-- [ ] Tests verify factory and relationships
+- [x] Model created with `protected $guarded = [];` and required casts
+- [x] Relationships defined with return type hints
+- [x] Factory produces valid model instances
+- [x] `access_token` is stored encrypted
+- [x] User model has `instagramAccounts()` and `primaryInstagramAccount()` relationships
+- [x] Tests verify factory and relationships
