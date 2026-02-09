@@ -3,7 +3,7 @@
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return view('welcome');
+    return view('pages.landing');
 })->name('home');
 
 Route::view('dashboard', 'dashboard')
