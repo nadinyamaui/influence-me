@@ -14,4 +14,6 @@ All notable changes to this project will be documented in this file.
 - RFC 004: added `InstagramMedia` model with guarded attributes, enum/date/decimal casts, and `instagramAccount`/`clients` relationships.
 - RFC 004: added `InstagramMediaFactory` with realistic default generation and `post`, `reel`, `story`, and `highEngagement` states.
 - RFC 004: added feature coverage in `tests/Feature/Models/InstagramMediaTest.php` for default records, factory state behavior, and relationship wiring.
-- Foundation prep: added a minimal `Client` model (`app/Models/Client.php`) to support executable many-to-many relationship testing for media-campaign links.
+- RFC 005: added `AudienceDemographic` model with guarded attributes, enum/decimal/datetime casts, and `instagramAccount` relationship.
+- RFC 005: added `AudienceDemographicFactory` with default demographic generation and `age`, `gender`, `city`, and `country` states.
+- RFC 005: added feature coverage in `tests/Feature/Models/AudienceDemographicTest.php` for default records, state behavior, and relationship wiring.
