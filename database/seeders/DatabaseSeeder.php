@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\InstagramAccount;
 use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -15,9 +16,20 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
+        User::factory()
+            ->has(
+                InstagramAccount::factory()
+                    ->primary()
+                    ->business()
+                    ->state([
+                        'instagram_user_id' => '17841400000000000',
+                        'username' => 'testinfluencer',
+                    ]),
+                'instagramAccounts'
+            )
+            ->create([
+                'name' => 'Test User',
+                'email' => 'test@example.com',
+            ]);
     }
 }
