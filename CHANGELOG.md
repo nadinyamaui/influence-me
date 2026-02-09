@@ -36,3 +36,5 @@ All notable changes to this project will be documented in this file.
 - RFC 010: added `ScheduledPostFactory` with default planned future posts and `planned`, `published`, and `cancelled` states.
 - RFC 010: added `User::scheduledPosts()` relationship for influencer-owned scheduled posts.
 - RFC 010: added feature coverage in `tests/Feature/Models/ScheduledPostTest.php` for factory defaults/states, relationship typing, nullable client linkage, and user relationship behavior.
+- RFC 011: configured `campaign_media` pivot relationships on `Client::instagramMedia()` and `InstagramMedia::clients()` with pivot fields and timestamps.
+- RFC 011: added feature coverage in `tests/Feature/Models/CampaignMediaPivotTest.php` for pivot data access, timestamp tracking, and attach/detach behavior from both relationship sides.
