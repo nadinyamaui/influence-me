@@ -17,3 +17,6 @@ All notable changes to this project will be documented in this file.
 - RFC 005: added `AudienceDemographic` model with guarded attributes, enum/decimal/datetime casts, and `instagramAccount` relationship.
 - RFC 005: added `AudienceDemographicFactory` with default demographic generation and `age`, `gender`, `city`, and `country` states.
 - RFC 005: added feature coverage in `tests/Feature/Models/AudienceDemographicTest.php` for default records, state behavior, and relationship wiring.
+- RFC 006: expanded `Client` model with casts and full influencer/portal/proposal/invoice/campaign-media relationships and added `User::clients()`.
+- RFC 006: added `ClientFactory` with realistic defaults and `brand`/`individual` states.
+- RFC 006: added feature coverage in `tests/Feature/Models/ClientTest.php` for default records, states, and relationship definitions.
