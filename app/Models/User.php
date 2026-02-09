@@ -95,4 +95,12 @@ class User extends Authenticatable
     {
         return $this->hasMany(Proposal::class);
     }
+
+    /**
+     * Get all invoices for the influencer.
+     */
+    public function invoices(): HasMany
+    {
+        return $this->hasMany(Invoice::class);
+    }
 }
