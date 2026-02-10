@@ -12,9 +12,9 @@ class FacebookApiClient
     ) {}
 
     /**
-     * @return array<string, mixed>
+     * @return object
      */
-    public function exchangeForLongLivedToken(string $shortLivedToken): array
+    public function exchangeForLongLivedToken(string $shortLivedToken): object
     {
         $response = $this->connector->get('/oauth/access_token', [
             'client_id' => config('services.facebook.client_id'),
@@ -25,13 +25,13 @@ class FacebookApiClient
 
         $response->throw();
 
-        return $response->json();
+        return $response->object();
     }
 
     /**
-     * @return array{id:string,username:string,name:?string,account_type:?string,profile_picture_url:?string}
+     * @return object{id:string,username:string,name:?string,account_type:?string,profile_picture_url:?string}
      */
-    public function resolveInstagramProfileFromAccessToken(string $accessToken): array
+    public function resolveInstagramProfileFromAccessToken(string $accessToken): object
     {
         $pagesResponse = $this->connector->get('/me/accounts', [
             'access_token' => $accessToken,
@@ -41,21 +41,22 @@ class FacebookApiClient
 
         $pagesResponse->throw();
 
-        $pages = data_get($pagesResponse->json(), 'data', []);
+        $pagesPayload = $pagesResponse->object();
+        $pages = $pagesPayload?->data ?? [];
 
         if (! is_array($pages)) {
             $pages = [];
         }
 
         $instagramBusinessAccount = collect($pages)
-            ->map(fn (mixed $page): mixed => is_array($page) ? data_get($page, 'instagram_business_account') : null)
-            ->first(fn (mixed $account): bool => is_array($account) && (string) data_get($account, 'id', '') !== '');
+            ->map(fn (mixed $page): ?object => $page instanceof \stdClass ? ($page?->instagram_business_account ?? null) : null)
+            ->first(fn (mixed $account): bool => $account instanceof \stdClass && $this->stringProp($account, 'id') !== '');
 
-        if (! is_array($instagramBusinessAccount)) {
+        if (! $instagramBusinessAccount instanceof \stdClass) {
             throw new \RuntimeException('No Instagram professional account is linked to this Meta/Facebook user.');
         }
 
-        $instagramUserId = (string) data_get($instagramBusinessAccount, 'id');
+        $instagramUserId = $this->stringProp($instagramBusinessAccount, 'id');
 
         $profileResponse = $this->connector->get('/'.$instagramUserId, [
             'access_token' => $accessToken,
@@ -68,24 +69,33 @@ class FacebookApiClient
                 'status' => $profileResponse->status(),
             ]);
 
-            return [
+            return (object) [
                 'id' => $instagramUserId,
-                'username' => (string) data_get($instagramBusinessAccount, 'username', 'instagram_user'),
-                'name' => data_get($instagramBusinessAccount, 'name'),
+                'username' => $this->stringProp($instagramBusinessAccount, 'username', 'instagram_user'),
+                'name' => $this->mixedProp($instagramBusinessAccount, 'name'),
                 'account_type' => null,
-                'profile_picture_url' => data_get($instagramBusinessAccount, 'profile_picture_url'),
+                'profile_picture_url' => $this->mixedProp($instagramBusinessAccount, 'profile_picture_url'),
             ];
         }
 
-        $profile = $profileResponse->json();
+        $profile = $profileResponse->object();
 
-        return [
-            'id' => (string) data_get($profile, 'id', $instagramUserId),
-            'username' => (string) data_get($profile, 'username', data_get($instagramBusinessAccount, 'username', 'instagram_user')),
-            'name' => data_get($profile, 'name', data_get($instagramBusinessAccount, 'name')),
-            'account_type' => data_get($profile, 'account_type'),
-            'profile_picture_url' => data_get($profile, 'profile_picture_url', data_get($instagramBusinessAccount, 'profile_picture_url')),
+        return (object) [
+            'id' => $this->stringProp($profile, 'id', $instagramUserId),
+            'username' => $this->stringProp($profile, 'username', $this->stringProp($instagramBusinessAccount, 'username', 'instagram_user')),
+            'name' => $this->mixedProp($profile, 'name', $this->mixedProp($instagramBusinessAccount, 'name')),
+            'account_type' => $this->mixedProp($profile, 'account_type'),
+            'profile_picture_url' => $this->mixedProp($profile, 'profile_picture_url', $this->mixedProp($instagramBusinessAccount, 'profile_picture_url')),
         ];
     }
-}
 
+    private function stringProp(?object $object, string $property, string $default = ''): string
+    {
+        return isset($object?->{$property}) ? (string) $object?->{$property} : $default;
+    }
+
+    private function mixedProp(?object $object, string $property, mixed $default = null): mixed
+    {
+        return isset($object?->{$property}) ? $object?->{$property} : $default;
+    }
+}

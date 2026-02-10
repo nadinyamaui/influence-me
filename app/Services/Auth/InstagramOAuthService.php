@@ -45,8 +45,8 @@ class InstagramOAuthService
         $socialiteUser = Socialite::driver('facebook')->user();
 
         $tokenData = $this->facebookApiClient->exchangeForLongLivedToken((string) $socialiteUser->token);
-        $longLivedToken = (string) data_get($tokenData, 'access_token');
-        $expiresIn = (int) data_get($tokenData, 'expires_in', 0);
+        $longLivedToken = (string) ($tokenData->access_token ?? '');
+        $expiresIn = (int) ($tokenData->expires_in ?? 0);
 
         if ($longLivedToken === '' || $expiresIn <= 0) {
             throw new \RuntimeException('Meta token exchange returned incomplete payload.');
@@ -57,14 +57,14 @@ class InstagramOAuthService
 
         /** @var array{0:User,1:bool} $result */
         $result = DB::transaction(function () use ($actingUser, $expiresIn, $instagramProfile, $longLivedToken, $socialiteUser): array {
-            $instagramUserId = (string) data_get($instagramProfile, 'id', '');
+            $instagramUserId = (string) ($instagramProfile?->id ?? '');
 
             if ($instagramUserId === '') {
                 throw new \RuntimeException('Instagram account resolution returned no user id.');
             }
 
             $username = $this->resolveUsername($instagramProfile);
-            $name = (string) data_get($instagramProfile, 'name', $username);
+            $name = (string) ($instagramProfile?->name ?? $username);
 
             $account = InstagramAccount::query()
                 ->where('instagram_user_id', $instagramUserId)
@@ -108,7 +108,7 @@ class InstagramOAuthService
                 'instagram_user_id' => $instagramUserId,
                 'username' => $username,
                 'name' => $name,
-                'profile_picture_url' => data_get($instagramProfile, 'profile_picture_url'),
+                'profile_picture_url' => $instagramProfile?->profile_picture_url,
                 'account_type' => $this->resolveAccountType($instagramProfile),
                 'access_token' => $longLivedToken,
                 'token_expires_at' => now()->addSeconds($expiresIn),
@@ -129,7 +129,6 @@ class InstagramOAuthService
     }
 
     /**
-     * @param  array<string, mixed>  $instagramProfile
      * @return array{0:User,1:bool}
      */
     private function attachInstagramAccountForAuthenticatedUser(
@@ -138,7 +137,7 @@ class InstagramOAuthService
         string $instagramUserId,
         string $username,
         string $name,
-        array $instagramProfile,
+        object $instagramProfile,
         string $accessToken,
         int $expiresIn,
     ): array {
@@ -167,7 +166,7 @@ class InstagramOAuthService
             'instagram_user_id' => $instagramUserId,
             'username' => $username,
             'name' => $name,
-            'profile_picture_url' => data_get($instagramProfile, 'profile_picture_url'),
+            'profile_picture_url' => $instagramProfile?->profile_picture_url,
             'account_type' => $this->resolveAccountType($instagramProfile),
             'access_token' => $accessToken,
             'token_expires_at' => now()->addSeconds($expiresIn),
@@ -183,49 +182,40 @@ class InstagramOAuthService
         return [$actingUser, false];
     }
 
-    /**
-     * @param  array<string, mixed>  $instagramProfile
-     */
     private function updateInstagramAccount(
         InstagramAccount $account,
         string $username,
         string $name,
-        array $instagramProfile,
+        object $instagramProfile,
         string $accessToken,
         int $expiresIn,
     ): void {
         $account->update([
             'username' => $username,
             'name' => $name,
-            'profile_picture_url' => data_get($instagramProfile, 'profile_picture_url'),
+            'profile_picture_url' => $instagramProfile?->profile_picture_url,
             'access_token' => $accessToken,
             'account_type' => $this->resolveAccountType($instagramProfile),
             'token_expires_at' => now()->addSeconds($expiresIn),
         ]);
     }
 
-    /**
-     * @param  array<string, mixed>  $instagramProfile
-     */
-    private function resolveUsername(array $instagramProfile): string
+    private function resolveUsername(object $instagramProfile): string
     {
-        $username = (string) data_get($instagramProfile, 'username', '');
+        $username = (string) ($instagramProfile?->username ?? '');
 
         if ($username !== '') {
             return $username;
         }
 
-        $name = (string) data_get($instagramProfile, 'name', '');
+        $name = (string) ($instagramProfile?->name ?? '');
 
         return Str::of($name)->slug('_')->toString() ?: 'instagram_user';
     }
 
-    /**
-     * @param  array<string, mixed>  $instagramProfile
-     */
-    private function resolveAccountType(array $instagramProfile): AccountType
+    private function resolveAccountType(object $instagramProfile): AccountType
     {
-        $value = strtolower((string) data_get($instagramProfile, 'account_type', 'creator'));
+        $value = strtolower((string) ($instagramProfile?->account_type ?? 'creator'));
 
         return $value === AccountType::Business->value
             ? AccountType::Business
