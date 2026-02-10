@@ -8,22 +8,30 @@ use App\Connectors\Facebook\FacebookGraphConnector;
 
 class FacebookOAuthClient
 {
-    public function __construct(
-        private readonly FacebookGraphConnector $connector,
-    ) {}
+    private FacebookGraphConnector $connector;
 
-    public function exchangeForLongLivedAccessToken(string $shortLivedAccessToken): FacebookLongLivedAccessToken
+    private string $clientId;
+
+    private string $clientSecret;
+
+    public function __construct()
     {
-        $clientId = (string) config('services.facebook.client_id', '');
-        $clientSecret = (string) config('services.facebook.client_secret', '');
+        $this->clientId = (string) config('services.facebook.client_id', '');
+        $this->clientSecret = (string) config('services.facebook.client_secret', '');
 
-        if ($clientId === '' || $clientSecret === '') {
+        if ($this->clientId === '' || $this->clientSecret === '') {
             throw new FacebookOAuthTokenExchangeException('Facebook OAuth credentials are not configured.');
         }
 
+        $this->connector = new FacebookGraphConnector(
+            clientId: $this->clientId,
+            clientSecret: $this->clientSecret,
+        );
+    }
+
+    public function exchangeForLongLivedAccessToken(string $shortLivedAccessToken): FacebookLongLivedAccessToken
+    {
         $payload = $this->connector->get('/oauth/access_token', [
-            'client_id' => $clientId,
-            'client_secret' => $clientSecret,
             'grant_type' => 'fb_exchange_token',
             'fb_exchange_token' => $shortLivedAccessToken,
         ]);
