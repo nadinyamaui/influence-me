@@ -1,5 +1,7 @@
 <?php
 
+use App\Clients\Facebook\Data\FacebookLongLivedAccessToken;
+use App\Clients\Facebook\FacebookOAuthClient;
 use App\Enums\AccountType;
 use App\Models\InstagramAccount;
 use App\Models\User;
@@ -37,6 +39,20 @@ function fakeMetaSocialiteUser(array $overrides = []): SocialiteUser
     return $user;
 }
 
+function mockFacebookTokenExchange(string $expectedToken, string $returnedToken): void
+{
+    $client = Mockery::mock(FacebookOAuthClient::class);
+    $client->shouldReceive('exchangeForLongLivedAccessToken')
+        ->once()
+        ->with($expectedToken)
+        ->andReturn(new FacebookLongLivedAccessToken(
+            accessToken: $returnedToken,
+            expiresIn: 5183944,
+        ));
+
+    app()->instance(FacebookOAuthClient::class, $client);
+}
+
 it('shows login with instagram button on the login page', function (): void {
     $response = $this->get(route('login'));
 
@@ -66,6 +82,11 @@ it('redirects users to meta oauth with required scopes', function (): void {
 });
 
 it('creates a user and instagram account for first-time oauth logins', function (): void {
+    mockFacebookTokenExchange(
+        expectedToken: 'long-lived-meta-token',
+        returnedToken: 'exchanged-long-lived-token',
+    );
+
     $provider = Mockery::mock();
 
     Socialite::shouldReceive('driver')->once()->with('facebook')->andReturn($provider);
@@ -106,16 +127,21 @@ it('creates a user and instagram account for first-time oauth logins', function 
         ->and(Auth::id())->toBe($account->user_id)
         ->and($account->is_primary)->toBeTrue()
         ->and($account->account_type)->toBe(AccountType::Business)
-        ->and($account->access_token)->toBe('long-lived-meta-token');
+        ->and($account->access_token)->toBe('exchanged-long-lived-token');
 
     $rawToken = DB::table('instagram_accounts')
         ->where('instagram_user_id', '17841499999999999')
         ->value('access_token');
 
-    expect($rawToken)->not->toBe('long-lived-meta-token');
+    expect($rawToken)->not->toBe('exchanged-long-lived-token');
 });
 
 it('logs in returning users and refreshes their token', function (): void {
+    mockFacebookTokenExchange(
+        expectedToken: 'refreshed-long-token',
+        returnedToken: 'exchanged-refreshed-long-token',
+    );
+
     $user = User::factory()->create();
 
     $account = InstagramAccount::factory()
@@ -164,7 +190,7 @@ it('logs in returning users and refreshes their token', function (): void {
 
     expect(Auth::check())->toBeTrue()
         ->and(Auth::id())->toBe($user->id)
-        ->and($account->access_token)->toBe('refreshed-long-token')
+        ->and($account->access_token)->toBe('exchanged-refreshed-long-token')
         ->and($account->token_expires_at)->not->toBeNull();
 
     expect(User::query()->count())->toBe(1)
@@ -265,6 +291,11 @@ it('preserves add-account intent outside oauth state and redirects failures to d
 });
 
 it('honors add-account intent by attaching the resolved account to the authenticated user without session switching', function (): void {
+    mockFacebookTokenExchange(
+        expectedToken: 'new-add-account-token',
+        returnedToken: 'exchanged-add-account-token',
+    );
+
     $currentUser = User::factory()->create();
     $otherUser = User::factory()->create();
     $existingPrimary = InstagramAccount::factory()->for($currentUser)->primary()->create();
@@ -310,12 +341,18 @@ it('honors add-account intent by attaching the resolved account to the authentic
         ->and(Auth::id())->toBe($currentUser->id)
         ->and($newAccount->user_id)->toBe($currentUser->id)
         ->and($newAccount->is_primary)->toBeFalse()
+        ->and($newAccount->access_token)->toBe('exchanged-add-account-token')
         ->and($existingPrimary->fresh()->is_primary)->toBeTrue()
         ->and(User::query()->count())->toBe(2)
         ->and(InstagramAccount::query()->where('user_id', $otherUser->id)->count())->toBe(0);
 });
 
 it('does not attach another users instagram account during add-account intent', function (): void {
+    mockFacebookTokenExchange(
+        expectedToken: 'conflict-token',
+        returnedToken: 'exchanged-conflict-token',
+    );
+
     $currentUser = User::factory()->create();
     $owner = User::factory()->create();
 

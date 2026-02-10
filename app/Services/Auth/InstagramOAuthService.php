@@ -2,6 +2,7 @@
 
 namespace App\Services\Auth;
 
+use App\Clients\Facebook\FacebookOAuthClient;
 use App\Enums\AccountType;
 use App\Enums\InstagramOAuthIntent;
 use App\Models\InstagramAccount;
@@ -14,6 +15,10 @@ use Laravel\Socialite\Two\User as SocialiteUser;
 
 class InstagramOAuthService
 {
+    public function __construct(
+        private readonly FacebookOAuthClient $facebookOAuthClient,
+    ) {}
+
     public function redirectToProvider(): RedirectResponse
     {
         return Socialite::driver('facebook')
@@ -50,6 +55,9 @@ class InstagramOAuthService
         }
 
         $instagramProfile = $this->resolveInstagramProfile($socialiteUser);
+        $longLivedToken = $this->facebookOAuthClient->exchangeForLongLivedAccessToken($accessToken);
+        $accessToken = $longLivedToken->accessToken;
+        $expiresIn = $longLivedToken->expiresIn;
         $actingUser = $intent === InstagramOAuthIntent::AddAccount ? $currentUser : null;
 
         /** @var array{0:User,1:bool} $result */
