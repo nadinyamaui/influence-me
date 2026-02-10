@@ -44,3 +44,5 @@ All notable changes to this project will be documented in this file.
 - RFC 013: expanded influencer app navigation in `resources/views/layouts/app/sidebar.blade.php` with the Platform, Manage, and Instagram groups and all MVP placeholder links.
 - RFC 013: updated `resources/views/layouts/app/header.blade.php` (desktop and mobile variants) to mirror the same RFC 013 navigation structure and removed starter external links.
 - RFC 013: added feature coverage in `tests/Feature/NavigationStructureTest.php` to verify grouped navigation labels, dashboard route wiring, placeholder links, and removal of external links.
+- RFC 014: added `docs/meta-app-setup.md` with end-to-end Meta Developer App setup, permissions, OAuth callback configuration, token lifecycle, app review guidance, and troubleshooting for Instagram Graph API onboarding.
+- RFC 014: updated `.env.example` with `INSTAGRAM_CLIENT_ID`, `INSTAGRAM_CLIENT_SECRET`, and `INSTAGRAM_REDIRECT_URI` defaults required by Instagram OAuth configuration.
