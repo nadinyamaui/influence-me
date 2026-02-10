@@ -5,7 +5,6 @@ use App\Models\InstagramAccount;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Http;
 use Laravel\Socialite\Facades\Socialite;
 use Laravel\Socialite\Two\InvalidStateException;
 use Laravel\Socialite\Two\User as SocialiteUser;
@@ -20,6 +19,7 @@ function fakeMetaSocialiteUser(array $overrides = []): SocialiteUser
         'name' => 'Meta User',
         'email' => null,
         'token' => 'short-lived-facebook-token',
+        'expires_in' => 5183944,
         'raw' => [
             'id' => '102938475610',
             'name' => 'Meta User',
@@ -31,6 +31,7 @@ function fakeMetaSocialiteUser(array $overrides = []): SocialiteUser
     $user->name = (string) $payload['name'];
     $user->email = $payload['email'];
     $user->token = (string) $payload['token'];
+    $user->expiresIn = (int) $payload['expires_in'];
     $user->user = $payload['raw'];
 
     return $user;
@@ -65,42 +66,31 @@ it('redirects users to meta oauth with required scopes', function (): void {
 });
 
 it('creates a user and instagram account for first-time oauth logins', function (): void {
-    Http::fake([
-        'graph.facebook.com/v23.0/oauth/access_token*' => Http::response([
-            'access_token' => 'long-lived-meta-token',
-            'token_type' => 'bearer',
-            'expires_in' => 5183944,
-        ]),
-        'graph.facebook.com/v23.0/me/accounts*' => Http::response([
-            'data' => [[
-                'id' => '9988776655',
-                'name' => 'Creator Page',
-                'instagram_business_account' => [
-                    'id' => '17841499999999999',
-                    'username' => 'new_creator',
-                    'name' => 'New Creator',
-                    'profile_picture_url' => 'https://cdn.example.com/new.jpg',
-                ],
-            ]],
-        ]),
-        'graph.facebook.com/v23.0/17841499999999999*' => Http::response([
-            'id' => '17841499999999999',
-            'username' => 'new_creator',
-            'name' => 'New Creator',
-            'account_type' => 'BUSINESS',
-            'profile_picture_url' => 'https://cdn.example.com/new.jpg',
-        ]),
-    ]);
-
     $provider = Mockery::mock();
 
     Socialite::shouldReceive('driver')->once()->with('facebook')->andReturn($provider);
+    $provider->shouldReceive('fields')->once()->with(Mockery::type('array'))->andReturnSelf();
     $provider->shouldReceive('user')->once()->andReturn(fakeMetaSocialiteUser([
         'id' => '102938475610',
         'name' => 'Meta User Name',
+        'token' => 'long-lived-meta-token',
+        'expires_in' => 5183944,
         'raw' => [
             'id' => '102938475610',
             'name' => 'Meta User Name',
+            'accounts' => [
+                'data' => [[
+                    'id' => '9988776655',
+                    'name' => 'Creator Page',
+                    'instagram_business_account' => [
+                        'id' => '17841499999999999',
+                        'username' => 'new_creator',
+                        'name' => 'New Creator',
+                        'profile_picture_url' => 'https://cdn.example.com/new.jpg',
+                        'account_type' => 'BUSINESS',
+                    ],
+                ]],
+            ],
         ],
     ]));
 
@@ -137,41 +127,30 @@ it('logs in returning users and refreshes their token', function (): void {
             'is_primary' => true,
         ]);
 
-    Http::fake([
-        'graph.facebook.com/v23.0/oauth/access_token*' => Http::response([
-            'access_token' => 'refreshed-long-token',
-            'token_type' => 'bearer',
-            'expires_in' => 5183944,
-        ]),
-        'graph.facebook.com/v23.0/me/accounts*' => Http::response([
-            'data' => [[
-                'id' => '11223344',
-                'name' => 'Existing Creator Page',
-                'instagram_business_account' => [
-                    'id' => '17841411111111111',
-                    'username' => 'existing_creator',
-                    'name' => 'Existing Creator',
-                ],
-            ]],
-        ]),
-        'graph.facebook.com/v23.0/17841411111111111*' => Http::response([
-            'id' => '17841411111111111',
-            'username' => 'existing_creator',
-            'name' => 'Existing Creator',
-            'account_type' => 'CREATOR',
-        ]),
-    ]);
-
     $provider = Mockery::mock();
 
     Socialite::shouldReceive('driver')->once()->with('facebook')->andReturn($provider);
+    $provider->shouldReceive('fields')->once()->with(Mockery::type('array'))->andReturnSelf();
     $provider->shouldReceive('user')->once()->andReturn(fakeMetaSocialiteUser([
         'id' => '881122334455',
         'name' => 'Meta Existing User',
-        'token' => 'existing-short-token',
+        'token' => 'refreshed-long-token',
+        'expires_in' => 5183944,
         'raw' => [
             'id' => '881122334455',
             'name' => 'Meta Existing User',
+            'accounts' => [
+                'data' => [[
+                    'id' => '11223344',
+                    'name' => 'Existing Creator Page',
+                    'instagram_business_account' => [
+                        'id' => '17841411111111111',
+                        'username' => 'existing_creator',
+                        'name' => 'Existing Creator',
+                        'account_type' => 'CREATOR',
+                    ],
+                ]],
+            ],
         ],
     ]));
 
@@ -206,6 +185,7 @@ it('returns to login with an error when oauth state validation fails', function 
     $provider = Mockery::mock();
 
     Socialite::shouldReceive('driver')->once()->with('facebook')->andReturn($provider);
+    $provider->shouldReceive('fields')->once()->with(Mockery::type('array'))->andReturnSelf();
     $provider->shouldReceive('user')->once()->andThrow(new InvalidStateException);
 
     $response = $this
@@ -220,22 +200,10 @@ it('returns to login with an error when oauth state validation fails', function 
 });
 
 it('returns to login with an error when no linked instagram professional account exists', function (): void {
-    Http::fake([
-        'graph.facebook.com/v23.0/oauth/access_token*' => Http::response([
-            'access_token' => 'long-lived-meta-token',
-            'token_type' => 'bearer',
-            'expires_in' => 5183944,
-        ]),
-        'graph.facebook.com/v23.0/me/accounts*' => Http::response([
-            'data' => [
-                ['id' => '9988776655', 'name' => 'Page Without Instagram'],
-            ],
-        ]),
-    ]);
-
     $provider = Mockery::mock();
 
     Socialite::shouldReceive('driver')->once()->with('facebook')->andReturn($provider);
+    $provider->shouldReceive('fields')->once()->with(Mockery::type('array'))->andReturnSelf();
     $provider->shouldReceive('user')->once()->andReturn(fakeMetaSocialiteUser());
 
     $response = $this
@@ -253,6 +221,7 @@ it('returns to login with an error when oauth callback fails', function (): void
     $provider = Mockery::mock();
 
     Socialite::shouldReceive('driver')->once()->with('facebook')->andReturn($provider);
+    $provider->shouldReceive('fields')->once()->with(Mockery::type('array'))->andReturnSelf();
     $provider->shouldReceive('user')->once()->andThrow(new RuntimeException('OAuth failed'));
 
     $response = $this
@@ -283,6 +252,7 @@ it('preserves add-account intent outside oauth state and redirects failures to d
     $callbackProvider = Mockery::mock();
 
     Socialite::shouldReceive('driver')->once()->with('facebook')->andReturn($callbackProvider);
+    $callbackProvider->shouldReceive('fields')->once()->with(Mockery::type('array'))->andReturnSelf();
     $callbackProvider->shouldReceive('user')->once()->andThrow(new InvalidStateException);
 
     $callback = $this
@@ -299,38 +269,31 @@ it('honors add-account intent by attaching the resolved account to the authentic
     $otherUser = User::factory()->create();
     $existingPrimary = InstagramAccount::factory()->for($currentUser)->primary()->create();
 
-    Http::fake([
-        'graph.facebook.com/v23.0/oauth/access_token*' => Http::response([
-            'access_token' => 'new-add-account-token',
-            'token_type' => 'bearer',
-            'expires_in' => 5183944,
-        ]),
-        'graph.facebook.com/v23.0/me/accounts*' => Http::response([
-            'data' => [[
-                'id' => '77700011',
-                'name' => 'Second Creator Page',
-                'instagram_business_account' => [
-                    'id' => '17841422222222222',
-                    'username' => 'second_creator',
-                    'name' => 'Second Creator',
-                ],
-            ]],
-        ]),
-        'graph.facebook.com/v23.0/17841422222222222*' => Http::response([
-            'id' => '17841422222222222',
-            'username' => 'second_creator',
-            'name' => 'Second Creator',
-            'account_type' => 'CREATOR',
-        ]),
-    ]);
-
     $provider = Mockery::mock();
 
     Socialite::shouldReceive('driver')->once()->with('facebook')->andReturn($provider);
+    $provider->shouldReceive('fields')->once()->with(Mockery::type('array'))->andReturnSelf();
     $provider->shouldReceive('user')->once()->andReturn(fakeMetaSocialiteUser([
         'id' => '998877001122',
         'name' => 'Meta Add Account User',
-        'token' => 'short-lived-add-account-token',
+        'token' => 'new-add-account-token',
+        'expires_in' => 5183944,
+        'raw' => [
+            'id' => '998877001122',
+            'name' => 'Meta Add Account User',
+            'accounts' => [
+                'data' => [[
+                    'id' => '77700011',
+                    'name' => 'Second Creator Page',
+                    'instagram_business_account' => [
+                        'id' => '17841422222222222',
+                        'username' => 'second_creator',
+                        'name' => 'Second Creator',
+                        'account_type' => 'CREATOR',
+                    ],
+                ]],
+            ],
+        ],
     ]));
 
     $this->actingAs($currentUser);
@@ -361,37 +324,31 @@ it('does not attach another users instagram account during add-account intent', 
         'username' => 'owned_elsewhere',
     ]);
 
-    Http::fake([
-        'graph.facebook.com/v23.0/oauth/access_token*' => Http::response([
-            'access_token' => 'conflict-token',
-            'token_type' => 'bearer',
-            'expires_in' => 5183944,
-        ]),
-        'graph.facebook.com/v23.0/me/accounts*' => Http::response([
-            'data' => [[
-                'id' => '22223333',
-                'name' => 'Conflict Page',
-                'instagram_business_account' => [
-                    'id' => '17841433333333333',
-                    'username' => 'owned_elsewhere',
-                    'name' => 'Owned Elsewhere',
-                ],
-            ]],
-        ]),
-        'graph.facebook.com/v23.0/17841433333333333*' => Http::response([
-            'id' => '17841433333333333',
-            'username' => 'owned_elsewhere',
-            'name' => 'Owned Elsewhere',
-            'account_type' => 'BUSINESS',
-        ]),
-    ]);
-
     $provider = Mockery::mock();
 
     Socialite::shouldReceive('driver')->once()->with('facebook')->andReturn($provider);
+    $provider->shouldReceive('fields')->once()->with(Mockery::type('array'))->andReturnSelf();
     $provider->shouldReceive('user')->once()->andReturn(fakeMetaSocialiteUser([
         'id' => '222244445555',
         'name' => 'Meta Conflict User',
+        'token' => 'conflict-token',
+        'expires_in' => 5183944,
+        'raw' => [
+            'id' => '222244445555',
+            'name' => 'Meta Conflict User',
+            'accounts' => [
+                'data' => [[
+                    'id' => '22223333',
+                    'name' => 'Conflict Page',
+                    'instagram_business_account' => [
+                        'id' => '17841433333333333',
+                        'username' => 'owned_elsewhere',
+                        'name' => 'Owned Elsewhere',
+                        'account_type' => 'BUSINESS',
+                    ],
+                ]],
+            ],
+        ],
     ]));
 
     $this->actingAs($currentUser);

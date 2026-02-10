@@ -2,20 +2,16 @@
 
 namespace App\Services\Auth;
 
-use App\Clients\Facebook\FacebookApiClient;
 use App\Enums\AccountType;
 use App\Models\InstagramAccount;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Laravel\Socialite\Facades\Socialite;
+use Laravel\Socialite\Two\User as SocialiteUser;
 
 class InstagramOAuthService
 {
-    public function __construct(
-        private readonly FacebookApiClient $facebookApiClient,
-    ) {}
-
     /**
      * @return list<string>
      */
@@ -42,21 +38,23 @@ class InstagramOAuthService
 
     public function processCallback(string $intent, ?User $currentUser): InstagramOAuthResult
     {
-        $socialiteUser = Socialite::driver('facebook')->user();
+        /** @var SocialiteUser $socialiteUser */
+        $socialiteUser = Socialite::driver('facebook')
+            ->fields($this->oauthProfileFields())
+            ->user();
 
-        $tokenData = $this->facebookApiClient->exchangeForLongLivedToken((string) $socialiteUser->token);
-        $longLivedToken = (string) ($tokenData->access_token ?? '');
-        $expiresIn = (int) ($tokenData->expires_in ?? 0);
+        $accessToken = (string) ($socialiteUser->token ?? '');
+        $expiresIn = (int) ($socialiteUser->expiresIn ?? 0);
 
-        if ($longLivedToken === '' || $expiresIn <= 0) {
-            throw new \RuntimeException('Meta token exchange returned incomplete payload.');
+        if ($accessToken === '' || $expiresIn <= 0) {
+            throw new \RuntimeException('Meta OAuth returned incomplete token payload.');
         }
 
-        $instagramProfile = $this->facebookApiClient->resolveInstagramProfileFromAccessToken($longLivedToken);
+        $instagramProfile = $this->resolveInstagramProfile($socialiteUser);
         $actingUser = $intent === 'add_account' ? $currentUser : null;
 
         /** @var array{0:User,1:bool} $result */
-        $result = DB::transaction(function () use ($actingUser, $expiresIn, $instagramProfile, $longLivedToken, $socialiteUser): array {
+        $result = DB::transaction(function () use ($accessToken, $actingUser, $expiresIn, $instagramProfile, $socialiteUser): array {
             $instagramUserId = (string) ($instagramProfile?->id ?? '');
 
             if ($instagramUserId === '') {
@@ -78,7 +76,7 @@ class InstagramOAuthService
                     username: $username,
                     name: $name,
                     instagramProfile: $instagramProfile,
-                    accessToken: $longLivedToken,
+                    accessToken: $accessToken,
                     expiresIn: $expiresIn,
                 );
             }
@@ -89,7 +87,7 @@ class InstagramOAuthService
                     username: $username,
                     name: $name,
                     instagramProfile: $instagramProfile,
-                    accessToken: $longLivedToken,
+                    accessToken: $accessToken,
                     expiresIn: $expiresIn,
                 );
 
@@ -110,7 +108,7 @@ class InstagramOAuthService
                 'name' => $name,
                 'profile_picture_url' => $instagramProfile?->profile_picture_url,
                 'account_type' => $this->resolveAccountType($instagramProfile),
-                'access_token' => $longLivedToken,
+                'access_token' => $accessToken,
                 'token_expires_at' => now()->addSeconds($expiresIn),
                 'is_primary' => true,
             ]);
@@ -126,6 +124,19 @@ class InstagramOAuthService
             user: $result[0],
             shouldLogin: $result[1],
         );
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function oauthProfileFields(): array
+    {
+        return [
+            'id',
+            'name',
+            'email',
+            'accounts{id,name,instagram_business_account{id,username,name,profile_picture_url,account_type}}',
+        ];
     }
 
     /**
@@ -220,5 +231,39 @@ class InstagramOAuthService
         return $value === AccountType::Business->value
             ? AccountType::Business
             : AccountType::Creator;
+    }
+
+    private function resolveInstagramProfile(SocialiteUser $socialiteUser): object
+    {
+        $raw = $socialiteUser->getRaw();
+        $accounts = $raw['accounts']['data'] ?? [];
+
+        if (! is_array($accounts)) {
+            $accounts = [];
+        }
+
+        $instagramBusinessAccount = collect($accounts)
+            ->map(function (mixed $page): ?array {
+                if (! is_array($page)) {
+                    return null;
+                }
+
+                $account = $page['instagram_business_account'] ?? null;
+
+                return is_array($account) ? $account : null;
+            })
+            ->first(fn (mixed $account): bool => is_array($account) && isset($account['id']) && (string) $account['id'] !== '');
+
+        if (! is_array($instagramBusinessAccount)) {
+            throw new \RuntimeException('No Instagram professional account is linked to this Meta/Facebook user.');
+        }
+
+        return (object) [
+            'id' => (string) ($instagramBusinessAccount['id'] ?? ''),
+            'username' => isset($instagramBusinessAccount['username']) ? (string) $instagramBusinessAccount['username'] : 'instagram_user',
+            'name' => isset($instagramBusinessAccount['name']) ? $instagramBusinessAccount['name'] : null,
+            'account_type' => isset($instagramBusinessAccount['account_type']) ? $instagramBusinessAccount['account_type'] : null,
+            'profile_picture_url' => isset($instagramBusinessAccount['profile_picture_url']) ? $instagramBusinessAccount['profile_picture_url'] : null,
+        ];
     }
 }
