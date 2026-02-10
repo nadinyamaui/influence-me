@@ -338,6 +338,140 @@ it('logs in returning users and refreshes their token', function (): void {
         ->and(InstagramAccount::query()->count())->toBe(1);
 });
 
+it('selects the single locally linked instagram account when meta returns multiple pages', function (): void {
+    mockFacebookTokenExchange(
+        expectedToken: 'multi-pages-token',
+        returnedToken: 'exchanged-multi-pages-token',
+    );
+
+    $user = User::factory()->create();
+    $linkedAccount = InstagramAccount::factory()
+        ->for($user)
+        ->create([
+            'instagram_user_id' => '17841477777777777',
+            'username' => 'linked_creator',
+            'access_token' => 'old-linked-token',
+            'is_primary' => true,
+        ]);
+
+    $provider = Mockery::mock();
+
+    Socialite::shouldReceive('driver')->once()->with('facebook')->andReturn($provider);
+    $provider->shouldReceive('fields')->once()->with(Mockery::type('array'))->andReturnSelf();
+    $provider->shouldReceive('user')->once()->andReturn(fakeMetaSocialiteUser([
+        'id' => '121212121212',
+        'name' => 'Meta Multi Page User',
+        'token' => 'multi-pages-token',
+        'expires_in' => 5183944,
+        'raw' => [
+            'id' => '121212121212',
+            'name' => 'Meta Multi Page User',
+            'accounts' => [
+                'data' => [
+                    [
+                        'id' => '100001',
+                        'name' => 'Unlinked Page',
+                        'instagram_business_account' => [
+                            'id' => '17841488888888888',
+                            'username' => 'unlinked_creator',
+                            'name' => 'Unlinked Creator',
+                            'account_type' => 'CREATOR',
+                        ],
+                    ],
+                    [
+                        'id' => '100002',
+                        'name' => 'Linked Page',
+                        'instagram_business_account' => [
+                            'id' => '17841477777777777',
+                            'username' => 'linked_creator',
+                            'name' => 'Linked Creator',
+                            'account_type' => 'BUSINESS',
+                        ],
+                    ],
+                ],
+            ],
+        ],
+    ]));
+
+    $response = $this
+        ->withSession(['instagram_oauth_intent' => 'login'])
+        ->get(route('auth.instagram.callback'));
+
+    $response->assertRedirect(route('dashboard', absolute: false));
+
+    $linkedAccount->refresh();
+
+    expect(Auth::check())->toBeTrue()
+        ->and(Auth::id())->toBe($user->id)
+        ->and($linkedAccount->access_token)->toBe('exchanged-multi-pages-token')
+        ->and($linkedAccount->account_type)->toBe(AccountType::Business)
+        ->and(InstagramAccount::query()->where('user_id', $user->id)->count())->toBe(2);
+});
+
+it('creates instagram accounts for all meta pages in login flow', function (): void {
+    mockFacebookTokenExchange(
+        expectedToken: 'ambiguous-token',
+        returnedToken: 'exchanged-ambiguous-token',
+    );
+
+    $provider = Mockery::mock();
+
+    Socialite::shouldReceive('driver')->once()->with('facebook')->andReturn($provider);
+    $provider->shouldReceive('fields')->once()->with(Mockery::type('array'))->andReturnSelf();
+    $provider->shouldReceive('user')->once()->andReturn(fakeMetaSocialiteUser([
+        'id' => '343434343434',
+        'name' => 'Meta Ambiguous User',
+        'email' => 'ambiguous@example.com',
+        'token' => 'ambiguous-token',
+        'expires_in' => 5183944,
+        'raw' => [
+            'id' => '343434343434',
+            'name' => 'Meta Ambiguous User',
+            'email' => 'ambiguous@example.com',
+            'accounts' => [
+                'data' => [
+                    [
+                        'id' => '200001',
+                        'name' => 'First Page',
+                        'instagram_business_account' => [
+                            'id' => '17841410101010101',
+                            'username' => 'first_ambiguous',
+                            'name' => 'First Ambiguous',
+                            'account_type' => 'CREATOR',
+                        ],
+                    ],
+                    [
+                        'id' => '200002',
+                        'name' => 'Second Page',
+                        'instagram_business_account' => [
+                            'id' => '17841420202020202',
+                            'username' => 'second_ambiguous',
+                            'name' => 'Second Ambiguous',
+                            'account_type' => 'BUSINESS',
+                        ],
+                    ],
+                ],
+            ],
+        ],
+    ]));
+
+    $response = $this
+        ->withSession(['instagram_oauth_intent' => 'login'])
+        ->get(route('auth.instagram.callback'));
+
+    $response->assertRedirect(route('dashboard', absolute: false));
+
+    $this->assertAuthenticated();
+    $user = User::query()->where('email', 'ambiguous@example.com')->firstOrFail();
+    $firstAccount = InstagramAccount::query()->where('instagram_user_id', '17841410101010101')->firstOrFail();
+    $secondAccount = InstagramAccount::query()->where('instagram_user_id', '17841420202020202')->firstOrFail();
+
+    expect($firstAccount->user_id)->toBe($user->id)
+        ->and($secondAccount->user_id)->toBe($user->id)
+        ->and(InstagramAccount::query()->where('user_id', $user->id)->count())->toBe(2)
+        ->and(InstagramAccount::query()->where('user_id', $user->id)->where('is_primary', true)->count())->toBe(1);
+});
+
 it('returns to login with an error when permissions are denied', function (): void {
     $response = $this->get(route('auth.instagram.callback', ['error' => 'access_denied']));
 
@@ -500,6 +634,73 @@ it('honors add-account intent by attaching the resolved account to the authentic
         ->and($existingPrimary->fresh()->is_primary)->toBeTrue()
         ->and(User::query()->count())->toBe(2)
         ->and(InstagramAccount::query()->where('user_id', $otherUser->id)->count())->toBe(0);
+});
+
+it('attaches all returned instagram accounts during add-account intent', function (): void {
+    mockFacebookTokenExchange(
+        expectedToken: 'add-multiple-token',
+        returnedToken: 'exchanged-add-multiple-token',
+    );
+
+    $currentUser = User::factory()->create();
+    $existingPrimary = InstagramAccount::factory()->for($currentUser)->primary()->create();
+
+    $provider = Mockery::mock();
+
+    Socialite::shouldReceive('driver')->once()->with('facebook')->andReturn($provider);
+    $provider->shouldReceive('fields')->once()->with(Mockery::type('array'))->andReturnSelf();
+    $provider->shouldReceive('user')->once()->andReturn(fakeMetaSocialiteUser([
+        'id' => '909090909090',
+        'name' => 'Meta Add Multiple User',
+        'token' => 'add-multiple-token',
+        'expires_in' => 5183944,
+        'raw' => [
+            'id' => '909090909090',
+            'name' => 'Meta Add Multiple User',
+            'accounts' => [
+                'data' => [
+                    [
+                        'id' => '99880011',
+                        'name' => 'Third Creator Page',
+                        'instagram_business_account' => [
+                            'id' => '17841430303030303',
+                            'username' => 'third_creator',
+                            'name' => 'Third Creator',
+                            'account_type' => 'CREATOR',
+                        ],
+                    ],
+                    [
+                        'id' => '99880022',
+                        'name' => 'Fourth Creator Page',
+                        'instagram_business_account' => [
+                            'id' => '17841440404040404',
+                            'username' => 'fourth_creator',
+                            'name' => 'Fourth Creator',
+                            'account_type' => 'BUSINESS',
+                        ],
+                    ],
+                ],
+            ],
+        ],
+    ]));
+
+    $this->actingAs($currentUser);
+
+    $response = $this
+        ->withSession(['instagram_oauth_intent' => 'add_account'])
+        ->get(route('auth.instagram.callback'));
+
+    $response->assertRedirect(route('dashboard', absolute: false));
+
+    $thirdAccount = InstagramAccount::query()->where('instagram_user_id', '17841430303030303')->firstOrFail();
+    $fourthAccount = InstagramAccount::query()->where('instagram_user_id', '17841440404040404')->firstOrFail();
+
+    expect($thirdAccount->user_id)->toBe($currentUser->id)
+        ->and($fourthAccount->user_id)->toBe($currentUser->id)
+        ->and($thirdAccount->is_primary)->toBeFalse()
+        ->and($fourthAccount->is_primary)->toBeFalse()
+        ->and($existingPrimary->fresh()->is_primary)->toBeTrue()
+        ->and(InstagramAccount::query()->where('user_id', $currentUser->id)->count())->toBe(3);
 });
 
 it('does not attach another users instagram account during add-account intent', function (): void {

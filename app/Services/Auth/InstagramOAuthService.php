@@ -8,6 +8,7 @@ use App\Enums\InstagramOAuthIntent;
 use App\Models\InstagramAccount;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Laravel\Socialite\Facades\Socialite;
@@ -58,79 +59,36 @@ class InstagramOAuthService
             throw new \RuntimeException(__('Meta OAuth returned incomplete token payload.'));
         }
 
-        $instagramProfile = $this->resolveInstagramProfile($socialiteUser);
+        $actingUser = $intent === InstagramOAuthIntent::AddAccount ? $currentUser : null;
+        $instagramProfiles = $this->resolveInstagramProfiles($socialiteUser);
         $longLivedToken = $this->facebookOAuthClient->exchangeForLongLivedAccessToken($accessToken);
         $accessToken = $longLivedToken->accessToken;
         $expiresIn = $longLivedToken->expiresIn;
-        $actingUser = $intent === InstagramOAuthIntent::AddAccount ? $currentUser : null;
 
         /** @var array{0:User,1:bool} $result */
-        $result = DB::transaction(function () use ($accessToken, $actingUser, $expiresIn, $instagramProfile, $socialiteUser): array {
-            $instagramUserId = (string) ($instagramProfile?->id ?? '');
-
-            if ($instagramUserId === '') {
-                throw new \RuntimeException(__('Instagram account resolution returned no user id.'));
-            }
-
-            $username = $this->resolveUsername($instagramProfile);
-            $name = (string) ($instagramProfile?->name ?? $username);
-
-            $account = InstagramAccount::query()
-                ->where('instagram_user_id', $instagramUserId)
-                ->first();
-
+        $result = DB::transaction(function () use ($accessToken, $actingUser, $expiresIn, $instagramProfiles, $socialiteUser): array {
             if ($actingUser instanceof User) {
-                return $this->attachInstagramAccountForAuthenticatedUser(
-                    actingUser: $actingUser,
-                    existingAccount: $account,
-                    instagramUserId: $instagramUserId,
-                    username: $username,
-                    name: $name,
-                    instagramProfile: $instagramProfile,
-                    accessToken: $accessToken,
-                    expiresIn: $expiresIn,
-                );
-            }
-
-            if ($account instanceof InstagramAccount) {
-                $this->updateInstagramAccount(
-                    account: $account,
-                    username: $username,
-                    name: $name,
-                    instagramProfile: $instagramProfile,
+                $this->syncInstagramProfilesForUser(
+                    user: $actingUser,
+                    instagramProfiles: $instagramProfiles,
                     accessToken: $accessToken,
                     expiresIn: $expiresIn,
                 );
 
-                return [$account->user, true];
+                return [$actingUser, false];
             }
 
-            $user = $this->resolveOrCreateOAuthUser(
+            $user = $this->resolveLoginUser(
                 socialiteUser: $socialiteUser,
-                fallbackName: $name,
-                instagramUserId: $instagramUserId,
+                instagramProfiles: $instagramProfiles,
             );
 
-            $hasExistingAccounts = $user->instagramAccounts()->exists();
-            $isPrimary = ! $hasExistingAccounts;
-
-            $newAccount = InstagramAccount::query()->create([
-                'user_id' => $user->id,
-                'instagram_user_id' => $instagramUserId,
-                'username' => $username,
-                'name' => $name,
-                'profile_picture_url' => $instagramProfile?->profile_picture_url,
-                'account_type' => $this->resolveAccountType($instagramProfile),
-                'access_token' => $accessToken,
-                'token_expires_at' => now()->addSeconds($expiresIn),
-                'is_primary' => $isPrimary,
-            ]);
-
-            if ($isPrimary || $user->instagram_primary_account_id === null) {
-                $user->forceFill([
-                    'instagram_primary_account_id' => $newAccount->id,
-                ])->save();
-            }
+            $this->syncInstagramProfilesForUser(
+                user: $user,
+                instagramProfiles: $instagramProfiles,
+                accessToken: $accessToken,
+                expiresIn: $expiresIn,
+            );
 
             return [$user, true];
         });
@@ -185,57 +143,77 @@ class InstagramOAuthService
     }
 
     /**
-     * @return array{0:User,1:bool}
+     * @param  Collection<int, object>  $instagramProfiles
      */
-    private function attachInstagramAccountForAuthenticatedUser(
-        User $actingUser,
-        ?InstagramAccount $existingAccount,
-        string $instagramUserId,
-        string $username,
-        string $name,
-        object $instagramProfile,
+    private function syncInstagramProfilesForUser(
+        User $user,
+        Collection $instagramProfiles,
         string $accessToken,
         int $expiresIn,
-    ): array {
-        if ($existingAccount instanceof InstagramAccount && $existingAccount->user_id !== $actingUser->id) {
-            throw new \RuntimeException(__('This Instagram account is already connected to another user.'));
+    ): void {
+        $hasExistingAccounts = $user->instagramAccounts()->exists();
+        $assignPrimaryToNextCreated = ! $hasExistingAccounts;
+
+        $instagramProfiles->each(function (object $instagramProfile) use (&$assignPrimaryToNextCreated, $accessToken, $expiresIn, $user): void {
+            $instagramUserId = (string) ($instagramProfile?->id ?? '');
+            if ($instagramUserId === '') {
+                throw new \RuntimeException(__('Instagram account resolution returned no user id.'));
+            }
+
+            $username = $this->resolveUsername($instagramProfile);
+            $name = (string) ($instagramProfile?->name ?? $username);
+            $existingAccount = InstagramAccount::query()
+                ->where('instagram_user_id', $instagramUserId)
+                ->first();
+
+            if ($existingAccount instanceof InstagramAccount) {
+                if ($existingAccount->user_id !== $user->id) {
+                    throw new \RuntimeException(__('This Instagram account is already connected to another user.'));
+                }
+
+                $this->updateInstagramAccount(
+                    account: $existingAccount,
+                    username: $username,
+                    name: $name,
+                    instagramProfile: $instagramProfile,
+                    accessToken: $accessToken,
+                    expiresIn: $expiresIn,
+                );
+
+                return;
+            }
+
+            $isPrimary = $assignPrimaryToNextCreated;
+            InstagramAccount::query()->create([
+                'user_id' => $user->id,
+                'instagram_user_id' => $instagramUserId,
+                'username' => $username,
+                'name' => $name,
+                'profile_picture_url' => $instagramProfile?->profile_picture_url,
+                'account_type' => $this->resolveAccountType($instagramProfile),
+                'access_token' => $accessToken,
+                'token_expires_at' => now()->addSeconds($expiresIn),
+                'is_primary' => $isPrimary,
+            ]);
+
+            if ($assignPrimaryToNextCreated) {
+                $assignPrimaryToNextCreated = false;
+            }
+        });
+
+        if ($user->instagram_primary_account_id === null) {
+            $primaryAccountId = InstagramAccount::query()
+                ->where('user_id', $user->id)
+                ->orderByDesc('is_primary')
+                ->orderBy('id')
+                ->value('id');
+
+            if ($primaryAccountId !== null) {
+                $user->forceFill([
+                    'instagram_primary_account_id' => $primaryAccountId,
+                ])->save();
+            }
         }
-
-        if ($existingAccount instanceof InstagramAccount) {
-            $this->updateInstagramAccount(
-                account: $existingAccount,
-                username: $username,
-                name: $name,
-                instagramProfile: $instagramProfile,
-                accessToken: $accessToken,
-                expiresIn: $expiresIn,
-            );
-
-            return [$actingUser, false];
-        }
-
-        $hasExistingAccounts = $actingUser->instagramAccounts()->exists();
-        $isPrimary = ! $hasExistingAccounts;
-
-        $newAccount = InstagramAccount::query()->create([
-            'user_id' => $actingUser->id,
-            'instagram_user_id' => $instagramUserId,
-            'username' => $username,
-            'name' => $name,
-            'profile_picture_url' => $instagramProfile?->profile_picture_url,
-            'account_type' => $this->resolveAccountType($instagramProfile),
-            'access_token' => $accessToken,
-            'token_expires_at' => now()->addSeconds($expiresIn),
-            'is_primary' => $isPrimary,
-        ]);
-
-        if ($isPrimary || $actingUser->instagram_primary_account_id === null) {
-            $actingUser->forceFill([
-                'instagram_primary_account_id' => $newAccount->id,
-            ])->save();
-        }
-
-        return [$actingUser, false];
     }
 
     private function updateInstagramAccount(
@@ -278,7 +256,10 @@ class InstagramOAuthService
             : AccountType::Creator;
     }
 
-    private function resolveInstagramProfile(SocialiteUser $socialiteUser): object
+    /**
+     * @return Collection<int, object>
+     */
+    private function resolveInstagramProfiles(SocialiteUser $socialiteUser): Collection
     {
         $raw = $socialiteUser->getRaw();
         $accounts = $raw['accounts']['data'] ?? [];
@@ -287,7 +268,7 @@ class InstagramOAuthService
             $accounts = [];
         }
 
-        $instagramBusinessAccount = collect($accounts)
+        $profiles = collect($accounts)
             ->map(function (mixed $page): ?array {
                 if (! is_array($page)) {
                     return null;
@@ -297,10 +278,63 @@ class InstagramOAuthService
 
                 return is_array($account) ? $account : null;
             })
-            ->first(fn (mixed $account): bool => is_array($account) && (string) ($account['id'] ?? '') !== '');
+            ->filter(fn (mixed $account): bool => is_array($account) && (string) ($account['id'] ?? '') !== '')
+            ->unique(fn (array $account): string => (string) ($account['id'] ?? ''))
+            ->values()
+            ->map(fn (array $account): object => $this->formatInstagramProfile($account));
 
-        if (! is_array($instagramBusinessAccount)) {
+        if ($profiles->isEmpty()) {
             throw new \RuntimeException(__('No Instagram professional account is linked to this Meta/Facebook user.'));
+        }
+
+        return $profiles;
+    }
+
+    /**
+     * @param  Collection<int, object>  $instagramProfiles
+     */
+    private function resolveLoginUser(SocialiteUser $socialiteUser, Collection $instagramProfiles): User
+    {
+        $candidateIds = $instagramProfiles
+            ->map(fn (object $profile): string => (string) ($profile?->id ?? ''))
+            ->filter(fn (string $id): bool => $id !== '')
+            ->values()
+            ->all();
+
+        $linkedUserIds = InstagramAccount::query()
+            ->whereIn('instagram_user_id', $candidateIds)
+            ->pluck('user_id')
+            ->unique()
+            ->values();
+
+        if ($linkedUserIds->count() > 1) {
+            throw new \RuntimeException(__('Meta returned Instagram accounts linked to multiple users.'));
+        }
+
+        if ($linkedUserIds->count() === 1) {
+            $linkedUserId = (int) $linkedUserIds->first();
+            $linkedUser = User::query()->find($linkedUserId);
+
+            if ($linkedUser instanceof User) {
+                return $linkedUser;
+            }
+        }
+
+        $firstProfile = $instagramProfiles->first();
+        $fallbackName = (string) ($firstProfile?->name ?? 'Instagram User');
+        $fallbackInstagramUserId = (string) ($firstProfile?->id ?? '');
+
+        return $this->resolveOrCreateOAuthUser(
+            socialiteUser: $socialiteUser,
+            fallbackName: $fallbackName,
+            instagramUserId: $fallbackInstagramUserId,
+        );
+    }
+
+    private function formatInstagramProfile(mixed $instagramBusinessAccount): object
+    {
+        if (! is_array($instagramBusinessAccount)) {
+            throw new \RuntimeException(__('Instagram account resolution returned an invalid payload.'));
         }
 
         return (object) [
