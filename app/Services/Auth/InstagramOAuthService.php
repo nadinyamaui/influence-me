@@ -26,16 +26,6 @@ class InstagramOAuthService
         ];
     }
 
-    public function normalizeIntent(string $intent): string
-    {
-        return in_array($intent, ['login', 'add_account'], true) ? $intent : 'login';
-    }
-
-    public function failureRouteForIntent(string $intent): string
-    {
-        return $intent === 'add_account' ? 'dashboard' : 'login';
-    }
-
     public function processCallback(string $intent, ?User $currentUser): InstagramOAuthResult
     {
         /** @var SocialiteUser $socialiteUser */

@@ -6,6 +6,7 @@ use App\Services\Auth\InstagramOAuthService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
 use Laravel\Socialite\Facades\Socialite;
 use Throwable;
 
@@ -20,9 +21,10 @@ class InstagramAuthController
      */
     public function redirect(Request $request): RedirectResponse
     {
-        $intent = $this->instagramOAuthService->normalizeIntent(
-            $request->string('intent')->toString()
-        );
+        $validated = $request->validate([
+            'intent' => ['nullable', 'string', 'in:login,add_account'],
+        ]);
+        $intent = $validated['intent'] ?? 'login';
 
         // Keep flow context outside OAuth state so Socialite can fully manage CSRF state checks.
         $request->session()->put('instagram_oauth_intent', $intent);
@@ -37,10 +39,15 @@ class InstagramAuthController
      */
     public function callback(Request $request): RedirectResponse
     {
-        $intent = $this->instagramOAuthService->normalizeIntent(
-            (string) $request->session()->pull('instagram_oauth_intent', 'login')
+        $sessionIntent = (string) $request->session()->pull('instagram_oauth_intent', 'login');
+        $intentValidator = Validator::make(
+            ['intent' => $sessionIntent],
+            ['intent' => ['required', 'string', 'in:login,add_account']]
         );
-        $failureRoute = $this->instagramOAuthService->failureRouteForIntent($intent);
+        $intent = $intentValidator->fails()
+            ? 'login'
+            : (string) $intentValidator->validated()['intent'];
+        $failureRoute = $intent === 'add_account' ? 'dashboard' : 'login';
 
         if ($request->filled('error')) {
             return redirect()
