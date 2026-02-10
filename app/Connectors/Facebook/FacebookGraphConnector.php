@@ -1,58 +1,50 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Connectors\Facebook;
 
-use FacebookAds\AnonymousSession;
+use App\Connectors\Facebook\Contracts\FacebookGraphConnectorInterface;
+use App\Connectors\Facebook\Exceptions\FacebookGraphRequestException;
 use FacebookAds\Api;
-use FacebookAds\Http\Client as FacebookHttpClient;
 use FacebookAds\Http\Exception\RequestException;
-use FacebookAds\Http\RequestInterface;
 
-class FacebookGraphConnector
+/**
+ * Connector for generic Facebook Graph API requests using FacebookAds SDK.
+ */
+final class FacebookGraphConnector implements FacebookGraphConnectorInterface
 {
-    private Api $api;
-
     public function __construct(
-        private readonly string $clientId,
-        private readonly string $clientSecret,
-        ?Api $api = null,
-    ) {
-        $this->api = $api ?? new Api(
-            new FacebookHttpClient,
-            new AnonymousSession
-        );
-        $this->api->setDefaultGraphVersion('v24.0');
-    }
+        private readonly Api $api,
+    ) {}
 
     /**
+     * @param  array<string, mixed>  $params
      * @return array<string, mixed>
+     *
+     * @throws FacebookGraphRequestException
      */
-    public function get(string $endpoint, array $query = []): array
+    public function request(string $path, string $method = 'GET', array $params = []): array
     {
         try {
             $response = $this->api->call(
-                $endpoint,
-                RequestInterface::METHOD_GET,
-                array_merge(
-                    [
-                        'client_id' => $this->clientId,
-                        'client_secret' => $this->clientSecret,
-                    ],
-                    $query,
-                ),
+                $path,
+                strtoupper($method),
+                $params,
             );
         } catch (RequestException $exception) {
             $payload = $exception->getResponse()?->getContent();
+            $payload = is_array($payload) ? $payload : [];
 
-            return is_array($payload)
-                ? $payload
-                : [];
+            throw new FacebookGraphRequestException(
+                message: 'Facebook Graph request failed.',
+                payload: $payload,
+                previous: $exception,
+            );
         }
 
         $payload = $response->getContent();
 
-        return is_array($payload)
-            ? $payload
-            : [];
+        return is_array($payload) ? $payload : [];
     }
 }

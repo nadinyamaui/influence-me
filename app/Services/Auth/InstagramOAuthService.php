@@ -2,7 +2,7 @@
 
 namespace App\Services\Auth;
 
-use App\Clients\Facebook\FacebookOAuthClient;
+use App\Clients\Facebook\Contracts\FacebookOAuthClientInterface;
 use App\Enums\AccountType;
 use App\Enums\InstagramOAuthIntent;
 use App\Models\InstagramAccount;
@@ -16,7 +16,7 @@ use Laravel\Socialite\Two\User as SocialiteUser;
 class InstagramOAuthService
 {
     public function __construct(
-        private readonly FacebookOAuthClient $facebookOAuthClient,
+        private readonly FacebookOAuthClientInterface $facebookOAuthClient,
     ) {}
 
     public function redirectToProvider(): RedirectResponse

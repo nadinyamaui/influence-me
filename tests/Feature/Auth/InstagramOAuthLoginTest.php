@@ -1,7 +1,7 @@
 <?php
 
+use App\Clients\Facebook\Contracts\FacebookOAuthClientInterface;
 use App\Clients\Facebook\Data\FacebookLongLivedAccessToken;
-use App\Clients\Facebook\FacebookOAuthClient;
 use App\Enums\AccountType;
 use App\Models\InstagramAccount;
 use App\Models\User;
@@ -41,7 +41,7 @@ function fakeMetaSocialiteUser(array $overrides = []): SocialiteUser
 
 function mockFacebookTokenExchange(string $expectedToken, string $returnedToken): void
 {
-    $client = Mockery::mock(FacebookOAuthClient::class);
+    $client = Mockery::mock(FacebookOAuthClientInterface::class);
     $client->shouldReceive('exchangeForLongLivedAccessToken')
         ->once()
         ->with($expectedToken)
@@ -50,7 +50,7 @@ function mockFacebookTokenExchange(string $expectedToken, string $returnedToken)
             expiresIn: 5183944,
         ));
 
-    app()->instance(FacebookOAuthClient::class, $client);
+    app()->instance(FacebookOAuthClientInterface::class, $client);
 }
 
 it('shows login with instagram button on the login page', function (): void {
