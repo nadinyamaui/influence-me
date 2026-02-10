@@ -143,6 +143,7 @@ Hard constraints:
 - No persistence side effects hidden inside connectors
 - Do not use `data_get` for object property traversal; use nullsafe property access (`$object?->property?->property`) instead
 - Do not use custom normalize helper functions for request/session input; use Laravel validation rules (`$request->validate()` or Form Requests) and explicit defaults instead
+- Do not use `isset()` for value retrieval/defaulting; use null coalescing (`??`) with explicit defaults instead
 
 Testing requirements for decoupling:
 

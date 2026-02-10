@@ -37,7 +37,7 @@ class InstagramOAuthService
         $expiresIn = (int) ($socialiteUser->expiresIn ?? 0);
 
         if ($accessToken === '' || $expiresIn <= 0) {
-            throw new \RuntimeException('Meta OAuth returned incomplete token payload.');
+            throw new \RuntimeException(__('Meta OAuth returned incomplete token payload.'));
         }
 
         $instagramProfile = $this->resolveInstagramProfile($socialiteUser);
@@ -48,7 +48,7 @@ class InstagramOAuthService
             $instagramUserId = (string) ($instagramProfile?->id ?? '');
 
             if ($instagramUserId === '') {
-                throw new \RuntimeException('Instagram account resolution returned no user id.');
+                throw new \RuntimeException(__('Instagram account resolution returned no user id.'));
             }
 
             $username = $this->resolveUsername($instagramProfile);
@@ -143,7 +143,7 @@ class InstagramOAuthService
         int $expiresIn,
     ): array {
         if ($existingAccount instanceof InstagramAccount && $existingAccount->user_id !== $actingUser->id) {
-            throw new \RuntimeException('This Instagram account is already connected to another user.');
+            throw new \RuntimeException(__('This Instagram account is already connected to another user.'));
         }
 
         if ($existingAccount instanceof InstagramAccount) {
@@ -242,18 +242,18 @@ class InstagramOAuthService
 
                 return is_array($account) ? $account : null;
             })
-            ->first(fn (mixed $account): bool => is_array($account) && isset($account['id']) && (string) $account['id'] !== '');
+            ->first(fn (mixed $account): bool => is_array($account) && (string) ($account['id'] ?? '') !== '');
 
         if (! is_array($instagramBusinessAccount)) {
-            throw new \RuntimeException('No Instagram professional account is linked to this Meta/Facebook user.');
+            throw new \RuntimeException(__('No Instagram professional account is linked to this Meta/Facebook user.'));
         }
 
         return (object) [
             'id' => (string) ($instagramBusinessAccount['id'] ?? ''),
-            'username' => isset($instagramBusinessAccount['username']) ? (string) $instagramBusinessAccount['username'] : 'instagram_user',
-            'name' => isset($instagramBusinessAccount['name']) ? $instagramBusinessAccount['name'] : null,
-            'account_type' => isset($instagramBusinessAccount['account_type']) ? $instagramBusinessAccount['account_type'] : null,
-            'profile_picture_url' => isset($instagramBusinessAccount['profile_picture_url']) ? $instagramBusinessAccount['profile_picture_url'] : null,
+            'username' => (string) ($instagramBusinessAccount['username'] ?? 'instagram_user'),
+            'name' => $instagramBusinessAccount['name'] ?? null,
+            'account_type' => $instagramBusinessAccount['account_type'] ?? null,
+            'profile_picture_url' => $instagramBusinessAccount['profile_picture_url'] ?? null,
         ];
     }
 }

@@ -53,7 +53,7 @@ class InstagramAuthController
             return redirect()
                 ->route($failureRoute)
                 ->withErrors([
-                    'instagram' => 'Instagram authorization was denied. Please try again.',
+                    'instagram' => __('Instagram authorization was denied. Please try again.'),
                 ]);
         }
 
@@ -74,7 +74,7 @@ class InstagramAuthController
             return redirect()
                 ->route($failureRoute)
                 ->withErrors([
-                    'instagram' => 'Unable to authenticate with Instagram right now. Ensure your Meta account has a linked Instagram professional account and try again.',
+                    'instagram' => __('Unable to authenticate with Instagram right now. Ensure your Meta account has a linked Instagram professional account and try again.'),
                 ]);
         }
     }
