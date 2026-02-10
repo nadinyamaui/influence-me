@@ -293,3 +293,118 @@ it('preserves add-account intent outside oauth state and redirects failures to d
         ->assertRedirect(route('dashboard', absolute: false))
         ->assertSessionHasErrors('instagram');
 });
+
+it('honors add-account intent by attaching the resolved account to the authenticated user without session switching', function (): void {
+    $currentUser = User::factory()->create();
+    $otherUser = User::factory()->create();
+    $existingPrimary = InstagramAccount::factory()->for($currentUser)->primary()->create();
+
+    Http::fake([
+        'graph.facebook.com/v23.0/oauth/access_token*' => Http::response([
+            'access_token' => 'new-add-account-token',
+            'token_type' => 'bearer',
+            'expires_in' => 5183944,
+        ]),
+        'graph.facebook.com/v23.0/me/accounts*' => Http::response([
+            'data' => [[
+                'id' => '77700011',
+                'name' => 'Second Creator Page',
+                'instagram_business_account' => [
+                    'id' => '17841422222222222',
+                    'username' => 'second_creator',
+                    'name' => 'Second Creator',
+                ],
+            ]],
+        ]),
+        'graph.facebook.com/v23.0/17841422222222222*' => Http::response([
+            'id' => '17841422222222222',
+            'username' => 'second_creator',
+            'name' => 'Second Creator',
+            'account_type' => 'CREATOR',
+        ]),
+    ]);
+
+    $provider = Mockery::mock();
+
+    Socialite::shouldReceive('driver')->once()->with('facebook')->andReturn($provider);
+    $provider->shouldReceive('user')->once()->andReturn(fakeMetaSocialiteUser([
+        'id' => '998877001122',
+        'name' => 'Meta Add Account User',
+        'token' => 'short-lived-add-account-token',
+    ]));
+
+    $this->actingAs($currentUser);
+
+    $response = $this
+        ->withSession(['instagram_oauth_intent' => 'add_account'])
+        ->get(route('auth.instagram.callback'));
+
+    $response->assertRedirect(route('dashboard', absolute: false));
+
+    $newAccount = InstagramAccount::query()->where('instagram_user_id', '17841422222222222')->firstOrFail();
+
+    expect(Auth::check())->toBeTrue()
+        ->and(Auth::id())->toBe($currentUser->id)
+        ->and($newAccount->user_id)->toBe($currentUser->id)
+        ->and($newAccount->is_primary)->toBeFalse()
+        ->and($existingPrimary->fresh()->is_primary)->toBeTrue()
+        ->and(User::query()->count())->toBe(2)
+        ->and(InstagramAccount::query()->where('user_id', $otherUser->id)->count())->toBe(0);
+});
+
+it('does not attach another users instagram account during add-account intent', function (): void {
+    $currentUser = User::factory()->create();
+    $owner = User::factory()->create();
+
+    InstagramAccount::factory()->for($owner)->create([
+        'instagram_user_id' => '17841433333333333',
+        'username' => 'owned_elsewhere',
+    ]);
+
+    Http::fake([
+        'graph.facebook.com/v23.0/oauth/access_token*' => Http::response([
+            'access_token' => 'conflict-token',
+            'token_type' => 'bearer',
+            'expires_in' => 5183944,
+        ]),
+        'graph.facebook.com/v23.0/me/accounts*' => Http::response([
+            'data' => [[
+                'id' => '22223333',
+                'name' => 'Conflict Page',
+                'instagram_business_account' => [
+                    'id' => '17841433333333333',
+                    'username' => 'owned_elsewhere',
+                    'name' => 'Owned Elsewhere',
+                ],
+            ]],
+        ]),
+        'graph.facebook.com/v23.0/17841433333333333*' => Http::response([
+            'id' => '17841433333333333',
+            'username' => 'owned_elsewhere',
+            'name' => 'Owned Elsewhere',
+            'account_type' => 'BUSINESS',
+        ]),
+    ]);
+
+    $provider = Mockery::mock();
+
+    Socialite::shouldReceive('driver')->once()->with('facebook')->andReturn($provider);
+    $provider->shouldReceive('user')->once()->andReturn(fakeMetaSocialiteUser([
+        'id' => '222244445555',
+        'name' => 'Meta Conflict User',
+    ]));
+
+    $this->actingAs($currentUser);
+
+    $response = $this
+        ->withSession(['instagram_oauth_intent' => 'add_account'])
+        ->get(route('auth.instagram.callback'));
+
+    $response
+        ->assertRedirect(route('dashboard', absolute: false))
+        ->assertSessionHasErrors('instagram');
+
+    expect(Auth::check())->toBeTrue()
+        ->and(Auth::id())->toBe($currentUser->id)
+        ->and(InstagramAccount::query()->where('user_id', $currentUser->id)->count())->toBe(0);
+});

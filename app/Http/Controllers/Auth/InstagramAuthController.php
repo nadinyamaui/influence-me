@@ -76,7 +76,9 @@ class InstagramAuthController
 
             $instagramProfile = $this->resolveInstagramProfileFromFacebookToken($longLivedToken);
 
-            [$user] = DB::transaction(function () use ($socialiteUser, $instagramProfile, $longLivedToken, $expiresIn): array {
+            $currentUser = $intent === 'add_account' ? Auth::user() : null;
+
+            [$user, $shouldLogin] = DB::transaction(function () use ($socialiteUser, $instagramProfile, $longLivedToken, $expiresIn, $currentUser): array {
                 $instagramUserId = (string) data_get($instagramProfile, 'id', '');
 
                 if ($instagramUserId === '') {
@@ -90,6 +92,48 @@ class InstagramAuthController
                     ->where('instagram_user_id', $instagramUserId)
                     ->first();
 
+                if ($currentUser instanceof User) {
+                    if ($account instanceof InstagramAccount && $account->user_id !== $currentUser->id) {
+                        throw new \RuntimeException('This Instagram account is already connected to another user.');
+                    }
+
+                    if ($account instanceof InstagramAccount) {
+                        $account->update([
+                            'username' => $username,
+                            'name' => $name,
+                            'profile_picture_url' => data_get($instagramProfile, 'profile_picture_url'),
+                            'access_token' => $longLivedToken,
+                            'account_type' => $this->resolveAccountType($instagramProfile),
+                            'token_expires_at' => now()->addSeconds($expiresIn),
+                        ]);
+
+                        return [$currentUser, false];
+                    }
+
+                    $hasExistingAccounts = $currentUser->instagramAccounts()->exists();
+                    $isPrimary = ! $hasExistingAccounts;
+
+                    $account = InstagramAccount::query()->create([
+                        'user_id' => $currentUser->id,
+                        'instagram_user_id' => $instagramUserId,
+                        'username' => $username,
+                        'name' => $name,
+                        'profile_picture_url' => data_get($instagramProfile, 'profile_picture_url'),
+                        'account_type' => $this->resolveAccountType($instagramProfile),
+                        'access_token' => $longLivedToken,
+                        'token_expires_at' => now()->addSeconds($expiresIn),
+                        'is_primary' => $isPrimary,
+                    ]);
+
+                    if ($isPrimary || $currentUser->instagram_primary_account_id === null) {
+                        $currentUser->forceFill([
+                            'instagram_primary_account_id' => $account->id,
+                        ])->save();
+                    }
+
+                    return [$currentUser, false];
+                }
+
                 if ($account instanceof InstagramAccount) {
                     $account->update([
                         'username' => $username,
@@ -100,7 +144,7 @@ class InstagramAuthController
                         'token_expires_at' => now()->addSeconds($expiresIn),
                     ]);
 
-                    return [$account->user];
+                    return [$account->user, true];
                 }
 
                 $user = User::query()->create([
@@ -126,10 +170,12 @@ class InstagramAuthController
                     'instagram_primary_account_id' => $account->id,
                 ])->save();
 
-                return [$user];
+                return [$user, true];
             });
 
-            Auth::login($user, true);
+            if ($shouldLogin) {
+                Auth::login($user, true);
+            }
 
             return redirect()->route('dashboard');
         } catch (Throwable $exception) {
