@@ -3,6 +3,7 @@
 namespace App\Services\Auth;
 
 use App\Enums\AccountType;
+use App\Enums\InstagramOAuthIntent;
 use App\Models\InstagramAccount;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
@@ -34,7 +35,7 @@ class InstagramOAuthService
         ];
     }
 
-    public function processCallback(string $intent, ?User $currentUser): InstagramOAuthResult
+    public function processCallback(InstagramOAuthIntent $intent, ?User $currentUser): InstagramOAuthResult
     {
         /** @var SocialiteUser $socialiteUser */
         $socialiteUser = Socialite::driver('facebook')
@@ -49,7 +50,7 @@ class InstagramOAuthService
         }
 
         $instagramProfile = $this->resolveInstagramProfile($socialiteUser);
-        $actingUser = $intent === 'add_account' ? $currentUser : null;
+        $actingUser = $intent === InstagramOAuthIntent::AddAccount ? $currentUser : null;
 
         /** @var array{0:User,1:bool} $result */
         $result = DB::transaction(function () use ($accessToken, $actingUser, $expiresIn, $instagramProfile, $socialiteUser): array {
@@ -94,7 +95,6 @@ class InstagramOAuthService
 
             $user = User::query()->create([
                 'name' => (string) ($socialiteUser->getName() ?: $name),
-                // Keep email nullable intent from RFC while supporting current schema constraints.
                 'email' => $socialiteUser->getEmail() ?: sprintf('%s@instagram.local', $instagramUserId),
                 'password' => null,
             ]);

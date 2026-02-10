@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Enums\InstagramOAuthIntent;
 use App\Services\Auth\InstagramOAuthService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 use Throwable;
 
 class InstagramAuthController
@@ -15,36 +17,30 @@ class InstagramAuthController
         private readonly InstagramOAuthService $instagramOAuthService,
     ) {}
 
-    /**
-     * Redirect the user to Meta/Facebook OAuth for Instagram Graph access.
-     */
     public function redirect(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'intent' => ['nullable', 'string', 'in:login,add_account'],
+            'intent' => ['nullable', Rule::enum(InstagramOAuthIntent::class)],
         ]);
-        $intent = $validated['intent'] ?? 'login';
+        $intent = InstagramOAuthIntent::tryFrom((string) ($validated['intent'] ?? ''))
+            ?? InstagramOAuthIntent::Login;
 
-        // Keep flow context outside OAuth state so Socialite can fully manage CSRF state checks.
-        $request->session()->put('instagram_oauth_intent', $intent);
+        $request->session()->put('instagram_oauth_intent', $intent->value);
 
         return $this->instagramOAuthService->redirectToProvider();
     }
 
-    /**
-     * Handle the callback from Meta/Facebook OAuth.
-     */
     public function callback(Request $request): RedirectResponse
     {
-        $sessionIntent = (string) $request->session()->pull('instagram_oauth_intent', 'login');
+        $sessionIntent = (string) $request->session()->pull('instagram_oauth_intent', InstagramOAuthIntent::Login->value);
         $intentValidator = Validator::make(
             ['intent' => $sessionIntent],
-            ['intent' => ['required', 'string', 'in:login,add_account']]
+            ['intent' => ['required', Rule::enum(InstagramOAuthIntent::class)]]
         );
         $intent = $intentValidator->fails()
-            ? 'login'
-            : (string) $intentValidator->validated()['intent'];
-        $failureRoute = $intent === 'add_account' ? 'dashboard' : 'login';
+            ? InstagramOAuthIntent::Login
+            : InstagramOAuthIntent::from((string) $intentValidator->validated()['intent']);
+        $failureRoute = $intent->failureRoute();
 
         if ($request->filled('error')) {
             return redirect()
