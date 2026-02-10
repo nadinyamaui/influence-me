@@ -46,3 +46,6 @@ All notable changes to this project will be documented in this file.
 - RFC 013: added feature coverage in `tests/Feature/NavigationStructureTest.php` to verify grouped navigation labels, dashboard route wiring, placeholder links, and removal of external links.
 - RFC 014: added `docs/meta-app-setup.md` with end-to-end Meta Developer App setup, permissions, OAuth callback configuration, token lifecycle, app review guidance, and troubleshooting for Instagram Graph API onboarding.
 - RFC 014: updated `.env.example` with `INSTAGRAM_CLIENT_ID`, `INSTAGRAM_CLIENT_SECRET`, and `INSTAGRAM_REDIRECT_URI` defaults required by Instagram OAuth configuration.
+- RFC 015: added Instagram Socialite service configuration in `config/services.php` using `INSTAGRAM_CLIENT_ID`, `INSTAGRAM_CLIENT_SECRET`, and `INSTAGRAM_REDIRECT_URI`.
+- RFC 015: registered the Socialite Providers Instagram listener in `app/Providers/AppServiceProvider.php` so `Socialite::driver('instagram')` resolves correctly.
+- RFC 015: added feature coverage in `tests/Feature/Auth/InstagramSocialiteConfigurationTest.php` for listener registration and Instagram driver resolution.
