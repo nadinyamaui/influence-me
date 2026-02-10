@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Laravel\Socialite\Facades\Socialite;
+use Laravel\Socialite\Two\InvalidStateException;
 use Laravel\Socialite\Two\User as SocialiteUser;
 
 function fakeInstagramSocialiteUser(array $overrides = []): SocialiteUser
@@ -55,16 +56,12 @@ it('redirects users to instagram oauth with required scopes', function (): void 
         'pages_show_list',
         'pages_read_engagement',
     ])->andReturnSelf();
-    $provider->shouldReceive('with')->once()->with(Mockery::on(function (array $payload): bool {
-        return isset($payload['state'])
-            && str_starts_with((string) $payload['state'], 'login|');
-    }))->andReturnSelf();
     $provider->shouldReceive('redirect')->once()->andReturn(redirect('https://instagram.example/oauth'));
 
     $response = $this->get(route('auth.instagram'));
 
     $response->assertRedirect('https://instagram.example/oauth');
-    expect((string) session('instagram_oauth_state'))->toStartWith('login|');
+    expect((string) session('instagram_oauth_intent'))->toBe('login');
 });
 
 it('creates a user and instagram account for first-time oauth logins', function (): void {
@@ -79,7 +76,6 @@ it('creates a user and instagram account for first-time oauth logins', function 
     $provider = Mockery::mock();
 
     Socialite::shouldReceive('driver')->once()->with('instagram')->andReturn($provider);
-    $provider->shouldReceive('stateless')->once()->andReturnSelf();
     $provider->shouldReceive('user')->once()->andReturn(fakeInstagramSocialiteUser([
         'id' => '17841499999999999',
         'nickname' => 'new_creator',
@@ -91,10 +87,9 @@ it('creates a user and instagram account for first-time oauth logins', function 
         ],
     ]));
 
-    $state = 'login|csrf-token-value';
     $response = $this
-        ->withSession(['instagram_oauth_state' => $state])
-        ->get(route('auth.instagram.callback', ['state' => $state]));
+        ->withSession(['instagram_oauth_intent' => 'login'])
+        ->get(route('auth.instagram.callback'));
 
     $response->assertRedirect(route('dashboard', absolute: false));
 
@@ -136,7 +131,6 @@ it('logs in returning users and refreshes their token', function (): void {
     $provider = Mockery::mock();
 
     Socialite::shouldReceive('driver')->once()->with('instagram')->andReturn($provider);
-    $provider->shouldReceive('stateless')->once()->andReturnSelf();
     $provider->shouldReceive('user')->once()->andReturn(fakeInstagramSocialiteUser([
         'id' => '17841411111111111',
         'nickname' => 'existing_creator',
@@ -149,10 +143,9 @@ it('logs in returning users and refreshes their token', function (): void {
         ],
     ]));
 
-    $state = 'login|csrf-token-value';
     $response = $this
-        ->withSession(['instagram_oauth_state' => $state])
-        ->get(route('auth.instagram.callback', ['state' => $state]));
+        ->withSession(['instagram_oauth_intent' => 'login'])
+        ->get(route('auth.instagram.callback'));
 
     $response->assertRedirect(route('dashboard', absolute: false));
 
@@ -177,10 +170,15 @@ it('returns to login with an error when permissions are denied', function (): vo
     $this->assertGuest();
 });
 
-it('returns to login with an error when oauth state is missing or invalid', function (): void {
+it('returns to login with an error when oauth state validation fails', function (): void {
+    $provider = Mockery::mock();
+
+    Socialite::shouldReceive('driver')->once()->with('instagram')->andReturn($provider);
+    $provider->shouldReceive('user')->once()->andThrow(new InvalidStateException);
+
     $response = $this
-        ->withSession(['instagram_oauth_state' => 'login|expected-state'])
-        ->get(route('auth.instagram.callback', ['state' => 'login|other-state']));
+        ->withSession(['instagram_oauth_intent' => 'login'])
+        ->get(route('auth.instagram.callback'));
 
     $response
         ->assertRedirect(route('login', absolute: false))
@@ -193,17 +191,43 @@ it('returns to login with an error when oauth callback fails', function (): void
     $provider = Mockery::mock();
 
     Socialite::shouldReceive('driver')->once()->with('instagram')->andReturn($provider);
-    $provider->shouldReceive('stateless')->once()->andReturnSelf();
     $provider->shouldReceive('user')->once()->andThrow(new RuntimeException('OAuth failed'));
 
-    $state = 'login|csrf-token-value';
     $response = $this
-        ->withSession(['instagram_oauth_state' => $state])
-        ->get(route('auth.instagram.callback', ['state' => $state]));
+        ->withSession(['instagram_oauth_intent' => 'login'])
+        ->get(route('auth.instagram.callback'));
 
     $response
         ->assertRedirect(route('login', absolute: false))
         ->assertSessionHasErrors('instagram');
 
     $this->assertGuest();
+});
+
+it('preserves add-account intent outside oauth state and redirects failures to dashboard', function (): void {
+    $provider = Mockery::mock();
+
+    Socialite::shouldReceive('driver')->once()->with('instagram')->andReturn($provider);
+    $provider->shouldReceive('scopes')->once()->andReturnSelf();
+    $provider->shouldReceive('redirect')->once()->andReturn(redirect('https://instagram.example/oauth'));
+
+    $this->actingAs(User::factory()->create());
+
+    $response = $this->get(route('auth.instagram', ['intent' => 'add_account']));
+
+    $response->assertRedirect('https://instagram.example/oauth');
+    expect((string) session('instagram_oauth_intent'))->toBe('add_account');
+
+    $callbackProvider = Mockery::mock();
+
+    Socialite::shouldReceive('driver')->once()->with('instagram')->andReturn($callbackProvider);
+    $callbackProvider->shouldReceive('user')->once()->andThrow(new InvalidStateException);
+
+    $callback = $this
+        ->withSession(['instagram_oauth_intent' => 'add_account'])
+        ->get(route('auth.instagram.callback'));
+
+    $callback
+        ->assertRedirect(route('dashboard', absolute: false))
+        ->assertSessionHasErrors('instagram');
 });

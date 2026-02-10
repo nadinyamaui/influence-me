@@ -10,7 +10,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Str;
 use Laravel\Socialite\Facades\Socialite;
 use Throwable;
 
@@ -27,8 +26,8 @@ class InstagramAuthController
             $intent = 'login';
         }
 
-        $state = sprintf('%s|%s', $intent, Str::random(40));
-        $request->session()->put('instagram_oauth_state', $state);
+        // Keep flow context outside OAuth state so Socialite can fully manage CSRF state checks.
+        $request->session()->put('instagram_oauth_intent', $intent);
 
         return Socialite::driver('instagram')
             ->scopes([
@@ -37,7 +36,6 @@ class InstagramAuthController
                 'pages_show_list',
                 'pages_read_engagement',
             ])
-            ->with(['state' => $state])
             ->redirect();
     }
 
@@ -46,27 +44,24 @@ class InstagramAuthController
      */
     public function callback(Request $request): RedirectResponse
     {
+        $intent = $request->session()->pull('instagram_oauth_intent', 'login');
+
+        if (! is_string($intent) || ! in_array($intent, ['login', 'add_account'], true)) {
+            $intent = 'login';
+        }
+
+        $failureRoute = $intent === 'add_account' ? 'dashboard' : 'login';
+
         if ($request->filled('error')) {
             return redirect()
-                ->route('login')
+                ->route($failureRoute)
                 ->withErrors([
                     'instagram' => 'Instagram authorization was denied. Please try again.',
                 ]);
         }
 
-        $expectedState = (string) $request->session()->pull('instagram_oauth_state');
-        $receivedState = (string) $request->query('state', '');
-
-        if ($expectedState === '' || $receivedState === '' || ! hash_equals($expectedState, $receivedState)) {
-            return redirect()
-                ->route('login')
-                ->withErrors([
-                    'instagram' => 'Instagram authorization could not be verified. Please try again.',
-                ]);
-        }
-
         try {
-            $socialiteUser = Socialite::driver('instagram')->stateless()->user();
+            $socialiteUser = Socialite::driver('instagram')->user();
 
             $tokenData = $this->exchangeForLongLivedToken((string) $socialiteUser->token);
             $longLivedToken = (string) data_get($tokenData, 'access_token');
@@ -126,7 +121,7 @@ class InstagramAuthController
             report($exception);
 
             return redirect()
-                ->route('login')
+                ->route($failureRoute)
                 ->withErrors([
                     'instagram' => 'Unable to authenticate with Instagram right now. Please try again.',
                 ]);
