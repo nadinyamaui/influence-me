@@ -113,6 +113,7 @@ For every task, agents must:
 - Respect dependency graph before implementing downstream features
 - Reuse existing models/enums/statuses instead of introducing new variants
 - Enforce policy and guard constraints on every protected action/page
+- Keep controllers thin: request validation/session intent + response orchestration only; business logic and external API logic must live in service classes
 - Mock Instagram, Socialite, and Stripe in tests; do not rely on live APIs
 - Cover success, validation, authorization, and empty-state paths
 
