@@ -81,6 +81,25 @@ it('redirects users to meta oauth with required scopes', function (): void {
     expect((string) session('instagram_oauth_intent'))->toBe('login');
 });
 
+it('downgrades add-account intent to login when unauthenticated', function (): void {
+    $provider = Mockery::mock();
+
+    Socialite::shouldReceive('driver')->once()->with('facebook')->andReturn($provider);
+    $provider->shouldReceive('scopes')->once()->with([
+        'instagram_basic',
+        'instagram_manage_insights',
+        'pages_show_list',
+        'pages_read_engagement',
+        'business_management',
+    ])->andReturnSelf();
+    $provider->shouldReceive('redirect')->once()->andReturn(redirect('https://facebook.example/oauth'));
+
+    $response = $this->get(route('auth.instagram', ['intent' => 'add_account']));
+
+    $response->assertRedirect('https://facebook.example/oauth');
+    expect((string) session('instagram_oauth_intent'))->toBe('login');
+});
+
 it('creates a user and instagram account for first-time oauth logins', function (): void {
     mockFacebookTokenExchange(
         expectedToken: 'long-lived-meta-token',
@@ -134,6 +153,62 @@ it('creates a user and instagram account for first-time oauth logins', function 
         ->value('access_token');
 
     expect($rawToken)->not->toBe('exchanged-long-lived-token');
+});
+
+it('reuses an existing user when oauth email already exists', function (): void {
+    mockFacebookTokenExchange(
+        expectedToken: 'existing-email-token',
+        returnedToken: 'exchanged-existing-email-token',
+    );
+
+    $existingUser = User::factory()->create([
+        'email' => 'existing@example.com',
+        'instagram_primary_account_id' => null,
+    ]);
+
+    $provider = Mockery::mock();
+
+    Socialite::shouldReceive('driver')->once()->with('facebook')->andReturn($provider);
+    $provider->shouldReceive('fields')->once()->with(Mockery::type('array'))->andReturnSelf();
+    $provider->shouldReceive('user')->once()->andReturn(fakeMetaSocialiteUser([
+        'id' => '555666777888',
+        'name' => 'Existing Influencer',
+        'email' => 'existing@example.com',
+        'token' => 'existing-email-token',
+        'expires_in' => 5183944,
+        'raw' => [
+            'id' => '555666777888',
+            'name' => 'Existing Influencer',
+            'email' => 'existing@example.com',
+            'accounts' => [
+                'data' => [[
+                    'id' => '12345678',
+                    'name' => 'Existing Email Page',
+                    'instagram_business_account' => [
+                        'id' => '17841444444444444',
+                        'username' => 'existing_email_creator',
+                        'name' => 'Existing Email Creator',
+                        'account_type' => 'CREATOR',
+                    ],
+                ]],
+            ],
+        ],
+    ]));
+
+    $response = $this
+        ->withSession(['instagram_oauth_intent' => 'login'])
+        ->get(route('auth.instagram.callback'));
+
+    $response->assertRedirect(route('dashboard', absolute: false));
+
+    $newAccount = InstagramAccount::query()->where('instagram_user_id', '17841444444444444')->firstOrFail();
+
+    expect(Auth::check())->toBeTrue()
+        ->and(Auth::id())->toBe($existingUser->id)
+        ->and($newAccount->user_id)->toBe($existingUser->id)
+        ->and($newAccount->is_primary)->toBeTrue()
+        ->and($existingUser->fresh()->instagram_primary_account_id)->toBe($newAccount->id)
+        ->and(User::query()->where('email', 'existing@example.com')->count())->toBe(1);
 });
 
 it('logs in returning users and refreshes their token', function (): void {
@@ -288,6 +363,20 @@ it('preserves add-account intent outside oauth state and redirects failures to d
     $callback
         ->assertRedirect(route('dashboard', absolute: false))
         ->assertSessionHasErrors('instagram');
+});
+
+it('rejects add-account callbacks when no influencer is authenticated', function (): void {
+    $response = $this
+        ->withSession(['instagram_oauth_intent' => 'add_account'])
+        ->get(route('auth.instagram.callback'));
+
+    $response
+        ->assertRedirect(route('dashboard', absolute: false))
+        ->assertSessionHasErrors('instagram');
+
+    $this->assertGuest();
+    expect(User::query()->count())->toBe(0)
+        ->and(InstagramAccount::query()->count())->toBe(0);
 });
 
 it('honors add-account intent by attaching the resolved account to the authenticated user without session switching', function (): void {

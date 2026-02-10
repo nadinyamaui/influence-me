@@ -24,6 +24,9 @@ class InstagramAuthController
         ]);
         $intent = InstagramOAuthIntent::tryFrom((string) ($validated['intent'] ?? ''))
             ?? InstagramOAuthIntent::Login;
+        if ($intent === InstagramOAuthIntent::AddAccount && ! Auth::check()) {
+            $intent = InstagramOAuthIntent::Login;
+        }
 
         $request->session()->put('instagram_oauth_intent', $intent->value);
 

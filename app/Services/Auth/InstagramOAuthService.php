@@ -42,6 +42,10 @@ class InstagramOAuthService
 
     public function processCallback(InstagramOAuthIntent $intent, ?User $currentUser): InstagramOAuthResult
     {
+        if ($intent === InstagramOAuthIntent::AddAccount && ! ($currentUser instanceof User)) {
+            throw new \RuntimeException(__('You must be logged in to add another Instagram account.'));
+        }
+
         /** @var SocialiteUser $socialiteUser */
         $socialiteUser = Socialite::driver('facebook')
             ->fields($this->oauthProfileFields())
@@ -101,11 +105,11 @@ class InstagramOAuthService
                 return [$account->user, true];
             }
 
-            $user = User::query()->create([
-                'name' => (string) ($socialiteUser->getName() ?: $name),
-                'email' => $socialiteUser->getEmail() ?: sprintf('%s@instagram.local', $instagramUserId),
-                'password' => null,
-            ]);
+            $user = $this->resolveOrCreateOAuthUser(
+                socialiteUser: $socialiteUser,
+                fallbackName: $name,
+                instagramUserId: $instagramUserId,
+            );
 
             $newAccount = InstagramAccount::query()->create([
                 'user_id' => $user->id,
@@ -130,6 +134,36 @@ class InstagramOAuthService
             user: $result[0],
             shouldLogin: $result[1],
         );
+    }
+
+    private function resolveOrCreateOAuthUser(
+        SocialiteUser $socialiteUser,
+        string $fallbackName,
+        string $instagramUserId,
+    ): User {
+        $displayName = (string) ($socialiteUser->getName() ?: $fallbackName);
+        $email = trim((string) ($socialiteUser->getEmail() ?? ''));
+
+        if ($email !== '') {
+            $normalizedEmail = Str::lower($email);
+            $existingUser = User::query()->where('email', $normalizedEmail)->first();
+
+            if ($existingUser instanceof User) {
+                return $existingUser;
+            }
+
+            return User::query()->create([
+                'name' => $displayName,
+                'email' => $normalizedEmail,
+                'password' => null,
+            ]);
+        }
+
+        return User::query()->create([
+            'name' => $displayName,
+            'email' => sprintf('%s@instagram.local', $instagramUserId),
+            'password' => null,
+        ]);
     }
 
     /**
