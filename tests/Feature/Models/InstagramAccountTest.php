@@ -52,3 +52,13 @@ it('defines user instagram accounts and primary instagram account relationships'
         ->and($user->instagramAccounts)->toHaveCount(2)
         ->and($user->primaryInstagramAccount->is($primary))->toBeTrue();
 });
+
+it('stores long profile picture urls from meta graph responses', function (): void {
+    $longUrl = 'https://scontent-mrs2-1.xx.fbcdn.net/v/t51.2885-15/381676632_857008545780239_3038572693511449324_n.jpg?_nc_cat=103&ccb=1-7&_nc_sid=7d201b&_nc_ohc=K6_hCaL6Uj4Q7kNvwEMPlgx&_nc_oc=Adm7GqkPFgckFv7KqnHgbo844una9DvKdY327M32AJ8KVyVK4th3QVQjRSaPf2Kjn_s&_nc_zt=23&_nc_ht=scontent-mrs2-1.xx&edm=AGaHXAAEAAAA&oh=00_AfsLbqRakrYIiQG6EtZ5rGNtmYAPOB9AxxUV_ZLNOXsolg&oe=69911255';
+
+    $account = InstagramAccount::factory()->create([
+        'profile_picture_url' => $longUrl,
+    ]);
+
+    expect($account->fresh()->profile_picture_url)->toBe($longUrl);
+});
