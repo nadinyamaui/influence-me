@@ -49,9 +49,5 @@ All notable changes to this project will be documented in this file.
 - RFC 015: added Instagram Socialite service configuration in `config/services.php` using `INSTAGRAM_CLIENT_ID`, `INSTAGRAM_CLIENT_SECRET`, and `INSTAGRAM_REDIRECT_URI`.
 - RFC 015: registered the Socialite Providers Instagram listener in `app/Providers/AppServiceProvider.php` so `Socialite::driver('instagram')` resolves correctly.
 - RFC 015: added feature coverage in `tests/Feature/Auth/InstagramSocialiteConfigurationTest.php` for listener registration and Instagram driver resolution.
-- RFC 016: added `InstagramAuthController` with Instagram OAuth redirect/callback handling, state intent support (`login`/`add_account`), long-lived token exchange, typed account mapping, and guarded failure handling.
-- RFC 016: added OAuth routes in `routes/web.php` for `/auth/instagram`, `/auth/instagram/callback`, and compatibility redirect support for existing `/auth/instagram/redirect` links.
-- RFC 016: replaced the influencer login UI with a single Flux-powered `Login with Instagram` action in `resources/views/pages/auth/login.blade.php`.
-- RFC 016: added feature coverage in `tests/Feature/Auth/InstagramOAuthLoginTest.php` for login page rendering, redirect scopes, new-user provisioning, returning-user token refresh, denied-permission handling, and OAuth failure handling.
 - RFC 014: added `docs/meta-app-setup.md` with end-to-end Meta Developer App setup, permissions, OAuth callback configuration, token lifecycle, app review guidance, and troubleshooting for Instagram Graph API onboarding.
 - RFC 014: updated `.env.example` with `INSTAGRAM_CLIENT_ID`, `INSTAGRAM_CLIENT_SECRET`, and `INSTAGRAM_REDIRECT_URI` defaults required by Instagram OAuth configuration.
