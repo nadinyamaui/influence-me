@@ -41,3 +41,6 @@ All notable changes to this project will be documented in this file.
 - RFC 012: added model policies in `app/Policies/` for `InstagramAccount`, `Client`, `Proposal`, `Invoice`, `ScheduledPost`, and `InstagramMedia`.
 - RFC 012: enforced ownership and workflow authorization rules including proposal send restrictions, draft-only invoice edits/deletes, and prevention of deleting a user's last Instagram account.
 - RFC 012: added feature coverage in `tests/Feature/Authorization/ModelPoliciesTest.php` for policy auto-discovery, authorized/unauthorized outcomes across policy methods, and HTTP `403` responses for denied access.
+- RFC 013: expanded influencer app navigation in `resources/views/layouts/app/sidebar.blade.php` with the Platform, Manage, and Instagram groups and all MVP placeholder links.
+- RFC 013: updated `resources/views/layouts/app/header.blade.php` (desktop and mobile variants) to mirror the same RFC 013 navigation structure and removed starter external links.
+- RFC 013: added feature coverage in `tests/Feature/NavigationStructureTest.php` to verify grouped navigation labels, dashboard route wiring, placeholder links, and removal of external links.
