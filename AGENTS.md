@@ -141,6 +141,7 @@ Hard constraints:
 - No direct SDK/facade calls for external APIs in controllers (must route through service/client abstractions)
 - No business rule branching duplicated between controller and service
 - No persistence side effects hidden inside connectors
+- Do not use `data_get` for object property traversal; use nullsafe property access (`$object?->property?->property`) instead
 
 Testing requirements for decoupling:
 

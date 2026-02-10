@@ -133,6 +133,7 @@ Avoid these anti-patterns:
 - Direct third-party API SDK calls inside controllers/components
 - Business logic duplicated between controller/job/component and service
 - Connector classes performing persistence or authorization logic
+- `data_get` for object property traversal (use nullsafe property access like `$object?->property?->property`)
 
 Testing for decoupled design:
 
