@@ -27,9 +27,6 @@ class InstagramAuthController
             $intent = 'login';
         }
 
-        $state = sprintf('%s|%s', $intent, Str::random(40));
-        $request->session()->put('instagram_oauth_state', $state);
-
         return Socialite::driver('instagram')
             ->scopes([
                 'instagram_basic',
@@ -37,7 +34,7 @@ class InstagramAuthController
                 'pages_show_list',
                 'pages_read_engagement',
             ])
-            ->with(['state' => $state])
+            ->with(['state' => $intent])
             ->redirect();
     }
 
@@ -51,17 +48,6 @@ class InstagramAuthController
                 ->route('login')
                 ->withErrors([
                     'instagram' => 'Instagram authorization was denied. Please try again.',
-                ]);
-        }
-
-        $expectedState = (string) $request->session()->pull('instagram_oauth_state');
-        $receivedState = (string) $request->query('state', '');
-
-        if ($expectedState === '' || $receivedState === '' || ! hash_equals($expectedState, $receivedState)) {
-            return redirect()
-                ->route('login')
-                ->withErrors([
-                    'instagram' => 'Instagram authorization could not be verified. Please try again.',
                 ]);
         }
 
