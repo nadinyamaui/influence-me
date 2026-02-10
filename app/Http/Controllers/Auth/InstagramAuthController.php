@@ -7,7 +7,6 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
-use Laravel\Socialite\Facades\Socialite;
 use Throwable;
 
 class InstagramAuthController
@@ -29,9 +28,7 @@ class InstagramAuthController
         // Keep flow context outside OAuth state so Socialite can fully manage CSRF state checks.
         $request->session()->put('instagram_oauth_intent', $intent);
 
-        return Socialite::driver('facebook')
-            ->scopes($this->instagramOAuthService->oauthScopes())
-            ->redirect();
+        return $this->instagramOAuthService->redirectToProvider();
     }
 
     /**

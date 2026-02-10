@@ -5,6 +5,7 @@ namespace App\Services\Auth;
 use App\Enums\AccountType;
 use App\Models\InstagramAccount;
 use App\Models\User;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Laravel\Socialite\Facades\Socialite;
@@ -12,6 +13,13 @@ use Laravel\Socialite\Two\User as SocialiteUser;
 
 class InstagramOAuthService
 {
+    public function redirectToProvider(): RedirectResponse
+    {
+        return Socialite::driver('facebook')
+            ->scopes($this->oauthScopes())
+            ->redirect();
+    }
+
     /**
      * @return list<string>
      */
