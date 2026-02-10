@@ -116,6 +116,14 @@ For every task, agents must:
 - Mock Instagram, Socialite, and Stripe in tests; do not rely on live APIs
 - Cover success, validation, authorization, and empty-state paths
 
+## GitHub Tracking Conventions
+
+- Issue titles for RFC work must use: `RFC NNN: Title`
+- RFC issues must embed the full RFC markdown in the issue body
+- Do not open RFC issues that only reference `rfc/*.md` file paths
+- PR descriptions must include exactly one native GitHub issue link line: `Closes #<issue-number>`
+- Do not use issue comments to link PRs to issues
+
 ## Testing Expectations
 
 Minimum by feature area:

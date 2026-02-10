@@ -37,6 +37,11 @@ Run a strict quality gate before PR creation. Identify issues first, verify with
 - `Not ready`: at least one unresolved `P0-P2` finding.
 - Always summarize residual risk and unexecuted checks.
 
+6. Enforce GitHub linkage format before merge.
+- PR description must contain a native link line: `Closes #<issue-number>`.
+- Do not rely on issue comments for PR/issue linking.
+- If the PR is RFC-scoped, ensure the linked issue title follows `RFC NNN: Title`.
+
 ## Output Format
 
 Use this structure in responses:
