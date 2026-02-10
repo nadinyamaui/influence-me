@@ -113,8 +113,32 @@ For every task, Claude should:
 - Respect dependency graph before implementing downstream features
 - Reuse existing models/enums/statuses instead of introducing new variants
 - Enforce policy and guard constraints on every protected action/page
+- Keep controllers and Livewire components thin: orchestration only
+- Put business workflows in service classes
+- For third-party integrations, use `client` + `connector` layers to decouple services from HTTP transport
 - Mock Instagram, Socialite, and Stripe in tests; do not rely on live APIs
 - Cover success, validation, authorization, and empty-state paths
+
+## Decoupling Architecture Rules
+
+All implementations should follow strict layering and one-way dependencies:
+
+- UI (`controllers`, `Livewire`) -> `services` -> `clients` -> `connectors`
+- Models remain persistence-focused; no external API calls from models
+- Jobs delegate to services/clients; do not duplicate business rules in jobs
+
+Avoid these anti-patterns:
+
+- Direct `Http::` calls outside connectors/clients
+- Direct third-party API SDK calls inside controllers/components
+- Business logic duplicated between controller/job/component and service
+- Connector classes performing persistence or authorization logic
+
+Testing for decoupled design:
+
+- Feature tests for endpoint/page behavior
+- Service tests for business rules and ownership/authorization-sensitive flows
+- Client tests for response mapping and API error translation
 
 ## Testing Expectations
 
