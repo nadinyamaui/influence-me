@@ -10,25 +10,24 @@ use Laravel\Socialite\Facades\Socialite;
 use Laravel\Socialite\Two\InvalidStateException;
 use Laravel\Socialite\Two\User as SocialiteUser;
 
-function fakeInstagramSocialiteUser(array $overrides = []): SocialiteUser
+function fakeMetaSocialiteUser(array $overrides = []): SocialiteUser
 {
     $user = new SocialiteUser;
 
     $payload = array_merge([
-        'id' => '17841400000000000',
-        'nickname' => 'creator_handle',
-        'name' => 'Creator Name',
+        'id' => '102938475610',
+        'nickname' => null,
+        'name' => 'Meta User',
         'email' => null,
-        'token' => 'short-lived-token',
+        'token' => 'short-lived-facebook-token',
         'raw' => [
-            'id' => '17841400000000000',
-            'username' => 'creator_handle',
-            'account_type' => 'creator',
+            'id' => '102938475610',
+            'name' => 'Meta User',
         ],
     ], $overrides);
 
     $user->id = (string) $payload['id'];
-    $user->nickname = (string) $payload['nickname'];
+    $user->nickname = $payload['nickname'];
     $user->name = (string) $payload['name'];
     $user->email = $payload['email'];
     $user->token = (string) $payload['token'];
@@ -46,44 +45,62 @@ it('shows login with instagram button on the login page', function (): void {
         ->assertDontSeeText('Email address');
 });
 
-it('redirects users to instagram oauth with required scopes', function (): void {
+it('redirects users to meta oauth with required scopes', function (): void {
     $provider = Mockery::mock();
 
-    Socialite::shouldReceive('driver')->once()->with('instagram')->andReturn($provider);
+    Socialite::shouldReceive('driver')->once()->with('facebook')->andReturn($provider);
     $provider->shouldReceive('scopes')->once()->with([
         'instagram_basic',
         'instagram_manage_insights',
         'pages_show_list',
         'pages_read_engagement',
+        'business_management',
     ])->andReturnSelf();
-    $provider->shouldReceive('redirect')->once()->andReturn(redirect('https://instagram.example/oauth'));
+    $provider->shouldReceive('redirect')->once()->andReturn(redirect('https://facebook.example/oauth'));
 
     $response = $this->get(route('auth.instagram'));
 
-    $response->assertRedirect('https://instagram.example/oauth');
+    $response->assertRedirect('https://facebook.example/oauth');
     expect((string) session('instagram_oauth_intent'))->toBe('login');
 });
 
 it('creates a user and instagram account for first-time oauth logins', function (): void {
     Http::fake([
-        'graph.instagram.com/access_token*' => Http::response([
-            'access_token' => 'long-lived-token',
+        'graph.facebook.com/v23.0/oauth/access_token*' => Http::response([
+            'access_token' => 'long-lived-meta-token',
             'token_type' => 'bearer',
             'expires_in' => 5183944,
+        ]),
+        'graph.facebook.com/v23.0/me/accounts*' => Http::response([
+            'data' => [[
+                'id' => '9988776655',
+                'name' => 'Creator Page',
+                'instagram_business_account' => [
+                    'id' => '17841499999999999',
+                    'username' => 'new_creator',
+                    'name' => 'New Creator',
+                    'profile_picture_url' => 'https://cdn.example.com/new.jpg',
+                ],
+            ]],
+        ]),
+        'graph.facebook.com/v23.0/17841499999999999*' => Http::response([
+            'id' => '17841499999999999',
+            'username' => 'new_creator',
+            'name' => 'New Creator',
+            'account_type' => 'BUSINESS',
+            'profile_picture_url' => 'https://cdn.example.com/new.jpg',
         ]),
     ]);
 
     $provider = Mockery::mock();
 
-    Socialite::shouldReceive('driver')->once()->with('instagram')->andReturn($provider);
-    $provider->shouldReceive('user')->once()->andReturn(fakeInstagramSocialiteUser([
-        'id' => '17841499999999999',
-        'nickname' => 'new_creator',
-        'name' => 'New Creator',
+    Socialite::shouldReceive('driver')->once()->with('facebook')->andReturn($provider);
+    $provider->shouldReceive('user')->once()->andReturn(fakeMetaSocialiteUser([
+        'id' => '102938475610',
+        'name' => 'Meta User Name',
         'raw' => [
-            'id' => '17841499999999999',
-            'username' => 'new_creator',
-            'account_type' => 'business',
+            'id' => '102938475610',
+            'name' => 'Meta User Name',
         ],
     ]));
 
@@ -99,13 +116,13 @@ it('creates a user and instagram account for first-time oauth logins', function 
         ->and(Auth::id())->toBe($account->user_id)
         ->and($account->is_primary)->toBeTrue()
         ->and($account->account_type)->toBe(AccountType::Business)
-        ->and($account->access_token)->toBe('long-lived-token');
+        ->and($account->access_token)->toBe('long-lived-meta-token');
 
     $rawToken = DB::table('instagram_accounts')
         ->where('instagram_user_id', '17841499999999999')
         ->value('access_token');
 
-    expect($rawToken)->not->toBe('long-lived-token');
+    expect($rawToken)->not->toBe('long-lived-meta-token');
 });
 
 it('logs in returning users and refreshes their token', function (): void {
@@ -121,25 +138,40 @@ it('logs in returning users and refreshes their token', function (): void {
         ]);
 
     Http::fake([
-        'graph.instagram.com/access_token*' => Http::response([
+        'graph.facebook.com/v23.0/oauth/access_token*' => Http::response([
             'access_token' => 'refreshed-long-token',
             'token_type' => 'bearer',
             'expires_in' => 5183944,
+        ]),
+        'graph.facebook.com/v23.0/me/accounts*' => Http::response([
+            'data' => [[
+                'id' => '11223344',
+                'name' => 'Existing Creator Page',
+                'instagram_business_account' => [
+                    'id' => '17841411111111111',
+                    'username' => 'existing_creator',
+                    'name' => 'Existing Creator',
+                ],
+            ]],
+        ]),
+        'graph.facebook.com/v23.0/17841411111111111*' => Http::response([
+            'id' => '17841411111111111',
+            'username' => 'existing_creator',
+            'name' => 'Existing Creator',
+            'account_type' => 'CREATOR',
         ]),
     ]);
 
     $provider = Mockery::mock();
 
-    Socialite::shouldReceive('driver')->once()->with('instagram')->andReturn($provider);
-    $provider->shouldReceive('user')->once()->andReturn(fakeInstagramSocialiteUser([
-        'id' => '17841411111111111',
-        'nickname' => 'existing_creator',
-        'name' => 'Existing Creator',
+    Socialite::shouldReceive('driver')->once()->with('facebook')->andReturn($provider);
+    $provider->shouldReceive('user')->once()->andReturn(fakeMetaSocialiteUser([
+        'id' => '881122334455',
+        'name' => 'Meta Existing User',
         'token' => 'existing-short-token',
         'raw' => [
-            'id' => '17841411111111111',
-            'username' => 'existing_creator',
-            'account_type' => 'creator',
+            'id' => '881122334455',
+            'name' => 'Meta Existing User',
         ],
     ]));
 
@@ -173,8 +205,38 @@ it('returns to login with an error when permissions are denied', function (): vo
 it('returns to login with an error when oauth state validation fails', function (): void {
     $provider = Mockery::mock();
 
-    Socialite::shouldReceive('driver')->once()->with('instagram')->andReturn($provider);
+    Socialite::shouldReceive('driver')->once()->with('facebook')->andReturn($provider);
     $provider->shouldReceive('user')->once()->andThrow(new InvalidStateException);
+
+    $response = $this
+        ->withSession(['instagram_oauth_intent' => 'login'])
+        ->get(route('auth.instagram.callback'));
+
+    $response
+        ->assertRedirect(route('login', absolute: false))
+        ->assertSessionHasErrors('instagram');
+
+    $this->assertGuest();
+});
+
+it('returns to login with an error when no linked instagram professional account exists', function (): void {
+    Http::fake([
+        'graph.facebook.com/v23.0/oauth/access_token*' => Http::response([
+            'access_token' => 'long-lived-meta-token',
+            'token_type' => 'bearer',
+            'expires_in' => 5183944,
+        ]),
+        'graph.facebook.com/v23.0/me/accounts*' => Http::response([
+            'data' => [
+                ['id' => '9988776655', 'name' => 'Page Without Instagram'],
+            ],
+        ]),
+    ]);
+
+    $provider = Mockery::mock();
+
+    Socialite::shouldReceive('driver')->once()->with('facebook')->andReturn($provider);
+    $provider->shouldReceive('user')->once()->andReturn(fakeMetaSocialiteUser());
 
     $response = $this
         ->withSession(['instagram_oauth_intent' => 'login'])
@@ -190,7 +252,7 @@ it('returns to login with an error when oauth state validation fails', function 
 it('returns to login with an error when oauth callback fails', function (): void {
     $provider = Mockery::mock();
 
-    Socialite::shouldReceive('driver')->once()->with('instagram')->andReturn($provider);
+    Socialite::shouldReceive('driver')->once()->with('facebook')->andReturn($provider);
     $provider->shouldReceive('user')->once()->andThrow(new RuntimeException('OAuth failed'));
 
     $response = $this
@@ -207,20 +269,20 @@ it('returns to login with an error when oauth callback fails', function (): void
 it('preserves add-account intent outside oauth state and redirects failures to dashboard', function (): void {
     $provider = Mockery::mock();
 
-    Socialite::shouldReceive('driver')->once()->with('instagram')->andReturn($provider);
+    Socialite::shouldReceive('driver')->once()->with('facebook')->andReturn($provider);
     $provider->shouldReceive('scopes')->once()->andReturnSelf();
-    $provider->shouldReceive('redirect')->once()->andReturn(redirect('https://instagram.example/oauth'));
+    $provider->shouldReceive('redirect')->once()->andReturn(redirect('https://facebook.example/oauth'));
 
     $this->actingAs(User::factory()->create());
 
     $response = $this->get(route('auth.instagram', ['intent' => 'add_account']));
 
-    $response->assertRedirect('https://instagram.example/oauth');
+    $response->assertRedirect('https://facebook.example/oauth');
     expect((string) session('instagram_oauth_intent'))->toBe('add_account');
 
     $callbackProvider = Mockery::mock();
 
-    Socialite::shouldReceive('driver')->once()->with('instagram')->andReturn($callbackProvider);
+    Socialite::shouldReceive('driver')->once()->with('facebook')->andReturn($callbackProvider);
     $callbackProvider->shouldReceive('user')->once()->andThrow(new InvalidStateException);
 
     $callback = $this

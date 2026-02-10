@@ -35,10 +35,10 @@ return [
         ],
     ],
 
-    'instagram' => [
-        'client_id' => env('INSTAGRAM_CLIENT_ID'),
-        'client_secret' => env('INSTAGRAM_CLIENT_SECRET'),
-        'redirect' => env('INSTAGRAM_REDIRECT_URI'),
+    'facebook' => [
+        'client_id' => env('META_CLIENT_ID', env('INSTAGRAM_CLIENT_ID')),
+        'client_secret' => env('META_CLIENT_SECRET', env('INSTAGRAM_CLIENT_SECRET')),
+        'redirect' => env('META_REDIRECT_URI', env('INSTAGRAM_REDIRECT_URI')),
     ],
 
 ];

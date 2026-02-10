@@ -14,6 +14,7 @@ Create a step-by-step setup guide for configuring the Meta Developer App require
 1. **Prerequisites**
    - Instagram Business or Creator account (not Personal)
    - Facebook Page connected to the Instagram account
+   - Meta/Facebook user account with access to the connected Page
    - Meta Developer account
 
 2. **Create Meta App**
@@ -22,7 +23,7 @@ Create a step-by-step setup guide for configuring the Meta Developer App require
    - Add "Instagram Graph API" product
 
 3. **Configure Instagram Graph API**
-   - Add Instagram Basic Display product (if needed)
+   - Add Facebook Login for Business (or Facebook Login)
    - Configure OAuth redirect URIs:
      - Development: `https://influence-me.test/auth/instagram/callback`
      - Production: `https://yourdomain.com/auth/instagram/callback`
@@ -37,9 +38,9 @@ Create a step-by-step setup guide for configuring the Meta Developer App require
 
 5. **Environment Variables**
    ```
-   INSTAGRAM_CLIENT_ID=your_app_id
-   INSTAGRAM_CLIENT_SECRET=your_app_secret
-   INSTAGRAM_REDIRECT_URI=https://influence-me.test/auth/instagram/callback
+   META_CLIENT_ID=your_app_id
+   META_CLIENT_SECRET=your_app_secret
+   META_REDIRECT_URI=https://influence-me.test/auth/instagram/callback
    ```
 
 6. **Token Flow**
@@ -53,13 +54,14 @@ Create a step-by-step setup guide for configuring the Meta Developer App require
 
 8. **Troubleshooting**
    - Common errors and solutions
+   - Explicit note: users without Meta/Facebook accounts cannot complete Instagram Graph OAuth
    - Rate limiting (200 calls/user/hour)
 
 ## Files to Create
 - `docs/meta-app-setup.md`
 
 ## Also Update
-- `.env.example` — add `INSTAGRAM_CLIENT_ID`, `INSTAGRAM_CLIENT_SECRET`, `INSTAGRAM_REDIRECT_URI`
+- `.env.example` — add `META_CLIENT_ID`, `META_CLIENT_SECRET`, `META_REDIRECT_URI`
 
 ## Acceptance Criteria
 - [ ] Guide is clear enough for someone unfamiliar with Meta APIs

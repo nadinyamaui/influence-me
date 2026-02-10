@@ -10,12 +10,12 @@ Add the ability to connect additional Instagram accounts and disconnect existing
 ## Implementation
 
 ### Connect Additional Account
-Reuse the existing OAuth flow from #016 but with a different state parameter to distinguish "login" from "add account".
+Reuse the existing OAuth flow from #016 but keep "login" vs "add account" intent outside OAuth `state` (session-backed intent flag) so Socialite state validation remains enabled.
 
 **Update `InstagramAuthController`:**
-- Add `addAccount()` method that redirects to Instagram OAuth with `state=add_account`
-- Update `callback()` to check state:
-  - If `state=add_account` AND user is already authenticated:
+- Add `addAccount()` method that redirects to Meta/Facebook OAuth with intent `add_account`
+- Update `callback()` to check OAuth intent:
+  - If intent is `add_account` AND user is already authenticated:
     - Create new `InstagramAccount` linked to current user
     - Do NOT create a new User
     - Redirect back to `/instagram-accounts` with success message

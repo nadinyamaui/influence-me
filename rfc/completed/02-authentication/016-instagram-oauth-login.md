@@ -5,33 +5,35 @@
 
 ## Description
 
-Implement the Instagram OAuth login flow. Users click "Login with Instagram", are redirected to Instagram, authorize the app, and are redirected back. The system finds or creates a User and InstagramAccount, exchanges for a long-lived token, and logs the user in.
+Implement the Instagram OAuth login flow through Meta/Facebook Login. Users click "Login with Instagram", are redirected to Meta authorization, authorize the app, and are redirected back. The system resolves the linked Instagram professional account, finds or creates a User and InstagramAccount, exchanges for a long-lived token, and logs the user in.
 
 ## Implementation
 
 ### Create `App\Http\Controllers\Auth\InstagramAuthController`
 
 **`redirect()` method:**
-- Redirect to Instagram OAuth with required scopes:
-  `instagram_basic`, `instagram_manage_insights`, `pages_show_list`, `pages_read_engagement`
-- Add state parameter to distinguish "login" vs "add account" (for issue #029)
+- Redirect to Meta/Facebook OAuth with required scopes:
+  `instagram_basic`, `instagram_manage_insights`, `pages_show_list`, `pages_read_engagement`, `business_management`
+- Store `login` vs `add_account` intent outside OAuth `state` (session key) so Socialite state checks remain intact
 
 **`callback()` method:**
-1. Get the Instagram user from Socialite
-2. Find existing `InstagramAccount` by `instagram_user_id`
-3. If found: log in the associated User, update the access token
-4. If not found: create a new `User` (name from IG, email nullable), create `InstagramAccount` (set as primary), log in
-5. Exchange short-lived token for long-lived token (60 days) via Meta API
-6. Store the long-lived token (encrypted) and `token_expires_at`
-7. Redirect to `/dashboard`
+1. Get the Meta/Facebook user from Socialite
+2. Resolve the linked Instagram professional account through Graph API (`/me/accounts` + `instagram_business_account`)
+3. Find existing `InstagramAccount` by `instagram_user_id`
+4. If found: log in the associated User, update the access token
+5. If not found: create a new `User` (name from IG, email nullable), create `InstagramAccount` (set as primary), log in
+6. Exchange short-lived token for long-lived token (60 days) via Meta API
+7. Store the long-lived token (encrypted) and `token_expires_at`
+8. Redirect to `/dashboard`
 
 ### Token Exchange
 Make HTTP call to:
 ```
-GET https://graph.instagram.com/access_token
-  ?grant_type=ig_exchange_token
+GET https://graph.facebook.com/v23.0/oauth/access_token
+  ?client_id={app-id}
   &client_secret={app-secret}
-  &access_token={short-lived-token}
+  &grant_type=fb_exchange_token
+  &fb_exchange_token={short-lived-token}
 ```
 
 ### Update Login Page
@@ -54,11 +56,12 @@ Add routes to `routes/web.php`.
 
 ## Acceptance Criteria
 - [ ] Login page shows "Login with Instagram" button
-- [ ] Clicking redirects to Instagram OAuth
+- [ ] Clicking redirects to Meta/Facebook OAuth
 - [ ] Successful callback creates User + InstagramAccount for new users
 - [ ] Returning users are logged in and token refreshed
 - [ ] Short-lived token exchanged for long-lived token
 - [ ] Access token stored encrypted
+- [ ] Callback fails with clear error when no Meta-linked Instagram professional account exists
 - [ ] Redirects to dashboard after login
 - [ ] Feature tests cover callback flow (mocked Socialite)
 - [ ] Error handling for denied permissions or failed OAuth

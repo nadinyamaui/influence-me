@@ -1,22 +1,16 @@
 <?php
 
-use Illuminate\Support\Facades\Event;
 use Laravel\Socialite\Facades\Socialite;
-use SocialiteProviders\Instagram\Provider as InstagramProvider;
-use SocialiteProviders\Manager\SocialiteWasCalled;
+use Laravel\Socialite\Two\FacebookProvider;
 
-it('registers the instagram socialite provider listener', function () {
-    expect(Event::hasListeners(SocialiteWasCalled::class))->toBeTrue();
-});
-
-it('resolves the instagram socialite driver', function () {
+it('resolves the facebook socialite driver for instagram graph auth', function () {
     config([
-        'services.instagram.client_id' => 'test-client-id',
-        'services.instagram.client_secret' => 'test-client-secret',
-        'services.instagram.redirect' => 'https://influence-me.test/auth/instagram/callback',
+        'services.facebook.client_id' => 'test-client-id',
+        'services.facebook.client_secret' => 'test-client-secret',
+        'services.facebook.redirect' => 'https://influence-me.test/auth/instagram/callback',
     ]);
 
-    $provider = Socialite::driver('instagram');
+    $provider = Socialite::driver('facebook');
 
-    expect($provider)->toBeInstanceOf(InstagramProvider::class);
+    expect($provider)->toBeInstanceOf(FacebookProvider::class);
 });
