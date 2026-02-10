@@ -211,6 +211,72 @@ it('reuses an existing user when oauth email already exists', function (): void 
         ->and(User::query()->where('email', 'existing@example.com')->count())->toBe(1);
 });
 
+it('preserves an existing primary instagram account when reusing user by email', function (): void {
+    mockFacebookTokenExchange(
+        expectedToken: 'existing-primary-token',
+        returnedToken: 'exchanged-existing-primary-token',
+    );
+
+    $existingUser = User::factory()->create([
+        'email' => 'primary@example.com',
+    ]);
+
+    $existingPrimary = InstagramAccount::factory()
+        ->for($existingUser)
+        ->primary()
+        ->create([
+            'instagram_user_id' => '17841455555555555',
+            'username' => 'existing_primary',
+        ]);
+
+    $existingUser->forceFill([
+        'instagram_primary_account_id' => $existingPrimary->id,
+    ])->save();
+
+    $provider = Mockery::mock();
+
+    Socialite::shouldReceive('driver')->once()->with('facebook')->andReturn($provider);
+    $provider->shouldReceive('fields')->once()->with(Mockery::type('array'))->andReturnSelf();
+    $provider->shouldReceive('user')->once()->andReturn(fakeMetaSocialiteUser([
+        'id' => '888999000111',
+        'name' => 'Primary Preserved User',
+        'email' => 'primary@example.com',
+        'token' => 'existing-primary-token',
+        'expires_in' => 5183944,
+        'raw' => [
+            'id' => '888999000111',
+            'name' => 'Primary Preserved User',
+            'email' => 'primary@example.com',
+            'accounts' => [
+                'data' => [[
+                    'id' => '22334455',
+                    'name' => 'Secondary Creator Page',
+                    'instagram_business_account' => [
+                        'id' => '17841466666666666',
+                        'username' => 'secondary_creator',
+                        'name' => 'Secondary Creator',
+                        'account_type' => 'CREATOR',
+                    ],
+                ]],
+            ],
+        ],
+    ]));
+
+    $response = $this
+        ->withSession(['instagram_oauth_intent' => 'login'])
+        ->get(route('auth.instagram.callback'));
+
+    $response->assertRedirect(route('dashboard', absolute: false));
+
+    $newAccount = InstagramAccount::query()->where('instagram_user_id', '17841466666666666')->firstOrFail();
+
+    expect($newAccount->user_id)->toBe($existingUser->id)
+        ->and($newAccount->is_primary)->toBeFalse()
+        ->and($existingPrimary->fresh()->is_primary)->toBeTrue()
+        ->and($existingUser->fresh()->instagram_primary_account_id)->toBe($existingPrimary->id)
+        ->and(InstagramAccount::query()->where('user_id', $existingUser->id)->where('is_primary', true)->count())->toBe(1);
+});
+
 it('logs in returning users and refreshes their token', function (): void {
     mockFacebookTokenExchange(
         expectedToken: 'refreshed-long-token',

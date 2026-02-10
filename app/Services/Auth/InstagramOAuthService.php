@@ -111,6 +111,9 @@ class InstagramOAuthService
                 instagramUserId: $instagramUserId,
             );
 
+            $hasExistingAccounts = $user->instagramAccounts()->exists();
+            $isPrimary = ! $hasExistingAccounts;
+
             $newAccount = InstagramAccount::query()->create([
                 'user_id' => $user->id,
                 'instagram_user_id' => $instagramUserId,
@@ -120,12 +123,14 @@ class InstagramOAuthService
                 'account_type' => $this->resolveAccountType($instagramProfile),
                 'access_token' => $accessToken,
                 'token_expires_at' => now()->addSeconds($expiresIn),
-                'is_primary' => true,
+                'is_primary' => $isPrimary,
             ]);
 
-            $user->forceFill([
-                'instagram_primary_account_id' => $newAccount->id,
-            ])->save();
+            if ($isPrimary || $user->instagram_primary_account_id === null) {
+                $user->forceFill([
+                    'instagram_primary_account_id' => $newAccount->id,
+                ])->save();
+            }
 
             return [$user, true];
         });
