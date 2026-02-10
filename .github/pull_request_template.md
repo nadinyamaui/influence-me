@@ -1,42 +1,30 @@
+## RFC
+<!-- Required: include the RFC id/title this PR implements. -->
+- RFC `NNN` - Title
+
+## Issue Link (Required)
+<!-- Required: use GitHub native linking (not comments). Keep exactly one closing keyword line. -->
+Closes #<issue-number>
+
 ## Summary
-<!-- Explain what changed and why in 2-4 short bullets. -->
--
+<!-- Explain what changed and why in 2-6 short bullets. -->
+- 
 
 ## Type of change
-<!-- Mark all that apply by replacing [ ] with [x]. -->
 - [ ] Feature
 - [ ] Bug fix
 - [ ] Refactor
-- [ ] Performance improvement
 - [ ] Docs update
 - [ ] Test-only change
 - [ ] Chore/maintenance
-
-## Scope
-<!-- Mark impacted areas. -->
-- [ ] Admin
-- [ ] Settings
-- [ ] Technician Jobs
-- [ ] UISP integration
-- [ ] API
-- [ ] Authentication/Authorization
-- [ ] Database/Migrations
-- [ ] Queues/Jobs
-- [ ] Documentation
-- [ ] Other
-
-## User impact
-<!-- Describe what users will notice after deployment. -->
 
 ## Validation
 <!-- List exactly what you ran/verified. -->
 - [ ] Added or updated tests for this change
 - [ ] Ran relevant test suite locally (`php artisan test` or focused tests)
-- [ ] Updated `resources/docs` when behavior changed
 - [ ] No breaking changes
 
 ## Test evidence
-<!-- Paste commands and key results. -->
 ```bash
 # Example
 php artisan test
@@ -50,5 +38,5 @@ php artisan test
 
 ## Checklist
 - [ ] I followed AGENTS.md guidelines
-- [ ] I added all new user-facing strings to `resources/lang/es.json`
-- [ ] I did not remove existing translation keys unless all usages were removed
+- [ ] PR body includes `Closes #<issue-number>` (GitHub native link)
+- [ ] I did not use issue comments for PR linking

@@ -1,0 +1,44 @@
+name: RFC Delivery
+description: Create an RFC-tracked implementation issue with full RFC markdown content in body.
+title: "RFC 000: <title>"
+labels:
+  - feature
+body:
+  - type: input
+    id: rfc_id
+    attributes:
+      label: RFC ID
+      description: Three-digit RFC id, e.g. 031
+      placeholder: "031"
+    validations:
+      required: true
+
+  - type: input
+    id: milestone
+    attributes:
+      label: Milestone
+      description: Milestone title (for example, 04-clients)
+      placeholder: "04-clients"
+    validations:
+      required: true
+
+  - type: textarea
+    id: rfc_markdown
+    attributes:
+      label: RFC Markdown (Required)
+      description: Paste the complete RFC markdown content here. Do not link the RFC file path.
+      placeholder: |
+        # 031 - Client List Page
+
+        **Labels:** `feature`, `clients`
+        **Depends on:** #013
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance_mapping
+    attributes:
+      label: Acceptance Criteria Mapping
+      description: Optional checklist mapping planned implementation to criteria.
+    validations:
+      required: false
