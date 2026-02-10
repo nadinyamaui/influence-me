@@ -55,12 +55,16 @@ it('redirects users to instagram oauth with required scopes', function (): void 
         'pages_show_list',
         'pages_read_engagement',
     ])->andReturnSelf();
-    $provider->shouldReceive('with')->once()->with(['state' => 'login'])->andReturnSelf();
+    $provider->shouldReceive('with')->once()->with(Mockery::on(function (array $payload): bool {
+        return isset($payload['state'])
+            && str_starts_with((string) $payload['state'], 'login|');
+    }))->andReturnSelf();
     $provider->shouldReceive('redirect')->once()->andReturn(redirect('https://instagram.example/oauth'));
 
     $response = $this->get(route('auth.instagram'));
 
     $response->assertRedirect('https://instagram.example/oauth');
+    expect((string) session('instagram_oauth_state'))->toStartWith('login|');
 });
 
 it('creates a user and instagram account for first-time oauth logins', function (): void {
@@ -87,7 +91,10 @@ it('creates a user and instagram account for first-time oauth logins', function 
         ],
     ]));
 
-    $response = $this->get(route('auth.instagram.callback'));
+    $state = 'login|csrf-token-value';
+    $response = $this
+        ->withSession(['instagram_oauth_state' => $state])
+        ->get(route('auth.instagram.callback', ['state' => $state]));
 
     $response->assertRedirect(route('dashboard', absolute: false));
 
@@ -142,7 +149,10 @@ it('logs in returning users and refreshes their token', function (): void {
         ],
     ]));
 
-    $response = $this->get(route('auth.instagram.callback'));
+    $state = 'login|csrf-token-value';
+    $response = $this
+        ->withSession(['instagram_oauth_state' => $state])
+        ->get(route('auth.instagram.callback', ['state' => $state]));
 
     $response->assertRedirect(route('dashboard', absolute: false));
 
@@ -167,6 +177,18 @@ it('returns to login with an error when permissions are denied', function (): vo
     $this->assertGuest();
 });
 
+it('returns to login with an error when oauth state is missing or invalid', function (): void {
+    $response = $this
+        ->withSession(['instagram_oauth_state' => 'login|expected-state'])
+        ->get(route('auth.instagram.callback', ['state' => 'login|other-state']));
+
+    $response
+        ->assertRedirect(route('login', absolute: false))
+        ->assertSessionHasErrors('instagram');
+
+    $this->assertGuest();
+});
+
 it('returns to login with an error when oauth callback fails', function (): void {
     $provider = Mockery::mock();
 
@@ -174,7 +196,10 @@ it('returns to login with an error when oauth callback fails', function (): void
     $provider->shouldReceive('stateless')->once()->andReturnSelf();
     $provider->shouldReceive('user')->once()->andThrow(new RuntimeException('OAuth failed'));
 
-    $response = $this->get(route('auth.instagram.callback'));
+    $state = 'login|csrf-token-value';
+    $response = $this
+        ->withSession(['instagram_oauth_state' => $state])
+        ->get(route('auth.instagram.callback', ['state' => $state]));
 
     $response
         ->assertRedirect(route('login', absolute: false))
