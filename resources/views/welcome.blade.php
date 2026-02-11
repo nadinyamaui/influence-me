@@ -22,10 +22,11 @@
 
                 <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
                     <a href="{{ route('auth.facebook') }}" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-full bg-slate-900 px-8 py-3.5 text-sm font-medium text-white transition-all hover:bg-slate-800 hover:scale-[1.02] shadow-xl shadow-slate-200/50">
-
+                        <i class="fa-brands fa-instagram text-base" aria-hidden="true"></i>
                         Continue with Instagram
                     </a>
                     <a href="/pricing" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-full border border-slate-200 bg-white px-8 py-3.5 text-sm font-medium text-slate-700 transition-all hover:bg-slate-50 hover:border-slate-300">
+                        <i class="fa-solid fa-tags text-sm" aria-hidden="true"></i>
                         View Pricing
                     </a>
                 </div>
@@ -85,7 +86,7 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     <div class="group relative rounded-2xl border border-slate-200 bg-white p-8 transition-shadow hover:shadow-lg hover:shadow-slate-200/50">
                         <div class="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600">
-
+                            <i class="fa-brands fa-instagram" aria-hidden="true"></i>
                         </div>
                         <h3 class="text-lg font-medium text-slate-900 mb-2">Instagram Sync</h3>
                         <p class="text-sm text-slate-500 leading-relaxed">Secure OAuth connection instantly imports your media, profile stats, and audience demographics. No manual data entry.</p>
@@ -93,7 +94,7 @@
 
                     <div class="group relative rounded-2xl border border-slate-200 bg-white p-8 transition-shadow hover:shadow-lg hover:shadow-slate-200/50">
                         <div class="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-lg bg-orange-50 text-orange-600">
-
+                            <i class="fa-solid fa-calendar-days" aria-hidden="true"></i>
                         </div>
                         <h3 class="text-lg font-medium text-slate-900 mb-2">Content Operations</h3>
                         <p class="text-sm text-slate-500 leading-relaxed">Plan your feed with a drag-and-drop calendar. Track upcoming deliverables and keep your campaigns on schedule.</p>
@@ -101,7 +102,7 @@
 
                     <div class="group relative rounded-2xl border border-slate-200 bg-white p-8 transition-shadow hover:shadow-lg hover:shadow-slate-200/50">
                         <div class="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
-
+                            <i class="fa-solid fa-users" aria-hidden="true"></i>
                         </div>
                         <h3 class="text-lg font-medium text-slate-900 mb-2">Client CRM</h3>
                         <p class="text-sm text-slate-500 leading-relaxed">Give brands a dedicated login to view live campaign stats and approve content, keeping your DMs clean.</p>
@@ -109,7 +110,7 @@
 
                     <div class="group relative rounded-2xl border border-slate-200 bg-white p-8 transition-shadow hover:shadow-lg hover:shadow-slate-200/50">
                         <div class="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600">
-
+                            <i class="fa-solid fa-file-signature" aria-hidden="true"></i>
                         </div>
                         <h3 class="text-lg font-medium text-slate-900 mb-2">Proposals</h3>
                         <p class="text-sm text-slate-500 leading-relaxed">Create beautiful, branded proposals in minutes. Send them for digital approval and seamlessly convert them into invoices.</p>
@@ -117,7 +118,7 @@
 
                     <div class="group relative rounded-2xl border border-slate-200 bg-white p-8 transition-shadow hover:shadow-lg hover:shadow-slate-200/50">
                         <div class="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-lg bg-violet-50 text-violet-600">
-
+                            <i class="fa-solid fa-credit-card" aria-hidden="true"></i>
                         </div>
                         <h3 class="text-lg font-medium text-slate-900 mb-2">Invoicing &amp; Payments</h3>
                         <p class="text-sm text-slate-500 leading-relaxed">Powered by Stripe. Send professional invoices and get paid faster with direct checkout links. Track payment status in real-time.</p>
@@ -125,7 +126,7 @@
 
                     <div class="group relative rounded-2xl border border-slate-200 bg-white p-8 transition-shadow hover:shadow-lg hover:shadow-slate-200/50">
                         <div class="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-lg bg-rose-50 text-rose-600">
-
+                            <i class="fa-solid fa-chart-line" aria-hidden="true"></i>
                         </div>
                         <h3 class="text-lg font-medium text-slate-900 mb-2">Advanced Analytics</h3>
                         <p class="text-sm text-slate-500 leading-relaxed">Deep dive into post performance. Generate client-ready reports that prove your ROI without taking screenshots.</p>
@@ -193,7 +194,7 @@
                     <h2 class="text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl">Simple, transparent pricing</h2>
                     <p class="mt-4 text-slate-500">Start for free, upgrade as you grow.</p>
                     <div class="mt-4 inline-flex items-center gap-1.5 rounded-full bg-indigo-50 px-3 py-1 text-xs font-medium text-indigo-700 border border-indigo-100">
-
+                        <i class="fa-solid fa-shield-halved" aria-hidden="true"></i>
                         Instagram OAuth required for all influencer accounts
                     </div>
                 </div>
@@ -210,15 +211,15 @@
                         </div>
                         <ul class="mb-8 space-y-4 flex-1">
                             <li class="flex items-center gap-3 text-sm text-slate-600">
-
+                                <i class="fa-solid fa-circle-check text-emerald-500" aria-hidden="true"></i>
                                 Instagram Sync (1 Account)
                             </li>
                             <li class="flex items-center gap-3 text-sm text-slate-600">
-
+                                <i class="fa-solid fa-circle-check text-emerald-500" aria-hidden="true"></i>
                                 Basic Media Gallery
                             </li>
                             <li class="flex items-center gap-3 text-sm text-slate-600">
-
+                                <i class="fa-solid fa-circle-check text-emerald-500" aria-hidden="true"></i>
                                 3 Active Proposals
                             </li>
                         </ul>
@@ -241,19 +242,19 @@
                         </div>
                         <ul class="mb-8 space-y-4 flex-1">
                             <li class="flex items-center gap-3 text-sm text-slate-300">
-
+                                <i class="fa-solid fa-circle-check text-emerald-400" aria-hidden="true"></i>
                                 Instagram Sync (3 Accounts)
                             </li>
                             <li class="flex items-center gap-3 text-sm text-slate-300">
-
+                                <i class="fa-solid fa-circle-check text-emerald-400" aria-hidden="true"></i>
                                 Unlimited Clients
                             </li>
                             <li class="flex items-center gap-3 text-sm text-slate-300">
-
+                                <i class="fa-solid fa-circle-check text-emerald-400" aria-hidden="true"></i>
                                 Invoicing &amp; Payments
                             </li>
                             <li class="flex items-center gap-3 text-sm text-slate-300">
-
+                                <i class="fa-solid fa-circle-check text-emerald-400" aria-hidden="true"></i>
                                 Advanced Analytics
                             </li>
                         </ul>
@@ -273,15 +274,15 @@
                         </div>
                         <ul class="mb-8 space-y-4 flex-1">
                             <li class="flex items-center gap-3 text-sm text-slate-600">
-
+                                <i class="fa-solid fa-circle-check text-emerald-500" aria-hidden="true"></i>
                                 Unlimited Accounts
                             </li>
                             <li class="flex items-center gap-3 text-sm text-slate-600">
-
+                                <i class="fa-solid fa-circle-check text-emerald-500" aria-hidden="true"></i>
                                 Team Members
                             </li>
                             <li class="flex items-center gap-3 text-sm text-slate-600">
-
+                                <i class="fa-solid fa-circle-check text-emerald-500" aria-hidden="true"></i>
                                 White-label Reports
                             </li>
                         </ul>
@@ -301,7 +302,7 @@
                     <details class="group border border-slate-200 rounded-lg bg-slate-50/50 open:bg-white open:shadow-sm transition-all duration-300">
                         <summary class="flex cursor-pointer items-center justify-between p-6 font-medium text-slate-900">
                             Do I need a password to sign up?
-
+                            <i class="fa-solid fa-chevron-down text-xs text-slate-500 transition-transform group-open:rotate-180" aria-hidden="true"></i>
                         </summary>
                         <div class="px-6 pb-6 text-sm text-slate-500 leading-relaxed">
                             No. Influence Me uses OAuth verification. You simply log in with your Instagram account. This is more secure and ensures we are syncing data for the correct verified owner.
@@ -311,7 +312,7 @@
                     <details class="group border border-slate-200 rounded-lg bg-slate-50/50 open:bg-white open:shadow-sm transition-all duration-300">
                         <summary class="flex cursor-pointer items-center justify-between p-6 font-medium text-slate-900">
                             Can my clients log in separately?
-
+                            <i class="fa-solid fa-chevron-down text-xs text-slate-500 transition-transform group-open:rotate-180" aria-hidden="true"></i>
                         </summary>
                         <div class="px-6 pb-6 text-sm text-slate-500 leading-relaxed">
                             Yes. Each client gets secure access to view proposals, pay invoices, and review campaign analytics. They cannot see your private data or other clients.
@@ -321,7 +322,7 @@
                     <details class="group border border-slate-200 rounded-lg bg-slate-50/50 open:bg-white open:shadow-sm transition-all duration-300">
                         <summary class="flex cursor-pointer items-center justify-between p-6 font-medium text-slate-900">
                             Does Influence Me auto-post to Instagram?
-
+                            <i class="fa-solid fa-chevron-down text-xs text-slate-500 transition-transform group-open:rotate-180" aria-hidden="true"></i>
                         </summary>
                         <div class="px-6 pb-6 text-sm text-slate-500 leading-relaxed">
                             Currently, our scheduling tools are for planning, approval workflows, and internal tracking. We do not automatically publish content to your feed in this version, prioritizing account safety and manual control.
@@ -331,7 +332,7 @@
                     <details class="group border border-slate-200 rounded-lg bg-slate-50/50 open:bg-white open:shadow-sm transition-all duration-300">
                         <summary class="flex cursor-pointer items-center justify-between p-6 font-medium text-slate-900">
                             How are payments handled?
-
+                            <i class="fa-solid fa-chevron-down text-xs text-slate-500 transition-transform group-open:rotate-180" aria-hidden="true"></i>
                         </summary>
                         <div class="px-6 pb-6 text-sm text-slate-500 leading-relaxed">
                             We integrate directly with Stripe Connect. You can generate professional invoices or quick checkout links. Funds are transferred directly to your connected bank account.
@@ -346,7 +347,7 @@
                 <h2 class="text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl mb-6">Ready to professionalize your influence?</h2>
                 <div class="flex flex-col items-center gap-4">
                     <a href="{{ route('auth.facebook') }}" class="inline-flex items-center justify-center gap-2 rounded-full bg-slate-900 px-8 py-3.5 text-sm font-medium text-white transition-all hover:bg-slate-800 hover:shadow-lg hover:shadow-slate-200">
-
+                        <i class="fa-brands fa-instagram text-base" aria-hidden="true"></i>
                         Continue with Instagram
                     </a>
                 </div>

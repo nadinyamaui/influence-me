@@ -15,4 +15,5 @@ it('links to the terms of service page from the landing footer', function (): vo
 
     $response->assertOk();
     $response->assertSee('href="'.route('terms').'"', false);
+    $response->assertSee('href="'.route('portal.login').'"', false);
 });
