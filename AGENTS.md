@@ -113,8 +113,45 @@ For every task, agents must:
 - Respect dependency graph before implementing downstream features
 - Reuse existing models/enums/statuses instead of introducing new variants
 - Enforce policy and guard constraints on every protected action/page
+- Keep controllers thin: request validation/session intent + response orchestration only; business logic and external API logic must live in service classes
+- For third-party APIs, use a `client` + `connector` structure (connector handles HTTP transport/endpoints, client exposes domain methods) so services remain API-agnostic
 - Mock Instagram, Socialite, and Stripe in tests; do not rely on live APIs
 - Cover success, validation, authorization, and empty-state paths
+
+## Decoupling Architecture Rules
+
+All new and modified code must preserve strict layer boundaries:
+
+- `Controllers/Livewire components`: HTTP/UI orchestration only (request parsing, auth checks, response/redirect composition)
+- `Services`: use-case/business workflow orchestration only
+- `Clients`: third-party/domain adapters (typed domain-level API calls)
+- `Connectors`: raw transport concerns (HTTP base URL, headers, retries/timeouts, low-level request methods)
+- `Models`: persistence and relationships only (no external API calls)
+- `Jobs`: async orchestration that delegates to services/clients (no inline business logic duplication)
+
+Required dependency direction:
+
+- UI layer -> Services -> Clients -> Connectors
+- Never invert this direction
+- Shared logic must be extracted downward (never copied sideways across controllers/jobs/components)
+
+Hard constraints:
+
+- No direct `Http::` usage in controllers, Livewire components, models, policies, or form requests
+- No direct SDK/facade calls for external APIs in controllers (must route through service/client abstractions)
+- No business rule branching duplicated between controller and service
+- No persistence side effects hidden inside connectors
+- Do not use `data_get` for object property traversal; use nullsafe property access (`$object?->property?->property`) instead
+- Do not use custom normalize helper functions for request/session input; use Laravel validation rules (`$request->validate()` or Form Requests) and explicit defaults instead
+- Do not use `isset()` for value retrieval/defaulting; use null coalescing (`??`) with explicit defaults instead
+- Do not add inline comments inside function bodies; function code should be self-explanatory without internal comments
+
+Testing requirements for decoupling:
+
+- Feature tests cover behavior at controller/page boundary
+- Unit/service tests cover workflow rules and guard/ownership rules
+- Client tests mock transport responses and verify mapping/error handling
+- Connector tests (if added) cover request composition only
 
 ## GitHub Tracking Conventions
 

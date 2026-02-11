@@ -8,6 +8,7 @@ This guide walks through creating and configuring a Meta app for Influence Me In
 ## Prerequisites
 - Instagram account is `Business` or `Creator` (not Personal)
 - Instagram account is connected to a Facebook Page
+- User signing in has a Meta/Facebook account with access to that Page
 - Meta Developer account at `https://developers.facebook.com/`
 - Local app URL available for callback testing (example: `https://influence-me.test`)
 
@@ -59,9 +60,9 @@ For development mode, only app roles (admin/developer/tester) can grant scopes. 
 Add the following keys to environment files:
 
 ```env
-INSTAGRAM_CLIENT_ID=your_app_id
-INSTAGRAM_CLIENT_SECRET=your_app_secret
-INSTAGRAM_REDIRECT_URI=https://influence-me.test/auth/instagram/callback
+META_CLIENT_ID=your_app_id
+META_CLIENT_SECRET=your_app_secret
+META_REDIRECT_URI=https://influence-me.test/auth/instagram/callback
 ```
 
 Where to use them:
@@ -96,7 +97,7 @@ Typical review timeline: 3-10 business days, depending on submission quality and
 ## 9. Troubleshooting
 
 ### Invalid redirect URI
-- Ensure URI in Meta app exactly equals `INSTAGRAM_REDIRECT_URI` in environment config.
+- Ensure URI in Meta app exactly equals `META_REDIRECT_URI` (or legacy `INSTAGRAM_REDIRECT_URI`) in environment config.
 - Check scheme (`https`), host, path, and trailing slash mismatches.
 
 ### Missing permissions or access denied
@@ -105,6 +106,10 @@ Typical review timeline: 3-10 business days, depending on submission quality and
 
 ### No Pages available
 - Confirm user has Facebook Page access and the Page is linked to the Instagram professional account.
+
+### User has no Facebook account
+- Instagram Graph API OAuth depends on Meta/Facebook identity and Page permissions.
+- Create or use a Meta/Facebook account, grant it Page access, then reconnect.
 
 ### Token expired / sync failures
 - Re-authenticate if long-lived token cannot be refreshed.
