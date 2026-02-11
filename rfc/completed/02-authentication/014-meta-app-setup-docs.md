@@ -25,8 +25,8 @@ Create a step-by-step setup guide for configuring the Meta Developer App require
 3. **Configure Instagram Graph API**
    - Add Facebook Login for Business (or Facebook Login)
    - Configure OAuth redirect URIs:
-     - Development: `https://influence-me.test/auth/instagram/callback`
-     - Production: `https://yourdomain.com/auth/instagram/callback`
+     - Development: `https://influence-me.test/auth/facebook/callback`
+     - Production: `https://yourdomain.com/auth/facebook/callback`
 
 4. **Required Permissions**
    - `instagram_basic` — read profile info and media
@@ -40,7 +40,7 @@ Create a step-by-step setup guide for configuring the Meta Developer App require
    ```
    META_CLIENT_ID=your_app_id
    META_CLIENT_SECRET=your_app_secret
-   META_REDIRECT_URI=https://influence-me.test/auth/instagram/callback
+   META_REDIRECT_URI=https://influence-me.test/auth/facebook/callback
    ```
 
 6. **Token Flow**

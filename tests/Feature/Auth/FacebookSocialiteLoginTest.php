@@ -28,7 +28,6 @@ it('redirects to the facebook socialite provider', function (): void {
         ->andReturnSelf();
     Socialite::shouldReceive('with')
         ->once()
-        ->with(['state' => 'login'])
         ->andReturnSelf();
     Socialite::shouldReceive('redirect')
         ->once()
@@ -69,37 +68,6 @@ it('creates only a user after facebook callback for new users', function (): voi
     expect($user)->not->toBeNull();
 
     expect($user?->instagramAccounts()->count())->toBe(0);
-});
-
-it('logs in existing users by email on callback', function (): void {
-    $user = User::factory()->create([
-        'email' => 'existing@example.com',
-    ]);
-
-    $socialiteUser = new SocialiteUser;
-    $socialiteUser->id = '17841499999999999';
-    $socialiteUser->nickname = 'existing.creator';
-    $socialiteUser->name = 'Existing Creator';
-    $socialiteUser->email = 'existing@example.com';
-    $socialiteUser->avatar = 'https://example.com/new-avatar.jpg';
-    $socialiteUser->token = 'new-short-lived-token';
-    $socialiteUser->user = [
-        'username' => 'existing.creator',
-        'account_type' => 'creator',
-    ];
-
-    Socialite::shouldReceive('driver')
-        ->once()
-        ->with('facebook')
-        ->andReturnSelf();
-    Socialite::shouldReceive('user')
-        ->once()
-        ->andReturn($socialiteUser);
-
-    $response = $this->get(route('auth.facebook.callback'));
-
-    $response->assertRedirect(route('dashboard', absolute: false));
-    $this->assertAuthenticatedAs($user);
 });
 
 it('returns to login when facebook oauth callback fails', function (): void {

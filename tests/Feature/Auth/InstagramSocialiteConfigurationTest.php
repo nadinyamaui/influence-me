@@ -7,7 +7,7 @@ it('resolves the facebook socialite driver for instagram graph auth', function (
     config([
         'services.facebook.client_id' => 'test-client-id',
         'services.facebook.client_secret' => 'test-client-secret',
-        'services.facebook.redirect' => 'https://influence-me.test/auth/instagram/callback',
+        'services.facebook.redirect' => 'https://influence-me.test/auth/facebook/callback',
     ]);
 
     $provider = Socialite::driver('facebook');

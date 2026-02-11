@@ -9,8 +9,6 @@ Route::get('/', function () {
 
 Route::get('/auth/facebook', [FacebookAuthController::class, 'redirect'])->middleware('guest')->name('auth.facebook');
 Route::get('/auth/facebook/callback', [FacebookAuthController::class, 'callback'])->name('auth.facebook.callback');
-Route::get('/auth/instagram', [FacebookAuthController::class, 'redirect'])->middleware('guest')->name('auth.instagram');
-Route::get('/auth/instagram/callback', [FacebookAuthController::class, 'callback'])->name('auth.instagram.callback');
 
 Route::view('dashboard', 'dashboard')
     ->middleware(['auth', 'verified'])

@@ -9,6 +9,7 @@ use App\Services\Auth\FacebookSocialiteLoginService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Laravel\Socialite\Socialite;
 use Throwable;
 
 class FacebookAuthController extends Controller
@@ -19,28 +20,13 @@ class FacebookAuthController extends Controller
 
     public function redirect(Request $request): RedirectResponse
     {
-        $state = $request->query('state');
-
-        if (! is_string($state) || $state === '') {
-            $state = null;
-        }
-
-        return $this->loginService->redirectToProvider($state);
+        return $this->loginService->redirectToProvider();
     }
 
     public function callback(Request $request): RedirectResponse
     {
         try {
-            $authenticatedUser = Auth::guard('web')->user();
-
-            if (! $authenticatedUser instanceof User) {
-                $authenticatedUser = null;
-            }
-
-            $user = $this->loginService->resolveUserFromCallback($authenticatedUser);
-
-            Auth::guard('web')->login($user);
-            $request->session()->regenerate();
+            $user = $this->loginService->resolveUserFromCallback();
 
             return redirect()->intended(route('dashboard', absolute: false));
         } catch (SocialAuthenticationException $exception) {

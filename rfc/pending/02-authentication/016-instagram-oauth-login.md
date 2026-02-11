@@ -40,7 +40,7 @@ Replace `resources/views/pages/auth/login.blade.php` with a single "Login with I
 ### Routes
 ```php
 Route::get('/auth/instagram', [InstagramAuthController::class, 'redirect'])->name('auth.instagram');
-Route::get('/auth/instagram/callback', [InstagramAuthController::class, 'callback'])->name('auth.instagram.callback');
+Route::get('/auth/facebook/callback', [InstagramAuthController::class, 'callback'])->name('auth.instagram.callback');
 ```
 
 Add routes to `routes/web.php`.

@@ -5,7 +5,6 @@ namespace App\Services\Auth;
 use App\Exceptions\Auth\SocialAuthenticationException;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
-use Laravel\Socialite\Contracts\User as SocialiteUserContract;
 use Laravel\Socialite\Facades\Socialite;
 
 class FacebookSocialiteLoginService
@@ -20,48 +19,26 @@ class FacebookSocialiteLoginService
         'pages_read_engagement',
     ];
 
-    public function redirectToProvider(?string $state = null): RedirectResponse
+    public function redirectToProvider(): RedirectResponse
     {
-        return Socialite::driver('facebook')
-            ->scopes($this->scopes)
-            ->with(['state' => $state ?? 'login'])
-            ->redirect();
+        return Socialite::driver('facebook')->scopes($this->scopes)->redirect();
     }
 
-    public function resolveUserFromCallback(?User $authenticatedUser = null): User
+    public function resolveUserFromCallback(): User
     {
         $socialiteUser = Socialite::driver('facebook')->user();
-
-        if ((string) $socialiteUser->getId() === '') {
+        if (! $socialiteUser->getId()) {
             throw new SocialAuthenticationException('Facebook did not return required account information.');
         }
-
-        if ($authenticatedUser instanceof User) {
-            return $authenticatedUser;
-        }
-
-        return $this->findOrCreateInfluencerUser($socialiteUser);
-    }
-
-    private function findOrCreateInfluencerUser(SocialiteUserContract $socialiteUser): User
-    {
-        $email = $socialiteUser->getEmail();
-
-        if (! is_string($email) || $email === '') {
-            throw new SocialAuthenticationException('Facebook did not return an email address for sign in.');
-        }
-
-        $existingUser = User::query()->where('email', $email)->first();
-
-        if ($existingUser !== null) {
-            return $existingUser;
-        }
-
-        return User::query()->create([
-            'name' => $socialiteUser->getName() ?? $socialiteUser->getNickname() ?? 'Instagram User',
-            'email' => $email,
-            'password' => null,
-            'email_verified_at' => now(),
+        $user = User::updateOrCreate([
+            'socialite_user_type' => 'facebook',
+            'socialite_user_id' => $socialiteUser->getId(),
+        ], [
+            'name' => $socialiteUser->getName(),
+            'email' => $socialiteUser->getEmail(),
         ]);
+        auth()->login($user);
+
+        return $user;
     }
 }
