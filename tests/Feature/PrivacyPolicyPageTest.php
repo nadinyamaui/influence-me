@@ -6,6 +6,8 @@ it('renders the privacy policy page', function (): void {
     $response->assertOk();
     $response->assertSeeText('Privacy Policy');
     $response->assertSeeText('Information We Collect');
+    $response->assertSee('href="'.route('home').'#features"', false);
+    $response->assertSee('href="'.route('terms').'"', false);
 });
 
 it('links to the privacy policy page from the landing footer', function (): void {
