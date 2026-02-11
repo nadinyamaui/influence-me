@@ -11,7 +11,9 @@
         </style>
     </head>
     <body class="min-h-screen bg-slate-50 text-slate-700">
-        <main class="mx-auto max-w-4xl px-6 py-16 sm:py-20">
+        <x-marketing.header />
+
+        <main class="mx-auto max-w-4xl px-6 pb-16 pt-28 sm:pb-20 sm:pt-32">
             <div class="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm sm:p-12">
                 <div class="mb-10 border-b border-slate-100 pb-6">
                     <a href="{{ route('home') }}" class="text-sm font-medium text-indigo-600 hover:text-indigo-500">Back to home</a>
@@ -52,5 +54,7 @@
                 </div>
             </div>
         </main>
+
+        <x-marketing.footer />
     </body>
 </html>
