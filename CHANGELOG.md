@@ -52,5 +52,9 @@ All notable changes to this project will be documented in this file.
 - RFC 018: added a dedicated `client` auth guard, `clients` user provider, and `clients` password broker in `config/auth.php` for client-portal session isolation.
 - RFC 018: added `routes/portal.php` with `guest:client` and `auth:client` middleware groups and loaded it from `routes/web.php`.
 - RFC 018: added feature coverage in `tests/Feature/Auth/ClientGuardSetupTest.php` and updated `tests/Feature/Models/ClientUserTest.php` to validate real guard wiring and preserve `web` guard behavior.
+- RFC 019: added `PortalAuthController` and `PortalLoginRequest` to implement client-guard login/logout workflows, validation, session regeneration, and auth failure handling for `/portal/login`.
+- RFC 019: added `resources/views/pages/portal/login.blade.php` using the shared auth layout with client-portal-specific copy and only email/password login controls.
+- RFC 019: added portal auth routes in `routes/portal.php` (`portal.login`, `portal.login.store`, `portal.logout`) and enforced a dedicated `client-portal-login` rate limit of 5 requests/minute per IP.
+- RFC 019: added feature coverage in `tests/Feature/Auth/ClientPortalLoginTest.php` for login page rendering, successful/failed login, logout, rate limiting, and `web`/`client` guard isolation.
 - RFC 014: added `docs/meta-app-setup.md` with end-to-end Meta Developer App setup, permissions, OAuth callback configuration, token lifecycle, app review guidance, and troubleshooting for Instagram Graph API onboarding.
 - RFC 014: updated `.env.example` with `INSTAGRAM_CLIENT_ID`, `INSTAGRAM_CLIENT_SECRET`, and `INSTAGRAM_REDIRECT_URI` defaults required by Instagram OAuth configuration.
