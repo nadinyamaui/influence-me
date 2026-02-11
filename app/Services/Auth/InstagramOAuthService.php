@@ -138,7 +138,7 @@ class InstagramOAuthService
             'id',
             'name',
             'email',
-            'accounts{id,name,instagram_business_account{id,username,name,profile_picture_url,account_type}}',
+            'accounts{id,name,instagram_business_account{id,username,name,profile_picture_url}}',
         ];
     }
 

@@ -34,7 +34,7 @@ class AppServiceProvider extends ServiceProvider
 
         $this->app->singleton(FacebookGraphConnectorInterface::class, function (): FacebookGraphConnectorInterface {
             $api = new Api(new FacebookHttpClient, new AnonymousSession);
-            $api->setDefaultGraphVersion('v24.0');
+            $api->setDefaultGraphVersion('24.0');
 
             return new FacebookGraphConnector($api);
         });

@@ -100,6 +100,30 @@ it('downgrades add-account intent to login when unauthenticated', function (): v
     expect((string) session('instagram_oauth_intent'))->toBe('login');
 });
 
+it('requests oauth profile fields without unsupported instagram account_type', function (): void {
+    $provider = Mockery::mock();
+
+    Socialite::shouldReceive('driver')->once()->with('facebook')->andReturn($provider);
+    $provider->shouldReceive('fields')
+        ->once()
+        ->with(Mockery::on(function (array $fields): bool {
+            $requestedAccountsField = 'accounts{id,name,instagram_business_account{id,username,name,profile_picture_url}}';
+            $containsUnsupportedField = collect($fields)->contains(fn (string $field): bool => str_contains($field, 'account_type'));
+
+            return in_array($requestedAccountsField, $fields, true) && ! $containsUnsupportedField;
+        }))
+        ->andReturnSelf();
+    $provider->shouldReceive('user')->once()->andThrow(new RuntimeException('OAuth failed'));
+
+    $response = $this
+        ->withSession(['instagram_oauth_intent' => 'login'])
+        ->get(route('auth.instagram.callback'));
+
+    $response
+        ->assertRedirect(route('login', absolute: false))
+        ->assertSessionHasErrors('instagram');
+});
+
 it('creates a user and instagram account for first-time oauth logins', function (): void {
     mockFacebookTokenExchange(
         expectedToken: 'long-lived-meta-token',
