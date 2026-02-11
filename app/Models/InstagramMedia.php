@@ -10,6 +10,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class InstagramMedia extends Model
 {
+    use HasFactory;
+
+    protected $guarded = [];
+
     protected function casts(): array
     {
         return [

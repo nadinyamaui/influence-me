@@ -9,6 +9,20 @@ use Illuminate\Notifications\Notifiable;
 
 class ClientUser extends Authenticatable
 {
+    use HasFactory, Notifiable;
+
+    protected $fillable = [
+        'client_id',
+        'name',
+        'email',
+        'password',
+    ];
+
+    protected $hidden = [
+        'password',
+        'remember_token',
+    ];
+
     protected function casts(): array
     {
         return [

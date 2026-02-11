@@ -12,6 +12,10 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Client extends Model
 {
+    use HasFactory;
+
+    protected $guarded = [];
+
     protected function casts(): array
     {
         return [

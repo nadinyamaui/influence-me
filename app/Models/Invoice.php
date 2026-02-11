@@ -11,6 +11,27 @@ use Illuminate\Support\Str;
 
 class Invoice extends Model
 {
+    use HasFactory;
+
+    protected $guarded = [];
+
+    protected static function booted(): void
+    {
+        static::creating(function (self $invoice): void {
+            if (blank($invoice->invoice_number)) {
+                $invoice->invoice_number = 'pending-'.(string) Str::uuid();
+            }
+        });
+
+        static::created(function (self $invoice): void {
+            if (str_starts_with($invoice->invoice_number, 'pending-')) {
+                $invoice->forceFill([
+                    'invoice_number' => (string) $invoice->id,
+                ])->saveQuietly();
+            }
+        });
+    }
+
     protected function casts(): array
     {
         return [

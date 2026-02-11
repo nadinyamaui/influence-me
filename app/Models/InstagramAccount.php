@@ -11,6 +11,10 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class InstagramAccount extends Model
 {
+    use HasFactory;
+
+    protected $guarded = [];
+
     protected function casts(): array
     {
         return [

@@ -9,6 +9,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ScheduledPost extends Model
 {
+    use HasFactory;
+
+    protected $guarded = [];
+
     protected function casts(): array
     {
         return [
