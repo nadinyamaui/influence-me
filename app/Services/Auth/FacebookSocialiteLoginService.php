@@ -21,7 +21,9 @@ class FacebookSocialiteLoginService
 
     public function redirectToProvider(): RedirectResponse
     {
-        return Socialite::driver('facebook')->scopes($this->scopes)->redirect();
+        return Socialite::driver('facebook')
+            ->scopes($this->scopes)
+            ->redirect();
     }
 
     public function resolveUserFromCallback(): User

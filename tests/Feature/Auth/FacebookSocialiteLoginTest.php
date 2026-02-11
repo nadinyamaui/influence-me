@@ -26,9 +26,6 @@ it('redirects to the facebook socialite provider', function (): void {
             'pages_read_engagement',
         ])
         ->andReturnSelf();
-    Socialite::shouldReceive('with')
-        ->once()
-        ->andReturnSelf();
     Socialite::shouldReceive('redirect')
         ->once()
         ->andReturn(redirect('https://www.facebook.com/v18.0/dialog/oauth'));
