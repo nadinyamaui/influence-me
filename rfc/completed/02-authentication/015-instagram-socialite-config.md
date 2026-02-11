@@ -5,51 +5,37 @@
 
 ## Description
 
-Configure Laravel Socialite for Instagram OAuth. The `laravel/socialite` package is already installed. This issue only covers the configuration — not the login flow itself.
+Configure Laravel Socialite for Instagram Graph OAuth via Meta/Facebook Login. The `laravel/socialite` package is already installed. This issue only covers the configuration — not the login flow itself.
 
 ## Implementation
 
-### Add Instagram config to `config/services.php`
+### Add Facebook config to `config/services.php`
 ```php
-'instagram' => [
-    'client_id' => env('INSTAGRAM_CLIENT_ID'),
-    'client_secret' => env('INSTAGRAM_CLIENT_SECRET'),
-    'redirect' => env('INSTAGRAM_REDIRECT_URI'),
+'facebook' => [
+    'client_id' => env('META_CLIENT_ID'),
+    'client_secret' => env('META_CLIENT_SECRET'),
+    'redirect' => env('META_REDIRECT_URI'),
 ],
 ```
 
-### Install Socialite Instagram Provider
-Instagram Graph API is not a built-in Socialite driver. Install the community provider:
-```
-composer require socialiteproviders/instagram
-```
-
-Register the provider event listener. In Laravel 12, this goes in `AppServiceProvider` or a dedicated listener:
-```php
-// In AppServiceProvider boot():
-Event::listen(
-    SocialiteWasCalled::class,
-    \SocialiteProviders\Instagram\InstagramExtendSocialite::class . '@handle'
-);
-```
+### Use built-in Facebook Socialite driver
+Instagram Graph OAuth in this app uses Meta/Facebook Login, so no community Instagram provider is required.
 
 ### Verify `.env.example` has the variables
 ```
-INSTAGRAM_CLIENT_ID=
-INSTAGRAM_CLIENT_SECRET=
-INSTAGRAM_REDIRECT_URI=https://influence-me.test/auth/instagram/callback
+META_CLIENT_ID=
+META_CLIENT_SECRET=
+META_REDIRECT_URI=https://influence-me.test/auth/instagram/callback
 ```
 
 ## Files to Modify
-- `config/services.php` — add `instagram` config block
-- `app/Providers/AppServiceProvider.php` — register Socialite event listener
+- `config/services.php` — add `facebook` config block
 
 ## Files to Check/Verify
 - `.env.example` — should already have variables from #014
-- `composer.json` — verify `laravel/socialite` and `socialiteproviders/instagram`
+- `composer.json` — verify `laravel/socialite`
 
 ## Acceptance Criteria
-- [ ] Instagram service configured in `config/services.php`
-- [ ] Socialite provider registered and autoloaded
-- [ ] `Socialite::driver('instagram')` does not throw an error
+- [ ] Facebook service configured in `config/services.php`
+- [ ] `Socialite::driver('facebook')` does not throw an error
 - [ ] Environment variables in `.env.example`
