@@ -24,6 +24,8 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'email',
+        'socialite_user_type',
+        'socialite_user_id',
         'password',
     ];
 
