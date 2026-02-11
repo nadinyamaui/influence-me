@@ -25,7 +25,7 @@ Instagram Graph OAuth in this app uses Meta/Facebook Login, so no community Inst
 ```
 META_CLIENT_ID=
 META_CLIENT_SECRET=
-META_REDIRECT_URI=https://influence-me.test/auth/instagram/callback
+META_REDIRECT_URI=https://influence-me.test/auth/facebook/callback
 ```
 
 ## Files to Modify

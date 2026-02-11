@@ -38,7 +38,7 @@
                         <a href="/client/login" class="hidden sm:inline-flex items-center text-xs font-medium text-slate-500 hover:text-slate-900 transition-colors">
                             Client Portal
                         </a>
-                        <a href="/auth/instagram/redirect" class="inline-flex items-center gap-2 rounded-full bg-slate-900 px-4 py-2 text-xs font-medium text-white transition-all hover:bg-slate-800 hover:shadow-lg hover:shadow-slate-200 focus:ring-2 focus:ring-slate-400 focus:ring-offset-2">
+                        <a href="{{ route('auth.facebook') }}" class="inline-flex items-center gap-2 rounded-full bg-slate-900 px-4 py-2 text-xs font-medium text-white transition-all hover:bg-slate-800 hover:shadow-lg hover:shadow-slate-200 focus:ring-2 focus:ring-slate-400 focus:ring-offset-2">
                             <iconify-icon icon="solar:instagram-linear" width="16" stroke-width="1.5"></iconify-icon>
                             Continue with Instagram
                         </a>
@@ -68,7 +68,7 @@
                 </p>
 
                 <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
-                    <a href="/auth/instagram/redirect" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-full bg-slate-900 px-8 py-3.5 text-sm font-medium text-white transition-all hover:bg-slate-800 hover:scale-[1.02] shadow-xl shadow-slate-200/50">
+                    <a href="{{ route('auth.facebook') }}" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-full bg-slate-900 px-8 py-3.5 text-sm font-medium text-white transition-all hover:bg-slate-800 hover:scale-[1.02] shadow-xl shadow-slate-200/50">
                         <iconify-icon icon="solar:instagram-linear" width="18" stroke-width="1.5"></iconify-icon>
                         Continue with Instagram
                     </a>
@@ -269,7 +269,7 @@
                                 3 Active Proposals
                             </li>
                         </ul>
-                        <a href="/auth/instagram/redirect" class="block w-full rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-center text-sm font-medium text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-colors">
+                        <a href="{{ route('auth.facebook') }}" class="block w-full rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-center text-sm font-medium text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-colors">
                             Get Started
                         </a>
                     </div>
@@ -304,7 +304,7 @@
                                 Advanced Analytics
                             </li>
                         </ul>
-                        <a href="/auth/instagram/redirect" class="block w-full rounded-lg bg-indigo-600 px-4 py-2.5 text-center text-sm font-medium text-white hover:bg-indigo-500 transition-colors shadow-lg shadow-indigo-900/30">
+                        <a href="{{ route('auth.facebook') }}" class="block w-full rounded-lg bg-indigo-600 px-4 py-2.5 text-center text-sm font-medium text-white hover:bg-indigo-500 transition-colors shadow-lg shadow-indigo-900/30">
                             Start Free Trial
                         </a>
                     </div>
@@ -392,7 +392,7 @@
             <div class="mx-auto max-w-4xl px-6 text-center relative z-10">
                 <h2 class="text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl mb-6">Ready to professionalize your influence?</h2>
                 <div class="flex flex-col items-center gap-4">
-                    <a href="/auth/instagram/redirect" class="inline-flex items-center justify-center gap-2 rounded-full bg-slate-900 px-8 py-3.5 text-sm font-medium text-white transition-all hover:bg-slate-800 hover:shadow-lg hover:shadow-slate-200">
+                    <a href="{{ route('auth.facebook') }}" class="inline-flex items-center justify-center gap-2 rounded-full bg-slate-900 px-8 py-3.5 text-sm font-medium text-white transition-all hover:bg-slate-800 hover:shadow-lg hover:shadow-slate-200">
                         <iconify-icon icon="solar:instagram-linear" width="18" stroke-width="1.5"></iconify-icon>
                         Continue with Instagram
                     </a>

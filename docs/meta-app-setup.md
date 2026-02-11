@@ -28,10 +28,10 @@ This guide walks through creating and configuring a Meta app for Influence Me In
 Set redirect URIs in the Facebook Login settings.
 
 ### Development
-- `https://influence-me.test/auth/instagram/callback`
+- `https://influence-me.test/auth/facebook/callback`
 
 ### Production
-- `https://yourdomain.com/auth/instagram/callback`
+- `https://yourdomain.com/auth/facebook/callback`
 
 Notes:
 - URI must exactly match your Laravel route and environment value.
@@ -62,7 +62,7 @@ Add the following keys to environment files:
 ```env
 META_CLIENT_ID=your_app_id
 META_CLIENT_SECRET=your_app_secret
-META_REDIRECT_URI=https://influence-me.test/auth/instagram/callback
+META_REDIRECT_URI=https://influence-me.test/auth/facebook/callback
 ```
 
 Where to use them:
