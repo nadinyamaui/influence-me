@@ -1,6 +1,6 @@
 # Influence Me Agent Delivery Guide
 
-This file is generated from the RFC set in `/rfc` (RFC `000` through `073`).
+This file is generated from the RFC set in `/rfc` (RFC `000` through `092`).
 Use it as the execution contract for AI agents working in this repository.
 
 ## Source of Truth
@@ -14,6 +14,7 @@ Use it as the execution contract for AI agents working in this repository.
 Influence Me is an influencer operating system that centralizes:
 
 - Instagram account connectivity and sync
+- TikTok account connectivity and sync
 - Content browsing and client campaign linking
 - Content scheduling timeline
 - Client CRM and client portal access
@@ -29,11 +30,12 @@ Influence Me is an influencer operating system that centralizes:
 ## Non-Negotiable Product Rules
 
 - Influencer authentication is Instagram OAuth-first (RFC `016`, `017`)
+- TikTok is an additional connected platform and must not replace Instagram-first influencer authentication
 - Email/password registration and reset are removed for influencer users (RFC `017`)
 - Client portal uses separate `client` guard with isolated session/auth flows (RFC `018`, `019`)
 - Data ownership is strict: influencers see only their data; clients see only their client-scoped data (RFC `012`)
 - `ScheduledPost` is planning/tracking CRUD in MVP, not direct Instagram auto-publishing
-- External integrations (Instagram Graph API, Stripe) must be wrapped in service classes with typed error handling
+- External integrations (Instagram Graph API, TikTok API, Stripe) must be wrapped in service classes with typed error handling
 
 ## Domain Model Baseline (RFC 001/002)
 
@@ -43,6 +45,9 @@ Core entities:
 - `InstagramAccount`
 - `InstagramMedia`
 - `AudienceDemographic`
+- `TikTokAccount`
+- `TikTokMedia`
+- `TikTokAudienceDemographic`
 - `Client`
 - `ClientUser`
 - `Proposal`
@@ -68,6 +73,7 @@ Required enums:
 - Invoice: `Draft -> Sent -> Paid` and `Sent -> Overdue` (scheduled detection)
 - Scheduled post: `Planned -> Published|Cancelled`
 - Instagram sync status: `Idle -> Syncing -> Idle|Failed`
+- TikTok sync status: `Idle -> Syncing -> Idle|Failed`
 
 ## Integrations and Background Work
 
@@ -76,6 +82,16 @@ Instagram integration requirements:
 - OAuth login and account linking via Socialite + Meta token exchange
 - Graph API service methods for profile, media, insights, stories, demographics, token refresh
 - Queued jobs for profile/media/insights/stories/demographics/token refresh
+- Orchestrator chain and scheduler cadence:
+  - full sync every 6 hours
+  - profile + insights hourly
+  - token refresh daily for expiring tokens
+
+TikTok integration requirements:
+
+- Account linking via TikTok OAuth for authenticated influencer users
+- Client/connector/service abstractions for profile, media, insights, demographics, token refresh
+- Queued jobs for profile/media/insights/demographics/token refresh
 - Orchestrator chain and scheduler cadence:
   - full sync every 6 hours
   - profile + insights hourly
@@ -104,6 +120,7 @@ Additional scheduler requirements:
 - `049-057`: Invoicing CRUD, Stripe payment link/webhook, overdue handling
 - `058-066`: Analytics dashboard + client-scoped analytics
 - `067-073`: Test hardening, responsive/UX polish, security, deployment docs
+- `074-092`: TikTok platform integration (setup, models, connector/client/service, sync jobs, accounts UI, content + analytics integration)
 
 ## Implementation Expectations For Agents
 
@@ -115,7 +132,7 @@ For every task, agents must:
 - Enforce policy and guard constraints on every protected action/page
 - Keep controllers thin: request validation/session intent + response orchestration only; business logic and external API logic must live in service classes
 - For third-party APIs, use a `client` + `connector` structure (connector handles HTTP transport/endpoints, client exposes domain methods) so services remain API-agnostic
-- Mock Instagram, Socialite, and Stripe in tests; do not rely on live APIs
+- Mock Instagram, TikTok, Socialite, and Stripe in tests; do not rely on live APIs
 - Cover success, validation, authorization, and empty-state paths
 
 ## Decoupling Architecture Rules
@@ -264,3 +281,22 @@ A change is done only when:
 - `071` Error Handling and Monitoring
 - `072` Security Hardening
 - `073` Deployment Documentation
+- `074` TikTok Developer App Setup Documentation
+- `075` TikTok Socialite Service Configuration
+- `076` TikTokAccount Model, Factory, and Seeder
+- `077` TikTokMedia Model and Factory
+- `078` TikTokAudienceDemographic Model and Factory
+- `079` TikTok API Connector
+- `080` TikTok API Client
+- `081` TikTok Sync Service Class
+- `082` Sync TikTok Profile Job
+- `083` Sync TikTok Media Job
+- `084` Sync TikTok Media Insights Job
+- `085` Sync TikTok Audience Demographics Job
+- `086` TikTok Token Refresh Job
+- `087` TikTok Sync Orchestrator and Scheduled Tasks
+- `088` TikTok Accounts List Page
+- `089` Connect and Disconnect TikTok Accounts
+- `090` TikTok Manual Sync Trigger and Status UI
+- `091` TikTok Content Browser Integration
+- `092` TikTok Analytics Dashboard Integration
