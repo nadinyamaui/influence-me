@@ -7,18 +7,6 @@ use App\Models\InstagramAccount;
 use App\Models\InstagramMedia;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-/**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\InstagramMedia>
- */
-class InstagramMediaFactory extends Factory
-{
-    protected $model = InstagramMedia::class;
-
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
     public function definition(): array
     {
         return [

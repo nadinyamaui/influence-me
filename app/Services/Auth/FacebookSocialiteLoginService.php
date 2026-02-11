@@ -9,9 +9,6 @@ use Laravel\Socialite\Facades\Socialite;
 
 class FacebookSocialiteLoginService
 {
-    /**
-     * @var list<string>
-     */
     private array $scopes = [
         'instagram_basic',
         'instagram_manage_insights',
@@ -32,15 +29,20 @@ class FacebookSocialiteLoginService
         if (! $socialiteUser->getId()) {
             throw new SocialAuthenticationException('Facebook did not return required account information.');
         }
-        $user = User::updateOrCreate([
+        $user = $this->createUpdateUser($socialiteUser);
+        auth()->login($user);
+
+        return $user;
+    }
+
+    protected function createUpdateUser($socialiteUser): User
+    {
+        return User::updateOrCreate([
             'socialite_user_type' => 'facebook',
             'socialite_user_id' => $socialiteUser->getId(),
         ], [
             'name' => $socialiteUser->getName(),
             'email' => $socialiteUser->getEmail(),
         ]);
-        auth()->login($user);
-
-        return $user;
     }
 }

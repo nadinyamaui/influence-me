@@ -11,16 +11,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class InstagramAccount extends Model
 {
-    /** @use HasFactory<\Database\Factories\InstagramAccountFactory> */
-    use HasFactory;
-
-    protected $guarded = [];
-
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
     protected function casts(): array
     {
         return [
@@ -33,25 +23,16 @@ class InstagramAccount extends Model
         ];
     }
 
-    /**
-     * Get the influencer that owns the Instagram account.
-     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
-    /**
-     * Get all media for this Instagram account.
-     */
     public function instagramMedia(): HasMany
     {
         return $this->hasMany(InstagramMedia::class);
     }
 
-    /**
-     * Get audience demographics for this Instagram account.
-     */
     public function audienceDemographics(): HasMany
     {
         return $this->hasMany(AudienceDemographic::class);

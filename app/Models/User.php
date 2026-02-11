@@ -13,39 +13,6 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
 
 class User extends Authenticatable
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, TwoFactorAuthenticatable;
-
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
-    protected $fillable = [
-        'name',
-        'email',
-        'socialite_user_type',
-        'socialite_user_id',
-        'password',
-    ];
-
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var list<string>
-     */
-    protected $hidden = [
-        'password',
-        'two_factor_secret',
-        'two_factor_recovery_codes',
-        'remember_token',
-    ];
-
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
     protected function casts(): array
     {
         return [
@@ -54,9 +21,6 @@ class User extends Authenticatable
         ];
     }
 
-    /**
-     * Get the user's initials
-     */
     public function initials(): string
     {
         return Str::of($this->name)
@@ -66,49 +30,31 @@ class User extends Authenticatable
             ->implode('');
     }
 
-    /**
-     * Get all Instagram accounts for the influencer.
-     */
     public function instagramAccounts(): HasMany
     {
         return $this->hasMany(InstagramAccount::class);
     }
 
-    /**
-     * Get the primary Instagram account for the influencer.
-     */
     public function primaryInstagramAccount(): HasOne
     {
         return $this->hasOne(InstagramAccount::class)->where('is_primary', true);
     }
 
-    /**
-     * Get all clients for the influencer.
-     */
     public function clients(): HasMany
     {
         return $this->hasMany(Client::class);
     }
 
-    /**
-     * Get all proposals created by the influencer.
-     */
     public function proposals(): HasMany
     {
         return $this->hasMany(Proposal::class);
     }
 
-    /**
-     * Get all invoices for the influencer.
-     */
     public function invoices(): HasMany
     {
         return $this->hasMany(Invoice::class);
     }
 
-    /**
-     * Get all scheduled posts for the influencer.
-     */
     public function scheduledPosts(): HasMany
     {
         return $this->hasMany(ScheduledPost::class);

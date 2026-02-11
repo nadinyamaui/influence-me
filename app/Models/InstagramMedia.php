@@ -10,16 +10,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class InstagramMedia extends Model
 {
-    /** @use HasFactory<\Database\Factories\InstagramMediaFactory> */
-    use HasFactory;
-
-    protected $guarded = [];
-
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
     protected function casts(): array
     {
         return [
@@ -29,17 +19,11 @@ class InstagramMedia extends Model
         ];
     }
 
-    /**
-     * Get the Instagram account this media belongs to.
-     */
     public function instagramAccount(): BelongsTo
     {
         return $this->belongsTo(InstagramAccount::class);
     }
 
-    /**
-     * Get the clients linked to this media for campaigns.
-     */
     public function clients(): BelongsToMany
     {
         return $this->belongsToMany(Client::class, 'campaign_media')

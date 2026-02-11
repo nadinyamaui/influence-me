@@ -8,18 +8,6 @@ use App\Models\InstagramAccount;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-/**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\InstagramAccount>
- */
-class InstagramAccountFactory extends Factory
-{
-    protected $model = InstagramAccount::class;
-
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
     public function definition(): array
     {
         $username = fake()->unique()->userName();

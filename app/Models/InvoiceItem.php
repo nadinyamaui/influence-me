@@ -8,16 +8,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class InvoiceItem extends Model
 {
-    /** @use HasFactory<\Database\Factories\InvoiceItemFactory> */
-    use HasFactory;
-
-    protected $guarded = [];
-
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
     protected function casts(): array
     {
         return [
@@ -27,9 +17,6 @@ class InvoiceItem extends Model
         ];
     }
 
-    /**
-     * Get the invoice this line item belongs to.
-     */
     public function invoice(): BelongsTo
     {
         return $this->belongsTo(Invoice::class);

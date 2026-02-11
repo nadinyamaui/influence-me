@@ -161,6 +161,7 @@ Hard constraints:
 - Do not use `data_get` for object property traversal; use nullsafe property access (`$object?->property?->property`) instead
 - Do not use custom normalize helper functions for request/session input; use Laravel validation rules (`$request->validate()` or Form Requests) and explicit defaults instead
 - Do not use `isset()` for value retrieval/defaulting; use null coalescing (`??`) with explicit defaults instead
+- Do not add method-level docblocks; methods should not include PHPDoc comments unless explicitly required by a framework or tooling constraint
 - Do not add inline comments inside function bodies; function code should be self-explanatory without internal comments
 
 Testing requirements for decoupling:
