@@ -409,7 +409,7 @@
                 </div>
 
                 <div class="flex gap-8">
-                    <a href="#" class="text-xs text-slate-500 hover:text-slate-900 transition-colors">Privacy Policy</a>
+                    <a href="{{ route('privacy-policy') }}" class="text-xs text-slate-500 hover:text-slate-900 transition-colors">Privacy Policy</a>
                     <a href="{{ route('terms') }}" class="text-xs text-slate-500 hover:text-slate-900 transition-colors">Terms of Service</a>
                     <a href="#" class="text-xs text-slate-500 hover:text-slate-900 transition-colors">Contact Support</a>
                 </div>
