@@ -1,23 +1,4 @@
-<!DOCTYPE html>
-<html lang="en" class="scroll-smooth antialiased">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Influence Me | The Operating System for Creators</title>
-        <script src="https://cdn.tailwindcss.com"></script>
-        <script src="https://kit.fontawesome.com/3d9d39312b.js" crossorigin="anonymous"></script>
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&amp;display=swap" rel="stylesheet">
-        <style>
-            body { font-family: 'Inter', sans-serif; }
-            ::-webkit-scrollbar { width: 6px; }
-            ::-webkit-scrollbar-track { background: transparent; }
-            ::-webkit-scrollbar-thumb { background-color: #e2e8f0; border-radius: 20px; }
-            details > summary { list-style: none; }
-            details > summary::-webkit-details-marker { display: none; }
-        </style>
-    </head>
-    <body class="bg-white text-slate-600 selection:bg-indigo-100 selection:text-indigo-900">
-        <x-marketing.header />
+<x-layouts.marketing title="Influence Me | The Operating System for Creators">
 
         <section class="relative pt-32 pb-20 overflow-hidden">
             <div class="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-full -z-10 pointer-events-none">
@@ -371,7 +352,4 @@
                 </div>
             </div>
         </section>
-
-        <x-marketing.footer />
-    </body>
-</html>
+</x-layouts.marketing>

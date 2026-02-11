@@ -1,18 +1,4 @@
-<!DOCTYPE html>
-<html lang="en" class="scroll-smooth antialiased">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Terms of Service | Influence Me</title>
-        <script src="https://cdn.tailwindcss.com"></script>
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-        <style>
-            body { font-family: 'Inter', sans-serif; }
-        </style>
-    </head>
-    <body class="min-h-screen bg-slate-50 text-slate-700">
-        <x-marketing.header />
-
+<x-layouts.marketing title="Terms of Service | Influence Me" body-class="bg-slate-50 text-slate-700">
         <main class="mx-auto max-w-4xl px-6 pb-16 pt-28 sm:pb-20 sm:pt-32">
             <div class="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm sm:p-12">
                 <div class="mb-10 border-b border-slate-100 pb-6">
@@ -54,7 +40,4 @@
                 </div>
             </div>
         </main>
-
-        <x-marketing.footer />
-    </body>
-</html>
+</x-layouts.marketing>
