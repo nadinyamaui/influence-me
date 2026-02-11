@@ -25,16 +25,6 @@ it('defines client relationship', function (): void {
 });
 
 it('can be authenticated by a dedicated client guard configuration', function (): void {
-    config()->set('auth.providers.client_users', [
-        'driver' => 'eloquent',
-        'model' => ClientUser::class,
-    ]);
-
-    config()->set('auth.guards.client', [
-        'driver' => 'session',
-        'provider' => 'client_users',
-    ]);
-
     $clientUser = ClientUser::factory()->create();
 
     Auth::guard('client')->login($clientUser);
