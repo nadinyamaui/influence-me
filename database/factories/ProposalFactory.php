@@ -8,6 +8,10 @@ use App\Models\Proposal;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
+class ProposalFactory extends Factory
+{
+    protected $model = Proposal::class;
+
     public function definition(): array
     {
         $user = User::factory()->create();

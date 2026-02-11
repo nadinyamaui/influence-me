@@ -9,6 +9,10 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 
+class InvoiceFactory extends Factory
+{
+    protected $model = Invoice::class;
+
     public function definition(): array
     {
         $subtotal = fake()->randomFloat(2, 500, 15000);

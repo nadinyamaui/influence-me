@@ -7,6 +7,10 @@ use App\Models\AudienceDemographic;
 use App\Models\InstagramAccount;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
+class AudienceDemographicFactory extends Factory
+{
+    protected $model = AudienceDemographic::class;
+
     public function definition(): array
     {
         $type = fake()->randomElement([

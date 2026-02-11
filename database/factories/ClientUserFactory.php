@@ -6,6 +6,10 @@ use App\Models\Client;
 use App\Models\ClientUser;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
+class ClientUserFactory extends Factory
+{
+    protected $model = ClientUser::class;
+
     public function definition(): array
     {
         return [

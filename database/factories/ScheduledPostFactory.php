@@ -9,6 +9,10 @@ use App\Models\ScheduledPost;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
+class ScheduledPostFactory extends Factory
+{
+    protected $model = ScheduledPost::class;
+
     public function definition(): array
     {
         return [

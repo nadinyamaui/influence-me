@@ -6,6 +6,10 @@ use App\Models\Invoice;
 use App\Models\InvoiceItem;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
+class InvoiceItemFactory extends Factory
+{
+    protected $model = InvoiceItem::class;
+
     public function definition(): array
     {
         $quantity = fake()->randomFloat(2, 1, 10);

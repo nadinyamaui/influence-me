@@ -7,6 +7,10 @@ use App\Models\Client;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
+class ClientFactory extends Factory
+{
+    protected $model = Client::class;
+
     public function definition(): array
     {
         $type = fake()->randomElement([ClientType::Brand, ClientType::Individual]);

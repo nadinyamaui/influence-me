@@ -7,6 +7,10 @@ use App\Models\InstagramAccount;
 use App\Models\InstagramMedia;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
+class InstagramMediaFactory extends Factory
+{
+    protected $model = InstagramMedia::class;
+
     public function definition(): array
     {
         return [
