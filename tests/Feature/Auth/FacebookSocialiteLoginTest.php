@@ -1,5 +1,6 @@
 <?php
 
+use App\Exceptions\Auth\SocialAuthenticationException;
 use App\Models\User;
 use App\Services\Auth\FacebookSocialiteLoginService;
 use Laravel\Socialite\Facades\Socialite;
@@ -64,6 +65,24 @@ it('returns to login when facebook oauth callback fails', function (): void {
     $response = $this->get(route('auth.facebook.callback'));
 
     $response->assertRedirect(route('login'));
-    $response->assertSessionHasErrors('oauth');
+    $response->assertSessionHasErrors([
+        'oauth' => 'Unable to complete Facebook sign in. Please try again.',
+    ]);
+    $this->assertGuest();
+});
+
+it('returns to login with social auth error message when callback raises social authentication exception', function (): void {
+    $loginService = \Mockery::mock(FacebookSocialiteLoginService::class);
+    $loginService->shouldReceive('resolveUserFromCallback')
+        ->once()
+        ->andThrow(new SocialAuthenticationException('Facebook denied access to the requested scopes.'));
+    app()->instance(FacebookSocialiteLoginService::class, $loginService);
+
+    $response = $this->get(route('auth.facebook.callback'));
+
+    $response->assertRedirect(route('login'));
+    $response->assertSessionHasErrors([
+        'oauth' => 'Facebook denied access to the requested scopes.',
+    ]);
     $this->assertGuest();
 });
