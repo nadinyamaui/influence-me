@@ -1,8 +1,8 @@
 <?php
 
 use App\Models\User;
+use App\Services\Auth\FacebookSocialiteLoginService;
 use Laravel\Socialite\Facades\Socialite;
-use Laravel\Socialite\Two\User as SocialiteUser;
 
 it('renders a facebook oauth login button', function (): void {
     $response = $this->get(route('login'));
@@ -35,44 +35,31 @@ it('redirects to the facebook socialite provider', function (): void {
     $response->assertRedirect('https://www.facebook.com/v18.0/dialog/oauth');
 });
 
-it('creates only a user after facebook callback for new users', function (): void {
-    $socialiteUser = new SocialiteUser;
-    $socialiteUser->id = '17841400000000000';
-    $socialiteUser->nickname = 'creator.new';
-    $socialiteUser->name = 'Creator New';
-    $socialiteUser->email = 'creator.new@example.com';
-    $socialiteUser->avatar = 'https://example.com/avatar.jpg';
-    $socialiteUser->token = 'short-lived-token';
-    $socialiteUser->user = [
-        'username' => 'creator.new',
-        'account_type' => 'business',
-    ];
+it('redirects to dashboard after successful facebook callback', function (): void {
+    $user = User::factory()->create();
 
-    Socialite::shouldReceive('driver')
+    $loginService = \Mockery::mock(FacebookSocialiteLoginService::class);
+    $loginService->shouldReceive('resolveUserFromCallback')
         ->once()
-        ->with('facebook')
-        ->andReturnSelf();
-    Socialite::shouldReceive('user')
-        ->once()
-        ->andReturn($socialiteUser);
+        ->andReturnUsing(function () use ($user) {
+            auth()->login($user);
+
+            return $user;
+        });
+    app()->instance(FacebookSocialiteLoginService::class, $loginService);
 
     $response = $this->get(route('auth.facebook.callback'));
 
     $response->assertRedirect(route('dashboard', absolute: false));
-    $this->assertAuthenticated();
-
-    $user = User::query()->where('email', 'creator.new@example.com')->first();
-    expect($user)->not->toBeNull();
+    $this->assertAuthenticatedAs($user);
 });
 
 it('returns to login when facebook oauth callback fails', function (): void {
-    Socialite::shouldReceive('driver')
-        ->once()
-        ->with('facebook')
-        ->andReturnSelf();
-    Socialite::shouldReceive('user')
+    $loginService = \Mockery::mock(FacebookSocialiteLoginService::class);
+    $loginService->shouldReceive('resolveUserFromCallback')
         ->once()
         ->andThrow(new RuntimeException('Denied'));
+    app()->instance(FacebookSocialiteLoginService::class, $loginService);
 
     $response = $this->get(route('auth.facebook.callback'));
 

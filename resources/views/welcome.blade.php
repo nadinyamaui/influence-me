@@ -5,7 +5,6 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Influence Me | The Operating System for Creators</title>
         <script src="https://cdn.tailwindcss.com"></script>
-        <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&amp;display=swap" rel="stylesheet">
         <style>
             body { font-family: 'Inter', sans-serif; }
@@ -22,7 +21,7 @@
                 <div class="flex h-16 items-center justify-between">
                     <a href="/" class="flex items-center gap-2 group">
                         <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-900 text-white transition group-hover:bg-indigo-600">
-                            <iconify-icon icon="solar:hashtag-square-linear" width="20" stroke-width="1.5"></iconify-icon>
+                            
                         </div>
                         <span class="text-sm font-semibold tracking-tight text-slate-900">Influence Me</span>
                     </a>
@@ -35,11 +34,8 @@
                     </div>
 
                     <div class="flex items-center gap-3">
-                        <a href="/client/login" class="hidden sm:inline-flex items-center text-xs font-medium text-slate-500 hover:text-slate-900 transition-colors">
-                            Client Portal
-                        </a>
                         <a href="{{ route('auth.facebook') }}" class="inline-flex items-center gap-2 rounded-full bg-slate-900 px-4 py-2 text-xs font-medium text-white transition-all hover:bg-slate-800 hover:shadow-lg hover:shadow-slate-200 focus:ring-2 focus:ring-slate-400 focus:ring-offset-2">
-                            <iconify-icon icon="solar:instagram-linear" width="16" stroke-width="1.5"></iconify-icon>
+                            
                             Continue with Instagram
                         </a>
                     </div>
@@ -64,12 +60,12 @@
                 </h1>
 
                 <p class="mx-auto max-w-2xl text-lg text-slate-500 mb-10 leading-relaxed">
-                    Centralize your operations. Sync Instagram insights, manage client portals, create proposals, and automate invoicing-all without the chaos of spreadsheets.
+                    Centralize your operations. Sync Instagram insights, manage clients, create proposals, and automate invoicing-all without the chaos of spreadsheets.
                 </p>
 
                 <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
                     <a href="{{ route('auth.facebook') }}" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-full bg-slate-900 px-8 py-3.5 text-sm font-medium text-white transition-all hover:bg-slate-800 hover:scale-[1.02] shadow-xl shadow-slate-200/50">
-                        <iconify-icon icon="solar:instagram-linear" width="18" stroke-width="1.5"></iconify-icon>
+                        
                         Continue with Instagram
                     </a>
                     <a href="/pricing" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-full border border-slate-200 bg-white px-8 py-3.5 text-sm font-medium text-slate-700 transition-all hover:bg-slate-50 hover:border-slate-300">
@@ -132,7 +128,7 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     <div class="group relative rounded-2xl border border-slate-200 bg-white p-8 transition-shadow hover:shadow-lg hover:shadow-slate-200/50">
                         <div class="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600">
-                            <iconify-icon icon="solar:instagram-linear" width="24" stroke-width="1.5"></iconify-icon>
+                            
                         </div>
                         <h3 class="text-lg font-medium text-slate-900 mb-2">Instagram Sync</h3>
                         <p class="text-sm text-slate-500 leading-relaxed">Secure OAuth connection instantly imports your media, profile stats, and audience demographics. No manual data entry.</p>
@@ -140,7 +136,7 @@
 
                     <div class="group relative rounded-2xl border border-slate-200 bg-white p-8 transition-shadow hover:shadow-lg hover:shadow-slate-200/50">
                         <div class="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-lg bg-orange-50 text-orange-600">
-                            <iconify-icon icon="solar:calendar-mark-linear" width="24" stroke-width="1.5"></iconify-icon>
+                            
                         </div>
                         <h3 class="text-lg font-medium text-slate-900 mb-2">Content Operations</h3>
                         <p class="text-sm text-slate-500 leading-relaxed">Plan your feed with a drag-and-drop calendar. Track upcoming deliverables and keep your campaigns on schedule.</p>
@@ -148,15 +144,15 @@
 
                     <div class="group relative rounded-2xl border border-slate-200 bg-white p-8 transition-shadow hover:shadow-lg hover:shadow-slate-200/50">
                         <div class="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
-                            <iconify-icon icon="solar:users-group-rounded-linear" width="24" stroke-width="1.5"></iconify-icon>
+                            
                         </div>
-                        <h3 class="text-lg font-medium text-slate-900 mb-2">Client Portal &amp; CRM</h3>
+                        <h3 class="text-lg font-medium text-slate-900 mb-2">Client CRM</h3>
                         <p class="text-sm text-slate-500 leading-relaxed">Give brands a dedicated login to view live campaign stats and approve content, keeping your DMs clean.</p>
                     </div>
 
                     <div class="group relative rounded-2xl border border-slate-200 bg-white p-8 transition-shadow hover:shadow-lg hover:shadow-slate-200/50">
                         <div class="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600">
-                            <iconify-icon icon="solar:document-add-linear" width="24" stroke-width="1.5"></iconify-icon>
+                            
                         </div>
                         <h3 class="text-lg font-medium text-slate-900 mb-2">Proposals</h3>
                         <p class="text-sm text-slate-500 leading-relaxed">Create beautiful, branded proposals in minutes. Send them for digital approval and seamlessly convert them into invoices.</p>
@@ -164,7 +160,7 @@
 
                     <div class="group relative rounded-2xl border border-slate-200 bg-white p-8 transition-shadow hover:shadow-lg hover:shadow-slate-200/50">
                         <div class="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-lg bg-violet-50 text-violet-600">
-                            <iconify-icon icon="solar:card-linear" width="24" stroke-width="1.5"></iconify-icon>
+                            
                         </div>
                         <h3 class="text-lg font-medium text-slate-900 mb-2">Invoicing &amp; Payments</h3>
                         <p class="text-sm text-slate-500 leading-relaxed">Powered by Stripe. Send professional invoices and get paid faster with direct checkout links. Track payment status in real-time.</p>
@@ -172,7 +168,7 @@
 
                     <div class="group relative rounded-2xl border border-slate-200 bg-white p-8 transition-shadow hover:shadow-lg hover:shadow-slate-200/50">
                         <div class="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-lg bg-rose-50 text-rose-600">
-                            <iconify-icon icon="solar:chart-2-linear" width="24" stroke-width="1.5"></iconify-icon>
+                            
                         </div>
                         <h3 class="text-lg font-medium text-slate-900 mb-2">Advanced Analytics</h3>
                         <p class="text-sm text-slate-500 leading-relaxed">Deep dive into post performance. Generate client-ready reports that prove your ROI without taking screenshots.</p>
@@ -216,7 +212,7 @@
                             <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-white shadow-sm text-slate-900 font-semibold mb-4 mx-auto z-10">3</div>
                             <div class="text-left md:text-center">
                                 <h3 class="text-base font-medium text-slate-900">Deliver</h3>
-                                <p class="mt-2 text-sm text-slate-500">Clients approve work and view live analytics via their portal.</p>
+                                <p class="mt-2 text-sm text-slate-500">Clients approve work and view live campaign analytics.</p>
                             </div>
                         </div>
                     </div>
@@ -240,7 +236,7 @@
                     <h2 class="text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl">Simple, transparent pricing</h2>
                     <p class="mt-4 text-slate-500">Start for free, upgrade as you grow.</p>
                     <div class="mt-4 inline-flex items-center gap-1.5 rounded-full bg-indigo-50 px-3 py-1 text-xs font-medium text-indigo-700 border border-indigo-100">
-                        <iconify-icon icon="solar:shield-check-linear" width="14" stroke-width="1.5"></iconify-icon>
+                        
                         Instagram OAuth required for all influencer accounts
                     </div>
                 </div>
@@ -257,15 +253,15 @@
                         </div>
                         <ul class="mb-8 space-y-4 flex-1">
                             <li class="flex items-center gap-3 text-sm text-slate-600">
-                                <iconify-icon icon="solar:check-circle-linear" class="text-indigo-600"></iconify-icon>
+                                
                                 Instagram Sync (1 Account)
                             </li>
                             <li class="flex items-center gap-3 text-sm text-slate-600">
-                                <iconify-icon icon="solar:check-circle-linear" class="text-indigo-600"></iconify-icon>
+                                
                                 Basic Media Gallery
                             </li>
                             <li class="flex items-center gap-3 text-sm text-slate-600">
-                                <iconify-icon icon="solar:check-circle-linear" class="text-indigo-600"></iconify-icon>
+                                
                                 3 Active Proposals
                             </li>
                         </ul>
@@ -288,19 +284,19 @@
                         </div>
                         <ul class="mb-8 space-y-4 flex-1">
                             <li class="flex items-center gap-3 text-sm text-slate-300">
-                                <iconify-icon icon="solar:check-circle-bold" class="text-indigo-400"></iconify-icon>
+                                
                                 Instagram Sync (3 Accounts)
                             </li>
                             <li class="flex items-center gap-3 text-sm text-slate-300">
-                                <iconify-icon icon="solar:check-circle-bold" class="text-indigo-400"></iconify-icon>
-                                Unlimited Client Portals
+                                
+                                Unlimited Clients
                             </li>
                             <li class="flex items-center gap-3 text-sm text-slate-300">
-                                <iconify-icon icon="solar:check-circle-bold" class="text-indigo-400"></iconify-icon>
+                                
                                 Invoicing &amp; Payments
                             </li>
                             <li class="flex items-center gap-3 text-sm text-slate-300">
-                                <iconify-icon icon="solar:check-circle-bold" class="text-indigo-400"></iconify-icon>
+                                
                                 Advanced Analytics
                             </li>
                         </ul>
@@ -320,15 +316,15 @@
                         </div>
                         <ul class="mb-8 space-y-4 flex-1">
                             <li class="flex items-center gap-3 text-sm text-slate-600">
-                                <iconify-icon icon="solar:check-circle-linear" class="text-indigo-600"></iconify-icon>
+                                
                                 Unlimited Accounts
                             </li>
                             <li class="flex items-center gap-3 text-sm text-slate-600">
-                                <iconify-icon icon="solar:check-circle-linear" class="text-indigo-600"></iconify-icon>
+                                
                                 Team Members
                             </li>
                             <li class="flex items-center gap-3 text-sm text-slate-600">
-                                <iconify-icon icon="solar:check-circle-linear" class="text-indigo-600"></iconify-icon>
+                                
                                 White-label Reports
                             </li>
                         </ul>
@@ -348,7 +344,7 @@
                     <details class="group border border-slate-200 rounded-lg bg-slate-50/50 open:bg-white open:shadow-sm transition-all duration-300">
                         <summary class="flex cursor-pointer items-center justify-between p-6 font-medium text-slate-900">
                             Do I need a password to sign up?
-                            <iconify-icon icon="solar:alt-arrow-down-linear" class="text-slate-400 transition-transform group-open:rotate-180"></iconify-icon>
+                            
                         </summary>
                         <div class="px-6 pb-6 text-sm text-slate-500 leading-relaxed">
                             No. Influence Me uses OAuth verification. You simply log in with your Instagram account. This is more secure and ensures we are syncing data for the correct verified owner.
@@ -358,17 +354,17 @@
                     <details class="group border border-slate-200 rounded-lg bg-slate-50/50 open:bg-white open:shadow-sm transition-all duration-300">
                         <summary class="flex cursor-pointer items-center justify-between p-6 font-medium text-slate-900">
                             Can my clients log in separately?
-                            <iconify-icon icon="solar:alt-arrow-down-linear" class="text-slate-400 transition-transform group-open:rotate-180"></iconify-icon>
+                            
                         </summary>
                         <div class="px-6 pb-6 text-sm text-slate-500 leading-relaxed">
-                            Yes. Each client gets access to a secure Client Portal where they can view proposals, pay invoices, and see live analytics for their campaigns. They cannot see your private data or other clients.
+                            Yes. Each client gets secure access to view proposals, pay invoices, and review campaign analytics. They cannot see your private data or other clients.
                         </div>
                     </details>
 
                     <details class="group border border-slate-200 rounded-lg bg-slate-50/50 open:bg-white open:shadow-sm transition-all duration-300">
                         <summary class="flex cursor-pointer items-center justify-between p-6 font-medium text-slate-900">
                             Does Influence Me auto-post to Instagram?
-                            <iconify-icon icon="solar:alt-arrow-down-linear" class="text-slate-400 transition-transform group-open:rotate-180"></iconify-icon>
+                            
                         </summary>
                         <div class="px-6 pb-6 text-sm text-slate-500 leading-relaxed">
                             Currently, our scheduling tools are for planning, approval workflows, and internal tracking. We do not automatically publish content to your feed in this version, prioritizing account safety and manual control.
@@ -378,7 +374,7 @@
                     <details class="group border border-slate-200 rounded-lg bg-slate-50/50 open:bg-white open:shadow-sm transition-all duration-300">
                         <summary class="flex cursor-pointer items-center justify-between p-6 font-medium text-slate-900">
                             How are payments handled?
-                            <iconify-icon icon="solar:alt-arrow-down-linear" class="text-slate-400 transition-transform group-open:rotate-180"></iconify-icon>
+                            
                         </summary>
                         <div class="px-6 pb-6 text-sm text-slate-500 leading-relaxed">
                             We integrate directly with Stripe Connect. You can generate professional invoices or quick checkout links. Funds are transferred directly to your connected bank account.
@@ -393,11 +389,8 @@
                 <h2 class="text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl mb-6">Ready to professionalize your influence?</h2>
                 <div class="flex flex-col items-center gap-4">
                     <a href="{{ route('auth.facebook') }}" class="inline-flex items-center justify-center gap-2 rounded-full bg-slate-900 px-8 py-3.5 text-sm font-medium text-white transition-all hover:bg-slate-800 hover:shadow-lg hover:shadow-slate-200">
-                        <iconify-icon icon="solar:instagram-linear" width="18" stroke-width="1.5"></iconify-icon>
+                        
                         Continue with Instagram
-                    </a>
-                    <a href="/client/login" class="text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors">
-                        Client Portal Login
                     </a>
                 </div>
             </div>
@@ -408,7 +401,7 @@
                 <div class="flex flex-col items-center md:items-start gap-2">
                     <div class="flex items-center gap-2">
                         <div class="flex h-6 w-6 items-center justify-center rounded bg-slate-900 text-white">
-                            <iconify-icon icon="solar:hashtag-square-linear" width="14" stroke-width="1.5"></iconify-icon>
+                            
                         </div>
                         <span class="text-sm font-semibold text-slate-900">Influence Me</span>
                     </div>
@@ -421,7 +414,7 @@
                     <a href="#" class="text-xs text-slate-500 hover:text-slate-900 transition-colors">Contact Support</a>
                 </div>
 
-                <p class="text-xs text-slate-400">&copy; 2023 Influence Me Inc.</p>
+                <p class="text-xs text-slate-400">&copy; {{ date('Y') }} Influence Me Inc.</p>
             </div>
         </footer>
     </body>

@@ -99,13 +99,13 @@ it('returns mapped instagram accounts from the facebook accounts endpoint', func
 
     expect($client->accounts()->all())->toBe([
         [
-            'id' => 'ig-1',
-            'name' => 'Creator Page',
+            'instagram_user_id' => 'ig-1',
+            'name' => 'Creator One',
             'username' => 'creator.one',
             'biography' => 'Creator bio',
             'profile_picture_url' => 'https://example.com/pic.jpg',
             'followers_count' => 1200,
-            'follows_count' => 450,
+            'following_count' => 450,
             'media_count' => 88,
             'access_token' => 'page-token-1',
         ],
