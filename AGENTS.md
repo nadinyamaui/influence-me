@@ -29,9 +29,7 @@ Influence Me is an influencer operating system that centralizes:
 
 ## Non-Negotiable Product Rules
 
-- Influencer authentication is Instagram OAuth-first (RFC `016`, `017`)
 - TikTok is an additional connected platform and must not replace Instagram-first influencer authentication
-- Email/password registration and reset are removed for influencer users (RFC `017`)
 - Client portal uses separate `client` guard with isolated session/auth flows (RFC `018`, `019`)
 - Data ownership is strict: influencers see only their data; clients see only their client-scoped data (RFC `012`)
 - `ScheduledPost` is planning/tracking CRUD in MVP, not direct Instagram auto-publishing
