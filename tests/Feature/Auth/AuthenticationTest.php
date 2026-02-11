@@ -7,6 +7,11 @@ test('login screen can be rendered', function () {
     $response = $this->get(route('login'));
 
     $response->assertOk();
+    $response->assertSee('Email address');
+    $response->assertSee('Password');
+    $response->assertSee('Remember me');
+    $response->assertSee(route('password.request'));
+    $response->assertSee(route('register'));
 });
 
 test('users can authenticate using the login screen', function () {
