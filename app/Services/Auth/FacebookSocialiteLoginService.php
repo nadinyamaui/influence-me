@@ -4,7 +4,9 @@ namespace App\Services\Auth;
 
 use App\Exceptions\Auth\SocialAuthenticationException;
 use App\Models\User;
+use App\Services\Facebook\Client;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Collection;
 use Laravel\Socialite\Facades\Socialite;
 
 class FacebookSocialiteLoginService
@@ -31,6 +33,12 @@ class FacebookSocialiteLoginService
         }
         $user = $this->createUpdateUser($socialiteUser);
         auth()->login($user);
+        $token = $this->exchangeToken($socialiteUser);
+        $this->getAccounts($token['access_token'])->each(function ($account) use ($user) {
+            $user->instagramAccounts()->updateOrCreate([
+                'instagram_user_id' => $account['instagram_user_id'],
+            ], $account);
+        });
 
         return $user;
     }
@@ -44,5 +52,15 @@ class FacebookSocialiteLoginService
             'name' => $socialiteUser->getName(),
             'email' => $socialiteUser->getEmail(),
         ]);
+    }
+
+    protected function exchangeToken($socialiteUser): array
+    {
+        return new Client($socialiteUser->token)->getLongLivedToken();
+    }
+
+    protected function getAccounts(string $token): Collection
+    {
+        return new Client($token)->accounts();
     }
 }

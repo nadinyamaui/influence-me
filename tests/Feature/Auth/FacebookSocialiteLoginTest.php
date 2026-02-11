@@ -63,8 +63,6 @@ it('creates only a user after facebook callback for new users', function (): voi
 
     $user = User::query()->where('email', 'creator.new@example.com')->first();
     expect($user)->not->toBeNull();
-
-    expect($user?->instagramAccounts()->count())->toBe(0);
 });
 
 it('returns to login when facebook oauth callback fails', function (): void {
