@@ -12,6 +12,7 @@ it('creates valid audience demographic records with factory defaults and casts',
         'type' => DemographicType::Age,
         'dimension' => '18-24',
         'value' => 42.5,
+        'recorded_at' => now(),
     ]);
 
     expect($demographic->instagramAccount)->toBeInstanceOf(InstagramAccount::class)
@@ -27,24 +28,28 @@ it('supports age gender city and country demographic types', function (): void {
         'type' => DemographicType::Age,
         'dimension' => '25-34',
         'value' => 15.3,
+        'recorded_at' => now(),
     ]);
     $gender = AudienceDemographic::query()->create([
         'instagram_account_id' => $account->id,
         'type' => DemographicType::Gender,
         'dimension' => 'Female',
         'value' => 51.1,
+        'recorded_at' => now(),
     ]);
     $city = AudienceDemographic::query()->create([
         'instagram_account_id' => $account->id,
         'type' => DemographicType::City,
         'dimension' => 'Paris',
         'value' => 5.4,
+        'recorded_at' => now(),
     ]);
     $country = AudienceDemographic::query()->create([
         'instagram_account_id' => $account->id,
         'type' => DemographicType::Country,
         'dimension' => 'FR',
         'value' => 12.7,
+        'recorded_at' => now(),
     ]);
 
     expect($age->type)->toBe(DemographicType::Age)
@@ -64,6 +69,7 @@ it('defines instagram account relationship', function (): void {
         'type' => DemographicType::City,
         'dimension' => 'Berlin',
         'value' => 8.2,
+        'recorded_at' => now(),
     ]);
 
     expect($demographic->instagramAccount())->toBeInstanceOf(BelongsTo::class)
