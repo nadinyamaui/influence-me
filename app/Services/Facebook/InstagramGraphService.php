@@ -2,9 +2,14 @@
 
 namespace App\Services\Facebook;
 
+use App\Enums\AccountType;
+use App\Exceptions\InstagramApiException;
+use App\Exceptions\InstagramTokenExpiredException;
 use App\Enums\MediaType;
 use App\Models\InstagramAccount;
 use Carbon\Carbon;
+use FacebookAds\Http\Exception\AuthorizationException;
+use FacebookAds\Http\Exception\RequestException;
 
 class InstagramGraphService
 {
@@ -36,5 +41,37 @@ class InstagramGraphService
                 'comments_count' => $media['comments_count'] ?? 0,
             ]);
         }
+    }
+
+    public function getProfile(): array
+    {
+        try {
+            $profile = $this->client->getProfile();
+        } catch (AuthorizationException $exception) {
+            throw new InstagramTokenExpiredException($exception->getMessage(), $exception->getCode(), $exception);
+        } catch (RequestException $exception) {
+            throw new InstagramApiException($exception->getMessage(), $exception->getCode(), $exception);
+        }
+
+        return [
+            'username' => $profile['username'] ?? null,
+            'name' => $profile['name'] ?? null,
+            'biography' => $profile['biography'] ?? null,
+            'profile_picture_url' => $profile['profile_picture_url'] ?? null,
+            'followers_count' => $profile['followers_count'] ?? 0,
+            'following_count' => $profile['following_count'] ?? 0,
+            'media_count' => $profile['media_count'] ?? 0,
+            'account_type' => $this->mapAccountType($profile['account_type'] ?? null),
+        ];
+    }
+
+    protected function mapAccountType(?string $accountType): AccountType
+    {
+        $normalizedType = strtolower((string) $accountType);
+
+        return match ($normalizedType) {
+            'media_creator', 'creator' => AccountType::Creator,
+            default => AccountType::Business,
+        };
     }
 }
