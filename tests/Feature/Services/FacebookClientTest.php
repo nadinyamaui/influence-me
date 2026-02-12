@@ -1,8 +1,11 @@
 <?php
 
+use App\Exceptions\InstagramApiException;
+use App\Exceptions\InstagramTokenExpiredException;
 use App\Services\Facebook\Client;
 use FacebookAds\Api;
 use FacebookAds\Http\ResponseInterface;
+use Illuminate\Support\Facades\Http;
 
 it('initializes facebook api with configured credentials and default graph version', function (): void {
     config()->set('services.facebook.client_id', 'facebook-client-id');
@@ -213,3 +216,51 @@ it('filters out accounts without instagram id and normalizes biography', functio
         ],
     ]);
 });
+
+it('gets instagram media from graph endpoint', function (): void {
+    Http::fake([
+        'https://graph.instagram.com/v21.0/me/media*' => Http::response([
+            'data' => [
+                [
+                    'id' => 'media-1',
+                    'media_type' => 'IMAGE',
+                ],
+            ],
+        ], 200),
+    ]);
+
+    $client = new Client('instagram-access-token');
+    $response = $client->getMedia('cursor-123');
+
+    expect($response['data'][0]['id'])->toBe('media-1');
+
+    Http::assertSent(function ($request): bool {
+        return $request->url() === 'https://graph.instagram.com/v21.0/me/media?fields=id%2Ccaption%2Cmedia_type%2Cmedia_product_type%2Cmedia_url%2Cthumbnail_url%2Cpermalink%2Ctimestamp%2Clike_count%2Ccomments_count&access_token=instagram-access-token&after=cursor-123';
+    });
+});
+
+it('throws typed exception when instagram token is expired', function (): void {
+    Http::fake([
+        'https://graph.instagram.com/v21.0/me/media*' => Http::response([
+            'error' => [
+                'code' => 190,
+            ],
+        ], 400),
+    ]);
+
+    $client = new Client('expired-token');
+    $client->getMedia();
+})->throws(InstagramTokenExpiredException::class);
+
+it('throws generic instagram api exception for non-token api errors', function (): void {
+    Http::fake([
+        'https://graph.instagram.com/v21.0/me/media*' => Http::response([
+            'error' => [
+                'code' => 4,
+            ],
+        ], 400),
+    ]);
+
+    $client = new Client('invalid-token');
+    $client->getMedia();
+})->throws(InstagramApiException::class);
