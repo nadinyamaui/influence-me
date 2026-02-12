@@ -53,15 +53,12 @@ it('syncs insights only for recent non-story media and calculates engagement rat
     ]);
 
     $facebookClient = \Mockery::mock(FacebookClient::class);
-    $facebookClient->shouldReceive('canMakeRequest')
-        ->twice()
-        ->andReturnTrue();
     $facebookClient->shouldReceive('getMediaInsights')
         ->once()
         ->with('media-recent-post', MediaType::Post)
         ->andReturn(new Collection([
             'reach' => 1000,
-            'impressions' => 1200,
+            'views' => 1200,
             'saved' => 20,
             'shares' => 10,
         ]));
@@ -70,6 +67,7 @@ it('syncs insights only for recent non-story media and calculates engagement rat
         ->with('media-recent-reel', MediaType::Reel)
         ->andReturn(new Collection([
             'reach' => 200,
+            'views' => 0,
             'saved' => 5,
             'shares' => 1,
         ]));
@@ -103,7 +101,7 @@ it('syncs insights only for recent non-story media and calculates engagement rat
         ->and($recentStory->impressions)->toBe(44);
 });
 
-it('waits briefly when rate limit check fails before requesting insights', function (): void {
+it('maps views metric to impressions when syncing insights', function (): void {
     $account = InstagramAccount::factory()->create();
 
     $recentPost = InstagramMedia::factory()->post()->create([
@@ -115,15 +113,12 @@ it('waits briefly when rate limit check fails before requesting insights', funct
     ]);
 
     $facebookClient = \Mockery::mock(FacebookClient::class);
-    $facebookClient->shouldReceive('canMakeRequest')
-        ->once()
-        ->andReturnFalse();
     $facebookClient->shouldReceive('getMediaInsights')
         ->once()
         ->with('media-rate-limit', MediaType::Post)
         ->andReturn(new Collection([
             'reach' => 50,
-            'impressions' => 60,
+            'views' => 60,
             'saved' => 3,
             'shares' => 2,
         ]));
