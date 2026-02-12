@@ -7,7 +7,7 @@ use App\Models\InstagramMedia;
 use App\Services\Facebook\Client as FacebookClient;
 use Illuminate\Support\Collection;
 
-it('syncs insights only for recent non-story media and calculates engagement rate', function (): void {
+it('syncs insights using views for impressions on recent non-story media and calculates engagement rate', function (): void {
     $account = InstagramAccount::factory()->create();
 
     $recentPost = InstagramMedia::factory()->post()->create([
