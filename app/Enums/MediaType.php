@@ -36,17 +36,16 @@ enum MediaType: string
                 'comments',
                 'shares',
                 'saved',
+                'views',
                 'total_interactions',
             ],
 
             self::Reel => [
                 'views',
-                'plays',
                 'reach',
                 'total_interactions',
                 'ig_reels_avg_watch_time',
                 'ig_reels_video_view_total_time',
-                'clips_replays_count',
                 'reels_skip_rate',
             ],
 

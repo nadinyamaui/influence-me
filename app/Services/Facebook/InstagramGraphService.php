@@ -51,14 +51,8 @@ class InstagramGraphService
             ->where('media_type', '!=', MediaType::Story->value)
             ->chunkById(50, function ($mediaItems): void {
                 $mediaItems->each(function (InstagramMedia $media): void {
-                    if (! $this->client->canMakeRequest()) {
-                        sleep(1);
-                    }
-
                     $insights = $this->client->getMediaInsights($media->instagram_media_id, $media->media_type);
-
                     $reach = (int) ($insights->get('reach') ?? 0);
-                    $impressions = (int) ($insights->get('impressions') ?? 0);
                     $saved = (int) ($insights->get('saved') ?? 0);
                     $shares = (int) ($insights->get('shares') ?? 0);
                     $engagementRate = 0;
@@ -68,11 +62,12 @@ class InstagramGraphService
 
                     $media->update([
                         'reach' => $reach,
-                        'impressions' => $impressions,
+                        'impressions' => $insights->get('views'),
                         'saved_count' => $saved,
                         'shares_count' => $shares,
                         'engagement_rate' => $engagementRate,
                     ]);
+                    sleep(0.1);
                 });
             });
     }
