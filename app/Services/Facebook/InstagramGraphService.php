@@ -67,11 +67,16 @@ class InstagramGraphService
 
     protected function mapAccountType(?string $accountType): AccountType
     {
+        if ($accountType === null || $accountType === '') {
+            return $this->account->account_type ?? AccountType::Business;
+        }
+
         $normalizedType = strtolower((string) $accountType);
 
         return match ($normalizedType) {
             'media_creator', 'creator' => AccountType::Creator,
-            default => AccountType::Business,
+            'business' => AccountType::Business,
+            default => $this->account->account_type ?? AccountType::Business,
         };
     }
 }
