@@ -4,17 +4,13 @@ use App\Enums\MediaType;
 use App\Jobs\SyncInstagramMedia;
 use App\Models\InstagramAccount;
 use App\Models\InstagramMedia;
-use App\Services\InstagramGraphService;
+use App\Services\Facebook\Client as FacebookClient;
 
 it('fetches paginated media and syncs records with mapped media types', function (): void {
     $account = InstagramAccount::factory()->create();
 
-    $service = \Mockery::mock(InstagramGraphService::class);
-    $service->shouldReceive('forAccount')
-        ->once()
-        ->with($account)
-        ->andReturnSelf();
-    $service->shouldReceive('getMedia')
+    $facebookClient = \Mockery::mock(FacebookClient::class);
+    $facebookClient->shouldReceive('getMedia')
         ->once()
         ->with(null)
         ->andReturn([
@@ -50,7 +46,7 @@ it('fetches paginated media and syncs records with mapped media types', function
                 ],
             ],
         ]);
-    $service->shouldReceive('getMedia')
+    $facebookClient->shouldReceive('getMedia')
         ->once()
         ->with('cursor-2')
         ->andReturn([
@@ -81,7 +77,11 @@ it('fetches paginated media and syncs records with mapped media types', function
                 ],
             ],
         ]);
-    app()->instance(InstagramGraphService::class, $service);
+    app()->bind(FacebookClient::class, function ($app, $parameters) use ($facebookClient, $account) {
+        expect($parameters['access_token'] ?? null)->toBe($account->access_token);
+
+        return $facebookClient;
+    });
 
     app(SyncInstagramMedia::class, ['account' => $account])->handle();
 
@@ -105,12 +105,8 @@ it('updates existing media records when rerun to keep sync idempotent', function
         'comments_count' => 0,
     ]);
 
-    $service = \Mockery::mock(InstagramGraphService::class);
-    $service->shouldReceive('forAccount')
-        ->once()
-        ->with($account)
-        ->andReturnSelf();
-    $service->shouldReceive('getMedia')
+    $facebookClient = \Mockery::mock(FacebookClient::class);
+    $facebookClient->shouldReceive('getMedia')
         ->once()
         ->with(null)
         ->andReturn([
@@ -129,7 +125,11 @@ it('updates existing media records when rerun to keep sync idempotent', function
                 ],
             ],
         ]);
-    app()->instance(InstagramGraphService::class, $service);
+    app()->bind(FacebookClient::class, function ($app, $parameters) use ($facebookClient, $account) {
+        expect($parameters['access_token'] ?? null)->toBe($account->access_token);
+
+        return $facebookClient;
+    });
 
     app(SyncInstagramMedia::class, ['account' => $account])->handle();
 

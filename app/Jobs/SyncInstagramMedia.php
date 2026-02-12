@@ -5,7 +5,7 @@ namespace App\Jobs;
 use App\Enums\MediaType;
 use App\Models\InstagramAccount;
 use App\Models\InstagramMedia;
-use App\Services\InstagramGraphService;
+use App\Services\Facebook\Client as FacebookClient;
 use Carbon\Carbon;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
@@ -30,11 +30,11 @@ class SyncInstagramMedia implements ShouldQueue
 
     public function handle(): void
     {
-        $graphService = app(InstagramGraphService::class)->forAccount($this->account);
+        $facebookClient = app(FacebookClient::class, ['access_token' => $this->account->access_token]);
         $after = null;
 
         do {
-            $payload = $graphService->getMedia($after);
+            $payload = $facebookClient->getMedia($after);
 
             foreach ($payload['data'] ?? [] as $media) {
                 InstagramMedia::updateOrCreate(
