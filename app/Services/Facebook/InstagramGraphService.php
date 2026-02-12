@@ -7,6 +7,7 @@ use App\Exceptions\InstagramApiException;
 use App\Exceptions\InstagramTokenExpiredException;
 use App\Enums\MediaType;
 use App\Models\InstagramAccount;
+use App\Models\InstagramMedia;
 use Carbon\Carbon;
 use FacebookAds\Http\Exception\AuthorizationException;
 use FacebookAds\Http\Exception\RequestException;
@@ -41,6 +42,34 @@ class InstagramGraphService
                 'comments_count' => $media['comments_count'] ?? 0,
             ]);
         }
+    }
+
+    public function syncMediaInsights(): void
+    {
+        $this->account->instagramMedia()
+            ->where('published_at', '>=', now()->subDays(90))
+            ->where('media_type', '!=', MediaType::Story->value)
+            ->chunkById(50, function ($mediaItems): void {
+                $mediaItems->each(function (InstagramMedia $media): void {
+                    $insights = $this->client->getMediaInsights($media->instagram_media_id, $media->media_type);
+                    $reach = (int) ($insights->get('reach') ?? 0);
+                    $saved = (int) ($insights->get('saved') ?? 0);
+                    $shares = (int) ($insights->get('shares') ?? 0);
+                    $engagementRate = 0;
+                    if ($reach > 0) {
+                        $engagementRate = (($media->like_count + $media->comments_count + $saved + $shares) / $reach) * 100;
+                    }
+
+                    $media->update([
+                        'reach' => $reach,
+                        'impressions' => $insights->get('views'),
+                        'saved_count' => $saved,
+                        'shares_count' => $shares,
+                        'engagement_rate' => $engagementRate,
+                    ]);
+                    usleep(100000);
+                });
+            });
     }
 
     public function getProfile(): array

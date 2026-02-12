@@ -29,9 +29,9 @@ Constructor accepts an `InstagramAccount` model instance.
 **`getMediaInsights(string $mediaId): array`**
 - Endpoint: `GET https://graph.instagram.com/v21.0/{mediaId}/insights`
 - Metrics vary by media type:
-  - IMAGE/CAROUSEL: `impressions,reach,saved,engagement,likes,comments,shares`
-  - VIDEO/REEL: `impressions,reach,saved,likes,comments,shares,plays`
-  - STORY: `impressions,reach,replies,exits`
+  - IMAGE/CAROUSEL: `reach,likes,comments,shares,saved,views,total_interactions`
+  - VIDEO/REEL: `views,reach,total_interactions,ig_reels_avg_watch_time,ig_reels_video_view_total_time,reels_skip_rate`
+  - STORY: `reach,replies,navigation`
 - Returns: metrics array
 
 **`getAudienceDemographics(): array`**
@@ -52,15 +52,8 @@ Constructor accepts an `InstagramAccount` model instance.
 
 ### Error Handling
 - Create `App\Exceptions\InstagramApiException` with error code and message
-- Handle rate limiting (HTTP 429): throw specific exception with retry-after info
 - Handle expired tokens (error code 190): throw `InstagramTokenExpiredException`
 - Handle generic API errors
-
-### Rate Limiting
-- Track calls per account using cache: `instagram_api_calls:{account_id}`
-- Max 200 calls per hour per user
-- Method `canMakeRequest(): bool` checks before calling
-- Method `recordRequest(): void` increments counter
 
 ## Files to Create
 - `app/Services/InstagramGraphService.php`
@@ -69,7 +62,6 @@ Constructor accepts an `InstagramAccount` model instance.
 
 ## Acceptance Criteria
 - [ ] Service class handles all required API endpoints
-- [ ] Rate limiting tracked and respected
 - [ ] Pagination handled correctly for media endpoint
 - [ ] Error responses throw typed exceptions
 - [ ] Token refresh works
