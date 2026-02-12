@@ -2,8 +2,11 @@
 
 namespace App\Services\Facebook;
 
+use App\Enums\MediaType;
 use FacebookAds\Api;
+use FacebookAds\Object\IGMedia;
 use FacebookAds\Object\IGUser;
+use FacebookAds\Object\InstagramInsightsResult;
 use FacebookAds\Object\Page;
 use FacebookAds\Object\User;
 use Illuminate\Support\Collection;
@@ -43,7 +46,7 @@ class Client
         ]);
 
         return collect($accounts->getArrayCopy())
-            ->filter(fn(Page $page) => isset($page->getData()['instagram_business_account']['id']))
+            ->filter(fn (Page $page) => isset($page->getData()['instagram_business_account']['id']))
             ->map(function (Page $page) {
                 $account = $page->getData();
                 $ig = $account['instagram_business_account'];
@@ -88,30 +91,28 @@ class Client
 
     public function getMedia(int $media_id): array
     {
-        $media = $this->api->call("/{$media_id}", params: [
-            'fields' => implode(',', [
-                'id',
-                'caption',
-                'media_type',
-                'media_url',
-                'thumbnail_url',
-                'permalink',
-                'timestamp',
-                'like_count',
-                'comments_count',
-            ]),
-        ])->getContent();
+        $media = new IGMedia($media_id)->getSelf([
+            'id',
+            'caption',
+            'media_type',
+            'media_url',
+            'thumbnail_url',
+            'permalink',
+            'timestamp',
+            'like_count',
+            'comments_count',
+        ])->exportAllData();
 
         return [
-            'id' => $media['id'] ?? null,
-            'caption' => $media['caption'] ?? null,
-            'media_type' => $media['media_type'] ?? null,
-            'media_url' => $media['media_url'] ?? null,
+            'id' => $media['id'],
+            'caption' => $media['caption'],
+            'media_type' => $media['media_type'],
+            'media_url' => $media['media_url'],
             'thumbnail_url' => $media['thumbnail_url'] ?? null,
-            'permalink' => $media['permalink'] ?? null,
-            'timestamp' => $media['timestamp'] ?? null,
-            'like_count' => $media['like_count'] ?? null,
-            'comments_count' => $media['comments_count'] ?? null,
+            'permalink' => $media['permalink'],
+            'timestamp' => $media['timestamp'],
+            'like_count' => $media['like_count'],
+            'comments_count' => $media['comments_count'],
         ];
     }
 
@@ -127,19 +128,30 @@ class Client
             'followers_count',
             'follows_count',
             'media_count',
-            'account_type',
         ])->exportAllData();
 
         return [
-            'id' => $profile['id'] ?? null,
-            'username' => $profile['username'] ?? null,
-            'name' => $profile['name'] ?? null,
-            'biography' => $profile['biography'] ?? null,
-            'profile_picture_url' => $profile['profile_picture_url'] ?? null,
-            'followers_count' => $profile['followers_count'] ?? null,
-            'following_count' => $profile['follows_count'] ?? null,
-            'media_count' => $profile['media_count'] ?? null,
-            'account_type' => $profile['account_type'] ?? null,
+            'id' => $profile['id'],
+            'username' => $profile['username'],
+            'name' => $profile['name'],
+            'biography' => $profile['biography'],
+            'profile_picture_url' => $profile['profile_picture_url'],
+            'followers_count' => $profile['followers_count'],
+            'following_count' => $profile['follows_count'],
+            'media_count' => $profile['media_count'],
         ];
+    }
+
+    public function getMediaInsights(string $id, MediaType $type): Collection
+    {
+        $media = new IGMedia($id)->getInsights(params: [
+            'metric' => $type->metrics(),
+        ]);
+
+        return collect($media->getArrayCopy())
+            ->map(fn (InstagramInsightsResult $metric) => [
+                'name' => $metric->getData()['name'],
+                'values' => $metric->getData()['values'][0]['value'] ?? 0,
+            ])->pluck('values', 'name');
     }
 }

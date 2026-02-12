@@ -26,4 +26,35 @@ enum MediaType: string
 
         return MediaType::Post;
     }
+
+    public function metrics()
+    {
+        return match ($this) {
+            self::Post => [
+                'reach',
+                'likes',
+                'comments',
+                'shares',
+                'saved',
+                'total_interactions',
+            ],
+
+            self::Reel => [
+                'views',
+                'plays',
+                'reach',
+                'total_interactions',
+                'ig_reels_avg_watch_time',
+                'ig_reels_video_view_total_time',
+                'clips_replays_count',
+                'reels_skip_rate',
+            ],
+
+            self::Story => [
+                'reach',
+                'replies',
+                'navigation',
+            ],
+        };
+    }
 }

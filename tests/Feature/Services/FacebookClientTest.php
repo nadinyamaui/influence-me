@@ -383,6 +383,189 @@ it('returns nullable media keys when single instagram media response omits value
     ]);
 });
 
+it('gets image and carousel media insights from graph endpoint', function (): void {
+    $mediaTypeResponse = \Mockery::mock(ResponseInterface::class);
+    $mediaTypeResponse->shouldReceive('getContent')
+        ->once()
+        ->andReturn([
+            'media_type' => 'IMAGE',
+        ]);
+
+    $insightsResponse = \Mockery::mock(ResponseInterface::class);
+    $insightsResponse->shouldReceive('getContent')
+        ->once()
+        ->andReturn([
+            'data' => [
+                ['name' => 'impressions', 'values' => [['value' => 100]]],
+                ['name' => 'reach', 'values' => [['value' => 90]]],
+                ['name' => 'saved', 'values' => [['value' => 12]]],
+                ['name' => 'engagement', 'values' => [['value' => 80]]],
+                ['name' => 'likes', 'values' => [['value' => 55]]],
+                ['name' => 'comments', 'values' => [['value' => 7]]],
+                ['name' => 'shares', 'values' => [['value' => 3]]],
+            ],
+        ]);
+
+    $api = \Mockery::mock(Api::class);
+    $api->shouldReceive('call')
+        ->once()
+        ->withArgs(function ($path, $method, $params): bool {
+            return $path === '/17900000000000001'
+                && $method === 'GET'
+                && $params === [
+                    'fields' => 'media_type',
+                ];
+        })
+        ->andReturn($mediaTypeResponse);
+    $api->shouldReceive('call')
+        ->once()
+        ->withArgs(function ($path, $method, $params): bool {
+            return $path === '/17900000000000001/insights'
+                && $method === 'GET'
+                && $params === [
+                    'metric' => 'impressions,reach,saved,engagement,likes,comments,shares',
+                ];
+        })
+        ->andReturn($insightsResponse);
+
+    $clientReflection = new ReflectionClass(Client::class);
+    $client = $clientReflection->newInstanceWithoutConstructor();
+
+    $apiProperty = $clientReflection->getProperty('api');
+    $apiProperty->setAccessible(true);
+    $apiProperty->setValue($client, $api);
+
+    expect($client->getMediaInsights('17900000000000001'))->toBe([
+        'impressions' => 100,
+        'reach' => 90,
+        'saved' => 12,
+        'engagement' => 80,
+        'likes' => 55,
+        'comments' => 7,
+        'shares' => 3,
+    ]);
+});
+
+it('gets video and reel media insights from graph endpoint', function (): void {
+    $mediaTypeResponse = \Mockery::mock(ResponseInterface::class);
+    $mediaTypeResponse->shouldReceive('getContent')
+        ->once()
+        ->andReturn([
+            'media_type' => 'REEL',
+        ]);
+
+    $insightsResponse = \Mockery::mock(ResponseInterface::class);
+    $insightsResponse->shouldReceive('getContent')
+        ->once()
+        ->andReturn([
+            'data' => [
+                ['name' => 'impressions', 'values' => [['value' => 120]]],
+                ['name' => 'reach', 'values' => [['value' => 101]]],
+                ['name' => 'saved', 'values' => [['value' => 20]]],
+                ['name' => 'likes', 'values' => [['value' => 70]]],
+                ['name' => 'comments', 'values' => [['value' => 15]]],
+                ['name' => 'shares', 'values' => [['value' => 5]]],
+                ['name' => 'plays', 'values' => [['value' => 400]]],
+            ],
+        ]);
+
+    $api = \Mockery::mock(Api::class);
+    $api->shouldReceive('call')
+        ->once()
+        ->withArgs(function ($path, $method, $params): bool {
+            return $path === '/17900000000000002'
+                && $method === 'GET'
+                && $params === [
+                    'fields' => 'media_type',
+                ];
+        })
+        ->andReturn($mediaTypeResponse);
+    $api->shouldReceive('call')
+        ->once()
+        ->withArgs(function ($path, $method, $params): bool {
+            return $path === '/17900000000000002/insights'
+                && $method === 'GET'
+                && $params === [
+                    'metric' => 'impressions,reach,saved,likes,comments,shares,plays',
+                ];
+        })
+        ->andReturn($insightsResponse);
+
+    $clientReflection = new ReflectionClass(Client::class);
+    $client = $clientReflection->newInstanceWithoutConstructor();
+
+    $apiProperty = $clientReflection->getProperty('api');
+    $apiProperty->setAccessible(true);
+    $apiProperty->setValue($client, $api);
+
+    expect($client->getMediaInsights('17900000000000002'))->toBe([
+        'impressions' => 120,
+        'reach' => 101,
+        'saved' => 20,
+        'likes' => 70,
+        'comments' => 15,
+        'shares' => 5,
+        'plays' => 400,
+    ]);
+});
+
+it('gets story media insights from graph endpoint', function (): void {
+    $mediaTypeResponse = \Mockery::mock(ResponseInterface::class);
+    $mediaTypeResponse->shouldReceive('getContent')
+        ->once()
+        ->andReturn([
+            'media_type' => 'STORY',
+        ]);
+
+    $insightsResponse = \Mockery::mock(ResponseInterface::class);
+    $insightsResponse->shouldReceive('getContent')
+        ->once()
+        ->andReturn([
+            'data' => [
+                ['name' => 'impressions', 'values' => [['value' => 44]]],
+                ['name' => 'reach', 'values' => [['value' => 39]]],
+                ['name' => 'replies', 'values' => [['value' => 4]]],
+                ['name' => 'exits', 'values' => [['value' => 2]]],
+            ],
+        ]);
+
+    $api = \Mockery::mock(Api::class);
+    $api->shouldReceive('call')
+        ->once()
+        ->withArgs(function ($path, $method, $params): bool {
+            return $path === '/17900000000000003'
+                && $method === 'GET'
+                && $params === [
+                    'fields' => 'media_type',
+                ];
+        })
+        ->andReturn($mediaTypeResponse);
+    $api->shouldReceive('call')
+        ->once()
+        ->withArgs(function ($path, $method, $params): bool {
+            return $path === '/17900000000000003/insights'
+                && $method === 'GET'
+                && $params === [
+                    'metric' => 'impressions,reach,replies,exits',
+                ];
+        })
+        ->andReturn($insightsResponse);
+
+    $clientReflection = new ReflectionClass(Client::class);
+    $client = $clientReflection->newInstanceWithoutConstructor();
+
+    $apiProperty = $clientReflection->getProperty('api');
+    $apiProperty->setAccessible(true);
+    $apiProperty->setValue($client, $api);
+
+    expect($client->getMediaInsights('17900000000000003'))->toBe([
+        'impressions' => 44,
+        'reach' => 39,
+        'replies' => 4,
+        'exits' => 2,
+    ]);
+});
+
 it('gets instagram profile data from graph endpoint', function (): void {
     $profile = new class
     {
