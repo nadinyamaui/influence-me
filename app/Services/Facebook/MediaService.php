@@ -13,33 +13,29 @@ class MediaService
 
     public function __construct(protected InstagramAccount $account)
     {
-        $this->client = app(Client::class, ['access_token' => $this->account->access_token]);
+        $this->client = app(Client::class, [
+            'user_id' => $this->account->instagram_user_id,
+            'access_token' => $this->account->access_token,
+        ]);
     }
 
     public function retrieveMedia(): void
     {
-        $after = null;
-        do {
-            $payload = $this->client->getMedia($after);
-
-            foreach ($payload['data'] ?? [] as $media) {
-                InstagramMedia::updateOrCreate(
-                    ['instagram_media_id' => $media['id']],
-                    [
-                        'instagram_account_id' => $this->account->id,
-                        'media_type' => MediaType::parse($media),
-                        'caption' => $media['caption'] ?? null,
-                        'permalink' => $media['permalink'] ?? null,
-                        'media_url' => $media['media_url'] ?? null,
-                        'thumbnail_url' => $media['thumbnail_url'] ?? null,
-                        'published_at' => isset($media['timestamp']) ? Carbon::parse($media['timestamp']) : null,
-                        'like_count' => $media['like_count'] ?? 0,
-                        'comments_count' => $media['comments_count'] ?? 0,
-                    ]
-                );
-            }
-
-            $after = $payload['paging']['cursors']['after'] ?? null;
-        } while ($after);
+        $mediaPosts = $this->client->getAllMedia();
+        foreach ($mediaPosts as $media) {
+            $this->account->instagramMedia()->updateOrCreate([
+                'instagram_media_id' => $media['id'],
+            ], [
+                'instagram_account_id' => $this->account->id,
+                'media_type' => MediaType::parse($media),
+                'caption' => $media['caption'] ?? null,
+                'permalink' => $media['permalink'] ?? null,
+                'media_url' => $media['media_url'] ?? null,
+                'thumbnail_url' => $media['thumbnail_url'] ?? null,
+                'published_at' => Carbon::parse($media['timestamp']),
+                'like_count' => $media['like_count'] ?? 0,
+                'comments_count' => $media['comments_count'] ?? 0,
+            ]);
+        }
     }
 }

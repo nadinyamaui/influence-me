@@ -2,10 +2,8 @@
 
 namespace App\Services\Facebook;
 
-use App\Exceptions\InstagramApiException;
-use App\Exceptions\InstagramTokenExpiredException;
 use FacebookAds\Api;
-use FacebookAds\Http\Exception\RequestException;
+use FacebookAds\Object\IGUser;
 use FacebookAds\Object\Page;
 use FacebookAds\Object\User;
 use Illuminate\Support\Collection;
@@ -45,7 +43,7 @@ class Client
         ]);
 
         return collect($accounts->getArrayCopy())
-            ->filter(fn (Page $page) => isset($page->getData()['instagram_business_account']['id']))
+            ->filter(fn(Page $page) => isset($page->getData()['instagram_business_account']['id']))
             ->map(function (Page $page) {
                 $account = $page->getData();
                 $ig = $account['instagram_business_account'];
@@ -64,26 +62,27 @@ class Client
             });
     }
 
-    public function getMedia(?string $after = null): array
+    public function getAllMedia(): array
     {
-        $params = [
-            'fields' => 'id,caption,media_type,media_product_type,media_url,thumbnail_url,permalink,timestamp,like_count,comments_count',
-        ];
-
-        if ($after !== null) {
-            $params['after'] = $after;
+        $igUser = new IGUser($this->user_id);
+        $cursor = $igUser->getMedia([
+            'id',
+            'caption',
+            'media_type',
+            'media_product_type',
+            'media_url',
+            'thumbnail_url',
+            'permalink',
+            'timestamp',
+            'like_count',
+            'comments_count',
+        ]);
+        $cursor->setUseImplicitFetch(true);
+        $allMedia = [];
+        foreach ($cursor as $media) {
+            $allMedia[] = $media->exportAllData();
         }
 
-        try {
-            return $this->api->call('/me/media', params: $params)->getContent();
-        } catch (RequestException $exception) {
-            $errorCode = (int) $exception->getCode();
-
-            if ($errorCode === 190) {
-                throw new InstagramTokenExpiredException('Instagram access token is expired.', 190, $exception);
-            }
-
-            throw new InstagramApiException('Instagram media request failed. ['.$exception->getMessage().']', $errorCode, $exception);
-        }
+        return $allMedia;
     }
 }
