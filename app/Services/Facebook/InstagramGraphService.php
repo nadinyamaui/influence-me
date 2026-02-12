@@ -61,9 +61,10 @@ class InstagramGraphService
                     $impressions = (int) ($insights->get('impressions') ?? 0);
                     $saved = (int) ($insights->get('saved') ?? 0);
                     $shares = (int) ($insights->get('shares') ?? 0);
-                    $engagementRate = $reach > 0
-                        ? round((($media->like_count + $media->comments_count + $saved + $shares) / $reach) * 100, 2)
-                        : 0;
+                    $engagementRate = 0;
+                    if ($reach > 0) {
+                        $engagementRate = (($media->like_count + $media->comments_count + $saved + $shares) / $reach) * 100;
+                    }
 
                     $media->update([
                         'reach' => $reach,

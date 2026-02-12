@@ -15,10 +15,6 @@ class Client
 {
     protected Api $api;
 
-    protected ?array $appUsage = null;
-
-    protected ?array $pageUsage = null;
-
     public function __construct(protected string $access_token, protected ?string $user_id = null)
     {
         $this->api = Api::init(config('services.facebook.client_id'), config('services.facebook.client_secret'), $access_token);
@@ -151,7 +147,6 @@ class Client
         $media = new IGMedia($id)->getInsights(params: [
             'metric' => $type->metrics(),
         ]);
-        $this->captureUsageFromResponseHeaders($media->getLastResponse()?->getHeaders()?->export() ?? []);
 
         return collect($media->getArrayCopy())
             ->map(fn (InstagramInsightsResult $metric) => [
@@ -222,49 +217,5 @@ class Client
         );
 
         return $response->getContent();
-    }
-
-    public function canMakeRequest(): bool
-    {
-        return max($this->maxUsagePercentage($this->appUsage), $this->maxUsagePercentage($this->pageUsage)) < 90;
-    }
-
-    private function captureUsageFromResponseHeaders(array $headers): void
-    {
-        $normalizedHeaders = [];
-        foreach ($headers as $key => $value) {
-            $normalizedHeaders[strtolower((string) $key)] = $value;
-        }
-
-        $appUsage = $normalizedHeaders['x-app-usage'] ?? null;
-        if (is_string($appUsage)) {
-            $decoded = json_decode($appUsage, true);
-            if (is_array($decoded)) {
-                $this->appUsage = $decoded;
-            }
-        }
-
-        $pageUsage = $normalizedHeaders['x-page-usage'] ?? null;
-        if (is_string($pageUsage)) {
-            $decoded = json_decode($pageUsage, true);
-            if (is_array($decoded)) {
-                $this->pageUsage = $decoded;
-            }
-        }
-    }
-
-    private function maxUsagePercentage(?array $usage): int
-    {
-        if ($usage === null) {
-            return 0;
-        }
-
-        $percentages = [];
-        foreach (['call_count', 'total_cputime', 'total_time'] as $metric) {
-            $value = $usage[$metric] ?? 0;
-            $percentages[] = is_numeric($value) ? (int) $value : 0;
-        }
-
-        return max($percentages);
     }
 }
