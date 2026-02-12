@@ -46,7 +46,7 @@ class Client
         ]);
 
         return collect($accounts->getArrayCopy())
-            ->filter(fn (Page $page) => isset($page->getData()['instagram_business_account']['id']))
+            ->filter(fn(Page $page) => isset($page->getData()['instagram_business_account']['id']))
             ->map(function (Page $page) {
                 $account = $page->getData();
                 $ig = $account['instagram_business_account'];
@@ -149,9 +149,36 @@ class Client
         ]);
 
         return collect($media->getArrayCopy())
-            ->map(fn (InstagramInsightsResult $metric) => [
+            ->map(fn(InstagramInsightsResult $metric) => [
                 'name' => $metric->getData()['name'],
                 'values' => $metric->getData()['values'][0]['value'] ?? 0,
             ])->pluck('values', 'name');
+    }
+
+    public function getAudienceDemographics(): array
+    {
+        $igUser = new IGUser($this->user_id);
+        $result = [];
+        foreach (['country', 'gender', 'age', 'city'] as $breakdown) {
+            $cursor = $igUser->getInsights(params: [
+                'metric' => [
+                    'follower_demographics',
+                ],
+                'period' => 'lifetime',
+                'metric_type' => 'total_value',
+                'breakdown' => $breakdown,
+            ]);
+
+            foreach ($cursor as $insight) {
+                $result[$breakdown] = collect($insight->getData()['total_value']['breakdowns'][0]['results'])
+                    ->mapWithKeys(function ($point) {
+                        return [
+                            $point['dimension_values'][0] => $point['value'],
+                        ];
+                    })->all();
+            }
+        }
+
+        return $result;
     }
 }
