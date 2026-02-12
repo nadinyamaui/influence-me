@@ -6,7 +6,7 @@ use App\Enums\MediaType;
 use App\Models\InstagramAccount;
 use Carbon\Carbon;
 
-class MediaService
+class InstagramGraphService
 {
     protected Client $client;
 

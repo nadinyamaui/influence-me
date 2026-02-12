@@ -3,7 +3,7 @@
 namespace App\Jobs;
 
 use App\Models\InstagramAccount;
-use App\Services\Facebook\MediaService;
+use App\Services\Facebook\InstagramGraphService;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Queue\InteractsWithQueue;
@@ -26,6 +26,6 @@ class SyncInstagramMedia implements ShouldQueue
 
     public function handle(): void
     {
-        app(MediaService::class, ['account' => $this->account])->retrieveMedia();
+        app(InstagramGraphService::class, ['account' => $this->account])->retrieveMedia();
     }
 }
