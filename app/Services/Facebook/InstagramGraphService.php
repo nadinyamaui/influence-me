@@ -67,7 +67,7 @@ class InstagramGraphService
                         'shares_count' => $shares,
                         'engagement_rate' => $engagementRate,
                     ]);
-                    sleep(0.1);
+                    usleep(100000);
                 });
             });
     }
