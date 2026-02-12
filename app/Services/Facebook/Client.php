@@ -6,13 +6,15 @@ use App\Exceptions\InstagramApiException;
 use App\Exceptions\InstagramTokenExpiredException;
 use FacebookAds\Api;
 use FacebookAds\Http\Exception\RequestException;
+use FacebookAds\Object\Page;
+use FacebookAds\Object\User;
 use Illuminate\Support\Collection;
 
 class Client
 {
     protected Api $api;
 
-    public function __construct(protected string $access_token)
+    public function __construct(protected string $access_token, protected ?string $user_id = null)
     {
         $this->api = Api::init(config('services.facebook.client_id'), config('services.facebook.client_secret'), $access_token);
         $this->api->setDefaultGraphVersion('24.0');
@@ -30,29 +32,22 @@ class Client
 
     public function accounts(): Collection
     {
-        $accounts = $this->api->call('/me/accounts', params: [
-            'fields' => '
-                id,
-                name,
-                access_token,
-                category,
-                followers_count,
-                verification_status,
-                instagram_business_account{
-                    id,
-                    username,
-                    name,
-                    biography,
-                    profile_picture_url,
-                    followers_count,
-                    follows_count,
-                    media_count
-                }',
-        ])->getContent();
+        $user = new User($this->user_id);
+        $accounts = $user->getAccounts([
+            'id',
+            'name',
+            'access_token',
+            'category',
+            'followers_count',
+            'verification_status',
+            'instagram_business_account{id,username,name,biography,profile_picture_url,followers_count,follows_count,media_count}',
 
-        return collect($accounts['data'])
-            ->filter(fn ($account) => isset($account['instagram_business_account']['id']))
-            ->map(function ($account) {
+        ]);
+
+        return collect($accounts->getArrayCopy())
+            ->filter(fn (Page $page) => isset($page->getData()['instagram_business_account']['id']))
+            ->map(function (Page $page) {
+                $account = $page->getData();
                 $ig = $account['instagram_business_account'];
 
                 return [
@@ -88,7 +83,7 @@ class Client
                 throw new InstagramTokenExpiredException('Instagram access token is expired.', 190, $exception);
             }
 
-            throw new InstagramApiException('Instagram media request failed.', $errorCode, $exception);
+            throw new InstagramApiException('Instagram media request failed. ['.$exception->getMessage().']', $errorCode, $exception);
         }
     }
 }
