@@ -85,4 +85,32 @@ class Client
 
         return $allMedia;
     }
+
+    public function getProfile(): array
+    {
+        $igUser = new IGUser($this->user_id);
+        $profile = $igUser->getSelf([
+            'id',
+            'username',
+            'name',
+            'biography',
+            'profile_picture_url',
+            'followers_count',
+            'follows_count',
+            'media_count',
+            'account_type',
+        ])->exportAllData();
+
+        return [
+            'id' => $profile['id'] ?? null,
+            'username' => $profile['username'] ?? null,
+            'name' => $profile['name'] ?? null,
+            'biography' => $profile['biography'] ?? null,
+            'profile_picture_url' => $profile['profile_picture_url'] ?? null,
+            'followers_count' => $profile['followers_count'] ?? null,
+            'following_count' => $profile['follows_count'] ?? null,
+            'media_count' => $profile['media_count'] ?? null,
+            'account_type' => $profile['account_type'] ?? null,
+        ];
+    }
 }
