@@ -4,7 +4,6 @@ namespace App\Services\Facebook;
 
 use App\Enums\MediaType;
 use App\Models\InstagramAccount;
-use App\Models\InstagramMedia;
 use Carbon\Carbon;
 
 class MediaService
