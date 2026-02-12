@@ -5,6 +5,9 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
+- RFC 023: added `App\Jobs\SyncMediaInsights` queued job with `instagram-sync` queue configuration (`tries=3`, `timeout=600`) and delegated execution through `App\Services\Facebook\InstagramGraphService`.
+- RFC 023: added media insights sync workflow in `app/Services/Facebook/InstagramGraphService.php` to process non-story media from the last 90 days in chunks of 50, apply rate-limit checks before API calls, and persist `reach`, `impressions`, `saved_count`, `shares_count`, and derived `engagement_rate`.
+- RFC 023: added `canMakeRequest()` support in `app/Services/Facebook/Client.php` and feature coverage in `tests/Feature/Jobs/SyncMediaInsightsTest.php` for 90-day filtering, story exclusion, metric persistence, engagement-rate calculation, rate-limit wait behavior, and queue settings.
 - RFC 021: added `App\Jobs\SyncInstagramProfile` queued job with `instagram-sync` queue configuration (`tries=3`, `backoff=[30,60,120]`) and profile sync persistence for `InstagramAccount` fields.
 - RFC 021: added profile retrieval mapping in `app/Services/Facebook/InstagramGraphService.php` and extended `app/Services/Facebook/Client.php`.
 - RFC 021: added typed Instagram profile sync exception handling with `App\Exceptions\InstagramApiException` and `App\Exceptions\InstagramTokenExpiredException`, including graceful token-expiry failure state updates and retryable API failure behavior.

@@ -218,4 +218,9 @@ class Client
 
         return $response->getContent();
     }
+
+    public function canMakeRequest(): bool
+    {
+        return true;
+    }
 }
