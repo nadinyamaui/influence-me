@@ -309,3 +309,95 @@ it('returns an empty array when no instagram media is available', function (): v
 
     expect($client->getAllMedia())->toBe([]);
 });
+
+it('gets instagram profile data from graph endpoint', function (): void {
+    $profile = new class
+    {
+        public function exportAllData(): array
+        {
+            return [
+                'id' => '17841405822304914',
+                'username' => 'creator.one',
+                'name' => 'Creator One',
+                'biography' => 'Creator bio',
+                'profile_picture_url' => 'https://example.com/profile.jpg',
+                'followers_count' => 1200,
+                'follows_count' => 450,
+                'media_count' => 88,
+                'account_type' => 'BUSINESS',
+            ];
+        }
+    };
+
+    $igUser = \Mockery::mock('overload:'.IGUser::class);
+    $igUser->shouldReceive('getSelf')
+        ->once()
+        ->with([
+            'id',
+            'username',
+            'name',
+            'biography',
+            'profile_picture_url',
+            'followers_count',
+            'follows_count',
+            'media_count',
+            'account_type',
+        ])
+        ->andReturn($profile);
+
+    $clientReflection = new ReflectionClass(Client::class);
+    $client = $clientReflection->newInstanceWithoutConstructor();
+
+    $userIdProperty = $clientReflection->getProperty('user_id');
+    $userIdProperty->setAccessible(true);
+    $userIdProperty->setValue($client, '1234567890');
+
+    expect($client->getProfile())->toBe([
+        'id' => '17841405822304914',
+        'username' => 'creator.one',
+        'name' => 'Creator One',
+        'biography' => 'Creator bio',
+        'profile_picture_url' => 'https://example.com/profile.jpg',
+        'followers_count' => 1200,
+        'following_count' => 450,
+        'media_count' => 88,
+        'account_type' => 'BUSINESS',
+    ]);
+});
+
+it('returns nullable instagram profile keys when graph response omits values', function (): void {
+    $profile = new class
+    {
+        public function exportAllData(): array
+        {
+            return [
+                'id' => '17841405822304914',
+                'username' => 'creator.one',
+            ];
+        }
+    };
+
+    $igUser = \Mockery::mock('overload:'.IGUser::class);
+    $igUser->shouldReceive('getSelf')
+        ->once()
+        ->andReturn($profile);
+
+    $clientReflection = new ReflectionClass(Client::class);
+    $client = $clientReflection->newInstanceWithoutConstructor();
+
+    $userIdProperty = $clientReflection->getProperty('user_id');
+    $userIdProperty->setAccessible(true);
+    $userIdProperty->setValue($client, '1234567890');
+
+    expect($client->getProfile())->toBe([
+        'id' => '17841405822304914',
+        'username' => 'creator.one',
+        'name' => null,
+        'biography' => null,
+        'profile_picture_url' => null,
+        'followers_count' => null,
+        'following_count' => null,
+        'media_count' => null,
+        'account_type' => null,
+    ]);
+});
