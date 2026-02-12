@@ -26,7 +26,6 @@ Create a queued job that fetches currently active stories from the Instagram Gra
 
 ### Notes
 - Stories have different insight metrics (replies, exits instead of likes/comments)
-- Story insights are handled in the insights job (#023) with appropriate metric mapping
 - Stories are ephemeral — this job captures a snapshot while they're live
 
 ## Files to Create
