@@ -1,8 +1,11 @@
 <?php
 
+use App\Enums\MediaType;
 use App\Services\Facebook\Client;
 use FacebookAds\Api;
 use FacebookAds\Http\ResponseInterface;
+use FacebookAds\Object\IGMedia;
+use FacebookAds\Object\InstagramInsightsResult;
 use FacebookAds\Object\IGUser;
 use FacebookAds\Object\Page;
 use FacebookAds\Object\User;
@@ -323,246 +326,185 @@ it('gets a single instagram media item from graph endpoint', function (): void {
         'comments_count' => 8,
     ];
 
-    $response = \Mockery::mock(ResponseInterface::class);
-    $response->shouldReceive('getContent')
-        ->once()
-        ->andReturn($mediaResponse);
+    $media = new class($mediaResponse)
+    {
+        public function __construct(private array $data) {}
 
-    $api = \Mockery::mock(Api::class);
-    $api->shouldReceive('call')
+        public function exportAllData(): array
+        {
+            return $this->data;
+        }
+    };
+
+    $igMedia = \Mockery::mock('overload:'.IGMedia::class);
+    $igMedia->shouldReceive('getSelf')
         ->once()
-        ->withArgs(function ($path, $method, $params): bool {
-            return $path === '/17900000000000001'
-                && $method === 'GET'
-                && $params === [
-                    'fields' => 'id,caption,media_type,media_url,thumbnail_url,permalink,timestamp,like_count,comments_count',
-                ];
-        })
-        ->andReturn($response);
+        ->with([
+            'id',
+            'caption',
+            'media_type',
+            'media_url',
+            'thumbnail_url',
+            'permalink',
+            'timestamp',
+            'like_count',
+            'comments_count',
+        ])
+        ->andReturn($media);
 
     $clientReflection = new ReflectionClass(Client::class);
     $client = $clientReflection->newInstanceWithoutConstructor();
-
-    $apiProperty = $clientReflection->getProperty('api');
-    $apiProperty->setAccessible(true);
-    $apiProperty->setValue($client, $api);
 
     expect($client->getMedia(17900000000000001))->toBe($mediaResponse);
 });
 
-it('returns nullable media keys when single instagram media response omits values', function (): void {
-    $response = \Mockery::mock(ResponseInterface::class);
-    $response->shouldReceive('getContent')
-        ->once()
-        ->andReturn([
-            'id' => '17900000000000001',
-        ]);
+it('returns nullable thumbnail_url when single instagram media response omits value', function (): void {
+    $media = new class
+    {
+        public function exportAllData(): array
+        {
+            return [
+                'id' => '17900000000000001',
+                'caption' => 'Single media caption',
+                'media_type' => 'IMAGE',
+                'media_url' => 'https://example.com/media.jpg',
+                'permalink' => 'https://instagram.com/p/example',
+                'timestamp' => '2026-02-12T12:00:00+0000',
+                'like_count' => 34,
+                'comments_count' => 8,
+            ];
+        }
+    };
 
-    $api = \Mockery::mock(Api::class);
-    $api->shouldReceive('call')
+    $igMedia = \Mockery::mock('overload:'.IGMedia::class);
+    $igMedia->shouldReceive('getSelf')
         ->once()
-        ->andReturn($response);
+        ->andReturn($media);
 
     $clientReflection = new ReflectionClass(Client::class);
     $client = $clientReflection->newInstanceWithoutConstructor();
 
-    $apiProperty = $clientReflection->getProperty('api');
-    $apiProperty->setAccessible(true);
-    $apiProperty->setValue($client, $api);
-
     expect($client->getMedia(17900000000000001))->toBe([
         'id' => '17900000000000001',
-        'caption' => null,
-        'media_type' => null,
-        'media_url' => null,
+        'caption' => 'Single media caption',
+        'media_type' => 'IMAGE',
+        'media_url' => 'https://example.com/media.jpg',
         'thumbnail_url' => null,
-        'permalink' => null,
-        'timestamp' => null,
-        'like_count' => null,
-        'comments_count' => null,
+        'permalink' => 'https://instagram.com/p/example',
+        'timestamp' => '2026-02-12T12:00:00+0000',
+        'like_count' => 34,
+        'comments_count' => 8,
     ]);
 });
 
 it('gets image and carousel media insights from graph endpoint', function (): void {
-    $mediaTypeResponse = \Mockery::mock(ResponseInterface::class);
-    $mediaTypeResponse->shouldReceive('getContent')
-        ->once()
-        ->andReturn([
-            'media_type' => 'IMAGE',
-        ]);
+    $insights = [
+        \Mockery::mock(InstagramInsightsResult::class),
+        \Mockery::mock(InstagramInsightsResult::class),
+        \Mockery::mock(InstagramInsightsResult::class),
+        \Mockery::mock(InstagramInsightsResult::class),
+        \Mockery::mock(InstagramInsightsResult::class),
+        \Mockery::mock(InstagramInsightsResult::class),
+    ];
 
-    $insightsResponse = \Mockery::mock(ResponseInterface::class);
-    $insightsResponse->shouldReceive('getContent')
-        ->once()
-        ->andReturn([
-            'data' => [
-                ['name' => 'impressions', 'values' => [['value' => 100]]],
-                ['name' => 'reach', 'values' => [['value' => 90]]],
-                ['name' => 'saved', 'values' => [['value' => 12]]],
-                ['name' => 'engagement', 'values' => [['value' => 80]]],
-                ['name' => 'likes', 'values' => [['value' => 55]]],
-                ['name' => 'comments', 'values' => [['value' => 7]]],
-                ['name' => 'shares', 'values' => [['value' => 3]]],
-            ],
-        ]);
+    $insights[0]->shouldReceive('getData')->twice()->andReturn(['name' => 'reach', 'values' => [['value' => 90]]]);
+    $insights[1]->shouldReceive('getData')->twice()->andReturn(['name' => 'likes', 'values' => [['value' => 55]]]);
+    $insights[2]->shouldReceive('getData')->twice()->andReturn(['name' => 'comments', 'values' => [['value' => 7]]]);
+    $insights[3]->shouldReceive('getData')->twice()->andReturn(['name' => 'shares', 'values' => [['value' => 3]]]);
+    $insights[4]->shouldReceive('getData')->twice()->andReturn(['name' => 'saved', 'values' => [['value' => 12]]]);
+    $insights[5]->shouldReceive('getData')->twice()->andReturn(['name' => 'total_interactions', 'values' => [['value' => 80]]]);
 
-    $api = \Mockery::mock(Api::class);
-    $api->shouldReceive('call')
+    $igMedia = \Mockery::mock('overload:'.IGMedia::class);
+    $igMedia->shouldReceive('getInsights')
         ->once()
-        ->withArgs(function ($path, $method, $params): bool {
-            return $path === '/17900000000000001'
-                && $method === 'GET'
-                && $params === [
-                    'fields' => 'media_type',
-                ];
+        ->withArgs(function (array $params): bool {
+            return ($params['metric'] ?? null) === MediaType::Post->metrics();
         })
-        ->andReturn($mediaTypeResponse);
-    $api->shouldReceive('call')
-        ->once()
-        ->withArgs(function ($path, $method, $params): bool {
-            return $path === '/17900000000000001/insights'
-                && $method === 'GET'
-                && $params === [
-                    'metric' => 'impressions,reach,saved,engagement,likes,comments,shares',
-                ];
-        })
-        ->andReturn($insightsResponse);
+        ->andReturn(new ArrayObject($insights));
 
     $clientReflection = new ReflectionClass(Client::class);
     $client = $clientReflection->newInstanceWithoutConstructor();
 
-    $apiProperty = $clientReflection->getProperty('api');
-    $apiProperty->setAccessible(true);
-    $apiProperty->setValue($client, $api);
-
-    expect($client->getMediaInsights('17900000000000001'))->toBe([
-        'impressions' => 100,
+    expect($client->getMediaInsights('17900000000000001', MediaType::Post)->all())->toBe([
         'reach' => 90,
-        'saved' => 12,
-        'engagement' => 80,
         'likes' => 55,
         'comments' => 7,
         'shares' => 3,
+        'saved' => 12,
+        'total_interactions' => 80,
     ]);
 });
 
 it('gets video and reel media insights from graph endpoint', function (): void {
-    $mediaTypeResponse = \Mockery::mock(ResponseInterface::class);
-    $mediaTypeResponse->shouldReceive('getContent')
-        ->once()
-        ->andReturn([
-            'media_type' => 'REEL',
-        ]);
+    $insights = [
+        \Mockery::mock(InstagramInsightsResult::class),
+        \Mockery::mock(InstagramInsightsResult::class),
+        \Mockery::mock(InstagramInsightsResult::class),
+        \Mockery::mock(InstagramInsightsResult::class),
+        \Mockery::mock(InstagramInsightsResult::class),
+        \Mockery::mock(InstagramInsightsResult::class),
+        \Mockery::mock(InstagramInsightsResult::class),
+        \Mockery::mock(InstagramInsightsResult::class),
+    ];
 
-    $insightsResponse = \Mockery::mock(ResponseInterface::class);
-    $insightsResponse->shouldReceive('getContent')
-        ->once()
-        ->andReturn([
-            'data' => [
-                ['name' => 'impressions', 'values' => [['value' => 120]]],
-                ['name' => 'reach', 'values' => [['value' => 101]]],
-                ['name' => 'saved', 'values' => [['value' => 20]]],
-                ['name' => 'likes', 'values' => [['value' => 70]]],
-                ['name' => 'comments', 'values' => [['value' => 15]]],
-                ['name' => 'shares', 'values' => [['value' => 5]]],
-                ['name' => 'plays', 'values' => [['value' => 400]]],
-            ],
-        ]);
+    $insights[0]->shouldReceive('getData')->twice()->andReturn(['name' => 'views', 'values' => [['value' => 500]]]);
+    $insights[1]->shouldReceive('getData')->twice()->andReturn(['name' => 'plays', 'values' => [['value' => 400]]]);
+    $insights[2]->shouldReceive('getData')->twice()->andReturn(['name' => 'reach', 'values' => [['value' => 101]]]);
+    $insights[3]->shouldReceive('getData')->twice()->andReturn(['name' => 'total_interactions', 'values' => [['value' => 90]]]);
+    $insights[4]->shouldReceive('getData')->twice()->andReturn(['name' => 'ig_reels_avg_watch_time', 'values' => [['value' => 3.2]]]);
+    $insights[5]->shouldReceive('getData')->twice()->andReturn(['name' => 'ig_reels_video_view_total_time', 'values' => [['value' => 1280]]]);
+    $insights[6]->shouldReceive('getData')->twice()->andReturn(['name' => 'clips_replays_count', 'values' => [['value' => 41]]]);
+    $insights[7]->shouldReceive('getData')->twice()->andReturn(['name' => 'reels_skip_rate', 'values' => [['value' => 12.5]]]);
 
-    $api = \Mockery::mock(Api::class);
-    $api->shouldReceive('call')
+    $igMedia = \Mockery::mock('overload:'.IGMedia::class);
+    $igMedia->shouldReceive('getInsights')
         ->once()
-        ->withArgs(function ($path, $method, $params): bool {
-            return $path === '/17900000000000002'
-                && $method === 'GET'
-                && $params === [
-                    'fields' => 'media_type',
-                ];
+        ->withArgs(function (array $params): bool {
+            return ($params['metric'] ?? null) === MediaType::Reel->metrics();
         })
-        ->andReturn($mediaTypeResponse);
-    $api->shouldReceive('call')
-        ->once()
-        ->withArgs(function ($path, $method, $params): bool {
-            return $path === '/17900000000000002/insights'
-                && $method === 'GET'
-                && $params === [
-                    'metric' => 'impressions,reach,saved,likes,comments,shares,plays',
-                ];
-        })
-        ->andReturn($insightsResponse);
+        ->andReturn(new ArrayObject($insights));
 
     $clientReflection = new ReflectionClass(Client::class);
     $client = $clientReflection->newInstanceWithoutConstructor();
 
-    $apiProperty = $clientReflection->getProperty('api');
-    $apiProperty->setAccessible(true);
-    $apiProperty->setValue($client, $api);
-
-    expect($client->getMediaInsights('17900000000000002'))->toBe([
-        'impressions' => 120,
-        'reach' => 101,
-        'saved' => 20,
-        'likes' => 70,
-        'comments' => 15,
-        'shares' => 5,
+    expect($client->getMediaInsights('17900000000000002', MediaType::Reel)->all())->toBe([
+        'views' => 500,
         'plays' => 400,
+        'reach' => 101,
+        'total_interactions' => 90,
+        'ig_reels_avg_watch_time' => 3.2,
+        'ig_reels_video_view_total_time' => 1280,
+        'clips_replays_count' => 41,
+        'reels_skip_rate' => 12.5,
     ]);
 });
 
 it('gets story media insights from graph endpoint', function (): void {
-    $mediaTypeResponse = \Mockery::mock(ResponseInterface::class);
-    $mediaTypeResponse->shouldReceive('getContent')
-        ->once()
-        ->andReturn([
-            'media_type' => 'STORY',
-        ]);
+    $insights = [
+        \Mockery::mock(InstagramInsightsResult::class),
+        \Mockery::mock(InstagramInsightsResult::class),
+        \Mockery::mock(InstagramInsightsResult::class),
+    ];
 
-    $insightsResponse = \Mockery::mock(ResponseInterface::class);
-    $insightsResponse->shouldReceive('getContent')
-        ->once()
-        ->andReturn([
-            'data' => [
-                ['name' => 'impressions', 'values' => [['value' => 44]]],
-                ['name' => 'reach', 'values' => [['value' => 39]]],
-                ['name' => 'replies', 'values' => [['value' => 4]]],
-                ['name' => 'exits', 'values' => [['value' => 2]]],
-            ],
-        ]);
+    $insights[0]->shouldReceive('getData')->twice()->andReturn(['name' => 'reach', 'values' => [['value' => 39]]]);
+    $insights[1]->shouldReceive('getData')->twice()->andReturn(['name' => 'replies', 'values' => [['value' => 4]]]);
+    $insights[2]->shouldReceive('getData')->twice()->andReturn(['name' => 'navigation', 'values' => [['value' => ['tap_forward' => 10, 'tap_back' => 5]]]]);
 
-    $api = \Mockery::mock(Api::class);
-    $api->shouldReceive('call')
+    $igMedia = \Mockery::mock('overload:'.IGMedia::class);
+    $igMedia->shouldReceive('getInsights')
         ->once()
-        ->withArgs(function ($path, $method, $params): bool {
-            return $path === '/17900000000000003'
-                && $method === 'GET'
-                && $params === [
-                    'fields' => 'media_type',
-                ];
+        ->withArgs(function (array $params): bool {
+            return ($params['metric'] ?? null) === MediaType::Story->metrics();
         })
-        ->andReturn($mediaTypeResponse);
-    $api->shouldReceive('call')
-        ->once()
-        ->withArgs(function ($path, $method, $params): bool {
-            return $path === '/17900000000000003/insights'
-                && $method === 'GET'
-                && $params === [
-                    'metric' => 'impressions,reach,replies,exits',
-                ];
-        })
-        ->andReturn($insightsResponse);
+        ->andReturn(new ArrayObject($insights));
 
     $clientReflection = new ReflectionClass(Client::class);
     $client = $clientReflection->newInstanceWithoutConstructor();
 
-    $apiProperty = $clientReflection->getProperty('api');
-    $apiProperty->setAccessible(true);
-    $apiProperty->setValue($client, $api);
-
-    expect($client->getMediaInsights('17900000000000003'))->toBe([
-        'impressions' => 44,
+    expect($client->getMediaInsights('17900000000000003', MediaType::Story)->all())->toBe([
         'reach' => 39,
         'replies' => 4,
-        'exits' => 2,
+        'navigation' => ['tap_forward' => 10, 'tap_back' => 5],
     ]);
 });
 
@@ -597,7 +539,6 @@ it('gets instagram profile data from graph endpoint', function (): void {
             'followers_count',
             'follows_count',
             'media_count',
-            'account_type',
         ])
         ->andReturn($profile);
 
@@ -617,7 +558,6 @@ it('gets instagram profile data from graph endpoint', function (): void {
         'followers_count' => 1200,
         'following_count' => 450,
         'media_count' => 88,
-        'account_type' => 'BUSINESS',
     ]);
 });
 
@@ -629,6 +569,12 @@ it('returns nullable instagram profile keys when graph response omits values', f
             return [
                 'id' => '17841405822304914',
                 'username' => 'creator.one',
+                'name' => null,
+                'biography' => null,
+                'profile_picture_url' => null,
+                'followers_count' => null,
+                'follows_count' => null,
+                'media_count' => null,
             ];
         }
     };
@@ -654,6 +600,5 @@ it('returns nullable instagram profile keys when graph response omits values', f
         'followers_count' => null,
         'following_count' => null,
         'media_count' => null,
-        'account_type' => null,
     ]);
 });
