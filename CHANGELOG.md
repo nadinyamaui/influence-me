@@ -5,6 +5,9 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
+- RFC 025: added `App\Jobs\SyncAudienceDemographics` queued job with `instagram-sync` queue configuration (`tries=3`) and delegated execution through `App\Services\Facebook\InstagramGraphService`.
+- RFC 025: added demographics sync workflow in `app/Services/Facebook/InstagramGraphService.php` to fetch follower demographic insights, parse age/gender/city/country breakdowns (including `audience_gender_age` payloads), replace prior snapshot rows, and gracefully skip accounts with fewer than 100 followers.
+- RFC 025: added feature coverage in `tests/Feature/Jobs/SyncAudienceDemographicsTest.php` for demographics parsing/persistence, snapshot replacement behavior, follower-threshold skip behavior, and queue configuration.
 - RFC 023: added `App\Jobs\SyncMediaInsights` queued job with `instagram-sync` queue configuration (`tries=3`, `timeout=600`) and delegated execution through `App\Services\Facebook\InstagramGraphService`.
 - RFC 023: added media insights sync workflow in `app/Services/Facebook/InstagramGraphService.php` to process non-story media from the last 90 days in chunks of 50 and persist `reach`, `impressions` (from `views`), `saved_count`, `shares_count`, and derived `engagement_rate`.
 - RFC 023: updated insight metrics selection in `app/Enums/MediaType.php` and added feature coverage in `tests/Feature/Jobs/SyncMediaInsightsTest.php` for 90-day filtering, story exclusion, metric persistence/mapping, engagement-rate calculation, and queue settings.

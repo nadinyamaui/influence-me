@@ -2,10 +2,10 @@
 
 namespace App\Services\Facebook;
 
-use App\Enums\AccountType;
+use App\Enums\DemographicType;
+use App\Enums\MediaType;
 use App\Exceptions\InstagramApiException;
 use App\Exceptions\InstagramTokenExpiredException;
-use App\Enums\MediaType;
 use App\Models\InstagramAccount;
 use App\Models\InstagramMedia;
 use Carbon\Carbon;
@@ -91,5 +91,135 @@ class InstagramGraphService
             'following_count' => $profile['following_count'] ?? $this->account->following_count,
             'media_count' => $profile['media_count'] ?? $this->account->media_count,
         ];
+    }
+
+    public function syncAudienceDemographics(): void
+    {
+        if (($this->account->followers_count ?? 0) < 100) {
+            return;
+        }
+
+        $records = $this->buildAudienceDemographicsRecords($this->client->getAudienceDemographics());
+        $recordedAt = now();
+
+        $this->account->audienceDemographics()->delete();
+
+        if ($records === []) {
+            return;
+        }
+
+        $this->account->audienceDemographics()->createMany(
+            collect($records)->map(fn (array $record): array => [
+                'type' => $record['type'],
+                'dimension' => $record['dimension'],
+                'value' => $record['value'],
+                'recorded_at' => $recordedAt,
+            ])->all()
+        );
+    }
+
+    private function buildAudienceDemographicsRecords(array $demographics): array
+    {
+        $records = [];
+        $ageTotals = [];
+        $genderTotals = [];
+
+        $genderAgeBreakdown = $demographics['audience_gender_age'] ?? [];
+        if (is_array($genderAgeBreakdown)) {
+            foreach ($genderAgeBreakdown as $dimension => $value) {
+                if (! is_numeric($value)) {
+                    continue;
+                }
+
+                $parts = explode('.', (string) $dimension, 2);
+                if (count($parts) !== 2) {
+                    continue;
+                }
+
+                $gender = $this->normalizeGenderDimension($parts[0]);
+                $age = trim($parts[1]);
+                $metricValue = (float) $value;
+
+                if ($gender !== '') {
+                    $genderTotals[$gender] = ($genderTotals[$gender] ?? 0) + $metricValue;
+                }
+
+                if ($age !== '') {
+                    $ageTotals[$age] = ($ageTotals[$age] ?? 0) + $metricValue;
+                }
+            }
+        }
+
+        $mapping = [
+            'age' => DemographicType::Age,
+            'audience_age' => DemographicType::Age,
+            'gender' => DemographicType::Gender,
+            'audience_gender' => DemographicType::Gender,
+            'city' => DemographicType::City,
+            'audience_city' => DemographicType::City,
+            'country' => DemographicType::Country,
+            'audience_country' => DemographicType::Country,
+        ];
+
+        foreach ($mapping as $key => $type) {
+            $breakdown = $demographics[$key] ?? [];
+            if (! is_array($breakdown)) {
+                continue;
+            }
+
+            foreach ($breakdown as $dimension => $value) {
+                if (! is_numeric($value)) {
+                    continue;
+                }
+
+                $normalizedDimension = trim((string) $dimension);
+                if ($normalizedDimension === '') {
+                    continue;
+                }
+
+                if ($type === DemographicType::Gender) {
+                    $normalizedDimension = $this->normalizeGenderDimension($normalizedDimension);
+                }
+
+                if ($normalizedDimension === '') {
+                    continue;
+                }
+
+                $records[] = [
+                    'type' => $type,
+                    'dimension' => $normalizedDimension,
+                    'value' => round((float) $value, 2),
+                ];
+            }
+        }
+
+        foreach ($ageTotals as $dimension => $value) {
+            $records[] = [
+                'type' => DemographicType::Age,
+                'dimension' => $dimension,
+                'value' => round($value, 2),
+            ];
+        }
+
+        foreach ($genderTotals as $dimension => $value) {
+            $records[] = [
+                'type' => DemographicType::Gender,
+                'dimension' => $dimension,
+                'value' => round($value, 2),
+            ];
+        }
+
+        return $records;
+    }
+
+    private function normalizeGenderDimension(string $value): string
+    {
+        $normalizedValue = strtolower(trim($value));
+
+        return match ($normalizedValue) {
+            'm', 'male' => 'Male',
+            'f', 'female' => 'Female',
+            default => ucfirst($normalizedValue),
+        };
     }
 }
