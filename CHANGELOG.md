@@ -5,6 +5,9 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
+- RFC 024: added `App\Jobs\SyncInstagramStories` queued job with `instagram-sync` queue configuration (`tries=3`) and delegated execution through `App\Services\Facebook\InstagramGraphService`.
+- RFC 024: added active story sync workflow in `app/Services/Facebook/InstagramGraphService.php` using idempotent `InstagramMedia::updateOrCreate` persistence with `media_type=story` and mapped story snapshot fields (`caption`, `permalink`, `media_url`, `thumbnail_url`, `published_at`).
+- RFC 024: updated `app/Services/Facebook/Client.php` story retrieval to return normalized story payloads from Graph API media results and added feature coverage in `tests/Feature/Jobs/SyncInstagramStoriesTest.php` for creation, idempotent updates, and queue settings.
 - RFC 023: added `App\Jobs\SyncMediaInsights` queued job with `instagram-sync` queue configuration (`tries=3`, `timeout=600`) and delegated execution through `App\Services\Facebook\InstagramGraphService`.
 - RFC 023: added media insights sync workflow in `app/Services/Facebook/InstagramGraphService.php` to process non-story media from the last 90 days in chunks of 50 and persist `reach`, `impressions` (from `views`), `saved_count`, `shares_count`, and derived `engagement_rate`.
 - RFC 023: updated insight metrics selection in `app/Enums/MediaType.php` and added feature coverage in `tests/Feature/Jobs/SyncMediaInsightsTest.php` for 90-day filtering, story exclusion, metric persistence/mapping, engagement-rate calculation, and queue settings.
