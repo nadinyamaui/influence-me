@@ -54,7 +54,7 @@ class InstagramGraphService
         }
 
         return [
-            'username' => $profile['username'] ?? null,
+            'username' => $profile['username'] ?? $this->account->username,
             'name' => $profile['name'] ?? $this->account->name,
             'biography' => $profile['biography'] ?? $this->account->biography,
             'profile_picture_url' => $profile['profile_picture_url'] ?? $this->account->profile_picture_url,
