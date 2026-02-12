@@ -86,6 +86,35 @@ class Client
         return $allMedia;
     }
 
+    public function getMedia(int $media_id): array
+    {
+        $media = $this->api->call("/{$media_id}", params: [
+            'fields' => implode(',', [
+                'id',
+                'caption',
+                'media_type',
+                'media_url',
+                'thumbnail_url',
+                'permalink',
+                'timestamp',
+                'like_count',
+                'comments_count',
+            ]),
+        ])->getContent();
+
+        return [
+            'id' => $media['id'] ?? null,
+            'caption' => $media['caption'] ?? null,
+            'media_type' => $media['media_type'] ?? null,
+            'media_url' => $media['media_url'] ?? null,
+            'thumbnail_url' => $media['thumbnail_url'] ?? null,
+            'permalink' => $media['permalink'] ?? null,
+            'timestamp' => $media['timestamp'] ?? null,
+            'like_count' => $media['like_count'] ?? null,
+            'comments_count' => $media['comments_count'] ?? null,
+        ];
+    }
+
     public function getProfile(): array
     {
         $igUser = new IGUser($this->user_id);
