@@ -2,10 +2,9 @@
 
 namespace App\Services\Facebook;
 
-use App\Enums\AccountType;
+use App\Enums\MediaType;
 use App\Exceptions\InstagramApiException;
 use App\Exceptions\InstagramTokenExpiredException;
-use App\Enums\MediaType;
 use App\Models\InstagramAccount;
 use App\Models\InstagramMedia;
 use Carbon\Carbon;
@@ -109,5 +108,30 @@ class InstagramGraphService
             'following_count' => $profile['following_count'] ?? $this->account->following_count,
             'media_count' => $profile['media_count'] ?? $this->account->media_count,
         ];
+    }
+
+    public function syncAudienceDemographics(): void
+    {
+        if (($this->account->followers_count ?? 0) < 100) {
+            return;
+        }
+
+        $audiences = collect($this->client->getAudienceDemographics());
+        $recordedAt = now();
+
+        $this->account->audienceDemographics()->delete();
+
+        $audiences
+            ->each(function ($audience, $key) use ($recordedAt) {
+                $totalForType = collect($audience)->sum();
+                foreach ($audience as $dimension => $value) {
+                    $this->account->audienceDemographics()->create([
+                        'type' => $key,
+                        'dimension' => $dimension,
+                        'value' => $totalForType > 0 ? ($value * 100 / $totalForType) : 0,
+                        'recorded_at' => $recordedAt,
+                    ]);
+                }
+            });
     }
 }

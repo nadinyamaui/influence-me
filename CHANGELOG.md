@@ -5,6 +5,9 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
+- RFC 025: added `App\Jobs\SyncAudienceDemographics` queued job with `instagram-sync` queue configuration (`tries=3`) and delegated execution through `App\Services\Facebook\InstagramGraphService`.
+- RFC 025: added demographics sync workflow in `app/Services/Facebook/InstagramGraphService.php` to fetch follower demographic insights, parse age/gender/city/country breakdowns (including `audience_gender_age` payloads), replace prior snapshot rows, and gracefully skip accounts with fewer than 100 followers.
+- RFC 025: added feature coverage in `tests/Feature/Jobs/SyncAudienceDemographicsTest.php` for demographics parsing/persistence, snapshot replacement behavior, follower-threshold skip behavior, and queue configuration.
 - RFC 024: added `App\Jobs\SyncInstagramStories` queued job with `instagram-sync` queue configuration (`tries=3`) and delegated execution through `App\Services\Facebook\InstagramGraphService`.
 - RFC 024: added active story sync workflow in `app/Services/Facebook/InstagramGraphService.php` using idempotent `InstagramMedia::updateOrCreate` persistence with `media_type=story` and mapped story snapshot fields (`caption`, `permalink`, `media_url`, `thumbnail_url`, `published_at`).
 - RFC 024: updated `app/Services/Facebook/Client.php` story retrieval to return normalized story payloads from Graph API media results and added feature coverage in `tests/Feature/Jobs/SyncInstagramStoriesTest.php` for creation, idempotent updates, and queue settings.
