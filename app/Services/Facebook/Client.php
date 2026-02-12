@@ -128,7 +128,6 @@ class Client
             'followers_count',
             'follows_count',
             'media_count',
-            'account_type',
         ])->exportAllData();
 
         return [
@@ -140,7 +139,6 @@ class Client
             'followers_count' => $profile['followers_count'] ?? 0,
             'following_count' => $profile['follows_count'] ?? 0,
             'media_count' => $profile['media_count'] ?? 0,
-            'account_type' => $profile['account_type'] ?? null,
         ];
     }
 

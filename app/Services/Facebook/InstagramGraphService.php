@@ -61,22 +61,6 @@ class InstagramGraphService
             'followers_count' => $profile['followers_count'] ?? 0,
             'following_count' => $profile['following_count'] ?? 0,
             'media_count' => $profile['media_count'] ?? 0,
-            'account_type' => $this->mapAccountType($profile['account_type'] ?? null),
         ];
-    }
-
-    protected function mapAccountType(?string $accountType): AccountType
-    {
-        if ($accountType === null || $accountType === '') {
-            return $this->account->account_type ?? AccountType::Business;
-        }
-
-        $normalizedType = strtolower((string) $accountType);
-
-        return match ($normalizedType) {
-            'media_creator', 'creator' => AccountType::Creator,
-            'business' => AccountType::Business,
-            default => $this->account->account_type ?? AccountType::Business,
-        };
     }
 }

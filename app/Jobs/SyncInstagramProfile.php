@@ -56,7 +56,6 @@ class SyncInstagramProfile implements ShouldQueue
             'followers_count' => $profile['followers_count'],
             'following_count' => $profile['following_count'],
             'media_count' => $profile['media_count'],
-            'account_type' => $profile['account_type'],
             'sync_status' => SyncStatus::Idle,
             'last_synced_at' => now(),
             'last_sync_error' => null,

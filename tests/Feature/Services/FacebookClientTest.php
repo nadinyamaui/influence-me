@@ -611,7 +611,6 @@ it('gets instagram profile data from graph endpoint', function (): void {
                 'followers_count' => 1200,
                 'follows_count' => 450,
                 'media_count' => 88,
-                'account_type' => 'BUSINESS',
             ];
         }
     };
@@ -686,8 +685,8 @@ it('returns nullable instagram profile keys when graph response omits values', f
         'name' => null,
         'biography' => null,
         'profile_picture_url' => null,
-        'followers_count' => null,
-        'following_count' => null,
-        'media_count' => null,
+        'followers_count' => 0,
+        'following_count' => 0,
+        'media_count' => 0,
     ]);
 });

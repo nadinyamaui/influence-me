@@ -1,6 +1,5 @@
 <?php
 
-use App\Enums\AccountType;
 use App\Enums\SyncStatus;
 use App\Exceptions\InstagramApiException;
 use App\Exceptions\InstagramTokenExpiredException;
@@ -33,7 +32,6 @@ it('syncs instagram profile fields to the database', function (): void {
             'followers_count' => 1500,
             'following_count' => 200,
             'media_count' => 120,
-            'account_type' => AccountType::Creator,
         ]);
 
     app()->bind(InstagramGraphService::class, fn ($app, $parameters) => $instagramGraphService);
@@ -49,7 +47,6 @@ it('syncs instagram profile fields to the database', function (): void {
         ->and($account->followers_count)->toBe(1500)
         ->and($account->following_count)->toBe(200)
         ->and($account->media_count)->toBe(120)
-        ->and($account->account_type)->toBe(AccountType::Creator)
         ->and($account->sync_status)->toBe(SyncStatus::Idle)
         ->and($account->last_sync_error)->toBeNull()
         ->and($account->last_synced_at)->not->toBeNull();
