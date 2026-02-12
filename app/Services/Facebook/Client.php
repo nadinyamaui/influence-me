@@ -46,7 +46,7 @@ class Client
         ]);
 
         return collect($accounts->getArrayCopy())
-            ->filter(fn(Page $page) => isset($page->getData()['instagram_business_account']['id']))
+            ->filter(fn (Page $page) => isset($page->getData()['instagram_business_account']['id']))
             ->map(function (Page $page) {
                 $account = $page->getData();
                 $ig = $account['instagram_business_account'];
@@ -149,7 +149,7 @@ class Client
         ]);
 
         return collect($media->getArrayCopy())
-            ->map(fn(InstagramInsightsResult $metric) => [
+            ->map(fn (InstagramInsightsResult $metric) => [
                 'name' => $metric->getData()['name'],
                 'values' => $metric->getData()['values'][0]['value'] ?? 0,
             ])->pluck('values', 'name');
@@ -180,5 +180,42 @@ class Client
         }
 
         return $result;
+    }
+
+    public function getStories()
+    {
+        $igUser = new IGUser($this->user_id);
+        $cursor = $igUser->getMedia([
+            'id',
+            'caption',
+            'media_type',
+            'media_url',
+            'thumbnail_url',
+            'permalink',
+            'timestamp',
+        ], [
+            'limit' => 100,
+        ]);
+        $cursor->setUseImplicitFetch(true);
+
+        return collect($cursor->getArrayCopy())->filter(function (IGMedia $media) {
+            return strtolower($media->getData()['media_type']) === MediaType::Story->value;
+        });
+    }
+
+    public function refreshLongLivedToken(): array
+    {
+        $response = $this->api->call(
+            '/oauth/access_token',
+            'GET',
+            [
+                'grant_type' => 'fb_exchange_token',
+                'client_id' => config('services.facebook.client_id'),
+                'client_secret' => config('services.facebook.client_secret'),
+                'fb_exchange_token' => $this->access_token,
+            ]
+        );
+
+        return $response->getContent();
     }
 }

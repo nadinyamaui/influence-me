@@ -69,6 +69,50 @@ it('gets a long lived token from the facebook oauth endpoint', function (): void
     expect($client->getLongLivedToken())->toBe($tokenResponse);
 });
 
+it('refreshes a long lived token from the facebook oauth endpoint', function (): void {
+    config()->set('services.facebook.client_id', 'facebook-client-id');
+    config()->set('services.facebook.client_secret', 'facebook-client-secret');
+
+    $tokenResponse = [
+        'access_token' => 'refreshed-long-lived-token',
+        'token_type' => 'bearer',
+        'expires_in' => 5183944,
+    ];
+
+    $response = \Mockery::mock(ResponseInterface::class);
+    $response->shouldReceive('getContent')
+        ->once()
+        ->andReturn($tokenResponse);
+
+    $api = \Mockery::mock(Api::class);
+    $api->shouldReceive('call')
+        ->once()
+        ->withArgs(function ($path, $method, $params): bool {
+            return $path === '/oauth/access_token'
+                && $method === 'GET'
+                && $params === [
+                    'grant_type' => 'fb_exchange_token',
+                    'client_id' => 'facebook-client-id',
+                    'client_secret' => 'facebook-client-secret',
+                    'fb_exchange_token' => 'existing-long-lived-token',
+                ];
+        })
+        ->andReturn($response);
+
+    $clientReflection = new ReflectionClass(Client::class);
+    $client = $clientReflection->newInstanceWithoutConstructor();
+
+    $accessTokenProperty = $clientReflection->getProperty('access_token');
+    $accessTokenProperty->setAccessible(true);
+    $accessTokenProperty->setValue($client, 'existing-long-lived-token');
+
+    $apiProperty = $clientReflection->getProperty('api');
+    $apiProperty->setAccessible(true);
+    $apiProperty->setValue($client, $api);
+
+    expect($client->refreshLongLivedToken())->toBe($tokenResponse);
+});
+
 it('returns mapped instagram accounts from the facebook accounts endpoint', function (): void {
     $pageWithInstagramAccount = \Mockery::mock(Page::class);
     $pageWithInstagramAccount->shouldReceive('getData')
@@ -311,6 +355,51 @@ it('returns an empty array when no instagram media is available', function (): v
     $userIdProperty->setValue($client, '1234567890');
 
     expect($client->getAllMedia())->toBe([]);
+});
+
+it('returns empty story collection when graph endpoint has no media', function (): void {
+    $cursor = new class
+    {
+        public bool $useImplicitFetch = false;
+
+        public function setUseImplicitFetch(bool $useImplicitFetch): void
+        {
+            $this->useImplicitFetch = $useImplicitFetch;
+        }
+
+        public function getArrayCopy(): array
+        {
+            return [];
+        }
+    };
+
+    $igUser = \Mockery::mock('overload:'.IGUser::class);
+    $igUser->shouldReceive('getMedia')
+        ->once()
+        ->with([
+            'id',
+            'caption',
+            'media_type',
+            'media_url',
+            'thumbnail_url',
+            'permalink',
+            'timestamp',
+        ], [
+            'limit' => 100,
+        ])
+        ->andReturn($cursor);
+
+    $clientReflection = new ReflectionClass(Client::class);
+    $client = $clientReflection->newInstanceWithoutConstructor();
+
+    $userIdProperty = $clientReflection->getProperty('user_id');
+    $userIdProperty->setAccessible(true);
+    $userIdProperty->setValue($client, '1234567890');
+
+    $stories = $client->getStories();
+
+    expect($stories)->toHaveCount(0)
+        ->and($cursor->useImplicitFetch)->toBeTrue();
 });
 
 it('gets a single instagram media item from graph endpoint', function (): void {
