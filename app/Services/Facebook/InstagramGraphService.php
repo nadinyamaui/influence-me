@@ -2,9 +2,14 @@
 
 namespace App\Services\Facebook;
 
+use App\Enums\AccountType;
+use App\Exceptions\InstagramApiException;
+use App\Exceptions\InstagramTokenExpiredException;
 use App\Enums\MediaType;
 use App\Models\InstagramAccount;
 use Carbon\Carbon;
+use FacebookAds\Http\Exception\AuthorizationException;
+use FacebookAds\Http\Exception\RequestException;
 
 class InstagramGraphService
 {
@@ -36,5 +41,26 @@ class InstagramGraphService
                 'comments_count' => $media['comments_count'] ?? 0,
             ]);
         }
+    }
+
+    public function getProfile(): array
+    {
+        try {
+            $profile = $this->client->getProfile();
+        } catch (AuthorizationException $exception) {
+            throw new InstagramTokenExpiredException($exception->getMessage(), $exception->getCode(), $exception);
+        } catch (RequestException $exception) {
+            throw new InstagramApiException($exception->getMessage(), $exception->getCode(), $exception);
+        }
+
+        return [
+            'username' => $profile['username'] ?? $this->account->username,
+            'name' => $profile['name'] ?? $this->account->name,
+            'biography' => $profile['biography'] ?? $this->account->biography,
+            'profile_picture_url' => $profile['profile_picture_url'] ?? $this->account->profile_picture_url,
+            'followers_count' => $profile['followers_count'] ?? $this->account->followers_count,
+            'following_count' => $profile['following_count'] ?? $this->account->following_count,
+            'media_count' => $profile['media_count'] ?? $this->account->media_count,
+        ];
     }
 }

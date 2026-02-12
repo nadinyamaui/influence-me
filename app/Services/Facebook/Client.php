@@ -132,13 +132,13 @@ class Client
 
         return [
             'id' => $profile['id'],
-            'username' => $profile['username'],
-            'name' => $profile['name'],
-            'biography' => $profile['biography'],
-            'profile_picture_url' => $profile['profile_picture_url'],
-            'followers_count' => $profile['followers_count'],
-            'following_count' => $profile['follows_count'],
-            'media_count' => $profile['media_count'],
+            'username' => $profile['username'] ?? null,
+            'name' => $profile['name'] ?? null,
+            'biography' => $profile['biography'] ?? null,
+            'profile_picture_url' => $profile['profile_picture_url'] ?? null,
+            'followers_count' => $profile['followers_count'] ?? 0,
+            'following_count' => $profile['follows_count'] ?? 0,
+            'media_count' => $profile['media_count'] ?? 0,
         ];
     }
 

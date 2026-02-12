@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
+- RFC 021: added `App\Jobs\SyncInstagramProfile` queued job with `instagram-sync` queue configuration (`tries=3`, `backoff=[30,60,120]`) and profile sync persistence for `InstagramAccount` fields.
+- RFC 021: added profile retrieval mapping in `app/Services/Facebook/InstagramGraphService.php` and extended `app/Services/Facebook/Client.php`.
+- RFC 021: added typed Instagram profile sync exception handling with `App\Exceptions\InstagramApiException` and `App\Exceptions\InstagramTokenExpiredException`, including graceful token-expiry failure state updates and retryable API failure behavior.
+- RFC 021: added feature coverage in `tests/Feature/Jobs/SyncInstagramProfileTest.php` for successful profile persistence, token-expiry failure handling, retryable API exception propagation, and job queue/backoff configuration.
 - RFC 022: added `App\Jobs\SyncInstagramMedia` queued job with `instagram-sync` queue configuration (`tries=3`, `timeout=300`) and delegated execution through `App\Services\Facebook\InstagramGraphService`.
 - RFC 022: added Instagram media retrieval/mapping flow via `app/Services/Facebook/InstagramGraphService.php` and `app/Services/Facebook/Client.php`, including pagination handling, API-to-enum media type mapping, and idempotent `InstagramMedia::updateOrCreate` persistence.
 - RFC 022: added typed Instagram API error classes in `app/Exceptions/InstagramApiException.php` and `app/Exceptions/InstagramTokenExpiredException.php`, and feature coverage in `tests/Feature/Jobs/SyncInstagramMediaTest.php` for pagination sync behavior, media-type mapping, idempotent updates, and job queue settings.
