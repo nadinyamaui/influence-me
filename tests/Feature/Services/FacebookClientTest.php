@@ -310,6 +310,79 @@ it('returns an empty array when no instagram media is available', function (): v
     expect($client->getAllMedia())->toBe([]);
 });
 
+it('gets a single instagram media item from graph endpoint', function (): void {
+    $mediaResponse = [
+        'id' => '17900000000000001',
+        'caption' => 'Single media caption',
+        'media_type' => 'IMAGE',
+        'media_url' => 'https://example.com/media.jpg',
+        'thumbnail_url' => 'https://example.com/thumb.jpg',
+        'permalink' => 'https://instagram.com/p/example',
+        'timestamp' => '2026-02-12T12:00:00+0000',
+        'like_count' => 34,
+        'comments_count' => 8,
+    ];
+
+    $response = \Mockery::mock(ResponseInterface::class);
+    $response->shouldReceive('getContent')
+        ->once()
+        ->andReturn($mediaResponse);
+
+    $api = \Mockery::mock(Api::class);
+    $api->shouldReceive('call')
+        ->once()
+        ->withArgs(function ($path, $method, $params): bool {
+            return $path === '/17900000000000001'
+                && $method === 'GET'
+                && $params === [
+                    'fields' => 'id,caption,media_type,media_url,thumbnail_url,permalink,timestamp,like_count,comments_count',
+                ];
+        })
+        ->andReturn($response);
+
+    $clientReflection = new ReflectionClass(Client::class);
+    $client = $clientReflection->newInstanceWithoutConstructor();
+
+    $apiProperty = $clientReflection->getProperty('api');
+    $apiProperty->setAccessible(true);
+    $apiProperty->setValue($client, $api);
+
+    expect($client->getMedia(17900000000000001))->toBe($mediaResponse);
+});
+
+it('returns nullable media keys when single instagram media response omits values', function (): void {
+    $response = \Mockery::mock(ResponseInterface::class);
+    $response->shouldReceive('getContent')
+        ->once()
+        ->andReturn([
+            'id' => '17900000000000001',
+        ]);
+
+    $api = \Mockery::mock(Api::class);
+    $api->shouldReceive('call')
+        ->once()
+        ->andReturn($response);
+
+    $clientReflection = new ReflectionClass(Client::class);
+    $client = $clientReflection->newInstanceWithoutConstructor();
+
+    $apiProperty = $clientReflection->getProperty('api');
+    $apiProperty->setAccessible(true);
+    $apiProperty->setValue($client, $api);
+
+    expect($client->getMedia(17900000000000001))->toBe([
+        'id' => '17900000000000001',
+        'caption' => null,
+        'media_type' => null,
+        'media_url' => null,
+        'thumbnail_url' => null,
+        'permalink' => null,
+        'timestamp' => null,
+        'like_count' => null,
+        'comments_count' => null,
+    ]);
+});
+
 it('gets instagram profile data from graph endpoint', function (): void {
     $profile = new class
     {
