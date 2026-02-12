@@ -3,6 +3,9 @@
 use App\Services\Facebook\Client;
 use FacebookAds\Api;
 use FacebookAds\Http\ResponseInterface;
+use FacebookAds\Object\IGUser;
+use FacebookAds\Object\Page;
+use FacebookAds\Object\User;
 
 it('initializes facebook api with configured credentials and default graph version', function (): void {
     config()->set('services.facebook.client_id', 'facebook-client-id');
@@ -64,53 +67,54 @@ it('gets a long lived token from the facebook oauth endpoint', function (): void
 });
 
 it('returns mapped instagram accounts from the facebook accounts endpoint', function (): void {
-    $accountsResponse = [
-        'data' => [
-            [
-                'id' => 'page-1',
-                'name' => 'Creator Page',
-                'access_token' => 'page-token-1',
-                'instagram_business_account' => [
-                    'id' => 'ig-1',
-                    'username' => 'creator.one',
-                    'name' => 'Creator One',
-                    'biography' => 'Creator bio',
-                    'profile_picture_url' => 'https://example.com/pic.jpg',
-                    'followers_count' => 1200,
-                    'follows_count' => 450,
-                    'media_count' => 88,
-                ],
+    $pageWithInstagramAccount = \Mockery::mock(Page::class);
+    $pageWithInstagramAccount->shouldReceive('getData')
+        ->times(2)
+        ->andReturn([
+            'id' => 'page-1',
+            'name' => 'Creator Page',
+            'access_token' => 'page-token-1',
+            'instagram_business_account' => [
+                'id' => 'ig-1',
+                'username' => 'creator.one',
+                'name' => 'Creator One',
+                'biography' => 'Creator bio',
+                'profile_picture_url' => 'https://example.com/pic.jpg',
+                'followers_count' => 1200,
+                'follows_count' => 450,
+                'media_count' => 88,
             ],
-            [
-                'id' => 'page-2',
-                'name' => 'No Instagram Page',
-                'access_token' => 'page-token-2',
-            ],
-        ],
-    ];
+        ]);
 
-    $response = \Mockery::mock(ResponseInterface::class);
-    $response->shouldReceive('getContent')
+    $pageWithoutInstagramAccount = \Mockery::mock(Page::class);
+    $pageWithoutInstagramAccount->shouldReceive('getData')
         ->once()
-        ->andReturn($accountsResponse);
+        ->andReturn([
+            'id' => 'page-2',
+            'name' => 'No Instagram Page',
+            'access_token' => 'page-token-2',
+        ]);
 
-    $api = \Mockery::mock(Api::class);
-    $api->shouldReceive('call')
+    $facebookUser = \Mockery::mock('overload:'.User::class);
+    $facebookUser->shouldReceive('getAccounts')
         ->once()
-        ->withArgs(function ($path, $method, $params): bool {
-            return $path === '/me/accounts'
-                && $method === 'GET'
-                && is_string($params['fields'] ?? null)
-                && str_contains($params['fields'], 'instagram_business_account{');
-        })
-        ->andReturn($response);
+        ->with([
+            'id',
+            'name',
+            'access_token',
+            'category',
+            'followers_count',
+            'verification_status',
+            'instagram_business_account{id,username,name,biography,profile_picture_url,followers_count,follows_count,media_count}',
+        ])
+        ->andReturn(new ArrayObject([$pageWithInstagramAccount, $pageWithoutInstagramAccount]));
 
     $clientReflection = new ReflectionClass(Client::class);
     $client = $clientReflection->newInstanceWithoutConstructor();
 
-    $apiProperty = $clientReflection->getProperty('api');
-    $apiProperty->setAccessible(true);
-    $apiProperty->setValue($client, $api);
+    $userIdProperty = $clientReflection->getProperty('user_id');
+    $userIdProperty->setAccessible(true);
+    $userIdProperty->setValue($client, '1234567890');
 
     expect($client->accounts()->all())->toBe([
         [
@@ -128,76 +132,81 @@ it('returns mapped instagram accounts from the facebook accounts endpoint', func
 });
 
 it('filters out accounts without instagram id and normalizes biography', function (): void {
-    $accountsResponse = [
-        'data' => [
-            [
-                'id' => 'page-1',
-                'name' => 'Creator Page',
-                'access_token' => 'page-token-1',
-                'instagram_business_account' => [
-                    'id' => 'ig-1',
-                    'username' => 'creator.one',
-                    'name' => 'Creator One',
-                    'biography' => '   padded bio   ',
-                    'profile_picture_url' => 'https://example.com/pic.jpg',
-                    'followers_count' => 1200,
-                    'follows_count' => 450,
-                    'media_count' => 88,
-                ],
+    $pageWithInstagramId = \Mockery::mock(Page::class);
+    $pageWithInstagramId->shouldReceive('getData')
+        ->times(2)
+        ->andReturn([
+            'id' => 'page-1',
+            'name' => 'Creator Page',
+            'access_token' => 'page-token-1',
+            'instagram_business_account' => [
+                'id' => 'ig-1',
+                'username' => 'creator.one',
+                'name' => 'Creator One',
+                'biography' => '   padded bio   ',
+                'profile_picture_url' => 'https://example.com/pic.jpg',
+                'followers_count' => 1200,
+                'follows_count' => 450,
+                'media_count' => 88,
             ],
-            [
-                'id' => 'page-2',
-                'name' => 'No Instagram Id',
-                'access_token' => 'page-token-2',
-                'instagram_business_account' => [
-                    'username' => 'missing.id',
-                    'name' => 'Missing ID',
-                    'profile_picture_url' => 'https://example.com/missing.jpg',
-                    'followers_count' => 10,
-                    'follows_count' => 20,
-                    'media_count' => 30,
-                ],
-            ],
-            [
-                'id' => 'page-3',
-                'name' => 'Null Biography',
-                'access_token' => 'page-token-3',
-                'instagram_business_account' => [
-                    'id' => null,
-                    'username' => 'null.id',
-                    'name' => 'Null ID',
-                    'profile_picture_url' => 'https://example.com/null.jpg',
-                    'followers_count' => 10,
-                    'follows_count' => 20,
-                    'media_count' => 30,
-                    'biography' => null,
-                ],
-            ],
-        ],
-    ];
+        ]);
 
-    $response = \Mockery::mock(ResponseInterface::class);
-    $response->shouldReceive('getContent')
+    $pageWithoutInstagramId = \Mockery::mock(Page::class);
+    $pageWithoutInstagramId->shouldReceive('getData')
         ->once()
-        ->andReturn($accountsResponse);
+        ->andReturn([
+            'id' => 'page-2',
+            'name' => 'No Instagram Id',
+            'access_token' => 'page-token-2',
+            'instagram_business_account' => [
+                'username' => 'missing.id',
+                'name' => 'Missing ID',
+                'profile_picture_url' => 'https://example.com/missing.jpg',
+                'followers_count' => 10,
+                'follows_count' => 20,
+                'media_count' => 30,
+            ],
+        ]);
 
-    $api = \Mockery::mock(Api::class);
-    $api->shouldReceive('call')
+    $pageWithNullInstagramId = \Mockery::mock(Page::class);
+    $pageWithNullInstagramId->shouldReceive('getData')
         ->once()
-        ->withArgs(function ($path, $method, $params): bool {
-            return $path === '/me/accounts'
-                && $method === 'GET'
-                && is_string($params['fields'] ?? null)
-                && str_contains($params['fields'], 'instagram_business_account{');
-        })
-        ->andReturn($response);
+        ->andReturn([
+            'id' => 'page-3',
+            'name' => 'Null Biography',
+            'access_token' => 'page-token-3',
+            'instagram_business_account' => [
+                'id' => null,
+                'username' => 'null.id',
+                'name' => 'Null ID',
+                'profile_picture_url' => 'https://example.com/null.jpg',
+                'followers_count' => 10,
+                'follows_count' => 20,
+                'media_count' => 30,
+                'biography' => null,
+            ],
+        ]);
+
+    $facebookUser = \Mockery::mock('overload:'.User::class);
+    $facebookUser->shouldReceive('getAccounts')
+        ->once()
+        ->with([
+            'id',
+            'name',
+            'access_token',
+            'category',
+            'followers_count',
+            'verification_status',
+            'instagram_business_account{id,username,name,biography,profile_picture_url,followers_count,follows_count,media_count}',
+        ])
+        ->andReturn(new ArrayObject([$pageWithInstagramId, $pageWithoutInstagramId, $pageWithNullInstagramId]));
 
     $clientReflection = new ReflectionClass(Client::class);
     $client = $clientReflection->newInstanceWithoutConstructor();
 
-    $apiProperty = $clientReflection->getProperty('api');
-    $apiProperty->setAccessible(true);
-    $apiProperty->setValue($client, $api);
+    $userIdProperty = $clientReflection->getProperty('user_id');
+    $userIdProperty->setAccessible(true);
+    $userIdProperty->setValue($client, '1234567890');
 
     expect($client->accounts()->all())->toBe([
         [
@@ -212,4 +221,91 @@ it('filters out accounts without instagram id and normalizes biography', functio
             'access_token' => 'page-token-1',
         ],
     ]);
+});
+
+it('gets all instagram media from graph endpoint', function (): void {
+    $mediaOne = new class
+    {
+        public function exportAllData(): array
+        {
+            return ['id' => 'media-1', 'media_type' => 'IMAGE'];
+        }
+    };
+
+    $mediaTwo = new class
+    {
+        public function exportAllData(): array
+        {
+            return ['id' => 'media-2', 'media_type' => 'VIDEO'];
+        }
+    };
+
+    $cursor = new class([$mediaOne, $mediaTwo]) implements IteratorAggregate
+    {
+        public function __construct(private array $items) {}
+
+        public function setUseImplicitFetch(bool $useImplicitFetch): void {}
+
+        public function getIterator(): Traversable
+        {
+            return new ArrayIterator($this->items);
+        }
+    };
+
+    $igUser = \Mockery::mock('overload:'.IGUser::class);
+    $igUser->shouldReceive('getMedia')
+        ->once()
+        ->with([
+            'id',
+            'caption',
+            'media_type',
+            'media_product_type',
+            'media_url',
+            'thumbnail_url',
+            'permalink',
+            'timestamp',
+            'like_count',
+            'comments_count',
+        ])
+        ->andReturn($cursor);
+
+    $clientReflection = new ReflectionClass(Client::class);
+    $client = $clientReflection->newInstanceWithoutConstructor();
+
+    $userIdProperty = $clientReflection->getProperty('user_id');
+    $userIdProperty->setAccessible(true);
+    $userIdProperty->setValue($client, '1234567890');
+
+    expect($client->getAllMedia())->toBe([
+        ['id' => 'media-1', 'media_type' => 'IMAGE'],
+        ['id' => 'media-2', 'media_type' => 'VIDEO'],
+    ]);
+});
+
+it('returns an empty array when no instagram media is available', function (): void {
+    $cursor = new class([]) implements IteratorAggregate
+    {
+        public function __construct(private array $items) {}
+
+        public function setUseImplicitFetch(bool $useImplicitFetch): void {}
+
+        public function getIterator(): Traversable
+        {
+            return new ArrayIterator($this->items);
+        }
+    };
+
+    $igUser = \Mockery::mock('overload:'.IGUser::class);
+    $igUser->shouldReceive('getMedia')
+        ->once()
+        ->andReturn($cursor);
+
+    $clientReflection = new ReflectionClass(Client::class);
+    $client = $clientReflection->newInstanceWithoutConstructor();
+
+    $userIdProperty = $clientReflection->getProperty('user_id');
+    $userIdProperty->setAccessible(true);
+    $userIdProperty->setValue($client, '1234567890');
+
+    expect($client->getAllMedia())->toBe([]);
 });

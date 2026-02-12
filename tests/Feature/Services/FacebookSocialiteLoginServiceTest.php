@@ -62,7 +62,7 @@ it('creates the influencer user, logs them in, and syncs instagram accounts on c
 
         public function getId(): string
         {
-            return 'facebook-user-123';
+            return '1234567890123';
         }
 
         public function getName(): string
@@ -93,7 +93,7 @@ it('creates the influencer user, logs them in, and syncs instagram accounts on c
         ->andReturn(['access_token' => 'long-lived-token']);
     $service->shouldReceive('getAccounts')
         ->once()
-        ->with('long-lived-token')
+        ->with('1234567890123', 'long-lived-token')
         ->andReturn(collect([
             [
                 'instagram_user_id' => 'ig-1',
@@ -122,7 +122,7 @@ it('creates the influencer user, logs them in, and syncs instagram accounts on c
     $resolvedUser = $service->resolveUserFromCallback();
 
     expect($resolvedUser->socialite_user_type)->toBe('facebook')
-        ->and($resolvedUser->socialite_user_id)->toBe('facebook-user-123')
+        ->and($resolvedUser->socialite_user_id)->toBe('1234567890123')
         ->and($resolvedUser->email)->toBe('social@example.com');
     $this->assertAuthenticatedAs($resolvedUser);
     $this->assertDatabaseCount('users', 1);
@@ -145,7 +145,7 @@ it('updates existing user and instagram account records on callback', function (
         'name' => 'Old Name',
         'email' => 'old@example.com',
         'socialite_user_type' => 'facebook',
-        'socialite_user_id' => 'facebook-user-123',
+        'socialite_user_id' => '1234567890123',
     ]);
 
     InstagramAccount::factory()->create([
@@ -162,7 +162,7 @@ it('updates existing user and instagram account records on callback', function (
 
         public function getId(): string
         {
-            return 'facebook-user-123';
+            return '1234567890123';
         }
 
         public function getName(): string
@@ -193,7 +193,7 @@ it('updates existing user and instagram account records on callback', function (
         ->andReturn(['access_token' => 'long-lived-token']);
     $service->shouldReceive('getAccounts')
         ->once()
-        ->with('long-lived-token')
+        ->with('1234567890123', 'long-lived-token')
         ->andReturn(collect([
             [
                 'instagram_user_id' => 'ig-1',

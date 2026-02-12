@@ -34,7 +34,7 @@ class FacebookSocialiteLoginService
         $user = $this->createUpdateUser($socialiteUser);
         auth()->login($user);
         $token = $this->exchangeToken($socialiteUser);
-        $this->getAccounts($token['access_token'])->each(function ($account) use ($user) {
+        $this->getAccounts($socialiteUser->getId(), $token['access_token'])->each(function ($account) use ($user) {
             $user->instagramAccounts()->updateOrCreate([
                 'instagram_user_id' => $account['instagram_user_id'],
             ], $account);
@@ -59,8 +59,8 @@ class FacebookSocialiteLoginService
         return new Client($socialiteUser->token)->getLongLivedToken();
     }
 
-    protected function getAccounts(string $token): Collection
+    protected function getAccounts(string $id, string $token): Collection
     {
-        return new Client($token)->accounts();
+        return new Client($token, $id)->accounts();
     }
 }

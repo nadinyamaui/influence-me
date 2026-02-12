@@ -5,6 +5,9 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
+- RFC 022: added `App\Jobs\SyncInstagramMedia` queued job with `instagram-sync` queue configuration (`tries=3`, `timeout=300`) and delegated execution through `App\Services\Facebook\MediaService`.
+- RFC 022: added Instagram media retrieval/mapping flow via `app/Services/Facebook/MediaService.php` and `app/Services/Facebook/Client.php`, including pagination handling, API-to-enum media type mapping, and idempotent `InstagramMedia::updateOrCreate` persistence.
+- RFC 022: added typed Instagram API error classes in `app/Exceptions/InstagramApiException.php` and `app/Exceptions/InstagramTokenExpiredException.php`, and feature coverage in `tests/Feature/Jobs/SyncInstagramMediaTest.php` for pagination sync behavior, media-type mapping, idempotent updates, and job queue settings.
 - RFC 002: added backed string enums in `app/Enums/` for media, clients, proposals, invoices, scheduled posts, demographics, account type, and sync status.
 - RFC 002: added unit coverage in `tests/Unit/EnumsTest.php` to verify enum cases and lowercase backed values.
 - RFC 003: added `InstagramAccount` model with guarded attributes, enum/date/boolean/encrypted casts, and influencer/media/demographics relationships.

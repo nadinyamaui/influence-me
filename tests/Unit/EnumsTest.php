@@ -16,6 +16,38 @@ it('defines all media type enum cases', function (): void {
         ->and(MediaType::Story->value)->toBe('story');
 });
 
+it('parses image and carousel media as post', function (): void {
+    expect(MediaType::parse(['media_type' => 'IMAGE']))->toBe(MediaType::Post)
+        ->and(MediaType::parse(['media_type' => 'CAROUSEL_ALBUM']))->toBe(MediaType::Post);
+});
+
+it('parses reels media product type as reel', function (): void {
+    expect(MediaType::parse([
+        'media_type' => 'VIDEO',
+        'media_product_type' => 'REELS',
+    ]))->toBe(MediaType::Reel);
+});
+
+it('parses video permalink containing reel path as reel', function (): void {
+    expect(MediaType::parse([
+        'media_type' => 'VIDEO',
+        'permalink' => 'https://instagram.com/reel/abc123',
+    ]))->toBe(MediaType::Reel);
+});
+
+it('parses non-reel video as post', function (): void {
+    expect(MediaType::parse([
+        'media_type' => 'VIDEO',
+        'media_product_type' => 'FEED',
+        'permalink' => 'https://instagram.com/p/abc123',
+    ]))->toBe(MediaType::Post);
+});
+
+it('parses unknown media type as post', function (): void {
+    expect(MediaType::parse(['media_type' => 'STORY']))->toBe(MediaType::Post)
+        ->and(MediaType::parse([]))->toBe(MediaType::Post);
+});
+
 it('defines all client type enum cases', function (): void {
     expect(ClientType::cases())->toHaveCount(2)
         ->and(ClientType::Brand->value)->toBe('brand')
