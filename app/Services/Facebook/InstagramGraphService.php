@@ -115,16 +115,21 @@ class InstagramGraphService
         if (($this->account->followers_count ?? 0) < 100) {
             return;
         }
-        collect($this->client->getAudienceDemographics())
-            ->each(function ($audience, $key) {
+
+        $audiences = collect($this->client->getAudienceDemographics());
+        $recordedAt = now();
+
+        $this->account->audienceDemographics()->delete();
+
+        $audiences
+            ->each(function ($audience, $key) use ($recordedAt) {
                 $totalForType = collect($audience)->sum();
                 foreach ($audience as $dimension => $value) {
-                    $this->account->audienceDemographics()->updateOrCreate([
+                    $this->account->audienceDemographics()->create([
                         'type' => $key,
                         'dimension' => $dimension,
-                    ], [
                         'value' => $totalForType > 0 ? ($value * 100 / $totalForType) : 0,
-                        'recorded_at' => now(),
+                        'recorded_at' => $recordedAt,
                     ]);
                 }
             });
