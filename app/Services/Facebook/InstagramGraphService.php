@@ -55,12 +55,12 @@ class InstagramGraphService
 
         return [
             'username' => $profile['username'] ?? null,
-            'name' => $profile['name'] ?? null,
-            'biography' => $profile['biography'] ?? null,
-            'profile_picture_url' => $profile['profile_picture_url'] ?? null,
-            'followers_count' => $profile['followers_count'] ?? 0,
-            'following_count' => $profile['following_count'] ?? 0,
-            'media_count' => $profile['media_count'] ?? 0,
+            'name' => $profile['name'] ?? $this->account->name,
+            'biography' => $profile['biography'] ?? $this->account->biography,
+            'profile_picture_url' => $profile['profile_picture_url'] ?? $this->account->profile_picture_url,
+            'followers_count' => $profile['followers_count'] ?? $this->account->followers_count,
+            'following_count' => $profile['following_count'] ?? $this->account->following_count,
+            'media_count' => $profile['media_count'] ?? $this->account->media_count,
         ];
     }
 }
