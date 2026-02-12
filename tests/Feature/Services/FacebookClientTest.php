@@ -4,8 +4,8 @@ use App\Exceptions\InstagramApiException;
 use App\Exceptions\InstagramTokenExpiredException;
 use App\Services\Facebook\Client;
 use FacebookAds\Api;
+use FacebookAds\Http\Exception\RequestException;
 use FacebookAds\Http\ResponseInterface;
-use Illuminate\Support\Facades\Http;
 
 it('initializes facebook api with configured credentials and default graph version', function (): void {
     config()->set('services.facebook.client_id', 'facebook-client-id');
@@ -218,49 +218,101 @@ it('filters out accounts without instagram id and normalizes biography', functio
 });
 
 it('gets instagram media from graph endpoint', function (): void {
-    Http::fake([
-        'https://graph.instagram.com/v21.0/me/media*' => Http::response([
-            'data' => [
-                [
-                    'id' => 'media-1',
-                    'media_type' => 'IMAGE',
-                ],
+    $mediaResponse = [
+        'data' => [
+            [
+                'id' => 'media-1',
+                'media_type' => 'IMAGE',
             ],
-        ], 200),
-    ]);
+        ],
+    ];
 
-    $client = new Client('instagram-access-token');
-    $response = $client->getMedia('cursor-123');
+    $response = \Mockery::mock(ResponseInterface::class);
+    $response->shouldReceive('getContent')
+        ->once()
+        ->andReturn($mediaResponse);
 
-    expect($response['data'][0]['id'])->toBe('media-1');
+    $api = \Mockery::mock(Api::class);
+    $api->shouldReceive('call')
+        ->once()
+        ->withArgs(function ($path, $method, $params): bool {
+            return $path === '/me/media'
+                && $method === 'GET'
+                && ($params['after'] ?? null) === 'cursor-123'
+                && str_contains((string) ($params['fields'] ?? null), 'media_type');
+        })
+        ->andReturn($response);
 
-    Http::assertSent(function ($request): bool {
-        return $request->url() === 'https://graph.instagram.com/v21.0/me/media?fields=id%2Ccaption%2Cmedia_type%2Cmedia_product_type%2Cmedia_url%2Cthumbnail_url%2Cpermalink%2Ctimestamp%2Clike_count%2Ccomments_count&access_token=instagram-access-token&after=cursor-123';
-    });
+    $clientReflection = new ReflectionClass(Client::class);
+    $client = $clientReflection->newInstanceWithoutConstructor();
+
+    $apiProperty = $clientReflection->getProperty('api');
+    $apiProperty->setAccessible(true);
+    $apiProperty->setValue($client, $api);
+
+    expect($client->getMedia('cursor-123'))->toBe($mediaResponse);
 });
 
 it('throws typed exception when instagram token is expired', function (): void {
-    Http::fake([
-        'https://graph.instagram.com/v21.0/me/media*' => Http::response([
+    $errorResponse = \Mockery::mock(ResponseInterface::class);
+    $errorResponse->shouldReceive('getHeaders')
+        ->once()
+        ->andReturn([]);
+    $errorResponse->shouldReceive('getContent')
+        ->atLeast()
+        ->once()
+        ->andReturn([
             'error' => [
                 'code' => 190,
+                'message' => 'Invalid OAuth access token.',
             ],
-        ], 400),
-    ]);
+        ]);
 
-    $client = new Client('expired-token');
+    $requestException = new RequestException($errorResponse);
+
+    $api = \Mockery::mock(Api::class);
+    $api->shouldReceive('call')
+        ->once()
+        ->andThrow($requestException);
+
+    $clientReflection = new ReflectionClass(Client::class);
+    $client = $clientReflection->newInstanceWithoutConstructor();
+
+    $apiProperty = $clientReflection->getProperty('api');
+    $apiProperty->setAccessible(true);
+    $apiProperty->setValue($client, $api);
+
     $client->getMedia();
 })->throws(InstagramTokenExpiredException::class);
 
 it('throws generic instagram api exception for non-token api errors', function (): void {
-    Http::fake([
-        'https://graph.instagram.com/v21.0/me/media*' => Http::response([
+    $errorResponse = \Mockery::mock(ResponseInterface::class);
+    $errorResponse->shouldReceive('getHeaders')
+        ->once()
+        ->andReturn([]);
+    $errorResponse->shouldReceive('getContent')
+        ->atLeast()
+        ->once()
+        ->andReturn([
             'error' => [
                 'code' => 4,
+                'message' => 'Application request limit reached.',
             ],
-        ], 400),
-    ]);
+        ]);
 
-    $client = new Client('invalid-token');
+    $requestException = new RequestException($errorResponse);
+
+    $api = \Mockery::mock(Api::class);
+    $api->shouldReceive('call')
+        ->once()
+        ->andThrow($requestException);
+
+    $clientReflection = new ReflectionClass(Client::class);
+    $client = $clientReflection->newInstanceWithoutConstructor();
+
+    $apiProperty = $clientReflection->getProperty('api');
+    $apiProperty->setAccessible(true);
+    $apiProperty->setValue($client, $api);
+
     $client->getMedia();
 })->throws(InstagramApiException::class);

@@ -30,7 +30,7 @@ class SyncInstagramMedia implements ShouldQueue
 
     public function handle(): void
     {
-        $graphService = new InstagramGraphService($this->account);
+        $graphService = app(InstagramGraphService::class)->forAccount($this->account);
         $after = null;
 
         do {

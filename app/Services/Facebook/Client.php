@@ -5,9 +5,8 @@ namespace App\Services\Facebook;
 use App\Exceptions\InstagramApiException;
 use App\Exceptions\InstagramTokenExpiredException;
 use FacebookAds\Api;
-use Illuminate\Http\Client\RequestException;
+use FacebookAds\Http\Exception\RequestException;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Http;
 
 class Client
 {
@@ -72,29 +71,24 @@ class Client
 
     public function getMedia(?string $after = null): array
     {
-        $query = [
+        $params = [
             'fields' => 'id,caption,media_type,media_product_type,media_url,thumbnail_url,permalink,timestamp,like_count,comments_count',
-            'access_token' => $this->access_token,
         ];
 
         if ($after !== null) {
-            $query['after'] = $after;
+            $params['after'] = $after;
         }
 
         try {
-            $response = Http::baseUrl('https://graph.instagram.com/v21.0')
-                ->get('/me/media', $query)
-                ->throw();
+            return $this->api->call('/me/media', params: $params)->getContent();
         } catch (RequestException $exception) {
-            $errorCode = $exception->response->json('error.code');
+            $errorCode = (int) $exception->getCode();
 
-            if ((int) $errorCode === 190) {
+            if ($errorCode === 190) {
                 throw new InstagramTokenExpiredException('Instagram access token is expired.', 190, $exception);
             }
 
-            throw new InstagramApiException('Instagram media request failed.', (int) ($errorCode ?? 0), $exception);
+            throw new InstagramApiException('Instagram media request failed.', $errorCode, $exception);
         }
-
-        return $response->json();
     }
 }
