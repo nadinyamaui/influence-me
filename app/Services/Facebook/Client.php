@@ -182,7 +182,7 @@ class Client
         return $result;
     }
 
-    public function getStories()
+    public function getStories(): Collection
     {
         $igUser = new IGUser($this->user_id);
         $cursor = $igUser->getMedia([
@@ -198,9 +198,10 @@ class Client
         ]);
         $cursor->setUseImplicitFetch(true);
 
-        return collect($cursor->getArrayCopy())->filter(function (IGMedia $media) {
-            return strtolower($media->getData()['media_type']) === MediaType::Story->value;
-        });
+        return collect($cursor->getArrayCopy())
+            ->map(fn (IGMedia $media): array => $media->exportAllData())
+            ->filter(fn (array $media): bool => strtolower($media['media_type'] ?? '') === MediaType::Story->value)
+            ->values();
     }
 
     public function refreshLongLivedToken(): array

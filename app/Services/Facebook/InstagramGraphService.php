@@ -72,6 +72,24 @@ class InstagramGraphService
             });
     }
 
+    public function syncStories(): void
+    {
+        $stories = $this->client->getStories();
+        foreach ($stories as $story) {
+            $this->account->instagramMedia()->updateOrCreate([
+                'instagram_media_id' => $story['id'],
+            ], [
+                'instagram_account_id' => $this->account->id,
+                'media_type' => MediaType::Story,
+                'caption' => $story['caption'] ?? null,
+                'permalink' => $story['permalink'] ?? null,
+                'media_url' => $story['media_url'] ?? null,
+                'thumbnail_url' => $story['thumbnail_url'] ?? null,
+                'published_at' => Carbon::parse($story['timestamp']),
+            ]);
+        }
+    }
+
     public function getProfile(): array
     {
         try {
