@@ -124,6 +124,7 @@ class InstagramGraphService
                         'dimension' => $dimension,
                     ], [
                         'value' => $totalForType > 0 ? ($value * 100 / $totalForType) : 0,
+                        'recorded_at' => now(),
                     ]);
                 }
             });
