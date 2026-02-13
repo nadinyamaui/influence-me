@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\SyncStatus;
 use App\Jobs\RefreshInstagramToken;
 use App\Jobs\SyncAllInstagramData;
 use App\Jobs\SyncInstagramProfile;
@@ -14,9 +15,11 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 Schedule::call(function (): void {
-    InstagramAccount::query()->each(function (InstagramAccount $account): void {
-        SyncAllInstagramData::dispatch($account);
-    });
+    InstagramAccount::query()
+        ->where('sync_status', '!=', SyncStatus::Syncing->value)
+        ->each(function (InstagramAccount $account): void {
+            SyncAllInstagramData::dispatch($account);
+        });
 })->everySixHours()->name('sync-all-instagram');
 
 Schedule::call(function (): void {
@@ -27,8 +30,10 @@ Schedule::call(function (): void {
 })->hourly()->name('refresh-instagram-insights');
 
 Schedule::call(function (): void {
+    $now = now();
+
     InstagramAccount::query()
-        ->where('token_expires_at', '<=', now()->addDays(7))
+        ->whereBetween('token_expires_at', [$now, $now->copy()->addDays(7)])
         ->each(function (InstagramAccount $account): void {
             RefreshInstagramToken::dispatch($account);
         });
