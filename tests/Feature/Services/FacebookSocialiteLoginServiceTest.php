@@ -255,3 +255,70 @@ it('updates existing user and instagram account records on callback', function (
         'followers_count' => 999,
     ]);
 });
+
+it('throws a social authentication exception when instagram account is linked to another user', function (): void {
+    $conflictingUser = User::factory()->create();
+    InstagramAccount::factory()->create([
+        'user_id' => $conflictingUser->id,
+        'instagram_user_id' => 'ig-1',
+    ]);
+
+    $socialiteUser = new class
+    {
+        public string $token = 'short-lived-token';
+
+        public function getId(): string
+        {
+            return '1234567890123';
+        }
+
+        public function getName(): string
+        {
+            return 'Social User';
+        }
+
+        public function getEmail(): string
+        {
+            return 'social@example.com';
+        }
+    };
+
+    Socialite::shouldReceive('driver')
+        ->once()
+        ->with('facebook')
+        ->andReturnSelf();
+    Socialite::shouldReceive('user')
+        ->once()
+        ->andReturn($socialiteUser);
+
+    $service = \Mockery::mock(FacebookSocialiteLoginService::class)
+        ->makePartial()
+        ->shouldAllowMockingProtectedMethods();
+    $service->shouldReceive('exchangeToken')
+        ->once()
+        ->with($socialiteUser)
+        ->andReturn(['access_token' => 'long-lived-token']);
+    $service->shouldReceive('getAccounts')
+        ->once()
+        ->with('1234567890123', 'long-lived-token')
+        ->andReturn(collect([
+            [
+                'instagram_user_id' => 'ig-1',
+                'username' => 'ig_one',
+                'name' => 'IG One',
+                'biography' => 'Bio one',
+                'profile_picture_url' => 'https://example.test/ig-1.jpg',
+                'followers_count' => 1000,
+                'following_count' => 150,
+                'media_count' => 42,
+                'access_token' => 'page-token-1',
+            ],
+        ]));
+
+    expect(fn () => $service->resolveUserFromCallback())
+        ->toThrow(SocialAuthenticationException::class, 'One or more Instagram accounts are linked to a different user.');
+    $this->assertDatabaseMissing('users', [
+        'socialite_user_type' => 'facebook',
+        'socialite_user_id' => '1234567890123',
+    ]);
+});
