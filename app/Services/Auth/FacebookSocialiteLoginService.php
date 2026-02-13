@@ -31,6 +31,8 @@ class FacebookSocialiteLoginService
         if (! $socialiteUser->getId()) {
             throw new SocialAuthenticationException('Facebook did not return required account information.');
         }
+        $this->ensureNoConflictingEmailUser($socialiteUser);
+
         $user = $this->createUpdateUser($socialiteUser);
         auth()->login($user);
         $token = $this->exchangeToken($socialiteUser);
@@ -52,6 +54,22 @@ class FacebookSocialiteLoginService
             'name' => $socialiteUser->getName(),
             'email' => $socialiteUser->getEmail(),
         ]);
+    }
+
+    protected function ensureNoConflictingEmailUser($socialiteUser): void
+    {
+        $existingUserByEmail = User::query()
+            ->where('email', $socialiteUser->getEmail())
+            ->first();
+        if (
+            $existingUserByEmail !== null
+            && (
+                $existingUserByEmail->socialite_user_type !== 'facebook'
+                || $existingUserByEmail->socialite_user_id !== $socialiteUser->getId()
+            )
+        ) {
+            throw new SocialAuthenticationException('A user with this email already exists.');
+        }
     }
 
     protected function exchangeToken($socialiteUser): array
