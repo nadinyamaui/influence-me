@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
+- RFC 027: added `App\Jobs\SyncAllInstagramData` orchestrator job to dispatch a chained Instagram sync workflow (`SyncInstagramProfile -> SyncInstagramMedia -> SyncMediaInsights -> SyncInstagramStories -> SyncAudienceDemographics`) on the `instagram-sync` queue with typed failure-state updates.
+- RFC 027: added `App\Jobs\MarkInstagramSyncComplete` to finalize successful sync chains by setting `sync_status=idle`, stamping `last_synced_at`, and clearing `last_sync_error`.
+- RFC 027: added scheduler automation in `routes/console.php` for full Instagram sync every 6 hours (`sync-all-instagram`), profile/insights refresh hourly (`refresh-instagram-insights`), and token refresh daily for accounts expiring within 7 days (`refresh-instagram-tokens`).
+- RFC 027: updated Horizon queue worker defaults in `config/horizon.php` to include `instagram-sync` and added queue wait threshold configuration for `redis:instagram-sync`.
+- RFC 027: added feature coverage in `tests/Feature/Jobs/SyncAllInstagramDataTest.php` and `tests/Feature/Console/InstagramSchedulingTest.php` for orchestrator chaining/order, failure callback behavior, completion-state updates, scheduler registration, cadence, and scheduled dispatch filters.
 - RFC 026: added `App\Jobs\RefreshInstagramToken` queued job with `instagram-sync` queue configuration (`tries=3`, `backoff=[60,300,900]`) and token refresh persistence for `InstagramAccount`.
 - RFC 026: added token refresh handling in `app/Services/Facebook/InstagramGraphService.php` with typed exception mapping and strict validation for refresh responses that must include `access_token`.
 - RFC 026: added feature coverage in `tests/Feature/Jobs/RefreshInstagramTokenTest.php` for successful token refresh persistence, already-expired token handling, expired-token API responses, retryable API failure propagation, and queue/backoff configuration.
