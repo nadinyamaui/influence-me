@@ -3,6 +3,7 @@
 namespace App\Services\Auth;
 
 use App\Exceptions\Auth\SocialAuthenticationException;
+use App\Models\InstagramAccount;
 use App\Models\User;
 use App\Services\Facebook\Client;
 use Illuminate\Http\RedirectResponse;
@@ -32,10 +33,13 @@ class FacebookSocialiteLoginService
             throw new SocialAuthenticationException('Facebook did not return required account information.');
         }
         $this->ensureNoConflictingEmailUser($socialiteUser);
+        $existingUser = $this->findExistingSocialiteUser($socialiteUser);
+        $token = $this->exchangeToken($socialiteUser);
+        $accounts = $this->getAccounts($socialiteUser->getId(), $token['access_token']);
+        $this->ensureInstagramAccountsBelongToUser($existingUser, $accounts);
         $user = $this->createUpdateUser($socialiteUser);
         auth()->login($user);
-        $token = $this->exchangeToken($socialiteUser);
-        $this->getAccounts($socialiteUser->getId(), $token['access_token'])->each(function ($account) use ($user) {
+        $accounts->each(function ($account) use ($user) {
             $user->instagramAccounts()->updateOrCreate([
                 'instagram_user_id' => $account['instagram_user_id'],
             ], $account);
@@ -68,6 +72,40 @@ class FacebookSocialiteLoginService
             )
         ) {
             throw new SocialAuthenticationException('A user with this email already exists.');
+        }
+    }
+
+    protected function findExistingSocialiteUser($socialiteUser): ?User
+    {
+        return User::query()
+            ->where('socialite_user_type', 'facebook')
+            ->where('socialite_user_id', $socialiteUser->getId())
+            ->first();
+    }
+
+    protected function ensureInstagramAccountsBelongToUser(?User $user, Collection $accounts): void
+    {
+        $instagramUserIds = $accounts
+            ->pluck('instagram_user_id')
+            ->filter()
+            ->values();
+        if ($instagramUserIds->isEmpty()) {
+            return;
+        }
+
+        $conflictingAccount = InstagramAccount::query()
+            ->whereIn('instagram_user_id', $instagramUserIds)
+            ->when(
+                $user,
+                fn ($query) => $query->where('user_id', '!=', $user->id),
+            )
+            ->when(
+                $user === null,
+                fn ($query) => $query->whereNotNull('user_id'),
+            )
+            ->first();
+        if ($conflictingAccount !== null) {
+            throw new SocialAuthenticationException('One or more Instagram accounts are linked to a different user.');
         }
     }
 
