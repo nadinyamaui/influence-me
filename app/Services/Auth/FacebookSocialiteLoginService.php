@@ -32,7 +32,6 @@ class FacebookSocialiteLoginService
             throw new SocialAuthenticationException('Facebook did not return required account information.');
         }
         $this->ensureNoConflictingEmailUser($socialiteUser);
-
         $user = $this->createUpdateUser($socialiteUser);
         auth()->login($user);
         $token = $this->exchangeToken($socialiteUser);
