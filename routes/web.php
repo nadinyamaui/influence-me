@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Auth\FacebookAuthController;
 use App\Livewire\Dashboard;
+use App\Livewire\InstagramAccounts\Index as InstagramAccountsIndex;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -17,6 +18,10 @@ Route::get('/auth/facebook/callback', [FacebookAuthController::class, 'callback'
 Route::livewire('dashboard', Dashboard::class)
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
+
+Route::livewire('instagram-accounts', InstagramAccountsIndex::class)
+    ->middleware(['auth'])
+    ->name('instagram-accounts.index');
 
 require __DIR__.'/settings.php';
 require __DIR__.'/portal.php';

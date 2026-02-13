@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
+- RFC 028: added `App\Livewire\InstagramAccounts\Index` and `resources/views/pages/instagram-accounts/index.blade.php` to deliver the authenticated `/instagram-accounts` list page with account avatars, username/type/primary badges, follower and media counts, sync status indicators, relative last sync time, token active/expired/expiring-soon states, and an empty-state CTA placeholder.
+- RFC 028: added route wiring in `routes/web.php` (`instagram-accounts.index`), updated influencer navigation links in `resources/views/layouts/app/sidebar.blade.php` and `resources/views/layouts/app/header.blade.php` to point to the new page with active-state support, and added feature coverage in `tests/Feature/InstagramAccountsPageTest.php` plus navigation assertion updates in `tests/Feature/NavigationStructureTest.php`.
 - RFC 026: added `App\Jobs\RefreshInstagramToken` queued job with `instagram-sync` queue configuration (`tries=3`, `backoff=[60,300,900]`) and token refresh persistence for `InstagramAccount`.
 - RFC 026: added token refresh handling in `app/Services/Facebook/InstagramGraphService.php` with typed exception mapping and strict validation for refresh responses that must include `access_token`.
 - RFC 026: added feature coverage in `tests/Feature/Jobs/RefreshInstagramTokenTest.php` for successful token refresh persistence, already-expired token handling, expired-token API responses, retryable API failure propagation, and queue/backoff configuration.
