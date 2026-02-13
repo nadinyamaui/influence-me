@@ -55,6 +55,39 @@ it('throws a social authentication exception when facebook does not return an id
     app(FacebookSocialiteLoginService::class)->resolveUserFromCallback();
 })->throws(SocialAuthenticationException::class, 'Facebook did not return required account information.');
 
+it('throws a social authentication exception when another user already has the callback email', function (): void {
+    User::factory()->create([
+        'email' => 'social@example.com',
+        'socialite_user_type' => null,
+        'socialite_user_id' => null,
+    ]);
+
+    $socialiteUser = new class
+    {
+        public string $token = 'short-lived-token';
+
+        public function getId(): string
+        {
+            return '1234567890123';
+        }
+
+        public function getEmail(): string
+        {
+            return 'social@example.com';
+        }
+    };
+
+    Socialite::shouldReceive('driver')
+        ->once()
+        ->with('facebook')
+        ->andReturnSelf();
+    Socialite::shouldReceive('user')
+        ->once()
+        ->andReturn($socialiteUser);
+
+    app(FacebookSocialiteLoginService::class)->resolveUserFromCallback();
+})->throws(SocialAuthenticationException::class, 'A user with this email already exists.');
+
 it('creates the influencer user, logs them in, and syncs instagram accounts on callback', function (): void {
     $socialiteUser = new class
     {
