@@ -3,6 +3,7 @@
 namespace App\Services\Auth;
 
 use App\Exceptions\Auth\SocialAuthenticationException;
+use App\Models\InstagramAccount;
 use App\Models\User;
 use App\Services\Facebook\Client;
 use Illuminate\Http\RedirectResponse;
@@ -31,10 +32,20 @@ class FacebookSocialiteLoginService
         if (! $socialiteUser->getId()) {
             throw new SocialAuthenticationException('Facebook did not return required account information.');
         }
-        $user = $this->createUpdateUser($socialiteUser);
-        auth()->login($user);
+        $user = auth()->user() ?? $this->createUpdateUser($socialiteUser);
+        if (! auth()->check()) {
+            auth()->login($user);
+        }
         $token = $this->exchangeToken($socialiteUser);
-        $this->getAccounts($socialiteUser->getId(), $token['access_token'])->each(function ($account) use ($user) {
+        $this->getAccounts($socialiteUser->getId(), $token['access_token'])->each(function ($account) use ($user): void {
+            $existingAccount = InstagramAccount::query()
+                ->where('instagram_user_id', $account['instagram_user_id'])
+                ->first();
+
+            if ($existingAccount && $existingAccount->user_id !== $user->id) {
+                throw new SocialAuthenticationException('This Instagram account is already linked to another user.');
+            }
+
             $user->instagramAccounts()->updateOrCreate([
                 'instagram_user_id' => $account['instagram_user_id'],
             ], $account);
