@@ -37,9 +37,21 @@ class FacebookSocialiteLoginService
             auth()->login($user);
         }
         if (($user->socialite_user_type ?? null) === null || ($user->socialite_user_id ?? null) === null) {
+            $socialiteUserType = $user->socialite_user_type ?? 'facebook';
+            $socialiteUserId = $user->socialite_user_id ?? $socialiteUser->getId();
+            $socialiteOwner = User::query()
+                ->where('socialite_user_type', $socialiteUserType)
+                ->where('socialite_user_id', $socialiteUserId)
+                ->where('id', '!=', $user->id)
+                ->exists();
+
+            if ($socialiteOwner) {
+                throw new SocialAuthenticationException('This Facebook account is already linked to another user.');
+            }
+
             $user->forceFill([
-                'socialite_user_type' => $user->socialite_user_type ?? 'facebook',
-                'socialite_user_id' => $user->socialite_user_id ?? $socialiteUser->getId(),
+                'socialite_user_type' => $socialiteUserType,
+                'socialite_user_id' => $socialiteUserId,
             ])->save();
         }
         $token = $this->exchangeToken($socialiteUser);

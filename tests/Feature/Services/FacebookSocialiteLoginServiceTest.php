@@ -360,3 +360,51 @@ it('throws when callback includes an instagram account already linked to another
 
     $service->resolveUserFromCallback();
 })->throws(SocialAuthenticationException::class, 'This Instagram account is already linked to another user.');
+
+it('throws when callback socialite identity is already linked to another user while current user has null socialite fields', function (): void {
+    User::factory()->create([
+        'socialite_user_type' => 'facebook',
+        'socialite_user_id' => '1234567890123',
+    ]);
+    $authenticatedUser = User::factory()->create([
+        'socialite_user_type' => null,
+        'socialite_user_id' => null,
+    ]);
+    $this->actingAs($authenticatedUser);
+
+    $socialiteUser = new class
+    {
+        public string $token = 'short-lived-token';
+
+        public function getId(): string
+        {
+            return '1234567890123';
+        }
+
+        public function getName(): string
+        {
+            return 'Social User';
+        }
+
+        public function getEmail(): string
+        {
+            return 'social@example.com';
+        }
+    };
+
+    Socialite::shouldReceive('driver')
+        ->once()
+        ->with('facebook')
+        ->andReturnSelf();
+    Socialite::shouldReceive('user')
+        ->once()
+        ->andReturn($socialiteUser);
+
+    $service = \Mockery::mock(FacebookSocialiteLoginService::class)
+        ->makePartial()
+        ->shouldAllowMockingProtectedMethods();
+    $service->shouldReceive('exchangeToken')->never();
+    $service->shouldReceive('getAccounts')->never();
+
+    $service->resolveUserFromCallback();
+})->throws(SocialAuthenticationException::class, 'This Facebook account is already linked to another user.');
