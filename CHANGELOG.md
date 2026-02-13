@@ -5,6 +5,9 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
+- RFC 026: added `App\Jobs\RefreshInstagramToken` queued job with `instagram-sync` queue configuration (`tries=3`, `backoff=[60,300,900]`) and token refresh persistence for `InstagramAccount`.
+- RFC 026: added token refresh handling in `app/Services/Facebook/InstagramGraphService.php` with typed exception mapping and strict validation for refresh responses that must include `access_token`.
+- RFC 026: added feature coverage in `tests/Feature/Jobs/RefreshInstagramTokenTest.php` for successful token refresh persistence, already-expired token handling, expired-token API responses, retryable API failure propagation, and queue/backoff configuration.
 - RFC 025: added `App\Jobs\SyncAudienceDemographics` queued job with `instagram-sync` queue configuration (`tries=3`) and delegated execution through `App\Services\Facebook\InstagramGraphService`.
 - RFC 025: added demographics sync workflow in `app/Services/Facebook/InstagramGraphService.php` to fetch follower demographic insights, parse age/gender/city/country breakdowns (including `audience_gender_age` payloads), replace prior snapshot rows, and gracefully skip accounts with fewer than 100 followers.
 - RFC 025: added feature coverage in `tests/Feature/Jobs/SyncAudienceDemographicsTest.php` for demographics parsing/persistence, snapshot replacement behavior, follower-threshold skip behavior, and queue configuration.

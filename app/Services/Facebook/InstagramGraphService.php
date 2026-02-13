@@ -110,6 +110,24 @@ class InstagramGraphService
         ];
     }
 
+    public function refreshLongLivedToken(): string
+    {
+        try {
+            $response = $this->client->refreshLongLivedToken();
+        } catch (AuthorizationException $exception) {
+            throw new InstagramTokenExpiredException($exception->getMessage(), $exception->getCode(), $exception);
+        } catch (RequestException $exception) {
+            throw new InstagramApiException($exception->getMessage(), $exception->getCode(), $exception);
+        }
+
+        $accessToken = $response['access_token'] ?? null;
+        if (! is_string($accessToken) || $accessToken === '') {
+            throw new InstagramApiException('Instagram token refresh response was missing access_token.');
+        }
+
+        return $accessToken;
+    }
+
     public function syncAudienceDemographics(): void
     {
         if (($this->account->followers_count ?? 0) < 100) {
