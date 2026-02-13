@@ -36,6 +36,12 @@ class FacebookSocialiteLoginService
         if (! auth()->check()) {
             auth()->login($user);
         }
+        if (($user->socialite_user_type ?? null) === null || ($user->socialite_user_id ?? null) === null) {
+            $user->forceFill([
+                'socialite_user_type' => $user->socialite_user_type ?? 'facebook',
+                'socialite_user_id' => $user->socialite_user_id ?? $socialiteUser->getId(),
+            ])->save();
+        }
         $token = $this->exchangeToken($socialiteUser);
         $this->getAccounts($socialiteUser->getId(), $token['access_token'])->each(function ($account) use ($user): void {
             $existingAccount = InstagramAccount::query()

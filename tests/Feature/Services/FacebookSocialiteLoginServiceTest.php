@@ -284,7 +284,9 @@ it('links instagram accounts to the currently authenticated user without creatin
 
     $resolvedUser = $service->resolveUserFromCallback();
 
-    expect($resolvedUser->id)->toBe($authenticatedUser->id);
+    expect($resolvedUser->id)->toBe($authenticatedUser->id)
+        ->and($resolvedUser->socialite_user_type)->toBe('facebook')
+        ->and($resolvedUser->socialite_user_id)->toBe('1234567890123');
     $this->assertAuthenticatedAs($authenticatedUser);
     $this->assertDatabaseCount('users', 1);
     $this->assertDatabaseHas('instagram_accounts', [
