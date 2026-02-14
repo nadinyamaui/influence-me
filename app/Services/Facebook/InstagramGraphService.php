@@ -80,10 +80,8 @@ class InstagramGraphService
             ], [
                 'instagram_account_id' => $this->account->id,
                 'media_type' => MediaType::Story,
-                'caption' => $story['caption'] ?? null,
-                'permalink' => $story['permalink'] ?? null,
-                'media_url' => $story['media_url'] ?? null,
-                'thumbnail_url' => $story['thumbnail_url'] ?? null,
+                'permalink' => $story['permalink'],
+                'media_url' => $story['media_url'],
                 'published_at' => Carbon::parse($story['timestamp']),
             ]);
         }
