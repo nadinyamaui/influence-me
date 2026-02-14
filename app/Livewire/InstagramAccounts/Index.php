@@ -39,12 +39,7 @@ class Index extends Component
         $account = User::resolveInstagramAccount($accountId);
         $this->authorize('update', $account);
 
-        $user = Auth::user();
-        if ($user === null) {
-            abort(403);
-        }
-
-        $user->instagramAccounts()->update(['is_primary' => false]);
+        Auth::user()->instagramAccounts()->update(['is_primary' => false]);
         $account->update(['is_primary' => true]);
 
         session()->flash('status', 'Primary Instagram account updated.');
@@ -55,12 +50,7 @@ class Index extends Component
         $account = User::resolveInstagramAccount($accountId);
         $this->authorize('view', $account);
 
-        $user = Auth::user();
-        if ($user === null) {
-            abort(403);
-        }
-
-        if ($user->instagramAccounts()->count() <= 1) {
+        if (Auth::user()->instagramAccounts()->count() <= 1) {
             $this->addError('disconnect', 'You cannot disconnect your last Instagram account.');
             $this->disconnectingAccountId = null;
 
@@ -89,7 +79,7 @@ class Index extends Component
         $account->delete();
 
         if ($wasPrimary) {
-            $nextAccount = Auth::user()?->instagramAccounts()
+            $nextAccount = Auth::user()->instagramAccounts()
                 ->orderBy('id')
                 ->first();
 
@@ -115,16 +105,16 @@ class Index extends Component
             return null;
         }
 
-        return Auth::user()?->instagramAccounts()
+        return Auth::user()->instagramAccounts()
             ->whereKey($this->disconnectingAccountId)
             ->first();
     }
 
     private function accounts(): Collection
     {
-        return Auth::user()?->instagramAccounts()
+        return Auth::user()->instagramAccounts()
             ->orderByDesc('is_primary')
             ->orderBy('username')
-            ->get() ?? collect();
+            ->get();
     }
 }
