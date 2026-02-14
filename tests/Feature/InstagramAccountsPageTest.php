@@ -78,6 +78,20 @@ test('instagram accounts page shows empty state and connect call to action', fun
         ->assertSee(route('auth.facebook.add'));
 });
 
+test('instagram accounts page bootstraps a success toast from flashed status', function (): void {
+    $user = User::factory()->create();
+
+    $response = $this->actingAs($user)
+        ->withSession([
+            'status' => 'Instagram accounts connected successfully.',
+        ])
+        ->get(route('instagram-accounts.index'));
+
+    $response->assertSuccessful()
+        ->assertSee('$flux.toast', false)
+        ->assertSee('Instagram accounts connected successfully.');
+});
+
 test('authenticated users can set a non-primary account as primary', function (): void {
     $user = User::factory()->create();
 
