@@ -81,7 +81,7 @@
                                     @endif
                                 </td>
                                 <td class="px-4 py-3 text-zinc-700 dark:text-zinc-200">{{ $client->email ?? '—' }}</td>
-                                <td class="px-4 py-3 text-zinc-700 dark:text-zinc-200">{{ number_format($client->instagram_media_count) }}</td>
+                                <td class="px-4 py-3 text-zinc-700 dark:text-zinc-200">{{ number_format($client->campaigns_count) }}</td>
                                 <td class="px-4 py-3">
                                     <div class="flex justify-end gap-2">
                                         <a

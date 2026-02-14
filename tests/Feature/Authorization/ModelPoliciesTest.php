@@ -2,6 +2,7 @@
 
 use App\Enums\InvoiceStatus;
 use App\Enums\ProposalStatus;
+use App\Models\Campaign;
 use App\Models\Client;
 use App\Models\ClientUser;
 use App\Models\InstagramAccount;
@@ -10,6 +11,7 @@ use App\Models\Invoice;
 use App\Models\Proposal;
 use App\Models\ScheduledPost;
 use App\Models\User;
+use App\Policies\CampaignPolicy;
 use App\Policies\ClientPolicy;
 use App\Policies\InstagramAccountPolicy;
 use App\Policies\InstagramMediaPolicy;
@@ -22,6 +24,7 @@ use Illuminate\Support\Str;
 
 it('auto-discovers all RFC 012 policies', function (): void {
     expect(Gate::getPolicyFor(InstagramAccount::class))->toBeInstanceOf(InstagramAccountPolicy::class)
+        ->and(Gate::getPolicyFor(Campaign::class))->toBeInstanceOf(CampaignPolicy::class)
         ->and(Gate::getPolicyFor(Client::class))->toBeInstanceOf(ClientPolicy::class)
         ->and(Gate::getPolicyFor(Proposal::class))->toBeInstanceOf(ProposalPolicy::class)
         ->and(Gate::getPolicyFor(Invoice::class))->toBeInstanceOf(InvoicePolicy::class)
@@ -79,6 +82,42 @@ it('applies client policy rules', function (): void {
         ->and($matchingClientUserGate->allows('update', $client))->toBeFalse()
         ->and($matchingClientUserGate->allows('delete', $client))->toBeFalse()
         ->and($mismatchedClientUserGate->allows('view', $client))->toBeFalse();
+});
+
+it('applies campaign policy rules', function (): void {
+    $owner = User::factory()->create();
+    $outsider = User::factory()->create();
+
+    $client = Client::factory()->for($owner)->create();
+    $otherClient = Client::factory()->for($outsider)->create();
+
+    $campaign = Campaign::factory()->for($client)->create();
+    $ownerProposal = Proposal::factory()->for($owner)->for($client)->create();
+    $otherProposal = Proposal::factory()->for($outsider)->for($otherClient)->create();
+
+    $matchingClientUser = ClientUser::factory()->for($client)->create();
+
+    $ownerGate = Gate::forUser($owner);
+    $outsiderGate = Gate::forUser($outsider);
+    $clientUserGate = Gate::forUser($matchingClientUser);
+
+    expect($ownerGate->allows('viewAny', Campaign::class))->toBeTrue()
+        ->and($ownerGate->allows('create', Campaign::class))->toBeTrue()
+        ->and($ownerGate->allows('view', $campaign))->toBeTrue()
+        ->and($ownerGate->allows('update', $campaign))->toBeTrue()
+        ->and($ownerGate->allows('delete', $campaign))->toBeTrue()
+        ->and($ownerGate->allows('linkProposal', [$campaign, $ownerProposal]))->toBeTrue()
+        ->and($ownerGate->allows('linkProposal', [$campaign, $otherProposal]))->toBeFalse()
+        ->and($outsiderGate->allows('view', $campaign))->toBeFalse()
+        ->and($outsiderGate->allows('update', $campaign))->toBeFalse()
+        ->and($outsiderGate->allows('delete', $campaign))->toBeFalse()
+        ->and($outsiderGate->allows('linkProposal', [$campaign, $ownerProposal]))->toBeFalse()
+        ->and($clientUserGate->allows('viewAny', Campaign::class))->toBeFalse()
+        ->and($clientUserGate->allows('create', Campaign::class))->toBeFalse()
+        ->and($clientUserGate->allows('view', $campaign))->toBeFalse()
+        ->and($clientUserGate->allows('update', $campaign))->toBeFalse()
+        ->and($clientUserGate->allows('delete', $campaign))->toBeFalse()
+        ->and($clientUserGate->allows('linkProposal', [$campaign, $ownerProposal]))->toBeFalse();
 });
 
 it('applies proposal policy rules', function (): void {
@@ -245,6 +284,25 @@ it('returns 403 for unauthorized client view', function (): void {
 
     Route::middleware(['web', 'auth'])->get($uri, function () use ($client) {
         Gate::authorize('view', $client);
+
+        return response()->noContent();
+    });
+
+    $this->actingAs($outsider)
+        ->get($uri)
+        ->assertForbidden();
+});
+
+it('returns 403 for unauthorized campaign update', function (): void {
+    $owner = User::factory()->create();
+    $outsider = User::factory()->create();
+
+    $client = Client::factory()->for($owner)->create();
+    $campaign = Campaign::factory()->for($client)->create();
+    $uri = '/_test/policies/campaigns/'.Str::uuid();
+
+    Route::middleware(['web', 'auth'])->get($uri, function () use ($campaign) {
+        Gate::authorize('update', $campaign);
 
         return response()->noContent();
     });

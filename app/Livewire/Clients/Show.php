@@ -4,9 +4,12 @@ namespace App\Livewire\Clients;
 
 use App\Enums\InvoiceStatus;
 use App\Enums\ProposalStatus;
+use App\Models\Campaign;
 use App\Models\Client;
+use App\Models\InstagramMedia;
 use App\Services\Clients\ClientPortalAccessService;
 use App\Services\Content\ContentClientLinkService;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Collection;
@@ -122,8 +125,9 @@ class Show extends Component
     {
         $this->authorize('update', $this->client);
 
-        $media = $this->client->instagramMedia()
+        $media = InstagramMedia::query()
             ->whereKey($mediaId)
+            ->whereHas('campaigns', fn (Builder $builder): Builder => $builder->where('campaigns.client_id', $this->client->id))
             ->firstOrFail();
 
         $this->authorize('linkToClient', $media);
@@ -169,8 +173,10 @@ class Show extends Component
                 InvoiceStatus::Overdue,
             ]);
 
+        $linkedMediaQuery = $this->linkedMediaQuery();
+
         return [
-            'linked_posts' => $this->client->instagramMedia()->count(),
+            'linked_posts' => (clone $linkedMediaQuery)->count(),
             'active_proposals' => $this->client->proposals()->where('status', ProposalStatus::Sent)->count(),
             'pending_invoices' => $pendingInvoiceQuery->count(),
             'pending_invoice_total' => (float) $pendingInvoiceQuery->sum('total'),
@@ -179,20 +185,27 @@ class Show extends Component
 
     private function linkedContentMedia(): EloquentCollection
     {
-        return $this->client->instagramMedia()
-            ->orderByRaw('case when campaign_media.campaign_name is null then 1 else 0 end')
-            ->orderBy('campaign_media.campaign_name')
+        return $this->linkedMediaQuery()
+            ->with('campaigns')
             ->orderByDesc('published_at')
             ->get();
     }
 
     private function groupedLinkedContent(EloquentCollection $linkedContentMedia): Collection
     {
-        return $linkedContentMedia
-            ->groupBy(function ($media): string {
-                return $media->pivot->campaign_name ?? 'Uncategorized';
+        $campaigns = $this->client->campaigns()
+            ->with([
+                'instagramMedia' => fn ($builder) => $builder->orderByDesc('published_at'),
+            ])
+            ->orderBy('name')
+            ->get();
+
+        return $campaigns
+            ->filter(fn (Campaign $campaign): bool => $campaign->instagramMedia->isNotEmpty())
+            ->mapWithKeys(function (Campaign $campaign): array {
+                return [$campaign->name => collect($campaign->instagramMedia->all())];
             })
-            ->map(fn (EloquentCollection $group): Collection => collect($group->all()));
+            ->map(fn (Collection $group): Collection => collect($group->all()));
     }
 
     private function linkedContentSummary(EloquentCollection $linkedContentMedia): array
@@ -207,5 +220,13 @@ class Show extends Component
             'total_impressions' => (int) $linkedContentMedia->sum('impressions'),
             'average_engagement_rate' => round($averageEngagementRate, 2),
         ];
+    }
+
+    private function linkedMediaQuery(): Builder
+    {
+        return InstagramMedia::query()
+            ->select('instagram_media.*')
+            ->whereHas('campaigns', fn (Builder $builder): Builder => $builder->where('campaigns.client_id', $this->client->id))
+            ->distinct();
     }
 }

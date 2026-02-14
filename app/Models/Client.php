@@ -6,7 +6,6 @@ use App\Enums\ClientType;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
@@ -43,10 +42,8 @@ class Client extends Model
         return $this->hasMany(Invoice::class);
     }
 
-    public function instagramMedia(): BelongsToMany
+    public function campaigns(): HasMany
     {
-        return $this->belongsToMany(InstagramMedia::class, 'campaign_media')
-            ->withPivot('campaign_name', 'notes')
-            ->withTimestamps();
+        return $this->hasMany(Campaign::class);
     }
 }

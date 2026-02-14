@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Campaign;
 use App\Models\Client;
 use App\Models\InstagramAccount;
 use App\Models\InstagramMedia;
@@ -18,10 +19,13 @@ test('content client link service links a media item to a client', function (): 
 
     $service->link($user, $media, $client, 'Service Campaign', 'Service Notes');
 
+    $campaign = Campaign::query()->where('client_id', $client->id)->where('name', 'Service Campaign')->first();
+
+    expect($campaign)->not->toBeNull();
+
     $this->assertDatabaseHas('campaign_media', [
-        'client_id' => $client->id,
+        'campaign_id' => $campaign->id,
         'instagram_media_id' => $media->id,
-        'campaign_name' => 'Service Campaign',
         'notes' => 'Service Notes',
     ]);
 });
@@ -44,16 +48,18 @@ test('content client link service batch links media items', function (): void {
         null,
     );
 
+    $campaign = Campaign::query()->where('client_id', $client->id)->where('name', 'Batch Service Campaign')->first();
+
+    expect($campaign)->not->toBeNull();
+
     $this->assertDatabaseHas('campaign_media', [
-        'client_id' => $client->id,
+        'campaign_id' => $campaign->id,
         'instagram_media_id' => $firstMedia->id,
-        'campaign_name' => 'Batch Service Campaign',
     ]);
 
     $this->assertDatabaseHas('campaign_media', [
-        'client_id' => $client->id,
+        'campaign_id' => $campaign->id,
         'instagram_media_id' => $secondMedia->id,
-        'campaign_name' => 'Batch Service Campaign',
     ]);
 });
 
@@ -63,14 +69,15 @@ test('content client link service unlinks media from a client', function (): voi
     $account = InstagramAccount::factory()->for($user)->create();
     $media = InstagramMedia::factory()->for($account)->create();
 
-    $media->clients()->attach($client->id);
+    $campaign = Campaign::factory()->for($client)->create();
+    $campaign->instagramMedia()->attach($media->id);
 
     $service = app(ContentClientLinkService::class);
 
     $service->unlink($user, $media, $client);
 
     expect(DB::table('campaign_media')
-        ->where('client_id', $client->id)
+        ->where('campaign_id', $campaign->id)
         ->where('instagram_media_id', $media->id)
         ->exists())->toBeFalse();
 });

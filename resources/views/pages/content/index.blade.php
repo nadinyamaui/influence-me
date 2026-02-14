@@ -210,23 +210,23 @@
                             </flux:button>
                         </div>
 
-                        @if ($selectedMedia->clients->isEmpty())
+                        @if ($selectedMedia->campaigns->isEmpty())
                             <p class="text-sm text-zinc-600 dark:text-zinc-300">No linked clients yet.</p>
                         @else
                             <div class="space-y-2">
-                                @foreach ($selectedMedia->clients as $client)
+                                @foreach ($selectedMedia->campaigns as $campaign)
                                     <div class="flex items-center justify-between gap-2 rounded-lg bg-zinc-50 px-3 py-2 text-sm dark:bg-zinc-800/60">
                                         <div>
                                             <a
-                                                href="{{ route('clients.show', $client) }}"
+                                                href="{{ route('clients.show', $campaign->client) }}"
                                                 wire:navigate
                                                 class="font-medium text-sky-700 underline underline-offset-2 hover:text-sky-600 dark:text-sky-300 dark:hover:text-sky-200"
                                             >
-                                                {{ $client->name }}
+                                                {{ $campaign->client->name }}
                                             </a>
-                                            <p class="text-zinc-500 dark:text-zinc-300">{{ $client->pivot->campaign_name ?? 'Uncategorized' }}</p>
+                                            <p class="text-zinc-500 dark:text-zinc-300">{{ $campaign->name }}</p>
                                         </div>
-                                        <flux:button type="button" size="sm" variant="danger" wire:click="confirmUnlinkClient({{ $client->id }})">
+                                        <flux:button type="button" size="sm" variant="danger" wire:click="confirmUnlinkClient({{ $campaign->client_id }})">
                                             Unlink
                                         </flux:button>
                                     </div>

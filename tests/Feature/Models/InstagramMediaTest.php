@@ -2,6 +2,7 @@
 
 use App\Enums\ClientType;
 use App\Enums\MediaType;
+use App\Models\Campaign;
 use App\Models\Client;
 use App\Models\InstagramMedia;
 use App\Models\User;
@@ -32,7 +33,7 @@ it('supports post reel story and high engagement factory states', function (): v
         ->and((float) $highEngagement->engagement_rate)->toBeGreaterThanOrEqual(18);
 });
 
-it('defines instagram account and clients relationships', function (): void {
+it('defines instagram account and campaigns relationships', function (): void {
     $media = InstagramMedia::factory()->create();
 
     $client = Client::query()->create([
@@ -43,14 +44,17 @@ it('defines instagram account and clients relationships', function (): void {
         'type' => ClientType::Brand,
     ]);
 
-    $media->clients()->attach($client->id, [
-        'campaign_name' => 'Spring Launch',
+    $campaign = Campaign::factory()->for($client)->create([
+        'name' => 'Spring Launch',
+    ]);
+
+    $media->campaigns()->attach($campaign->id, [
         'notes' => 'Primary placement',
     ]);
 
     expect($media->instagramAccount())->toBeInstanceOf(BelongsTo::class)
-        ->and($media->clients())->toBeInstanceOf(BelongsToMany::class)
-        ->and($media->clients)->toHaveCount(1)
-        ->and($media->clients->first()->id)->toBe($client->id)
-        ->and($media->clients->first()->pivot->campaign_name)->toBe('Spring Launch');
+        ->and($media->campaigns())->toBeInstanceOf(BelongsToMany::class)
+        ->and($media->campaigns)->toHaveCount(1)
+        ->and($media->campaigns->first()->id)->toBe($campaign->id)
+        ->and($media->campaigns->first()->pivot->notes)->toBe('Primary placement');
 });

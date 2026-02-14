@@ -2,6 +2,7 @@
 
 use App\Enums\InvoiceStatus;
 use App\Enums\ProposalStatus;
+use App\Models\Campaign;
 use App\Models\Client;
 use App\Models\ClientUser;
 use App\Models\InstagramAccount;
@@ -71,8 +72,10 @@ test('portal dashboard displays scoped summary metrics and recent activity', fun
         'reach' => 9000,
     ]);
 
-    $client->instagramMedia()->attach([$firstVisibleMedia->id, $secondVisibleMedia->id]);
-    $otherClient->instagramMedia()->attach([$hiddenMedia->id]);
+    $clientCampaign = Campaign::factory()->for($client)->create();
+    $otherClientCampaign = Campaign::factory()->for($otherClient)->create();
+    $clientCampaign->instagramMedia()->attach([$firstVisibleMedia->id, $secondVisibleMedia->id]);
+    $otherClientCampaign->instagramMedia()->attach([$hiddenMedia->id]);
 
     $response = $this->actingAs($clientUser, 'client')
         ->get(route('portal.dashboard'));

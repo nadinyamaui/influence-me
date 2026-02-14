@@ -10,12 +10,11 @@ return new class extends Migration
     {
         Schema::create('campaign_media', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('client_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('campaign_id')->constrained()->cascadeOnDelete();
             $table->foreignId('instagram_media_id')->constrained()->cascadeOnDelete();
-            $table->string('campaign_name')->nullable();
             $table->text('notes')->nullable();
             $table->timestamps();
-            $table->unique(['client_id', 'instagram_media_id']);
+            $table->unique(['campaign_id', 'instagram_media_id']);
         });
     }
 

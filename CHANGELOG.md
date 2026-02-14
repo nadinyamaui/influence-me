@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
+- RFC 093: added first-class campaign domain support with `app/Models/Campaign.php`, `database/migrations/2026_02_14_200000_create_campaigns_table.php`, `database/factories/CampaignFactory.php`, `app/Policies/CampaignPolicy.php`, and reverse relationships in `app/Models/Client.php`/`app/Models/Proposal.php`.
+- RFC 093: expanded authorization coverage in `tests/Feature/Authorization/ModelPoliciesTest.php` and added dedicated campaign model coverage in `tests/Feature/Models/CampaignTest.php`.
+- RFC 094: refactored `campaign_media` to campaign-owned links via `database/migrations/2026_02_14_200100_refactor_campaign_media_table.php`, updated `app/Models/InstagramMedia.php` and `app/Services/Content/ContentClientLinkService.php` to use `campaign_id + instagram_media_id`, and removed pivot `campaign_name` dependency.
+- RFC 094: updated content/client/portal workflows to read campaign entities instead of pivot text (`app/Livewire/Content/Index.php`, `resources/views/pages/content/index.blade.php`, `app/Livewire/Clients/Show.php`, `app/Livewire/Clients/Index.php`, `resources/views/pages/clients/index.blade.php`, `app/Livewire/Portal/Dashboard.php`) with updated feature/model/service tests for duplicate prevention and unlink behavior.
 - RFC 037: added `App\Livewire\Portal\Dashboard` and updated `routes/portal.php` to serve `/portal/dashboard` as a client-guarded Livewire page with scoped metrics and recent activity data.
 - RFC 037: replaced `resources/views/pages/portal/dashboard.blade.php` placeholder content with a summary dashboard (active proposals, pending invoices total, linked content, total reach) and recent proposals/invoices lists with status badges and placeholder detail links.
 - RFC 037: added feature coverage in `tests/Feature/Portal/PortalDashboardTest.php` and updated `tests/Feature/Portal/PortalLayoutTest.php` for dashboard rendering updates and strict client data scoping.

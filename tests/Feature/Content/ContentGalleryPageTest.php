@@ -2,6 +2,7 @@
 
 use App\Enums\MediaType;
 use App\Livewire\Content\Index;
+use App\Models\Campaign;
 use App\Models\Client;
 use App\Models\InstagramAccount;
 use App\Models\InstagramMedia;
@@ -136,8 +137,11 @@ test('content detail modal displays metrics caption permalink and linked clients
         'media_type' => MediaType::Reel,
     ]);
 
-    $media->clients()->attach($client->id, [
-        'campaign_name' => 'Launch Campaign',
+    $campaign = Campaign::factory()->for($client)->create([
+        'name' => 'Launch Campaign',
+    ]);
+
+    $campaign->instagramMedia()->attach($media->id, [
         'notes' => 'Campaign notes',
     ]);
 
@@ -156,7 +160,7 @@ test('content detail modal displays metrics caption permalink and linked clients
         ->assertSee('@modalaccount')
         ->assertSee('Modal Client')
         ->assertSee('Launch Campaign')
-        ->assertSee('href="' . route('clients.show', $client) . '"', false)
+        ->assertSee('href="'.route('clients.show', $client).'"', false)
         ->call('closeDetailModal')
         ->assertSet('showDetailModal', false);
 });
@@ -181,15 +185,18 @@ test('single media can be linked to a client and duplicate links are prevented',
         ->set('linkNotes', 'Paid collaboration')
         ->call('saveLink');
 
+    $campaign = Campaign::query()->where('client_id', $client->id)->where('name', 'Spring Launch')->first();
+
+    expect($campaign)->not->toBeNull();
+
     $this->assertDatabaseHas('campaign_media', [
-        'client_id' => $client->id,
+        'campaign_id' => $campaign->id,
         'instagram_media_id' => $media->id,
-        'campaign_name' => 'Spring Launch',
         'notes' => 'Paid collaboration',
     ]);
 
     expect(DB::table('campaign_media')
-        ->where('client_id', $client->id)
+        ->where('campaign_id', $campaign->id)
         ->where('instagram_media_id', $media->id)
         ->count())->toBe(1);
 });
@@ -215,20 +222,22 @@ test('batch selection mode links all selected media to a client', function (): v
         ->assertSet('selectionMode', false)
         ->assertSet('selectedMediaIds', []);
 
+    $campaign = Campaign::query()->where('client_id', $client->id)->where('name', 'Batch Campaign')->first();
+
+    expect($campaign)->not->toBeNull();
+
     $this->assertDatabaseHas('campaign_media', [
-        'client_id' => $client->id,
+        'campaign_id' => $campaign->id,
         'instagram_media_id' => $firstMedia->id,
-        'campaign_name' => 'Batch Campaign',
     ]);
 
     $this->assertDatabaseHas('campaign_media', [
-        'client_id' => $client->id,
+        'campaign_id' => $campaign->id,
         'instagram_media_id' => $secondMedia->id,
-        'campaign_name' => 'Batch Campaign',
     ]);
 
     $this->assertDatabaseMissing('campaign_media', [
-        'client_id' => $client->id,
+        'campaign_id' => $campaign->id,
         'instagram_media_id' => $thirdMedia->id,
     ]);
 });
@@ -239,9 +248,10 @@ test('linked media can be unlinked from detail modal', function (): void {
     $client = Client::factory()->for($user)->create();
     $media = InstagramMedia::factory()->for($account)->create();
 
-    $media->clients()->attach($client->id, [
-        'campaign_name' => 'To Remove',
+    $campaign = Campaign::factory()->for($client)->create([
+        'name' => 'To Remove',
     ]);
+    $campaign->instagramMedia()->attach($media->id);
 
     Livewire::actingAs($user)
         ->test(Index::class)
@@ -252,7 +262,7 @@ test('linked media can be unlinked from detail modal', function (): void {
         ->assertSet('confirmingUnlinkClientId', null);
 
     $this->assertDatabaseMissing('campaign_media', [
-        'client_id' => $client->id,
+        'campaign_id' => $campaign->id,
         'instagram_media_id' => $media->id,
     ]);
 });
@@ -276,7 +286,6 @@ test('users cannot link content to clients they do not own', function (): void {
         ->assertHasErrors(['linkClientId']);
 
     $this->assertDatabaseMissing('campaign_media', [
-        'client_id' => $ownerClient->id,
         'instagram_media_id' => $outsiderMedia->id,
     ]);
 });

@@ -4,6 +4,7 @@ use App\Enums\ClientType;
 use App\Enums\InvoiceStatus;
 use App\Enums\ProposalStatus;
 use App\Livewire\Clients\Show;
+use App\Models\Campaign;
 use App\Models\Client;
 use App\Models\ClientUser;
 use App\Models\InstagramAccount;
@@ -36,7 +37,10 @@ test('owner can view client detail page with summary and tabs', function (): voi
 
     $account = InstagramAccount::factory()->for($owner)->create();
     $media = InstagramMedia::factory()->for($account)->create();
-    $client->instagramMedia()->attach($media->id);
+    $campaign = Campaign::factory()->for($client)->create([
+        'name' => 'Uncategorized',
+    ]);
+    $campaign->instagramMedia()->attach($media->id);
 
     Proposal::factory()->for($owner)->for($client)->create([
         'status' => ProposalStatus::Sent,
@@ -121,17 +125,16 @@ test('content tab groups linked media by campaign and shows aggregate stats', fu
         'engagement_rate' => 2.0,
     ]);
 
-    $client->instagramMedia()->attach($launchFirst->id, [
-        'campaign_name' => 'Launch Campaign',
+    $launchCampaign = Campaign::factory()->for($client)->create([
+        'name' => 'Launch Campaign',
+    ]);
+    $uncategorizedCampaign = Campaign::factory()->for($client)->create([
+        'name' => 'Uncategorized',
     ]);
 
-    $client->instagramMedia()->attach($launchSecond->id, [
-        'campaign_name' => 'Launch Campaign',
-    ]);
-
-    $client->instagramMedia()->attach($uncategorized->id, [
-        'campaign_name' => null,
-    ]);
+    $launchCampaign->instagramMedia()->attach($launchFirst->id);
+    $launchCampaign->instagramMedia()->attach($launchSecond->id);
+    $uncategorizedCampaign->instagramMedia()->attach($uncategorized->id);
 
     Livewire::actingAs($owner)
         ->test(Show::class, ['client' => $client])
@@ -152,9 +155,10 @@ test('owners can unlink linked media from client content tab', function (): void
     $account = InstagramAccount::factory()->for($owner)->create();
     $media = InstagramMedia::factory()->for($account)->create();
 
-    $client->instagramMedia()->attach($media->id, [
-        'campaign_name' => 'To Remove',
+    $campaign = Campaign::factory()->for($client)->create([
+        'name' => 'To Remove',
     ]);
+    $campaign->instagramMedia()->attach($media->id);
 
     Livewire::actingAs($owner)
         ->test(Show::class, ['client' => $client])
@@ -163,7 +167,7 @@ test('owners can unlink linked media from client content tab', function (): void
         ->assertSee('No content linked to this client yet. Go to the Content browser to link posts.');
 
     $this->assertDatabaseMissing('campaign_media', [
-        'client_id' => $client->id,
+        'campaign_id' => $campaign->id,
         'instagram_media_id' => $media->id,
     ]);
 });
