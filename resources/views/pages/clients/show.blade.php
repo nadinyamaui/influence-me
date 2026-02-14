@@ -159,6 +159,7 @@
                                             <div class="min-w-0 flex-1">
                                                 <p class="text-sm font-medium text-zinc-900 dark:text-zinc-100">{{ Str::limit($linkedMedia->caption ?? 'No caption', 30) }}</p>
                                                 <p class="mt-1 text-xs text-zinc-500 dark:text-zinc-300">{{ number_format($linkedMedia->like_count) }} likes · {{ number_format($linkedMedia->reach) }} reach</p>
+                                                <p class="mt-1 text-xs text-zinc-500 dark:text-zinc-300">{{ number_format((float) $linkedMedia->engagement_rate, 2) }}% engagement</p>
                                                 <p class="mt-1 text-xs text-zinc-500 dark:text-zinc-300">{{ $linkedMedia->published_at?->format('M j, Y') ?? 'Unpublished' }}</p>
                                             </div>
                                         </div>
