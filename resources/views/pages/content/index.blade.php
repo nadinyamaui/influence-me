@@ -217,7 +217,13 @@
                                 @foreach ($selectedMedia->clients as $client)
                                     <div class="flex items-center justify-between gap-2 rounded-lg bg-zinc-50 px-3 py-2 text-sm dark:bg-zinc-800/60">
                                         <div>
-                                            <p class="font-medium text-zinc-900 dark:text-zinc-100">{{ $client->name }}</p>
+                                            <a
+                                                href="{{ route('clients.show', $client) }}"
+                                                wire:navigate
+                                                class="font-medium text-sky-700 underline underline-offset-2 hover:text-sky-600 dark:text-sky-300 dark:hover:text-sky-200"
+                                            >
+                                                {{ $client->name }}
+                                            </a>
                                             <p class="text-zinc-500 dark:text-zinc-300">{{ $client->pivot->campaign_name ?? 'Uncategorized' }}</p>
                                         </div>
                                         <flux:button type="button" size="sm" variant="danger" wire:click="confirmUnlinkClient({{ $client->id }})">
