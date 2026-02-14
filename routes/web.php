@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Auth\FacebookAuthController;
 use App\Livewire\Clients\Create as ClientsCreate;
+use App\Livewire\Clients\Edit as ClientsEdit;
 use App\Livewire\Clients\Index as ClientsIndex;
 use App\Livewire\Dashboard;
 use App\Livewire\InstagramAccounts\Index as InstagramAccountsIndex;
@@ -33,6 +34,10 @@ Route::livewire('clients', ClientsIndex::class)
 Route::livewire('clients/create', ClientsCreate::class)
     ->middleware(['auth'])
     ->name('clients.create');
+
+Route::livewire('clients/{client}/edit', ClientsEdit::class)
+    ->middleware(['auth'])
+    ->name('clients.edit');
 
 require __DIR__.'/settings.php';
 require __DIR__.'/portal.php';

@@ -5,6 +5,9 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
+- RFC 033: added `/clients/{client}/edit` via `App\Livewire\Clients\Edit` and `resources/views/pages/clients/edit.blade.php` with owner-only prefilled editing, validation-backed updates, and a modal-confirmed delete action.
+- RFC 033: added `app/Http/Requests/UpdateClientRequest.php` and connected it to Livewire update validation while preserving client ownership authorization checks.
+- RFC 033: added feature coverage in `tests/Feature/Clients/ClientEditPageTest.php` for authorized rendering, unauthorized access denial, update validation/persistence, and cascade delete behavior for related proposals and invoices.
 - RFC 032: added `/clients/create` Livewire page via `App\Livewire\Clients\Create` and `resources/views/pages/clients/create.blade.php` with Flux form fields for full client profile capture and cancel/save actions.
 - RFC 032: added `app/Http/Requests/StoreClientRequest.php` and integrated its validation rules into the create workflow so new clients are created under the authenticated influencer only.
 - RFC 032: added feature coverage in `tests/Feature/Clients/ClientCreatePageTest.php` for page rendering, successful creation/redirect flow, and invalid payload validation failures.
