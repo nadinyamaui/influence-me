@@ -2,8 +2,7 @@
 
 namespace App\Livewire\Clients;
 
-use App\Enums\ClientType;
-use App\Http\Requests\UpdateClientRequest;
+use App\Livewire\Forms\ClientForm;
 use App\Models\Client;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Livewire\Component;
@@ -14,17 +13,7 @@ class Edit extends Component
 
     public Client $client;
 
-    public string $name = '';
-
-    public string $email = '';
-
-    public string $company_name = '';
-
-    public string $type = ClientType::Brand->value;
-
-    public string $phone = '';
-
-    public string $notes = '';
+    public ClientForm $form;
 
     public bool $confirmingDelete = false;
 
@@ -33,28 +22,16 @@ class Edit extends Component
         $this->authorize('update', $client);
 
         $this->client = $client;
-        $this->name = $client->name;
-        $this->email = $client->email ?? '';
-        $this->company_name = $client->company_name ?? '';
-        $this->type = $client->type->value;
-        $this->phone = $client->phone ?? '';
-        $this->notes = $client->notes ?? '';
+        $this->form->setClient($client);
     }
 
     public function save()
     {
         $this->authorize('update', $this->client);
 
-        $validated = $this->validate((new UpdateClientRequest())->rules());
+        $this->form->validate();
 
-        $this->client->update([
-            'name' => $validated['name'],
-            'email' => $validated['email'] ?: null,
-            'company_name' => $validated['company_name'] ?: null,
-            'type' => $validated['type'],
-            'phone' => $validated['phone'] ?: null,
-            'notes' => $validated['notes'] ?: null,
-        ]);
+        $this->client->update($this->form->payload());
 
         session()->flash('status', 'Client updated successfully.');
 
