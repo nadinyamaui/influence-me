@@ -49,6 +49,14 @@
 
             <flux:date-picker mode="range" wire:model.live="dateRange" :clearable="true" :label="__('Date Range')" />
 
+            <flux:select wire:model.live="clientId" :label="__('Client')">
+                <option value="all">All Clients</option>
+                <option value="without_clients">Without Clients</option>
+                @foreach ($availableClients as $client)
+                    <option value="{{ $client->id }}">{{ $client->name }}</option>
+                @endforeach
+            </flux:select>
+
             <flux:select wire:model.live="sortBy" :label="__('Sort By')">
                 @foreach ($sortOptions as $sortValue => $label)
                     <option value="{{ $sortValue }}">{{ $label }}</option>
@@ -140,7 +148,14 @@
             <div class="grid gap-5 lg:grid-cols-2">
                 <div class="space-y-4">
                     <div class="overflow-hidden rounded-xl border border-zinc-200 bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-800">
-                        @if ($selectedMedia->media_url || $selectedMedia->thumbnail_url)
+                        @if ($selectedMedia->media_type === MediaType::Reel && $selectedMedia->media_url)
+                            <video
+                                src="{{ $selectedMedia->media_url }}"
+                                controls
+                                playsinline
+                                class="h-full w-full object-cover"
+                            ></video>
+                        @elseif ($selectedMedia->media_url || $selectedMedia->thumbnail_url)
                             <img
                                 src="{{ $selectedMedia->media_url ?? $selectedMedia->thumbnail_url }}"
                                 alt="{{ $selectedMedia->caption ? Str::limit($selectedMedia->caption, 60) : 'Instagram media preview' }}"

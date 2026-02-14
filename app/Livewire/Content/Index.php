@@ -25,6 +25,8 @@ class Index extends Component
 
     public string $accountId = 'all';
 
+    public string $clientId = 'all';
+
     public array $dateRange = [
         'start' => null,
         'end' => null,
@@ -79,6 +81,20 @@ class Index extends Component
     {
         $range = $this->normalizeDateRangeValue($value);
         $this->dateRange = $range;
+
+        $this->resetCursor();
+    }
+
+    public function updatedClientId(string $value): void
+    {
+        if ($value !== 'all' && $value !== 'without_clients') {
+            $clientId = (int) $value;
+            $hasClient = Auth::user()->clients()->whereKey($clientId)->exists();
+
+            if (! $hasClient) {
+                $this->clientId = 'all';
+            }
+        }
 
         $this->resetCursor();
     }
@@ -321,6 +337,15 @@ class Index extends Component
 
         if ($this->accountId !== 'all') {
             $query->where('instagram_account_id', (int) $this->accountId);
+        }
+
+        if ($this->clientId === 'without_clients') {
+            $query->whereDoesntHave('clients', fn (Builder $builder): Builder => $builder
+                ->where('clients.user_id', Auth::id()));
+        } elseif ($this->clientId !== 'all') {
+            $query->whereHas('clients', fn (Builder $builder): Builder => $builder
+                ->whereKey((int) $this->clientId)
+                ->where('clients.user_id', Auth::id()));
         }
 
         if (filled($range['start'])) {
