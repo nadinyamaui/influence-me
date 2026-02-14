@@ -6,8 +6,8 @@ use App\Enums\ClientType;
 use App\Models\Client;
 use App\Models\User;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -94,7 +94,7 @@ class Index extends Component
     private function clients(): LengthAwarePaginator
     {
         $query = Auth::user()->clients()
-            ->withCount('instagramMedia')
+            ->withCount('campaigns')
             ->orderBy('name');
 
         $search = trim($this->search);

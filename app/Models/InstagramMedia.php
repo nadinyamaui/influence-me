@@ -3,9 +3,9 @@
 namespace App\Models;
 
 use App\Enums\MediaType;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
@@ -29,10 +29,10 @@ class InstagramMedia extends Model
         return $this->belongsTo(InstagramAccount::class);
     }
 
-    public function clients(): BelongsToMany
+    public function campaigns(): BelongsToMany
     {
-        return $this->belongsToMany(Client::class, 'campaign_media')
-            ->withPivot('campaign_name', 'notes')
+        return $this->belongsToMany(Campaign::class, 'campaign_media')
+            ->withPivot('notes')
             ->withTimestamps();
     }
 

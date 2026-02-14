@@ -2,6 +2,7 @@
 
 use App\Enums\ClientType;
 use App\Livewire\Clients\Index;
+use App\Models\Campaign;
 use App\Models\Client;
 use App\Models\InstagramAccount;
 use App\Models\InstagramMedia;
@@ -30,7 +31,8 @@ test('authenticated users only see their own clients and sidebar link points to 
 
     $account = InstagramAccount::factory()->for($user)->create();
     $media = InstagramMedia::factory()->for($account)->create();
-    $ownerClient->instagramMedia()->attach($media->id);
+    $campaign = Campaign::factory()->for($ownerClient)->create();
+    $campaign->instagramMedia()->attach($media->id);
 
     $response = $this->actingAs($user)->get(route('clients.index'));
 
