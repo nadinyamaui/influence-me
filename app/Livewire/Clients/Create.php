@@ -36,12 +36,7 @@ class Create extends Component
 
         $validated = $this->validate((new StoreClientRequest())->rules());
 
-        $user = Auth::user();
-        if ($user === null) {
-            abort(403);
-        }
-
-        $user->clients()->create([
+        Auth::user()->clients()->create([
             'name' => $validated['name'],
             'email' => $validated['email'] ?: null,
             'company_name' => $validated['company_name'] ?: null,

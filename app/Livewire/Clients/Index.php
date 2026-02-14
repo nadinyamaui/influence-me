@@ -86,20 +86,14 @@ class Index extends Component
             return null;
         }
 
-        return Auth::user()?->clients()
+        return Auth::user()->clients()
             ->whereKey($this->deletingClientId)
             ->first();
     }
 
     private function clients(): LengthAwarePaginator
     {
-        $user = Auth::user();
-
-        if ($user === null) {
-            abort(403);
-        }
-
-        $query = $user->clients()
+        $query = Auth::user()->clients()
             ->withCount('instagramMedia')
             ->orderBy('name');
 

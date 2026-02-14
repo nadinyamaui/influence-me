@@ -5,7 +5,6 @@ namespace App\Livewire\Portal;
 use App\Enums\InvoiceStatus;
 use App\Enums\ProposalStatus;
 use App\Models\Client;
-use App\Models\ClientUser;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 
@@ -14,10 +13,6 @@ class Dashboard extends Component
     public function render()
     {
         $clientUser = Auth::guard('client')->user();
-
-        if (! $clientUser instanceof ClientUser) {
-            abort(403);
-        }
 
         $client = $clientUser->client;
 
