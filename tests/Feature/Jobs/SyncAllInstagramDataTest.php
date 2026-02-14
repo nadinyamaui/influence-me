@@ -2,6 +2,7 @@
 
 use App\Enums\SyncStatus;
 use App\Exceptions\InstagramApiException;
+use App\Exceptions\InstagramTokenExpiredException;
 use App\Jobs\SyncAllInstagramData;
 use App\Models\InstagramAccount;
 use App\Services\Facebook\InstagramGraphService;
@@ -95,4 +96,39 @@ it('configures instagram sync queue settings', function (): void {
 
     expect($job->queue)->toBe('instagram-sync')
         ->and($job->tries)->toBe(3);
+});
+
+it('does not overwrite failed status when profile marks account as failed without throwing', function (): void {
+    $account = InstagramAccount::factory()->create([
+        'sync_status' => SyncStatus::Idle,
+        'last_sync_error' => null,
+        'last_synced_at' => null,
+    ]);
+
+    $instagramGraphService = \Mockery::mock(InstagramGraphService::class);
+    $instagramGraphService->shouldReceive('getProfile')
+        ->once()
+        ->ordered('sync')
+        ->andThrow(new InstagramTokenExpiredException('Token expired'));
+    $instagramGraphService->shouldReceive('retrieveMedia')
+        ->once()
+        ->ordered('sync');
+    $instagramGraphService->shouldReceive('syncMediaInsights')
+        ->once()
+        ->ordered('sync');
+    $instagramGraphService->shouldReceive('syncStories')
+        ->once()
+        ->ordered('sync');
+    $instagramGraphService->shouldReceive('syncAudienceDemographics')
+        ->once()
+        ->ordered('sync');
+    app()->bind(InstagramGraphService::class, fn () => $instagramGraphService);
+
+    app(SyncAllInstagramData::class, ['account' => $account])->handle();
+
+    $account->refresh();
+
+    expect($account->sync_status)->toBe(SyncStatus::Failed)
+        ->and($account->last_sync_error)->toBe('Token expired')
+        ->and($account->last_synced_at)->toBeNull();
 });

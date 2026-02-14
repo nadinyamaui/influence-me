@@ -41,11 +41,14 @@ class SyncAllInstagramData implements ShouldQueue
                 new SyncInstagramStories($this->account),
                 new SyncAudienceDemographics($this->account),
                 function () use ($accountId): void {
-                    InstagramAccount::query()->whereKey($accountId)->update([
-                        'sync_status' => SyncStatus::Idle,
-                        'last_synced_at' => now(),
-                        'last_sync_error' => null,
-                    ]);
+                    InstagramAccount::query()
+                        ->whereKey($accountId)
+                        ->where('sync_status', '!=', SyncStatus::Failed->value)
+                        ->update([
+                            'sync_status' => SyncStatus::Idle,
+                            'last_synced_at' => now(),
+                            'last_sync_error' => null,
+                        ]);
                 },
             ])->onQueue('instagram-sync')
                 ->catch(function (Throwable $exception) use ($accountId): void {
