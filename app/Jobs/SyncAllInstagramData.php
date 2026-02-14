@@ -35,7 +35,7 @@ class SyncAllInstagramData implements ShouldQueue
 
         try {
             Bus::chain([
-                new SyncInstagramProfile($this->account),
+                new SyncInstagramProfile($this->account, finalizeSyncState: false),
                 new SyncInstagramMedia($this->account),
                 new SyncMediaInsights($this->account),
                 new SyncInstagramStories($this->account),

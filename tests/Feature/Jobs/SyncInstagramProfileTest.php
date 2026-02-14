@@ -101,3 +101,37 @@ it('configures queue and retry backoff settings', function (): void {
         ->and($job->tries)->toBe(3)
         ->and($job->backoff)->toBe([30, 60, 120]);
 });
+
+it('can update profile fields without finalizing sync state', function (): void {
+    $syncedAt = now()->subDay();
+
+    $account = InstagramAccount::factory()->create([
+        'sync_status' => SyncStatus::Syncing,
+        'last_synced_at' => $syncedAt,
+        'last_sync_error' => 'keep until full sync completes',
+    ]);
+
+    $instagramGraphService = \Mockery::mock(InstagramGraphService::class);
+    $instagramGraphService->shouldReceive('getProfile')
+        ->once()
+        ->andReturn([
+            'username' => 'chain-username',
+            'name' => 'Chain Name',
+            'biography' => 'Chain bio',
+            'profile_picture_url' => 'https://example.test/chain.jpg',
+            'followers_count' => 1700,
+            'following_count' => 220,
+            'media_count' => 95,
+        ]);
+
+    app()->bind(InstagramGraphService::class, fn ($app, $parameters) => $instagramGraphService);
+
+    app(SyncInstagramProfile::class, ['account' => $account, 'finalizeSyncState' => false])->handle();
+
+    $account->refresh();
+
+    expect($account->username)->toBe('chain-username')
+        ->and($account->sync_status)->toBe(SyncStatus::Syncing)
+        ->and($account->last_synced_at?->timestamp)->toBe($syncedAt->timestamp)
+        ->and($account->last_sync_error)->toBe('keep until full sync completes');
+});

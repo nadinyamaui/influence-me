@@ -55,6 +55,7 @@ it('marks account as failed when the chained sync workflow throws', function ():
     $account = InstagramAccount::factory()->create([
         'sync_status' => SyncStatus::Idle,
         'last_sync_error' => null,
+        'last_synced_at' => null,
     ]);
 
     $instagramGraphService = \Mockery::mock(InstagramGraphService::class);
@@ -83,7 +84,8 @@ it('marks account as failed when the chained sync workflow throws', function ():
     $account->refresh();
 
     expect($account->sync_status)->toBe(SyncStatus::Failed)
-        ->and($account->last_sync_error)->toBe('Insights sync failed');
+        ->and($account->last_sync_error)->toBe('Insights sync failed')
+        ->and($account->last_synced_at)->toBeNull();
 });
 
 it('configures instagram sync queue settings', function (): void {

@@ -23,7 +23,7 @@ class SyncInstagramProfile implements ShouldQueue
 
     public array $backoff = [30, 60, 120];
 
-    public function __construct(public InstagramAccount $account)
+    public function __construct(public InstagramAccount $account, public bool $finalizeSyncState = true)
     {
         $this->onQueue('instagram-sync');
     }
@@ -48,7 +48,7 @@ class SyncInstagramProfile implements ShouldQueue
             throw $exception;
         }
 
-        $this->account->update([
+        $updates = [
             'username' => $profile['username'],
             'name' => $profile['name'],
             'biography' => $profile['biography'],
@@ -56,9 +56,14 @@ class SyncInstagramProfile implements ShouldQueue
             'followers_count' => $profile['followers_count'],
             'following_count' => $profile['following_count'],
             'media_count' => $profile['media_count'],
-            'sync_status' => SyncStatus::Idle,
-            'last_synced_at' => now(),
-            'last_sync_error' => null,
-        ]);
+        ];
+
+        if ($this->finalizeSyncState) {
+            $updates['sync_status'] = SyncStatus::Idle;
+            $updates['last_synced_at'] = now();
+            $updates['last_sync_error'] = null;
+        }
+
+        $this->account->update($updates);
     }
 }
