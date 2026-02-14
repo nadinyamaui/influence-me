@@ -24,11 +24,11 @@ class Show extends Component
 
     public bool $confirmingRevokePortalAccess = false;
 
-    private ?Collection $linkedContentGroups = null;
+    public Collection $linkedContentGroups;
 
     public array $linkedContentSummaryData = [];
 
-    private bool $linkedContentLoaded = false;
+    public bool $linkedContentLoaded = false;
 
     public function mount(Client $client): void
     {
@@ -37,10 +37,15 @@ class Show extends Component
         $this->client = $client;
         $this->linkedContentGroups = collect();
         $this->linkedContentSummaryData = $this->emptyLinkedContentSummary();
+        $this->linkedContentLoaded = false;
     }
 
     public function render()
     {
+        if ($this->activeTab === 'content' && ! $this->linkedContentLoaded) {
+            $this->loadLinkedContent();
+        }
+
         return view('pages.clients.show', [
             'summary' => $this->summary(),
             'linkedContentGroups' => $this->linkedContentGroups ?? collect(),
