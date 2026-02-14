@@ -2,6 +2,8 @@
 
 namespace App\Livewire\InstagramAccounts;
 
+use App\Enums\SyncStatus;
+use App\Jobs\SyncAllInstagramData;
 use App\Models\InstagramAccount;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Collection;
@@ -13,6 +15,23 @@ class Index extends Component
     use AuthorizesRequests;
 
     public ?int $disconnectingAccountId = null;
+
+    public function syncNow(int $accountId): void
+    {
+        $account = $this->resolveUserAccount($accountId);
+        $this->authorize('update', $account);
+
+        if ($account->sync_status === SyncStatus::Syncing) {
+            return;
+        }
+
+        $account->update([
+            'sync_status' => SyncStatus::Syncing,
+            'last_sync_error' => null,
+        ]);
+
+        SyncAllInstagramData::dispatch($account);
+    }
 
     public function setPrimary(int $accountId): void
     {

@@ -5,6 +5,9 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
+- RFC 030: added manual account sync action `syncNow` to `app/Livewire/InstagramAccounts/Index.php` with ownership authorization, duplicate-sync guard, immediate `sync_status=syncing` UI feedback, and queued `App\Jobs\SyncAllInstagramData` dispatch.
+- RFC 030: updated `resources/views/pages/instagram-accounts/index.blade.php` with per-account "Sync Now" controls (disabled while syncing), `wire:poll.5s` status refresh while syncing, RFC-compliant status copy ("Up to date", "Syncing...", "Sync failed"), failed-sync collapsible `last_sync_error` display, and expiring/expired token "Re-authenticate" links.
+- RFC 030: expanded `tests/Feature/InstagramAccountsPageTest.php` to verify manual sync dispatch and syncing-state persistence, skip-dispatch when already syncing, failed-sync error rendering, and polling/status text visibility on the accounts page.
 - RFC 029: added authenticated add-account OAuth entry route `auth.facebook.add` and callback intent branching in `app/Http/Controllers/Auth/FacebookAuthController.php` so account linking uses `createInstagramAccountsForLoggedUser()` and redirects back to `/instagram-accounts` with scoped success/error handling.
 - RFC 029: expanded `/instagram-accounts` in `app/Livewire/InstagramAccounts/Index.php` and `resources/views/pages/instagram-accounts/index.blade.php` with "Connect Another Account", `setPrimary` action, disconnect confirmation modal flow, ownership-safe account resolution, and last-account disconnect guard messaging.
 - RFC 029: added feature coverage in `tests/Feature/Auth/FacebookSocialiteLoginTest.php` and `tests/Feature/InstagramAccountsPageTest.php` for add-account auth flow, callback account-linking behavior, primary-account switching, disconnect confirmation, and prevention of disconnecting the final account.

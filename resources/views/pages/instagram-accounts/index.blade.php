@@ -26,9 +26,9 @@
         </div>
     @endif
 
-    @if ($errors->has('oauth') || $errors->has('disconnect'))
+    @if ($errors->has('oauth') || $errors->has('disconnect') || $errors->has('sync'))
         <div class="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-800 dark:border-rose-900/40 dark:bg-rose-950/50 dark:text-rose-200">
-            {{ $errors->first('oauth') ?? $errors->first('disconnect') }}
+            {{ $errors->first('oauth') ?? $errors->first('disconnect') ?? $errors->first('sync') }}
         </div>
     @endif
 
@@ -53,7 +53,13 @@
                     $syncStatusValue = $account->sync_status?->value ?? SyncStatus::Idle->value;
                 @endphp
 
-                <article wire:key="instagram-account-{{ $account->id }}" class="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-700 dark:bg-zinc-900">
+                <article
+                    wire:key="instagram-account-{{ $account->id }}"
+                    @if ($syncStatusValue === SyncStatus::Syncing->value)
+                        wire:poll.5s
+                    @endif
+                    class="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-700 dark:bg-zinc-900"
+                >
                     <div class="flex items-start gap-3">
                         @if ($account->profile_picture_url)
                             <img
@@ -95,17 +101,17 @@
                             @if ($syncStatusValue === SyncStatus::Syncing->value)
                                 <span class="inline-flex items-center gap-2 font-medium text-amber-600 dark:text-amber-300">
                                     <span class="h-3 w-3 animate-spin rounded-full border-2 border-amber-500 border-t-transparent"></span>
-                                    Syncing
+                                    Syncing...
                                 </span>
                             @elseif ($syncStatusValue === SyncStatus::Failed->value)
                                 <span class="inline-flex items-center gap-2 font-medium text-rose-600 dark:text-rose-300">
                                     <span class="h-2.5 w-2.5 rounded-full bg-rose-500"></span>
-                                    Failed
+                                    Sync failed
                                 </span>
                             @else
                                 <span class="inline-flex items-center gap-2 font-medium text-emerald-600 dark:text-emerald-300">
                                     <span class="h-2.5 w-2.5 rounded-full bg-emerald-500"></span>
-                                    Idle
+                                    Up to date
                                 </span>
                             @endif
                         </div>
@@ -118,16 +124,48 @@
                         <div class="flex items-center justify-between gap-3">
                             <span class="text-zinc-500 dark:text-zinc-300">Token status</span>
                             @if ($tokenExpired)
-                                <span class="font-medium text-rose-600 dark:text-rose-300">Expired</span>
+                                <span class="font-medium text-rose-600 dark:text-rose-300">
+                                    Expired
+                                    <a
+                                        href="{{ route('auth.facebook.add') }}"
+                                        class="underline underline-offset-2 hover:text-rose-700 dark:hover:text-rose-200"
+                                    >
+                                        Re-authenticate
+                                    </a>
+                                </span>
                             @elseif ($tokenExpiringSoon)
-                                <span class="font-medium text-amber-600 dark:text-amber-300">Expires within 7 days</span>
+                                <span class="font-medium text-amber-600 dark:text-amber-300">
+                                    Expires within 7 days
+                                    <a
+                                        href="{{ route('auth.facebook.add') }}"
+                                        class="underline underline-offset-2 hover:text-amber-700 dark:hover:text-amber-200"
+                                    >
+                                        Re-authenticate
+                                    </a>
+                                </span>
                             @else
                                 <span class="font-medium text-emerald-600 dark:text-emerald-300">Active</span>
                             @endif
                         </div>
                     </div>
 
+                    @if ($syncStatusValue === SyncStatus::Failed->value && $account->last_sync_error)
+                        <details class="mt-4 rounded-lg border border-rose-200 bg-rose-50 p-3 text-sm dark:border-rose-900/40 dark:bg-rose-950/30">
+                            <summary class="cursor-pointer font-medium text-rose-700 dark:text-rose-200">View sync error</summary>
+                            <p class="mt-2 whitespace-pre-wrap text-rose-700 dark:text-rose-200">{{ $account->last_sync_error }}</p>
+                        </details>
+                    @endif
+
                     <div class="mt-5 flex items-center justify-end gap-2">
+                        <button
+                            type="button"
+                            wire:click="syncNow({{ $account->id }})"
+                            @disabled($syncStatusValue === SyncStatus::Syncing->value)
+                            class="inline-flex items-center rounded-md border border-amber-300 px-3 py-1.5 text-xs font-medium text-amber-700 transition hover:bg-amber-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-amber-700 dark:text-amber-200 dark:hover:bg-amber-900/20"
+                        >
+                            Sync Now
+                        </button>
+
                         @if (! $account->is_primary)
                             <button
                                 type="button"
