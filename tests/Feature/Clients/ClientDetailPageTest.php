@@ -1,8 +1,8 @@
 <?php
 
+use App\Enums\ClientType;
 use App\Enums\InvoiceStatus;
 use App\Enums\ProposalStatus;
-use App\Enums\ClientType;
 use App\Livewire\Clients\Show;
 use App\Models\Client;
 use App\Models\ClientUser;
@@ -70,7 +70,11 @@ test('owner can view client detail page with summary and tabs', function (): voi
     Livewire::actingAs($owner)
         ->test(Show::class, ['client' => $client])
         ->set('activeTab', 'content')
-        ->assertSee('Content tab coming soon.')
+        ->assertSee('Total reach')
+        ->assertSee('Total impressions')
+        ->assertSee('Average engagement rate')
+        ->assertSee('Uncategorized')
+        ->assertSee('Unlink')
         ->set('activeTab', 'proposals')
         ->assertSee('Proposals tab coming soon.')
         ->set('activeTab', 'invoices')
@@ -88,4 +92,78 @@ test('non-owners cannot view client detail page', function (): void {
     $this->actingAs($outsider)
         ->get(route('clients.show', $client))
         ->assertForbidden();
+});
+
+test('content tab groups linked media by campaign and shows aggregate stats', function (): void {
+    $owner = User::factory()->create();
+
+    $client = Client::factory()->for($owner)->create();
+    $account = InstagramAccount::factory()->for($owner)->create();
+
+    $launchFirst = InstagramMedia::factory()->for($account)->create([
+        'caption' => 'Launch Post One',
+        'reach' => 1000,
+        'impressions' => 2100,
+        'engagement_rate' => 5.5,
+    ]);
+
+    $launchSecond = InstagramMedia::factory()->for($account)->create([
+        'caption' => 'Launch Post Two',
+        'reach' => 500,
+        'impressions' => 900,
+        'engagement_rate' => 4.5,
+    ]);
+
+    $uncategorized = InstagramMedia::factory()->for($account)->create([
+        'caption' => 'No Campaign Post',
+        'reach' => 300,
+        'impressions' => 500,
+        'engagement_rate' => 2.0,
+    ]);
+
+    $client->instagramMedia()->attach($launchFirst->id, [
+        'campaign_name' => 'Launch Campaign',
+    ]);
+
+    $client->instagramMedia()->attach($launchSecond->id, [
+        'campaign_name' => 'Launch Campaign',
+    ]);
+
+    $client->instagramMedia()->attach($uncategorized->id, [
+        'campaign_name' => null,
+    ]);
+
+    Livewire::actingAs($owner)
+        ->test(Show::class, ['client' => $client])
+        ->set('activeTab', 'content')
+        ->assertSee('Launch Campaign')
+        ->assertSee('Uncategorized')
+        ->assertSee('1,800')
+        ->assertSee('3,500')
+        ->assertSee('4.00%')
+        ->assertSee('Launch Post One')
+        ->assertSee('Launch Post Two')
+        ->assertSee('No Campaign Post');
+});
+
+test('owners can unlink linked media from client content tab', function (): void {
+    $owner = User::factory()->create();
+    $client = Client::factory()->for($owner)->create();
+    $account = InstagramAccount::factory()->for($owner)->create();
+    $media = InstagramMedia::factory()->for($account)->create();
+
+    $client->instagramMedia()->attach($media->id, [
+        'campaign_name' => 'To Remove',
+    ]);
+
+    Livewire::actingAs($owner)
+        ->test(Show::class, ['client' => $client])
+        ->set('activeTab', 'content')
+        ->call('unlinkContent', $media->id)
+        ->assertSee('No content linked to this client yet. Go to the Content browser to link posts.');
+
+    $this->assertDatabaseMissing('campaign_media', [
+        'client_id' => $client->id,
+        'instagram_media_id' => $media->id,
+    ]);
 });

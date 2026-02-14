@@ -63,7 +63,15 @@
                     <tbody class="divide-y divide-zinc-100 dark:divide-zinc-800">
                         @foreach ($clients as $client)
                             <tr wire:key="client-row-{{ $client->id }}">
-                                <td class="px-4 py-3 font-medium text-zinc-900 dark:text-zinc-100">{{ $client->name }}</td>
+                                <td class="px-4 py-3">
+                                    <a
+                                        href="{{ route('clients.show', $client) }}"
+                                        class="font-medium text-blue-600 transition hover:underline dark:text-blue-400"
+                                        wire:navigate
+                                    >
+                                        {{ $client->name }}
+                                    </a>
+                                </td>
                                 <td class="px-4 py-3 text-zinc-700 dark:text-zinc-200">{{ $client->company_name ?? '—' }}</td>
                                 <td class="px-4 py-3">
                                     @if ($client->type === ClientType::Brand)
@@ -76,13 +84,6 @@
                                 <td class="px-4 py-3 text-zinc-700 dark:text-zinc-200">{{ number_format($client->instagram_media_count) }}</td>
                                 <td class="px-4 py-3">
                                     <div class="flex justify-end gap-2">
-                                        <a
-                                            href="{{ route('clients.show', $client) }}"
-                                            class="inline-flex items-center rounded-md border border-zinc-300 px-3 py-1.5 text-xs font-medium text-zinc-700 transition hover:bg-zinc-100 dark:border-zinc-600 dark:text-zinc-200 dark:hover:bg-zinc-800"
-                                            wire:navigate
-                                        >
-                                            View
-                                        </a>
                                         <a
                                             href="{{ route('clients.edit', $client) }}"
                                             class="inline-flex items-center rounded-md border border-zinc-300 px-3 py-1.5 text-xs font-medium text-zinc-700 transition hover:bg-zinc-100 dark:border-zinc-600 dark:text-zinc-200 dark:hover:bg-zinc-800"
@@ -112,23 +113,26 @@
     @endif
 
     @if ($deletingClientId)
-        <div class="fixed inset-0 z-40 flex items-center justify-center bg-zinc-900/60 p-4">
-            <div class="w-full max-w-md rounded-2xl border border-zinc-200 bg-white p-6 shadow-xl dark:border-zinc-700 dark:bg-zinc-900">
-                <h2 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100">Delete client?</h2>
-                <p class="mt-2 text-sm text-zinc-600 dark:text-zinc-300">
-                    You are about to delete
-                    <span class="font-semibold text-zinc-900 dark:text-zinc-100">{{ $this->deletingClient()?->name ?? 'this client' }}</span>.
-                </p>
+        <flux:modal
+            name="client-list-delete-modal"
+            :show="$deletingClientId !== null"
+            @close="cancelDelete"
+            class="max-w-md"
+        >
+            <h2 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100">Delete client?</h2>
+            <p class="mt-2 text-sm text-zinc-600 dark:text-zinc-300">
+                You are about to delete
+                <span class="font-semibold text-zinc-900 dark:text-zinc-100">{{ $this->deletingClient()?->name ?? 'this client' }}</span>.
+            </p>
 
-                <div class="mt-5 flex justify-end gap-2">
-                    <flux:button type="button" variant="filled" wire:click="cancelDelete">
-                        Cancel
-                    </flux:button>
-                    <flux:button type="button" variant="danger" wire:click="delete">
-                        Delete
-                    </flux:button>
-                </div>
+            <div class="mt-5 flex justify-end gap-2">
+                <flux:button type="button" variant="filled" wire:click="cancelDelete">
+                    Cancel
+                </flux:button>
+                <flux:button type="button" variant="danger" wire:click="delete">
+                    Delete
+                </flux:button>
             </div>
-        </div>
+        </flux:modal>
     @endif
 </div>

@@ -358,15 +358,7 @@ it('returns an empty array when no instagram media is available', function (): v
 });
 
 it('returns empty story collection when graph endpoint has no media', function (): void {
-    $cursor = new class
-    {
-        public bool $useImplicitFetch = false;
-
-        public function setUseImplicitFetch(bool $useImplicitFetch): void
-        {
-            $this->useImplicitFetch = $useImplicitFetch;
-        }
-
+    $cursor = new class {
         public function getArrayCopy(): array
         {
             return [];
@@ -374,7 +366,7 @@ it('returns empty story collection when graph endpoint has no media', function (
     };
 
     $igUser = \Mockery::mock('overload:'.IGUser::class);
-    $igUser->shouldReceive('getMedia')
+    $igUser->shouldReceive('getStories')
         ->once()
         ->with([
             'id',
@@ -398,8 +390,7 @@ it('returns empty story collection when graph endpoint has no media', function (
 
     $stories = $client->getStories();
 
-    expect($stories)->toHaveCount(0)
-        ->and($cursor->useImplicitFetch)->toBeTrue();
+    expect($stories)->toHaveCount(0);
 });
 
 it('gets a single instagram media item from graph endpoint', function (): void {

@@ -5,6 +5,7 @@ use App\Livewire\Clients\Create as ClientsCreate;
 use App\Livewire\Clients\Edit as ClientsEdit;
 use App\Livewire\Clients\Index as ClientsIndex;
 use App\Livewire\Clients\Show as ClientsShow;
+use App\Livewire\Content\Index as ContentIndex;
 use App\Livewire\Dashboard;
 use App\Livewire\InstagramAccounts\Index as InstagramAccountsIndex;
 use Illuminate\Support\Facades\Route;
@@ -24,6 +25,9 @@ Route::middleware(['auth'])->group(function (): void {
 
     Route::livewire('instagram-accounts', InstagramAccountsIndex::class)
         ->name('instagram-accounts.index');
+
+    Route::livewire('content', ContentIndex::class)
+        ->name('content.index');
 
     Route::livewire('clients', ClientsIndex::class)
         ->name('clients.index');

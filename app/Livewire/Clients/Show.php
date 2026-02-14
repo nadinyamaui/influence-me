@@ -6,7 +6,10 @@ use App\Enums\InvoiceStatus;
 use App\Enums\ProposalStatus;
 use App\Models\Client;
 use App\Services\Clients\ClientPortalAccessService;
+use App\Services\Content\ContentClientLinkService;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 use Livewire\Component;
@@ -21,21 +24,43 @@ class Show extends Component
 
     public bool $confirmingRevokePortalAccess = false;
 
+    public Collection $linkedContentGroups;
+
+    public array $linkedContentSummaryData = [];
+
+    public bool $linkedContentLoaded = false;
+
     public function mount(Client $client): void
     {
         $this->authorize('view', $client);
 
         $this->client = $client;
+        $this->linkedContentGroups = collect();
+        $this->linkedContentSummaryData = $this->emptyLinkedContentSummary();
+        $this->linkedContentLoaded = false;
     }
 
     public function render()
     {
+        if ($this->activeTab === 'content' && ! $this->linkedContentLoaded) {
+            $this->loadLinkedContent();
+        }
+
         return view('pages.clients.show', [
             'summary' => $this->summary(),
+            'linkedContentGroups' => $this->linkedContentGroups ?? collect(),
+            'linkedContentSummary' => $this->linkedContentSummaryData,
             'hasPortalAccess' => $this->client->clientUser()->exists(),
         ])->layout('layouts.app', [
             'title' => __('Client Details'),
         ]);
+    }
+
+    public function updatedActiveTab(string $value): void
+    {
+        if ($value === 'content') {
+            $this->loadLinkedContent();
+        }
     }
 
     public function inviteToPortal(ClientPortalAccessService $portalAccessService): void
@@ -93,6 +118,49 @@ class Show extends Component
         session()->flash('status', 'Portal access revoked.');
     }
 
+    public function unlinkContent(int $mediaId, ContentClientLinkService $linkService): void
+    {
+        $this->authorize('update', $this->client);
+
+        $media = $this->client->instagramMedia()
+            ->whereKey($mediaId)
+            ->firstOrFail();
+
+        $this->authorize('linkToClient', $media);
+
+        $linkService->unlink(Auth::user(), $media, $this->client);
+
+        if ($this->activeTab === 'content') {
+            $this->linkedContentLoaded = false;
+            $this->loadLinkedContent();
+        }
+
+        session()->flash('status', 'Content unlinked from client.');
+    }
+
+    private function loadLinkedContent(): void
+    {
+        if ($this->linkedContentLoaded) {
+            return;
+        }
+
+        $linkedContentMedia = $this->linkedContentMedia();
+
+        $this->linkedContentGroups = $this->groupedLinkedContent($linkedContentMedia);
+        $this->linkedContentSummaryData = $this->linkedContentSummary($linkedContentMedia);
+        $this->linkedContentLoaded = true;
+    }
+
+    private function emptyLinkedContentSummary(): array
+    {
+        return [
+            'total_posts' => 0,
+            'total_reach' => 0,
+            'total_impressions' => 0,
+            'average_engagement_rate' => 0.0,
+        ];
+    }
+
     private function summary(): array
     {
         $pendingInvoiceQuery = $this->client->invoices()
@@ -106,6 +174,36 @@ class Show extends Component
             'active_proposals' => $this->client->proposals()->where('status', ProposalStatus::Sent)->count(),
             'pending_invoices' => $pendingInvoiceQuery->count(),
             'pending_invoice_total' => (float) $pendingInvoiceQuery->sum('total'),
+        ];
+    }
+
+    private function linkedContentMedia(): EloquentCollection
+    {
+        return $this->client->instagramMedia()
+            ->orderByRaw('case when campaign_media.campaign_name is null then 1 else 0 end')
+            ->orderBy('campaign_media.campaign_name')
+            ->orderByDesc('published_at')
+            ->get();
+    }
+
+    private function groupedLinkedContent(EloquentCollection $linkedContentMedia): Collection
+    {
+        return $linkedContentMedia->groupBy(function ($media): string {
+            return $media->pivot->campaign_name ?? 'Uncategorized';
+        });
+    }
+
+    private function linkedContentSummary(EloquentCollection $linkedContentMedia): array
+    {
+        $averageEngagementRate = $linkedContentMedia->isEmpty()
+            ? 0
+            : (float) $linkedContentMedia->avg(fn ($media): float => (float) $media->engagement_rate);
+
+        return [
+            'total_posts' => $linkedContentMedia->count(),
+            'total_reach' => (int) $linkedContentMedia->sum('reach'),
+            'total_impressions' => (int) $linkedContentMedia->sum('impressions'),
+            'average_engagement_rate' => round($averageEngagementRate, 2),
         ];
     }
 }
