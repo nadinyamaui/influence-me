@@ -71,17 +71,13 @@
                 <div class="lg:col-span-7">
                     <div class="mb-8 inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.22em] text-teal-100 backdrop-blur">
                         <span class="h-2 w-2 rounded-full bg-teal-300 glow-dot"></span>
-                        Creator command center
+                        Influencer CRM platform
                     </div>
 
-                    <h1 class="font-display text-5xl leading-[0.98] text-white sm:text-6xl lg:text-7xl">
-                        Influence,
-                        <span class="text-amber-200">operated</span>
-                        with intent.
-                    </h1>
+                    <h1 class="font-display text-5xl leading-[0.98] text-white sm:text-6xl lg:text-7xl">Run your influencer business like a <span class="text-amber-200">real CRM</span>.</h1>
 
                     <p class="mt-7 max-w-2xl text-base leading-relaxed text-slate-200 sm:text-lg">
-                        Influence Me turns the messy side of creator work into a sharp system: synced platform data, clear client workflows, proposal control, and invoices that move from sent to paid without the spreadsheet spiral.
+                        Influence Me helps you send polished proposals, manage client deliverables, and share campaign reports automatically. We sync your account stats and linked posts so you spend less time reporting and more time creating.
                     </p>
 
                     <div class="mt-10 flex flex-col items-start gap-4 sm:flex-row sm:items-center">
@@ -173,9 +169,7 @@
                         <p class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">System Modules</p>
                         <h2 class="mt-3 font-display text-4xl leading-tight text-slate-900 sm:text-5xl">Built like a studio OS, not a generic dashboard.</h2>
                     </div>
-                    <p class="max-w-xl text-sm leading-relaxed text-slate-600">
-                        Every block below mirrors how creators actually work: account sync, client collaboration, negotiated deliverables, and revenue operations that remain auditable.
-                    </p>
+                    <p class="max-w-xl text-sm leading-relaxed text-slate-600">Every block below reflects the influencer CRM workflow: proposals, deliverables, approvals, reporting, and scheduled content reminders in one place.</p>
                 </div>
 
                 <div class="grid grid-cols-1 gap-5 lg:grid-cols-6">
@@ -183,32 +177,32 @@
                         <div class="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-teal-100 text-teal-700">
                             <i class="fa-brands fa-instagram" aria-hidden="true"></i>
                         </div>
-                        <h3 class="text-lg font-semibold text-slate-900">Platform Sync</h3>
-                        <p class="mt-2 text-sm text-slate-600">OAuth-based account connection pulls profile, media, and audience insights into one source of truth.</p>
+                        <h3 class="text-lg font-semibold text-slate-900">Automated Stats and Post Linking</h3>
+                        <p class="mt-2 text-sm text-slate-600">Connect your accounts once and automatically pull audience stats, post performance, and linked campaign content for client-ready reporting.</p>
                     </article>
 
                     <article class="group rounded-3xl border border-slate-300 bg-slate-900 p-6 text-slate-100 transition duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-slate-500/30 lg:col-span-2">
                         <div class="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-slate-700 text-teal-200">
                             <i class="fa-solid fa-users" aria-hidden="true"></i>
                         </div>
-                        <h3 class="text-lg font-semibold">Client Rooms</h3>
-                        <p class="mt-2 text-sm text-slate-300">Client users get isolated portal access for approvals, invoice payment, and scoped analytics visibility.</p>
+                        <h3 class="text-lg font-semibold">Client Deliverables Hub</h3>
+                        <p class="mt-2 text-sm text-slate-300">Track each client deliverable by campaign, keep approvals visible, and give clients a focused portal to review exactly what belongs to them.</p>
                     </article>
 
                     <article class="group rounded-3xl border border-slate-300 bg-white p-6 transition duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-amber-200/30 lg:col-span-2">
                         <div class="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-amber-100 text-amber-700">
                             <i class="fa-solid fa-file-signature" aria-hidden="true"></i>
                         </div>
-                        <h3 class="text-lg font-semibold text-slate-900">Proposal Engine</h3>
-                        <p class="mt-2 text-sm text-slate-600">Move deals through draft, sent, revised, approved, and rejected states without losing version clarity.</p>
+                        <h3 class="text-lg font-semibold text-slate-900">Proposal Builder</h3>
+                        <p class="mt-2 text-sm text-slate-600">Build professional proposals using demographics from your connected accounts, then move each deal from draft to approval with full status clarity.</p>
                     </article>
 
                     <article class="group rounded-3xl border border-slate-300 bg-white p-6 transition duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-cyan-200/30 lg:col-span-3">
                         <div class="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-cyan-100 text-cyan-700">
                             <i class="fa-solid fa-credit-card" aria-hidden="true"></i>
                         </div>
-                        <h3 class="text-lg font-semibold text-slate-900">Revenue Ops</h3>
-                        <p class="mt-2 text-sm text-slate-600">Send invoices, generate Stripe checkout links, and track overdue detection without manual follow-up debt.</p>
+                        <h3 class="text-lg font-semibold text-slate-900">Schedule and Reporting Control</h3>
+                        <p class="mt-2 text-sm text-slate-600">Plan posting timelines with reminders for what to publish and when, while keeping campaign reporting organized without extra admin work.</p>
                     </article>
 
                     <article class="rounded-3xl border border-slate-300 bg-gradient-to-br from-amber-50 to-teal-50 p-6 lg:col-span-3">
@@ -240,8 +234,8 @@
                 <div class="grid gap-8 lg:grid-cols-12">
                     <div class="lg:col-span-4">
                         <p class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Workflow</p>
-                        <h2 class="mt-3 font-display text-4xl leading-tight text-slate-900">From account sync to cash receipt.</h2>
-                        <p class="mt-4 max-w-sm text-sm text-slate-600">No step-hopping across disconnected tools. Each stage hands off to the next with explicit state transitions.</p>
+                        <h2 class="mt-3 font-display text-4xl leading-tight text-slate-900">From proposal to published deliverable.</h2>
+                        <p class="mt-4 max-w-sm text-sm text-slate-600">One CRM flow for influencer operations. Each stage is connected so execution and reporting stay consistent.</p>
                     </div>
 
                     <div class="lg:col-span-8">
@@ -249,8 +243,8 @@
                             <div class="grid gap-4 rounded-2xl border border-slate-300 bg-slate-50 p-5 sm:grid-cols-[auto_1fr_auto] sm:items-center">
                                 <div class="inline-flex h-10 w-10 items-center justify-center rounded-full bg-slate-900 text-sm font-semibold text-white">01</div>
                                 <div>
-                                    <h3 class="text-base font-semibold text-slate-900">Connect Instagram account</h3>
-                                    <p class="text-sm text-slate-600">Secure OAuth link verifies ownership and starts sync queues.</p>
+                                    <h3 class="text-base font-semibold text-slate-900">Connect your social accounts</h3>
+                                    <p class="text-sm text-slate-600">Secure OAuth confirms ownership and starts automated sync for profile, content, and demographics.</p>
                                 </div>
                                 <span class="rounded-full bg-teal-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-teal-700">Identity</span>
                             </div>
@@ -258,28 +252,28 @@
                             <div class="grid gap-4 rounded-2xl border border-slate-300 bg-slate-50 p-5 sm:grid-cols-[auto_1fr_auto] sm:items-center">
                                 <div class="inline-flex h-10 w-10 items-center justify-center rounded-full bg-slate-900 text-sm font-semibold text-white">02</div>
                                 <div>
-                                    <h3 class="text-base font-semibold text-slate-900">Build campaign deliverables</h3>
-                                    <p class="text-sm text-slate-600">Organize content, timeline scheduling, and client-linked media planning.</p>
+                                    <h3 class="text-base font-semibold text-slate-900">Build proposals with real demographics</h3>
+                                    <p class="text-sm text-slate-600">Use account insights to create more professional proposals and set clear deliverables before kickoff.</p>
                                 </div>
-                                <span class="rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-amber-700">Planning</span>
+                                <span class="rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-amber-700">Proposal</span>
                             </div>
 
                             <div class="grid gap-4 rounded-2xl border border-slate-300 bg-slate-50 p-5 sm:grid-cols-[auto_1fr_auto] sm:items-center">
                                 <div class="inline-flex h-10 w-10 items-center justify-center rounded-full bg-slate-900 text-sm font-semibold text-white">03</div>
                                 <div>
-                                    <h3 class="text-base font-semibold text-slate-900">Negotiate and approve</h3>
-                                    <p class="text-sm text-slate-600">Client portal keeps proposal revision loops and approvals tracked.</p>
+                                    <h3 class="text-base font-semibold text-slate-900">Manage deliverables and deadlines</h3>
+                                    <p class="text-sm text-slate-600">Track what needs to be posted, how it should look, and when it is due with timeline reminders.</p>
                                 </div>
-                                <span class="rounded-full bg-cyan-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-cyan-700">Approval</span>
+                                <span class="rounded-full bg-cyan-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-cyan-700">Execution</span>
                             </div>
 
                             <div class="grid gap-4 rounded-2xl border border-slate-300 bg-slate-50 p-5 sm:grid-cols-[auto_1fr_auto] sm:items-center">
                                 <div class="inline-flex h-10 w-10 items-center justify-center rounded-full bg-slate-900 text-sm font-semibold text-white">04</div>
                                 <div>
-                                    <h3 class="text-base font-semibold text-slate-900">Invoice and collect</h3>
-                                    <p class="text-sm text-slate-600">Checkout completion updates invoice status and records payment events.</p>
+                                    <h3 class="text-base font-semibold text-slate-900">Auto-report performance back to clients</h3>
+                                    <p class="text-sm text-slate-600">Linked posts and synced stats keep campaign reports current, reducing manual reporting and admin time.</p>
                                 </div>
-                                <span class="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-emerald-700">Revenue</span>
+                                <span class="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-emerald-700">Reporting</span>
                             </div>
                         </div>
                     </div>
