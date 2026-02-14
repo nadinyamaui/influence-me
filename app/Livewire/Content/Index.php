@@ -135,7 +135,7 @@ class Index extends Component
 
     public function openDetailModal(int $mediaId): void
     {
-        $media = $this->resolveMedia($mediaId);
+        $media = InstagramMedia::resolveForUser($mediaId);
         $this->authorize('view', $media);
 
         $this->selectedMediaId = $media->id;
@@ -171,7 +171,7 @@ class Index extends Component
             return;
         }
 
-        $media = $this->resolveMedia($mediaId);
+        $media = InstagramMedia::resolveForUser($mediaId);
         $this->authorize('linkToClient', $media);
 
         $selectedIds = array_values(array_unique(array_map('intval', $this->selectedMediaIds)));
@@ -208,7 +208,7 @@ class Index extends Component
             return;
         }
 
-        $media = $this->resolveMedia($this->selectedMediaId);
+        $media = InstagramMedia::resolveForUser($this->selectedMediaId);
         $this->authorize('linkToClient', $media);
 
         $this->linkingBatch = false;
@@ -266,7 +266,7 @@ class Index extends Component
             return;
         }
 
-        $media = $this->resolveMedia($this->selectedMediaId);
+        $media = InstagramMedia::resolveForUser($this->selectedMediaId);
         $this->authorize('linkToClient', $media);
 
         $linkService->link($user, $media, $client, $campaignName, $notes);
@@ -282,7 +282,7 @@ class Index extends Component
             return;
         }
 
-        $media = $this->resolveMedia($this->selectedMediaId);
+        $media = InstagramMedia::resolveForUser($this->selectedMediaId);
         $this->authorize('linkToClient', $media);
 
         $client = $this->resolveClient($clientId);
@@ -301,7 +301,7 @@ class Index extends Component
             return;
         }
 
-        $media = $this->resolveMedia($this->selectedMediaId);
+        $media = InstagramMedia::resolveForUser($this->selectedMediaId);
         $this->authorize('linkToClient', $media);
 
         $client = $this->resolveClient($this->confirmingUnlinkClientId);
@@ -421,21 +421,6 @@ class Index extends Component
         $this->resetPage(pageName: 'cursor');
     }
 
-    private function resolveMedia(int $mediaId): InstagramMedia
-    {
-        return InstagramMedia::query()
-            ->whereKey($mediaId)
-            ->whereHas('instagramAccount', fn (Builder $builder): Builder => $builder->where('user_id', Auth::id()))
-            ->firstOrFail();
-    }
-
-    private function resolveClient(int $clientId): Client
-    {
-        return Auth::user()->clients()
-            ->whereKey($clientId)
-            ->firstOrFail();
-    }
-
     private function selectedBatchMedia(): EloquentCollection
     {
         $selectedIds = array_values(array_unique(array_map('intval', $this->selectedMediaIds)));
@@ -447,6 +432,13 @@ class Index extends Component
             ->whereIn('id', $selectedIds)
             ->whereHas('instagramAccount', fn (Builder $builder): Builder => $builder->where('user_id', Auth::id()))
             ->get();
+    }
+
+    private function resolveClient(int $clientId): Client
+    {
+        return Auth::user()->clients()
+            ->whereKey($clientId)
+            ->firstOrFail();
     }
 
     private function resetLinkForm(): void

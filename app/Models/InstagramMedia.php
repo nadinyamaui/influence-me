@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\MediaType;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
@@ -33,5 +34,25 @@ class InstagramMedia extends Model
         return $this->belongsToMany(Client::class, 'campaign_media')
             ->withPivot('campaign_name', 'notes')
             ->withTimestamps();
+    }
+
+    public static function resolveForUser(int $mediaId): self
+    {
+        $userId = auth()->id();
+
+        if ($userId === null) {
+            abort(404);
+        }
+
+        $media = self::query()
+            ->whereKey($mediaId)
+            ->whereHas('instagramAccount', fn (Builder $builder): Builder => $builder->where('user_id', $userId))
+            ->first();
+
+        if ($media === null) {
+            abort(404);
+        }
+
+        return $media;
     }
 }
