@@ -1,6 +1,5 @@
 <?php
 
-use App\Enums\AccountType;
 use App\Enums\SyncStatus;
 use App\Jobs\SyncAllInstagramData;
 use App\Livewire\InstagramAccounts\Index;
@@ -24,7 +23,6 @@ test('authenticated users can see their instagram accounts with statuses and tok
     InstagramAccount::factory()->for($user)->create([
         'username' => 'primarycreator',
         'profile_picture_url' => null,
-        'account_type' => AccountType::Creator,
         'is_primary' => true,
         'followers_count' => 12345,
         'media_count' => 87,
@@ -35,7 +33,6 @@ test('authenticated users can see their instagram accounts with statuses and tok
 
     InstagramAccount::factory()->for($user)->create([
         'username' => 'brandaccount',
-        'account_type' => AccountType::Business,
         'followers_count' => 980,
         'media_count' => 44,
         'last_synced_at' => now()->subDay(),
@@ -55,8 +52,6 @@ test('authenticated users can see their instagram accounts with statuses and tok
         ->assertSee('@brandaccount')
         ->assertDontSee('@hiddenaccount')
         ->assertSee('Primary')
-        ->assertSee('Creator')
-        ->assertSee('Business')
         ->assertSee('12,345')
         ->assertSee('87')
         ->assertSee('Syncing...')
@@ -154,7 +149,8 @@ test('users can manually trigger sync from instagram accounts page', function ()
 
     Livewire::actingAs($user)
         ->test(Index::class)
-        ->call('syncNow', $account->id);
+        ->call('syncNow', $account->id)
+        ->assertSee('Syncing...');
 
     $account->refresh();
 

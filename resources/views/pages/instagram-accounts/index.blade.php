@@ -49,13 +49,13 @@
                 @php
                     $tokenExpired = $account->token_expires_at?->isPast() ?? false;
                     $tokenExpiringSoon = ! $tokenExpired && ($account->token_expires_at?->lte(now()->addDays(7)) ?? false);
-                    $accountTypeLabel = $account->account_type?->value ? ucfirst($account->account_type->value) : 'Unknown';
                     $syncStatusValue = $account->sync_status?->value ?? SyncStatus::Idle->value;
+                    $accountIsSyncing = $syncStatusValue === SyncStatus::Syncing->value || in_array($account->id, $this->syncingAccountIds, true);
                 @endphp
 
                 <article
                     wire:key="instagram-account-{{ $account->id }}"
-                    @if ($syncStatusValue === SyncStatus::Syncing->value)
+                    @if ($accountIsSyncing)
                         wire:poll.5s
                     @endif
                     class="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-700 dark:bg-zinc-900"
@@ -76,7 +76,6 @@
                         <div class="min-w-0 flex-1">
                             <p class="truncate text-base font-semibold text-zinc-900 dark:text-zinc-100">{{ '@'.$account->username }}</p>
                             <div class="mt-2 flex flex-wrap items-center gap-2 text-xs">
-                                <span class="rounded-full bg-zinc-100 px-2 py-1 font-medium text-zinc-700 dark:bg-zinc-800 dark:text-zinc-200">{{ $accountTypeLabel }}</span>
                                 @if ($account->is_primary)
                                     <span class="rounded-full bg-sky-100 px-2 py-1 font-medium text-sky-700 dark:bg-sky-900/40 dark:text-sky-200">Primary</span>
                                 @endif
@@ -98,7 +97,7 @@
                     <div class="mt-4 space-y-2 text-sm">
                         <div class="flex items-center justify-between gap-3">
                             <span class="text-zinc-500 dark:text-zinc-300">Sync status</span>
-                            @if ($syncStatusValue === SyncStatus::Syncing->value)
+                            @if ($accountIsSyncing)
                                 <span class="inline-flex items-center gap-2 font-medium text-amber-600 dark:text-amber-300">
                                     <span class="h-3 w-3 animate-spin rounded-full border-2 border-amber-500 border-t-transparent"></span>
                                     Syncing...
@@ -160,7 +159,7 @@
                         <button
                             type="button"
                             wire:click="syncNow({{ $account->id }})"
-                            @disabled($syncStatusValue === SyncStatus::Syncing->value)
+                            @disabled($accountIsSyncing)
                             class="inline-flex items-center rounded-md border border-amber-300 px-3 py-1.5 text-xs font-medium text-amber-700 transition hover:bg-amber-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-amber-700 dark:text-amber-200 dark:hover:bg-amber-900/20"
                         >
                             Sync Now
