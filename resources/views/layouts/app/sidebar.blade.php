@@ -16,7 +16,7 @@
                         {{ __('Dashboard') }}
                     </flux:sidebar.item>
 
-                    <flux:sidebar.item icon="photo" href="#">
+                    <flux:sidebar.item icon="photo" :href="route('content.index')" :current="request()->routeIs('content.index')" wire:navigate>
                         {{ __('Content') }}
                     </flux:sidebar.item>
 
