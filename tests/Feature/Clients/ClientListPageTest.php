@@ -127,3 +127,17 @@ test('clients list shows empty state when user has no clients', function (): voi
         ->assertSuccessful()
         ->assertSee('No clients yet. Add your first client to start managing campaigns.');
 });
+
+test('owners can delete clients from the list page', function (): void {
+    $user = User::factory()->create();
+    $client = Client::factory()->for($user)->create();
+
+    Livewire::actingAs($user)
+        ->test(Index::class)
+        ->call('confirmDelete', $client->id)
+        ->assertSet('deletingClientId', $client->id)
+        ->call('delete')
+        ->assertSet('deletingClientId', null);
+
+    $this->assertDatabaseMissing('clients', ['id' => $client->id]);
+});

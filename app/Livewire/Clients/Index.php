@@ -127,4 +127,17 @@ class Index extends Component
             ClientType::Individual->value,
         ];
     }
+
+    private function resolveClient(int $clientId): Client
+    {
+        $client = Auth::user()?->clients()
+            ->whereKey($clientId)
+            ->first();
+
+        if ($client === null) {
+            abort(404);
+        }
+
+        return $client;
+    }
 }
