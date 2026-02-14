@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 
@@ -75,5 +76,18 @@ class User extends Authenticatable
     public function scheduledPosts(): HasMany
     {
         return $this->hasMany(ScheduledPost::class);
+    }
+
+    public static function resolveInstagramAccount(int $accountId): InstagramAccount
+    {
+        $account = Auth::user()?->instagramAccounts()
+            ->whereKey($accountId)
+            ->first();
+
+        if ($account === null) {
+            abort(404);
+        }
+
+        return $account;
     }
 }

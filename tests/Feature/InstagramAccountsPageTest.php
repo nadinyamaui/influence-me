@@ -1,11 +1,12 @@
 <?php
 
-use App\Enums\AccountType;
 use App\Enums\SyncStatus;
+use App\Jobs\SyncAllInstagramData;
 use App\Livewire\InstagramAccounts\Index;
 use App\Models\InstagramAccount;
 use App\Models\User;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Bus;
 use Livewire\Livewire;
 
 test('guests are redirected to login from instagram accounts page', function (): void {
@@ -22,7 +23,6 @@ test('authenticated users can see their instagram accounts with statuses and tok
     InstagramAccount::factory()->for($user)->create([
         'username' => 'primarycreator',
         'profile_picture_url' => null,
-        'account_type' => AccountType::Creator,
         'is_primary' => true,
         'followers_count' => 12345,
         'media_count' => 87,
@@ -33,7 +33,6 @@ test('authenticated users can see their instagram accounts with statuses and tok
 
     InstagramAccount::factory()->for($user)->create([
         'username' => 'brandaccount',
-        'account_type' => AccountType::Business,
         'followers_count' => 980,
         'media_count' => 44,
         'last_synced_at' => now()->subDay(),
@@ -53,16 +52,16 @@ test('authenticated users can see their instagram accounts with statuses and tok
         ->assertSee('@brandaccount')
         ->assertDontSee('@hiddenaccount')
         ->assertSee('Primary')
-        ->assertSee('Creator')
-        ->assertSee('Business')
         ->assertSee('12,345')
         ->assertSee('87')
-        ->assertSee('Syncing')
-        ->assertSee('Idle')
+        ->assertSee('Syncing...')
+        ->assertSee('Up to date')
         ->assertSee('Expires within 7 days')
+        ->assertSee('Re-authenticate')
         ->assertSee('Active')
         ->assertSee('2 hours ago')
-        ->assertSee('1 day ago');
+        ->assertSee('1 day ago')
+        ->assertSee('wire:poll.5s', false);
 
     Carbon::setTestNow();
 });
@@ -135,4 +134,63 @@ test('users cannot disconnect their last instagram account', function (): void {
         ->assertSet('disconnectingAccountId', null);
 
     $this->assertDatabaseHas('instagram_accounts', ['id' => $account->id]);
+});
+
+test('users can manually trigger sync from instagram accounts page', function (): void {
+    Bus::fake();
+
+    $user = User::factory()->create();
+    $account = InstagramAccount::factory()
+        ->for($user)
+        ->create([
+            'sync_status' => SyncStatus::Idle,
+            'last_sync_error' => 'stale error',
+        ]);
+
+    Livewire::actingAs($user)
+        ->test(Index::class)
+        ->call('syncNow', $account->id)
+        ->assertSee('Syncing...');
+
+    $account->refresh();
+
+    expect($account->sync_status)->toBe(SyncStatus::Syncing)
+        ->and($account->last_sync_error)->toBeNull();
+
+    Bus::assertDispatched(SyncAllInstagramData::class, fn (SyncAllInstagramData $job): bool => $job->account->is($account));
+});
+
+test('manual sync action does not dispatch when account is already syncing', function (): void {
+    Bus::fake();
+
+    $user = User::factory()->create();
+    $account = InstagramAccount::factory()
+        ->for($user)
+        ->create([
+            'sync_status' => SyncStatus::Syncing,
+        ]);
+
+    Livewire::actingAs($user)
+        ->test(Index::class)
+        ->call('syncNow', $account->id);
+
+    Bus::assertNotDispatched(SyncAllInstagramData::class);
+});
+
+test('failed sync status shows collapsible sync error details', function (): void {
+    $user = User::factory()->create();
+
+    InstagramAccount::factory()
+        ->for($user)
+        ->create([
+            'sync_status' => SyncStatus::Failed,
+            'last_sync_error' => 'Instagram API unavailable',
+        ]);
+
+    $this->actingAs($user)
+        ->get(route('instagram-accounts.index'))
+        ->assertSuccessful()
+        ->assertSee('Sync failed')
+        ->assertSee('View sync error')
+        ->assertSee('Instagram API unavailable');
 });
