@@ -87,11 +87,11 @@ test('content gallery filters and sorting options work in query layer', function
         ->assertSee('Secondary Story Item')
         ->assertDontSee('Primary Post Item')
         ->set('accountId', 'all')
-        ->set('dateFrom', now()->subDays(2)->format('Y-m-d'))
+        ->set('dateRange', ['start' => now()->subDays(2)->format('Y-m-d'), 'end' => null])
         ->assertSee('Primary Post Item')
         ->assertSee('Primary Reel Item')
         ->assertDontSee('Secondary Story Item')
-        ->set('dateFrom', null)
+        ->set('dateRange', ['start' => null, 'end' => null])
         ->set('sortBy', 'most_liked')
         ->assertSeeInOrder([
             'Primary Reel Item',

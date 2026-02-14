@@ -25,10 +25,6 @@ class Index extends Component
 
     public string $accountId = 'all';
 
-    public ?string $dateFrom = null;
-
-    public ?string $dateTo = null;
-
     public array $dateRange = [
         'start' => null,
         'end' => null,
@@ -82,8 +78,6 @@ class Index extends Component
     public function updatedDateRange(mixed $value): void
     {
         $range = $this->normalizeDateRangeValue($value);
-        $this->dateFrom = $range['start'];
-        $this->dateTo = $range['end'];
         $this->dateRange = $range;
 
         $this->resetCursor();
@@ -315,6 +309,7 @@ class Index extends Component
     private function media(): CursorPaginator
     {
         [$sortField, $sortDirection] = $this->sortMap()[$this->sortBy] ?? $this->sortMap()['most_recent'];
+        $range = $this->normalizeDateRangeValue($this->dateRange);
 
         $query = InstagramMedia::query()
             ->with('instagramAccount')
@@ -328,12 +323,12 @@ class Index extends Component
             $query->where('instagram_account_id', (int) $this->accountId);
         }
 
-        if (filled($this->dateFrom)) {
-            $query->whereDate('published_at', '>=', $this->dateFrom);
+        if (filled($range['start'])) {
+            $query->whereDate('published_at', '>=', $range['start']);
         }
 
-        if (filled($this->dateTo)) {
-            $query->whereDate('published_at', '<=', $this->dateTo);
+        if (filled($range['end'])) {
+            $query->whereDate('published_at', '<=', $range['end']);
         }
 
         return $query
