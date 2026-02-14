@@ -322,3 +322,126 @@ it('throws a social authentication exception when instagram account is linked to
         'socialite_user_id' => '1234567890123',
     ]);
 });
+
+it('throws a social authentication exception when linking instagram accounts without an authenticated user', function (): void {
+    expect(fn () => app(FacebookSocialiteLoginService::class)->createInstagramAccountsForLoggedUser())
+        ->toThrow(SocialAuthenticationException::class, 'You must be logged in to link Instagram accounts.');
+});
+
+it('links instagram accounts to the authenticated user only', function (): void {
+    $user = User::factory()->create([
+        'socialite_user_type' => null,
+        'socialite_user_id' => null,
+    ]);
+    $this->actingAs($user);
+
+    $socialiteUser = new class
+    {
+        public string $token = 'short-lived-token';
+
+        public function getId(): string
+        {
+            return '1234567890123';
+        }
+    };
+
+    Socialite::shouldReceive('driver')
+        ->once()
+        ->with('facebook')
+        ->andReturnSelf();
+    Socialite::shouldReceive('user')
+        ->once()
+        ->andReturn($socialiteUser);
+
+    $service = \Mockery::mock(FacebookSocialiteLoginService::class)
+        ->makePartial()
+        ->shouldAllowMockingProtectedMethods();
+    $service->shouldReceive('exchangeToken')
+        ->once()
+        ->with($socialiteUser)
+        ->andReturn(['access_token' => 'long-lived-token']);
+    $service->shouldReceive('getAccounts')
+        ->once()
+        ->with('1234567890123', 'long-lived-token')
+        ->andReturn(collect([
+            [
+                'instagram_user_id' => 'ig-1',
+                'username' => 'ig_one',
+                'name' => 'IG One',
+                'biography' => 'Bio one',
+                'profile_picture_url' => 'https://example.test/ig-1.jpg',
+                'followers_count' => 1000,
+                'following_count' => 150,
+                'media_count' => 42,
+                'access_token' => 'page-token-1',
+            ],
+        ]));
+
+    $resolvedUser = $service->createInstagramAccountsForLoggedUser();
+
+    expect($resolvedUser->id)->toBe($user->id);
+    $this->assertAuthenticatedAs($user);
+    $this->assertDatabaseCount('users', 1);
+    $this->assertDatabaseHas('instagram_accounts', [
+        'user_id' => $user->id,
+        'instagram_user_id' => 'ig-1',
+        'username' => 'ig_one',
+        'followers_count' => 1000,
+    ]);
+});
+
+it('throws a social authentication exception when linking instagram accounts already linked to another user', function (): void {
+    $authenticatedUser = User::factory()->create();
+    $otherUser = User::factory()->create();
+    InstagramAccount::factory()->create([
+        'user_id' => $otherUser->id,
+        'instagram_user_id' => 'ig-1',
+    ]);
+
+    $this->actingAs($authenticatedUser);
+
+    $socialiteUser = new class
+    {
+        public string $token = 'short-lived-token';
+
+        public function getId(): string
+        {
+            return '1234567890123';
+        }
+    };
+
+    Socialite::shouldReceive('driver')
+        ->once()
+        ->with('facebook')
+        ->andReturnSelf();
+    Socialite::shouldReceive('user')
+        ->once()
+        ->andReturn($socialiteUser);
+
+    $service = \Mockery::mock(FacebookSocialiteLoginService::class)
+        ->makePartial()
+        ->shouldAllowMockingProtectedMethods();
+    $service->shouldReceive('exchangeToken')
+        ->once()
+        ->with($socialiteUser)
+        ->andReturn(['access_token' => 'long-lived-token']);
+    $service->shouldReceive('getAccounts')
+        ->once()
+        ->with('1234567890123', 'long-lived-token')
+        ->andReturn(collect([
+            [
+                'instagram_user_id' => 'ig-1',
+                'username' => 'ig_one',
+                'name' => 'IG One',
+                'biography' => 'Bio one',
+                'profile_picture_url' => 'https://example.test/ig-1.jpg',
+                'followers_count' => 1000,
+                'following_count' => 150,
+                'media_count' => 42,
+                'access_token' => 'page-token-1',
+            ],
+        ]));
+
+    expect(fn () => $service->createInstagramAccountsForLoggedUser())
+        ->toThrow(SocialAuthenticationException::class, 'One or more Instagram accounts are linked to a different user.');
+});
