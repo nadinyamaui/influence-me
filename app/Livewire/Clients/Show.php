@@ -24,25 +24,38 @@ class Show extends Component
 
     public bool $confirmingRevokePortalAccess = false;
 
+    public Collection $linkedContentGroups;
+
+    public array $linkedContentSummaryData = [];
+
+    private bool $linkedContentLoaded = false;
+
     public function mount(Client $client): void
     {
         $this->authorize('view', $client);
 
         $this->client = $client;
+        $this->linkedContentGroups = collect();
+        $this->linkedContentSummaryData = $this->emptyLinkedContentSummary();
     }
 
     public function render()
     {
-        $linkedContentMedia = $this->linkedContentMedia();
-
         return view('pages.clients.show', [
             'summary' => $this->summary(),
-            'linkedContentGroups' => $this->groupedLinkedContent($linkedContentMedia),
-            'linkedContentSummary' => $this->linkedContentSummary($linkedContentMedia),
+            'linkedContentGroups' => $this->linkedContentGroups,
+            'linkedContentSummary' => $this->linkedContentSummaryData,
             'hasPortalAccess' => $this->client->clientUser()->exists(),
         ])->layout('layouts.app', [
             'title' => __('Client Details'),
         ]);
+    }
+
+    public function updatedActiveTab(string $value): void
+    {
+        if ($value === 'content') {
+            $this->loadLinkedContent();
+        }
     }
 
     public function inviteToPortal(ClientPortalAccessService $portalAccessService): void
@@ -112,7 +125,35 @@ class Show extends Component
 
         $linkService->unlink(Auth::user(), $media, $this->client);
 
+        if ($this->activeTab === 'content') {
+            $this->linkedContentLoaded = false;
+            $this->loadLinkedContent();
+        }
+
         session()->flash('status', 'Content unlinked from client.');
+    }
+
+    private function loadLinkedContent(): void
+    {
+        if ($this->linkedContentLoaded) {
+            return;
+        }
+
+        $linkedContentMedia = $this->linkedContentMedia();
+
+        $this->linkedContentGroups = $this->groupedLinkedContent($linkedContentMedia);
+        $this->linkedContentSummaryData = $this->linkedContentSummary($linkedContentMedia);
+        $this->linkedContentLoaded = true;
+    }
+
+    private function emptyLinkedContentSummary(): array
+    {
+        return [
+            'total_posts' => 0,
+            'total_reach' => 0,
+            'total_impressions' => 0,
+            'average_engagement_rate' => 0.0,
+        ];
     }
 
     private function summary(): array
