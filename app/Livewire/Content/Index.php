@@ -3,12 +3,16 @@
 namespace App\Livewire\Content;
 
 use App\Enums\MediaType;
+use App\Models\Client;
 use App\Models\InstagramMedia;
+use App\Services\Content\ContentClientLinkService;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Pagination\CursorPaginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -30,6 +34,22 @@ class Index extends Component
     public ?int $selectedMediaId = null;
 
     public bool $showDetailModal = false;
+
+    public bool $selectionMode = false;
+
+    public array $selectedMediaIds = [];
+
+    public bool $showLinkModal = false;
+
+    public bool $linkingBatch = false;
+
+    public ?string $linkClientId = null;
+
+    public string $linkCampaignName = '';
+
+    public string $linkNotes = '';
+
+    public ?int $confirmingUnlinkClientId = null;
 
     public function updatedMediaType(string $value): void
     {
@@ -78,11 +98,13 @@ class Index extends Component
     public function render()
     {
         return view('pages.content.index', [
+            'availableClients' => $this->availableClients(),
             'accounts' => $this->accounts(),
             'media' => $this->media(),
             'mediaTypeFilters' => $this->mediaTypeFilters(),
             'selectedMedia' => $this->selectedMedia(),
             'sortOptions' => $this->sortOptions(),
+            'unlinkClient' => $this->unlinkClient(),
         ])->layout('layouts.app', [
             'title' => __('Content'),
         ]);
@@ -100,6 +122,171 @@ class Index extends Component
     public function closeDetailModal(): void
     {
         $this->showDetailModal = false;
+    }
+
+    public function toggleSelectionMode(): void
+    {
+        if ($this->selectionMode) {
+            $this->cancelSelectionMode();
+
+            return;
+        }
+
+        $this->selectionMode = true;
+        $this->showDetailModal = false;
+    }
+
+    public function cancelSelectionMode(): void
+    {
+        $this->selectionMode = false;
+        $this->selectedMediaIds = [];
+    }
+
+    public function toggleSelectedMedia(int $mediaId): void
+    {
+        if (! $this->selectionMode) {
+            return;
+        }
+
+        $media = $this->resolveMedia($mediaId);
+        $this->authorize('linkToClient', $media);
+
+        $selectedIds = array_values(array_unique(array_map('intval', $this->selectedMediaIds)));
+
+        if (in_array($media->id, $selectedIds, true)) {
+            $selectedIds = array_values(array_filter(
+                $selectedIds,
+                fn (int $selectedId): bool => $selectedId !== $media->id,
+            ));
+        } else {
+            $selectedIds[] = $media->id;
+        }
+
+        $this->selectedMediaIds = $selectedIds;
+    }
+
+    public function openBatchLinkModal(): void
+    {
+        if (count($this->selectedMediaIds) === 0) {
+            $this->addError('linkSelection', 'Select at least one media item to link.');
+
+            return;
+        }
+
+        $this->resetErrorBag('linkSelection');
+        $this->linkingBatch = true;
+        $this->resetLinkForm();
+        $this->showLinkModal = true;
+    }
+
+    public function openSingleLinkModal(): void
+    {
+        if ($this->selectedMediaId === null) {
+            return;
+        }
+
+        $media = $this->resolveMedia($this->selectedMediaId);
+        $this->authorize('linkToClient', $media);
+
+        $this->linkingBatch = false;
+        $this->resetErrorBag('linkSelection');
+        $this->resetLinkForm();
+        $this->showLinkModal = true;
+    }
+
+    public function closeLinkModal(): void
+    {
+        $this->showLinkModal = false;
+        $this->resetLinkForm();
+    }
+
+    public function saveLink(ContentClientLinkService $linkService): void
+    {
+        $validated = $this->validate([
+            'linkClientId' => [
+                'required',
+                'integer',
+                Rule::exists('clients', 'id')->where(fn ($builder) => $builder->where('user_id', Auth::id())),
+            ],
+            'linkCampaignName' => ['nullable', 'string', 'max:255'],
+            'linkNotes' => ['nullable', 'string', 'max:2000'],
+        ]);
+
+        $user = Auth::user();
+        $client = $this->resolveClient((int) $validated['linkClientId']);
+        $campaignName = blank($validated['linkCampaignName']) ? null : $validated['linkCampaignName'];
+        $notes = blank($validated['linkNotes']) ? null : $validated['linkNotes'];
+
+        if ($this->linkingBatch) {
+            $mediaItems = $this->selectedBatchMedia();
+            if ($mediaItems->isEmpty()) {
+                $this->addError('linkSelection', 'Select at least one media item to link.');
+
+                return;
+            }
+
+            foreach ($mediaItems as $media) {
+                $this->authorize('linkToClient', $media);
+            }
+
+            $linkService->batchLink($user, $mediaItems, $client, $campaignName, $notes);
+
+            $this->cancelSelectionMode();
+            $this->showLinkModal = false;
+            $this->resetLinkForm();
+            session()->flash('status', 'Selected content linked to client.');
+
+            return;
+        }
+
+        if ($this->selectedMediaId === null) {
+            return;
+        }
+
+        $media = $this->resolveMedia($this->selectedMediaId);
+        $this->authorize('linkToClient', $media);
+
+        $linkService->link($user, $media, $client, $campaignName, $notes);
+
+        $this->showLinkModal = false;
+        $this->resetLinkForm();
+        session()->flash('status', 'Content linked to client.');
+    }
+
+    public function confirmUnlinkClient(int $clientId): void
+    {
+        if ($this->selectedMediaId === null) {
+            return;
+        }
+
+        $media = $this->resolveMedia($this->selectedMediaId);
+        $this->authorize('linkToClient', $media);
+
+        $client = $this->resolveClient($clientId);
+
+        $this->confirmingUnlinkClientId = $client->id;
+    }
+
+    public function cancelUnlinkClient(): void
+    {
+        $this->confirmingUnlinkClientId = null;
+    }
+
+    public function unlinkFromClient(ContentClientLinkService $linkService): void
+    {
+        if ($this->selectedMediaId === null || $this->confirmingUnlinkClientId === null) {
+            return;
+        }
+
+        $media = $this->resolveMedia($this->selectedMediaId);
+        $this->authorize('linkToClient', $media);
+
+        $client = $this->resolveClient($this->confirmingUnlinkClientId);
+
+        $linkService->unlink(Auth::user(), $media, $client);
+
+        $this->confirmingUnlinkClientId = null;
+        session()->flash('status', 'Content unlinked from client.');
     }
 
     private function media(): CursorPaginator
@@ -139,6 +326,13 @@ class Index extends Component
             ->get(['id', 'username']);
     }
 
+    private function availableClients(): Collection
+    {
+        return Auth::user()->clients()
+            ->orderBy('name')
+            ->get(['id', 'name']);
+    }
+
     private function selectedMedia(): ?InstagramMedia
     {
         if ($this->selectedMediaId === null) {
@@ -154,6 +348,17 @@ class Index extends Component
             ])
             ->whereKey($this->selectedMediaId)
             ->whereHas('instagramAccount', fn (Builder $builder): Builder => $builder->where('user_id', Auth::id()))
+            ->first();
+    }
+
+    private function unlinkClient(): ?Client
+    {
+        if ($this->confirmingUnlinkClientId === null) {
+            return null;
+        }
+
+        return Auth::user()->clients()
+            ->whereKey($this->confirmingUnlinkClientId)
             ->first();
     }
 
@@ -199,5 +404,33 @@ class Index extends Component
             ->whereKey($mediaId)
             ->whereHas('instagramAccount', fn (Builder $builder): Builder => $builder->where('user_id', Auth::id()))
             ->firstOrFail();
+    }
+
+    private function resolveClient(int $clientId): Client
+    {
+        return Auth::user()->clients()
+            ->whereKey($clientId)
+            ->firstOrFail();
+    }
+
+    private function selectedBatchMedia(): EloquentCollection
+    {
+        $selectedIds = array_values(array_unique(array_map('intval', $this->selectedMediaIds)));
+        if ($selectedIds === []) {
+            return new EloquentCollection;
+        }
+
+        return InstagramMedia::query()
+            ->whereIn('id', $selectedIds)
+            ->whereHas('instagramAccount', fn (Builder $builder): Builder => $builder->where('user_id', Auth::id()))
+            ->get();
+    }
+
+    private function resetLinkForm(): void
+    {
+        $this->linkClientId = null;
+        $this->linkCampaignName = '';
+        $this->linkNotes = '';
+        $this->resetErrorBag(['linkClientId', 'linkCampaignName', 'linkNotes']);
     }
 }

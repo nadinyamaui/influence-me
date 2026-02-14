@@ -6,6 +6,7 @@ use App\Models\Client;
 use App\Models\InstagramAccount;
 use App\Models\InstagramMedia;
 use App\Models\User;
+use Illuminate\Support\Facades\DB;
 use Livewire\Livewire;
 
 test('guests are redirected to login from content gallery page', function (): void {
@@ -155,6 +156,126 @@ test('content detail modal displays metrics caption permalink and linked clients
         ->assertSee('Launch Campaign')
         ->call('closeDetailModal')
         ->assertSet('showDetailModal', false);
+});
+
+test('single media can be linked to a client and duplicate links are prevented', function (): void {
+    $user = User::factory()->create();
+    $account = InstagramAccount::factory()->for($user)->create();
+    $client = Client::factory()->for($user)->create();
+    $media = InstagramMedia::factory()->for($account)->create();
+
+    Livewire::actingAs($user)
+        ->test(Index::class)
+        ->call('openDetailModal', $media->id)
+        ->call('openSingleLinkModal')
+        ->set('linkClientId', (string) $client->id)
+        ->set('linkCampaignName', 'Spring Launch')
+        ->set('linkNotes', 'Paid collaboration')
+        ->call('saveLink')
+        ->call('openSingleLinkModal')
+        ->set('linkClientId', (string) $client->id)
+        ->set('linkCampaignName', 'Spring Launch')
+        ->set('linkNotes', 'Paid collaboration')
+        ->call('saveLink');
+
+    $this->assertDatabaseHas('campaign_media', [
+        'client_id' => $client->id,
+        'instagram_media_id' => $media->id,
+        'campaign_name' => 'Spring Launch',
+        'notes' => 'Paid collaboration',
+    ]);
+
+    expect(DB::table('campaign_media')
+        ->where('client_id', $client->id)
+        ->where('instagram_media_id', $media->id)
+        ->count())->toBe(1);
+});
+
+test('batch selection mode links all selected media to a client', function (): void {
+    $user = User::factory()->create();
+    $account = InstagramAccount::factory()->for($user)->create();
+    $client = Client::factory()->for($user)->create();
+
+    $firstMedia = InstagramMedia::factory()->for($account)->create();
+    $secondMedia = InstagramMedia::factory()->for($account)->create();
+    $thirdMedia = InstagramMedia::factory()->for($account)->create();
+
+    Livewire::actingAs($user)
+        ->test(Index::class)
+        ->call('toggleSelectionMode')
+        ->call('toggleSelectedMedia', $firstMedia->id)
+        ->call('toggleSelectedMedia', $secondMedia->id)
+        ->call('openBatchLinkModal')
+        ->set('linkClientId', (string) $client->id)
+        ->set('linkCampaignName', 'Batch Campaign')
+        ->call('saveLink')
+        ->assertSet('selectionMode', false)
+        ->assertSet('selectedMediaIds', []);
+
+    $this->assertDatabaseHas('campaign_media', [
+        'client_id' => $client->id,
+        'instagram_media_id' => $firstMedia->id,
+        'campaign_name' => 'Batch Campaign',
+    ]);
+
+    $this->assertDatabaseHas('campaign_media', [
+        'client_id' => $client->id,
+        'instagram_media_id' => $secondMedia->id,
+        'campaign_name' => 'Batch Campaign',
+    ]);
+
+    $this->assertDatabaseMissing('campaign_media', [
+        'client_id' => $client->id,
+        'instagram_media_id' => $thirdMedia->id,
+    ]);
+});
+
+test('linked media can be unlinked from detail modal', function (): void {
+    $user = User::factory()->create();
+    $account = InstagramAccount::factory()->for($user)->create();
+    $client = Client::factory()->for($user)->create();
+    $media = InstagramMedia::factory()->for($account)->create();
+
+    $media->clients()->attach($client->id, [
+        'campaign_name' => 'To Remove',
+    ]);
+
+    Livewire::actingAs($user)
+        ->test(Index::class)
+        ->call('openDetailModal', $media->id)
+        ->call('confirmUnlinkClient', $client->id)
+        ->assertSet('confirmingUnlinkClientId', $client->id)
+        ->call('unlinkFromClient')
+        ->assertSet('confirmingUnlinkClientId', null);
+
+    $this->assertDatabaseMissing('campaign_media', [
+        'client_id' => $client->id,
+        'instagram_media_id' => $media->id,
+    ]);
+});
+
+test('users cannot link content to clients they do not own', function (): void {
+    $owner = User::factory()->create();
+    $outsider = User::factory()->create();
+
+    $ownerClient = Client::factory()->for($owner)->create();
+
+    $outsiderAccount = InstagramAccount::factory()->for($outsider)->create();
+    $outsiderMedia = InstagramMedia::factory()->for($outsiderAccount)->create();
+
+    Livewire::actingAs($outsider)
+        ->test(Index::class)
+        ->call('openDetailModal', $outsiderMedia->id)
+        ->call('openSingleLinkModal')
+        ->set('linkClientId', (string) $ownerClient->id)
+        ->set('linkCampaignName', 'Unauthorized')
+        ->call('saveLink')
+        ->assertHasErrors(['linkClientId']);
+
+    $this->assertDatabaseMissing('campaign_media', [
+        'client_id' => $ownerClient->id,
+        'instagram_media_id' => $outsiderMedia->id,
+    ]);
 });
 
 test('content gallery uses cursor pagination', function (): void {

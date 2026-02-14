@@ -4,10 +4,30 @@
 @endphp
 
 <div class="flex h-full w-full flex-1 flex-col gap-6">
-    <div>
-        <h1 class="text-2xl font-semibold text-zinc-900 dark:text-zinc-100">Content</h1>
-        <p class="mt-1 text-sm text-zinc-600 dark:text-zinc-300">Browse synced Instagram media and filter by account, type, and performance.</p>
+    <div class="flex flex-wrap items-start justify-between gap-3">
+        <div>
+            <h1 class="text-2xl font-semibold text-zinc-900 dark:text-zinc-100">Content</h1>
+            <p class="mt-1 text-sm text-zinc-600 dark:text-zinc-300">Browse synced Instagram media and filter by account, type, and performance.</p>
+        </div>
+
+        @if ($media->count() > 0)
+            <flux:button type="button" :variant="$selectionMode ? 'primary' : 'filled'" wire:click="toggleSelectionMode">
+                {{ $selectionMode ? 'Cancel Select' : 'Select' }}
+            </flux:button>
+        @endif
     </div>
+
+    @if (session('status'))
+        <div class="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-800 dark:border-emerald-900/40 dark:bg-emerald-950/50 dark:text-emerald-200">
+            {{ session('status') }}
+        </div>
+    @endif
+
+    @if ($errors->has('linkSelection'))
+        <div class="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-800 dark:border-rose-900/40 dark:bg-rose-950/50 dark:text-rose-200">
+            {{ $errors->first('linkSelection') }}
+        </div>
+    @endif
 
     <section class="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-700 dark:bg-zinc-900">
         <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
@@ -46,11 +66,22 @@
     @else
         <section class="grid grid-cols-2 gap-4 lg:grid-cols-4">
             @foreach ($media as $item)
+                @php
+                    $isSelected = in_array($item->id, $selectedMediaIds, true);
+                    $mediaClickAction = $selectionMode
+                        ? 'toggleSelectedMedia('.$item->id.')'
+                        : 'openDetailModal('.$item->id.')';
+                @endphp
+
                 <button
                     type="button"
                     wire:key="content-media-{{ $item->id }}"
-                    wire:click="openDetailModal({{ $item->id }})"
-                    class="overflow-hidden rounded-2xl border border-zinc-200 bg-white text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-md dark:border-zinc-700 dark:bg-zinc-900"
+                    wire:click="{{ $mediaClickAction }}"
+                    @class([
+                        'overflow-hidden rounded-2xl border bg-white text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-md dark:bg-zinc-900',
+                        'border-sky-400 ring-2 ring-sky-200 dark:border-sky-400 dark:ring-sky-700/60' => $isSelected,
+                        'border-zinc-200 dark:border-zinc-700' => ! $isSelected,
+                    ])
                 >
                     <div class="relative aspect-square bg-zinc-100 dark:bg-zinc-800">
                         @if ($item->thumbnail_url || $item->media_url)
@@ -59,6 +90,12 @@
                                 alt="{{ $item->caption ? Str::limit($item->caption, 50) : 'Instagram media' }}"
                                 class="h-full w-full object-cover"
                             >
+                        @endif
+
+                        @if ($selectionMode)
+                            <div class="absolute right-2 top-2 flex h-6 w-6 items-center justify-center rounded-full border border-white/80 bg-zinc-950/70 text-xs font-semibold text-white">
+                                {{ $isSelected ? '✓' : '' }}
+                            </div>
                         @endif
 
                         <div class="absolute left-2 top-2 inline-flex items-center gap-1 rounded-full bg-zinc-950/80 px-2 py-1 text-xs font-medium text-white">
@@ -143,7 +180,7 @@
                     <section class="rounded-xl border border-zinc-200 p-3 dark:border-zinc-700">
                         <div class="mb-3 flex items-center justify-between gap-2">
                             <h3 class="font-medium text-zinc-900 dark:text-zinc-100">Linked Clients</h3>
-                            <flux:button type="button" size="sm" variant="filled" disabled>
+                            <flux:button type="button" size="sm" variant="filled" wire:click="openSingleLinkModal">
                                 Link to Client
                             </flux:button>
                         </div>
@@ -158,6 +195,9 @@
                                             <p class="font-medium text-zinc-900 dark:text-zinc-100">{{ $client->name }}</p>
                                             <p class="text-zinc-500 dark:text-zinc-300">{{ $client->pivot->campaign_name ?? 'Uncategorized' }}</p>
                                         </div>
+                                        <flux:button type="button" size="sm" variant="danger" wire:click="confirmUnlinkClient({{ $client->id }})">
+                                            Unlink
+                                        </flux:button>
                                     </div>
                                 @endforeach
                             </div>
@@ -169,6 +209,78 @@
                             Close
                         </flux:button>
                     </div>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    @if ($showLinkModal)
+        <div class="fixed inset-0 z-50 flex items-center justify-center bg-zinc-900/60 p-4">
+            <div class="w-full max-w-xl rounded-2xl border border-zinc-200 bg-white p-6 shadow-xl dark:border-zinc-700 dark:bg-zinc-900">
+                <h2 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100">{{ $linkingBatch ? 'Link Selected Content to Client' : 'Link Content to Client' }}</h2>
+
+                <form wire:submit="saveLink" class="mt-5 space-y-4">
+                    <flux:select wire:model="linkClientId" :label="__('Client')">
+                        <option value="">Select a client</option>
+                        @foreach ($availableClients as $client)
+                            <option value="{{ $client->id }}">{{ $client->name }}</option>
+                        @endforeach
+                    </flux:select>
+                    @error('linkClientId')
+                        <p class="text-sm font-medium text-rose-600 dark:text-rose-300">{{ $message }}</p>
+                    @enderror
+
+                    <flux:input wire:model="linkCampaignName" :label="__('Campaign Name (Optional)')" />
+                    @error('linkCampaignName')
+                        <p class="text-sm font-medium text-rose-600 dark:text-rose-300">{{ $message }}</p>
+                    @enderror
+
+                    <flux:textarea wire:model="linkNotes" :label="__('Notes (Optional)')" />
+                    @error('linkNotes')
+                        <p class="text-sm font-medium text-rose-600 dark:text-rose-300">{{ $message }}</p>
+                    @enderror
+
+                    <div class="flex justify-end gap-2 pt-2">
+                        <flux:button type="button" variant="filled" wire:click="closeLinkModal">
+                            Cancel
+                        </flux:button>
+                        <flux:button type="submit" variant="primary">
+                            Save
+                        </flux:button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    @endif
+
+    @if ($confirmingUnlinkClientId)
+        <div class="fixed inset-0 z-50 flex items-center justify-center bg-zinc-900/60 p-4">
+            <div class="w-full max-w-md rounded-2xl border border-zinc-200 bg-white p-6 shadow-xl dark:border-zinc-700 dark:bg-zinc-900">
+                <h2 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100">Remove link to {{ $unlinkClient?->name ?? 'this client' }}?</h2>
+
+                <div class="mt-5 flex justify-end gap-2">
+                    <flux:button type="button" variant="filled" wire:click="cancelUnlinkClient">
+                        Cancel
+                    </flux:button>
+                    <flux:button type="button" variant="danger" wire:click="unlinkFromClient">
+                        Unlink
+                    </flux:button>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    @if ($selectionMode)
+        <div class="fixed inset-x-0 bottom-5 z-30 flex justify-center px-4">
+            <div class="flex w-full max-w-xl items-center justify-between gap-3 rounded-2xl border border-zinc-200 bg-white px-4 py-3 shadow-xl dark:border-zinc-700 dark:bg-zinc-900">
+                <p class="text-sm font-medium text-zinc-700 dark:text-zinc-200">{{ count($selectedMediaIds) }} selected</p>
+                <div class="flex items-center gap-2">
+                    <flux:button type="button" size="sm" variant="primary" wire:click="openBatchLinkModal" :disabled="count($selectedMediaIds) === 0">
+                        Link to Client
+                    </flux:button>
+                    <flux:button type="button" size="sm" variant="filled" wire:click="cancelSelectionMode">
+                        Cancel
+                    </flux:button>
                 </div>
             </div>
         </div>
