@@ -188,9 +188,11 @@ class Show extends Component
 
     private function groupedLinkedContent(EloquentCollection $linkedContentMedia): Collection
     {
-        return $linkedContentMedia->groupBy(function ($media): string {
-            return $media->pivot->campaign_name ?? 'Uncategorized';
-        });
+        return $linkedContentMedia
+            ->groupBy(function ($media): string {
+                return $media->pivot->campaign_name ?? 'Uncategorized';
+            })
+            ->map(fn (EloquentCollection $group): Collection => collect($group->all()));
     }
 
     private function linkedContentSummary(EloquentCollection $linkedContentMedia): array
