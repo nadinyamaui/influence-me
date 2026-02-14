@@ -5,6 +5,7 @@ namespace App\Livewire\Content;
 use App\Enums\MediaType;
 use App\Models\InstagramMedia;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Pagination\CursorPaginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
@@ -13,6 +14,7 @@ use Livewire\WithPagination;
 
 class Index extends Component
 {
+    use AuthorizesRequests;
     use WithPagination;
 
     public string $mediaType = 'all';
@@ -24,6 +26,10 @@ class Index extends Component
     public ?string $dateTo = null;
 
     public string $sortBy = 'most_recent';
+
+    public ?int $selectedMediaId = null;
+
+    public bool $showDetailModal = false;
 
     public function updatedMediaType(string $value): void
     {
@@ -75,10 +81,25 @@ class Index extends Component
             'accounts' => $this->accounts(),
             'media' => $this->media(),
             'mediaTypeFilters' => $this->mediaTypeFilters(),
+            'selectedMedia' => $this->selectedMedia(),
             'sortOptions' => $this->sortOptions(),
         ])->layout('layouts.app', [
             'title' => __('Content'),
         ]);
+    }
+
+    public function openDetailModal(int $mediaId): void
+    {
+        $media = $this->resolveMedia($mediaId);
+        $this->authorize('view', $media);
+
+        $this->selectedMediaId = $media->id;
+        $this->showDetailModal = true;
+    }
+
+    public function closeDetailModal(): void
+    {
+        $this->showDetailModal = false;
     }
 
     private function media(): CursorPaginator
@@ -118,6 +139,24 @@ class Index extends Component
             ->get(['id', 'username']);
     }
 
+    private function selectedMedia(): ?InstagramMedia
+    {
+        if ($this->selectedMediaId === null) {
+            return null;
+        }
+
+        return InstagramMedia::query()
+            ->with([
+                'instagramAccount',
+                'clients' => fn ($builder) => $builder
+                    ->where('user_id', Auth::id())
+                    ->orderBy('name'),
+            ])
+            ->whereKey($this->selectedMediaId)
+            ->whereHas('instagramAccount', fn (Builder $builder): Builder => $builder->where('user_id', Auth::id()))
+            ->first();
+    }
+
     private function mediaTypeFilters(): array
     {
         return array_merge(
@@ -152,5 +191,13 @@ class Index extends Component
     private function resetCursor(): void
     {
         $this->resetPage(pageName: 'cursor');
+    }
+
+    private function resolveMedia(int $mediaId): InstagramMedia
+    {
+        return InstagramMedia::query()
+            ->whereKey($mediaId)
+            ->whereHas('instagramAccount', fn (Builder $builder): Builder => $builder->where('user_id', Auth::id()))
+            ->firstOrFail();
     }
 }

@@ -2,6 +2,7 @@
 
 use App\Enums\MediaType;
 use App\Livewire\Content\Index;
+use App\Models\Client;
 use App\Models\InstagramAccount;
 use App\Models\InstagramMedia;
 use App\Models\User;
@@ -106,6 +107,54 @@ test('content gallery filters and sorting options work in query layer', function
             'Secondary Story Item',
             'Primary Post Item',
         ]);
+});
+
+test('content detail modal displays metrics caption permalink and linked clients', function (): void {
+    $user = User::factory()->create();
+
+    $account = InstagramAccount::factory()->for($user)->create([
+        'username' => 'modalaccount',
+    ]);
+
+    $client = Client::factory()->for($user)->create([
+        'name' => 'Modal Client',
+    ]);
+
+    $media = InstagramMedia::factory()->for($account)->create([
+        'caption' => str_repeat('Detailed caption text ', 8),
+        'permalink' => 'https://instagram.com/p/modal-post',
+        'like_count' => 1234,
+        'comments_count' => 222,
+        'saved_count' => 45,
+        'shares_count' => 12,
+        'reach' => 6789,
+        'impressions' => 8901,
+        'engagement_rate' => 7.77,
+        'media_type' => MediaType::Reel,
+    ]);
+
+    $media->clients()->attach($client->id, [
+        'campaign_name' => 'Launch Campaign',
+        'notes' => 'Campaign notes',
+    ]);
+
+    Livewire::actingAs($user)
+        ->test(Index::class)
+        ->call('openDetailModal', $media->id)
+        ->assertSet('showDetailModal', true)
+        ->assertSee('Content Details')
+        ->assertSee('Detailed caption text')
+        ->assertSee('View on Instagram')
+        ->assertSee('Likes')
+        ->assertSee('1,234')
+        ->assertSee('6,789')
+        ->assertSee('8,901')
+        ->assertSee('7.77%')
+        ->assertSee('@modalaccount')
+        ->assertSee('Modal Client')
+        ->assertSee('Launch Campaign')
+        ->call('closeDetailModal')
+        ->assertSet('showDetailModal', false);
 });
 
 test('content gallery uses cursor pagination', function (): void {
