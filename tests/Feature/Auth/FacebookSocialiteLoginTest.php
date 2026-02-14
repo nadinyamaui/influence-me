@@ -34,6 +34,39 @@ it('redirects to the facebook socialite provider', function (): void {
     $response = $this->get(route('auth.facebook'));
 
     $response->assertRedirect('https://www.facebook.com/v18.0/dialog/oauth');
+    $response->assertSessionHas('facebook_auth_intent', 'login');
+});
+
+it('requires authentication to connect additional instagram accounts', function (): void {
+    $response = $this->get(route('auth.facebook.add'));
+
+    $response->assertRedirect(route('login'));
+});
+
+it('redirects authenticated users to facebook provider for add-account flow', function (): void {
+    $user = User::factory()->create();
+
+    Socialite::shouldReceive('driver')
+        ->once()
+        ->with('facebook')
+        ->andReturnSelf();
+    Socialite::shouldReceive('scopes')
+        ->once()
+        ->with([
+            'instagram_basic',
+            'instagram_manage_insights',
+            'pages_show_list',
+            'pages_read_engagement',
+        ])
+        ->andReturnSelf();
+    Socialite::shouldReceive('redirect')
+        ->once()
+        ->andReturn(redirect('https://www.facebook.com/v18.0/dialog/oauth'));
+
+    $response = $this->actingAs($user)->get(route('auth.facebook.add'));
+
+    $response->assertRedirect('https://www.facebook.com/v18.0/dialog/oauth');
+    $response->assertSessionHas('facebook_auth_intent', 'add_account');
 });
 
 it('redirects to dashboard after successful facebook callback', function (): void {
@@ -85,4 +118,42 @@ it('returns to login with social auth error message when callback raises social 
         'oauth' => 'Facebook denied access to the requested scopes.',
     ]);
     $this->assertGuest();
+});
+
+it('uses account-linking flow on callback for authenticated users with add-account intent', function (): void {
+    $user = User::factory()->create();
+
+    $loginService = \Mockery::mock(FacebookSocialiteLoginService::class);
+    $loginService->shouldReceive('createInstagramAccountsForLoggedUser')
+        ->once()
+        ->andReturn($user);
+    $loginService->shouldNotReceive('createUserAndAccounts');
+    app()->instance(FacebookSocialiteLoginService::class, $loginService);
+
+    $response = $this->actingAs($user)
+        ->withSession(['facebook_auth_intent' => 'add_account'])
+        ->get(route('auth.facebook.callback'));
+
+    $response->assertRedirect(route('instagram-accounts.index'));
+    $response->assertSessionHas('status', 'Instagram accounts connected successfully.');
+});
+
+it('returns to instagram accounts with oauth error on add-account callback social auth failure', function (): void {
+    $user = User::factory()->create();
+
+    $loginService = \Mockery::mock(FacebookSocialiteLoginService::class);
+    $loginService->shouldReceive('createInstagramAccountsForLoggedUser')
+        ->once()
+        ->andThrow(new SocialAuthenticationException('Facebook denied account linking.'));
+    $loginService->shouldNotReceive('createUserAndAccounts');
+    app()->instance(FacebookSocialiteLoginService::class, $loginService);
+
+    $response = $this->actingAs($user)
+        ->withSession(['facebook_auth_intent' => 'add_account'])
+        ->get(route('auth.facebook.callback'));
+
+    $response->assertRedirect(route('instagram-accounts.index'));
+    $response->assertSessionHasErrors([
+        'oauth' => 'Facebook denied account linking.',
+    ]);
 });

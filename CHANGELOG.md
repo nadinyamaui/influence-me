@@ -5,6 +5,9 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
+- RFC 029: added authenticated add-account OAuth entry route `auth.facebook.add` and callback intent branching in `app/Http/Controllers/Auth/FacebookAuthController.php` so account linking uses `createInstagramAccountsForLoggedUser()` and redirects back to `/instagram-accounts` with scoped success/error handling.
+- RFC 029: expanded `/instagram-accounts` in `app/Livewire/InstagramAccounts/Index.php` and `resources/views/pages/instagram-accounts/index.blade.php` with "Connect Another Account", `setPrimary` action, disconnect confirmation modal flow, ownership-safe account resolution, and last-account disconnect guard messaging.
+- RFC 029: added feature coverage in `tests/Feature/Auth/FacebookSocialiteLoginTest.php` and `tests/Feature/InstagramAccountsPageTest.php` for add-account auth flow, callback account-linking behavior, primary-account switching, disconnect confirmation, and prevention of disconnecting the final account.
 - RFC 027: added `App\Jobs\SyncAllInstagramData` queued orchestrator on the `instagram-sync` queue to run profile, media, insights, stories, and audience demographics syncs in sequence, set account status to `syncing`, mark failures with `last_sync_error`, and finalize successful runs by setting `sync_status=idle`, clearing errors, and updating `last_synced_at`.
 - RFC 027: added Instagram scheduler cadence in `routes/console.php` with named tasks for full account sync every 6 hours (`sync-all-instagram`), hourly profile+insights refresh (`refresh-instagram-insights`), and daily token refresh dispatch for accounts expiring within 7 days (`refresh-instagram-tokens`).
 - RFC 027: updated `config/horizon.php` to include the `instagram-sync` queue in worker defaults and added a dedicated queue wait threshold for `redis:instagram-sync`.
