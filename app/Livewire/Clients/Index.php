@@ -4,6 +4,7 @@ namespace App\Livewire\Clients;
 
 use App\Enums\ClientType;
 use App\Models\Client;
+use App\Models\User;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Database\Eloquent\Builder;
@@ -43,7 +44,7 @@ class Index extends Component
 
     public function confirmDelete(int $clientId): void
     {
-        $client = $this->resolveClient($clientId);
+        $client = User::resolveClient($clientId);
         $this->authorize('delete', $client);
 
         $this->resetErrorBag('delete');
@@ -61,7 +62,7 @@ class Index extends Component
             return;
         }
 
-        $client = $this->resolveClient($this->deletingClientId);
+        $client = User::resolveClient($this->deletingClientId);
         $this->authorize('delete', $client);
 
         $client->delete();
@@ -126,18 +127,5 @@ class Index extends Component
             ClientType::Brand->value,
             ClientType::Individual->value,
         ];
-    }
-
-    private function resolveClient(int $clientId): Client
-    {
-        $client = Auth::user()?->clients()
-            ->whereKey($clientId)
-            ->first();
-
-        if ($client === null) {
-            abort(404);
-        }
-
-        return $client;
     }
 }
