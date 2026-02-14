@@ -10,6 +10,7 @@ Route::prefix('portal')->middleware(['guest:client'])->group(function (): void {
         ->name('portal.login.store');
 });
 
-Route::prefix('portal')->middleware(['auth:client'])->group(function (): void {
+Route::prefix('portal')->middleware(['client.auth'])->group(function (): void {
+    Route::view('/dashboard', 'pages.portal.dashboard')->name('portal.dashboard');
     Route::post('/logout', [PortalAuthController::class, 'logout'])->name('portal.logout');
 });

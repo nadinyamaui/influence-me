@@ -5,6 +5,9 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
+- RFC 035: added dedicated portal layout templates `resources/views/layouts/portal.blade.php` and `resources/views/layouts/portal/sidebar.blade.php` with client-portal branding, simplified navigation, and client-user logout menu controls.
+- RFC 035: added `resources/views/pages/portal/dashboard.blade.php` placeholder on the new portal layout and wired `/portal/dashboard` in `routes/portal.php` behind a dedicated `client.auth` middleware alias that enforces the client guard and redirects guests to `/portal/login`.
+- RFC 035: added feature coverage in `tests/Feature/Portal/PortalLayoutTest.php` for client-guard access control, portal layout rendering, and logout behavior.
 - RFC 034: added `/clients/{client}` via `App\Livewire\Clients\Show` and `resources/views/pages/clients/show.blade.php` with owner-scoped client overview, portal-access status display, edit navigation, and tabbed placeholder sections.
 - RFC 034: updated clients list/detail wiring so “View” uses `clients.show` and edit saves redirect back to the client detail page.
 - RFC 034: added feature coverage in `tests/Feature/Clients/ClientDetailPageTest.php` for authorized rendering, forbidden access for non-owners, tab placeholder visibility, and summary metric display.
