@@ -44,6 +44,26 @@ class FacebookSocialiteLoginService
         return $user;
     }
 
+    public function createInstagramAccountsForLoggedUser(): User
+    {
+        $user = auth()->user();
+        if (! $user instanceof User) {
+            throw new SocialAuthenticationException('You must be logged in to link Instagram accounts.');
+        }
+
+        $socialiteUser = Socialite::driver('facebook')->user();
+        if (! $socialiteUser->getId()) {
+            throw new SocialAuthenticationException('Facebook did not return required account information.');
+        }
+
+        $token = $this->exchangeToken($socialiteUser);
+        $accounts = $this->getAccounts($socialiteUser->getId(), $token['access_token']);
+        $this->ensureInstagramAccountsBelongToUser($user, $accounts);
+        $this->upsertInstagramAccounts($accounts, $user);
+
+        return $user;
+    }
+
     protected function createUpdateUser($socialiteUser): User
     {
         return User::updateOrCreate([
