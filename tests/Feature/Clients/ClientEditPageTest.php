@@ -54,12 +54,12 @@ test('owners can update client details', function (): void {
 
     Livewire::actingAs($owner)
         ->test(Edit::class, ['client' => $client])
-        ->set('name', 'After Name')
-        ->set('email', 'after@example.test')
-        ->set('company_name', 'After Co')
-        ->set('type', ClientType::Brand->value)
-        ->set('phone', '555-999-0000')
-        ->set('notes', 'Updated notes')
+        ->set('form.name', 'After Name')
+        ->set('form.email', 'after@example.test')
+        ->set('form.company_name', 'After Co')
+        ->set('form.type', ClientType::Brand->value)
+        ->set('form.phone', '555-999-0000')
+        ->set('form.notes', 'Updated notes')
         ->call('save')
         ->assertHasNoErrors()
         ->assertRedirect(route('clients.show', $client));
@@ -80,20 +80,20 @@ test('client edit form validates invalid updates', function (): void {
 
     Livewire::actingAs($owner)
         ->test(Edit::class, ['client' => $client])
-        ->set('name', '')
-        ->set('email', 'invalid-email')
-        ->set('company_name', str_repeat('c', 256))
-        ->set('type', 'wrong')
-        ->set('phone', str_repeat('1', 51))
-        ->set('notes', str_repeat('n', 5001))
+        ->set('form.name', '')
+        ->set('form.email', 'invalid-email')
+        ->set('form.company_name', str_repeat('c', 256))
+        ->set('form.type', 'wrong')
+        ->set('form.phone', str_repeat('1', 51))
+        ->set('form.notes', str_repeat('n', 5001))
         ->call('save')
         ->assertHasErrors([
-            'name',
-            'email',
-            'company_name',
-            'type',
-            'phone',
-            'notes',
+            'form.name',
+            'form.email',
+            'form.company_name',
+            'form.type',
+            'form.phone',
+            'form.notes',
         ]);
 });
 

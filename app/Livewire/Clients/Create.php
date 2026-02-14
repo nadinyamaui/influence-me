@@ -2,8 +2,7 @@
 
 namespace App\Livewire\Clients;
 
-use App\Enums\ClientType;
-use App\Http\Requests\StoreClientRequest;
+use App\Livewire\Forms\ClientForm;
 use App\Models\Client;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\Auth;
@@ -13,17 +12,7 @@ class Create extends Component
 {
     use AuthorizesRequests;
 
-    public string $name = '';
-
-    public string $email = '';
-
-    public string $company_name = '';
-
-    public string $type = ClientType::Brand->value;
-
-    public string $phone = '';
-
-    public string $notes = '';
+    public ClientForm $form;
 
     public function mount(): void
     {
@@ -34,16 +23,9 @@ class Create extends Component
     {
         $this->authorize('create', Client::class);
 
-        $validated = $this->validate((new StoreClientRequest())->rules());
+        $this->form->validate();
 
-        Auth::user()->clients()->create([
-            'name' => $validated['name'],
-            'email' => $validated['email'] ?: null,
-            'company_name' => $validated['company_name'] ?: null,
-            'type' => $validated['type'],
-            'phone' => $validated['phone'] ?: null,
-            'notes' => $validated['notes'] ?: null,
-        ]);
+        Auth::user()->clients()->create($this->form->payload());
 
         session()->flash('status', 'Client created successfully.');
 

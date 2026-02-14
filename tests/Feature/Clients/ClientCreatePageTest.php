@@ -28,12 +28,12 @@ test('authenticated users can create a client from the create form', function ()
 
     Livewire::actingAs($user)
         ->test(Create::class)
-        ->set('name', 'Acme Partners')
-        ->set('email', 'client@example.test')
-        ->set('company_name', 'Acme Group')
-        ->set('type', ClientType::Brand->value)
-        ->set('phone', '555-111-2222')
-        ->set('notes', 'Primary partner account.')
+        ->set('form.name', 'Acme Partners')
+        ->set('form.email', 'client@example.test')
+        ->set('form.company_name', 'Acme Group')
+        ->set('form.type', ClientType::Brand->value)
+        ->set('form.phone', '555-111-2222')
+        ->set('form.notes', 'Primary partner account.')
         ->call('save')
         ->assertHasNoErrors()
         ->assertRedirect(route('clients.index'));
@@ -51,20 +51,20 @@ test('client create form validates invalid input', function (): void {
 
     Livewire::actingAs($user)
         ->test(Create::class)
-        ->set('name', '')
-        ->set('email', 'not-an-email')
-        ->set('company_name', str_repeat('a', 256))
-        ->set('type', 'invalid-type')
-        ->set('phone', str_repeat('1', 51))
-        ->set('notes', str_repeat('n', 5001))
+        ->set('form.name', '')
+        ->set('form.email', 'not-an-email')
+        ->set('form.company_name', str_repeat('a', 256))
+        ->set('form.type', 'invalid-type')
+        ->set('form.phone', str_repeat('1', 51))
+        ->set('form.notes', str_repeat('n', 5001))
         ->call('save')
         ->assertHasErrors([
-            'name',
-            'email',
-            'company_name',
-            'type',
-            'phone',
-            'notes',
+            'form.name',
+            'form.email',
+            'form.company_name',
+            'form.type',
+            'form.phone',
+            'form.notes',
         ]);
 
     $this->assertDatabaseCount('clients', 0);
