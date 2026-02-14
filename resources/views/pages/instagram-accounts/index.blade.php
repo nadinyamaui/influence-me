@@ -50,7 +50,7 @@
                     $tokenExpired = $account->token_expires_at?->isPast() ?? false;
                     $tokenExpiringSoon = ! $tokenExpired && ($account->token_expires_at?->lte(now()->addDays(7)) ?? false);
                     $syncStatusValue = $account->sync_status?->value ?? SyncStatus::Idle->value;
-                    $accountIsSyncing = $syncStatusValue === SyncStatus::Syncing->value || in_array($account->id, $this->syncingAccountIds, true);
+                    $accountIsSyncing = $syncStatusValue === SyncStatus::Syncing->value;
                 @endphp
 
                 <article

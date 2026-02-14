@@ -5,6 +5,7 @@ namespace App\Livewire\InstagramAccounts;
 use App\Enums\SyncStatus;
 use App\Jobs\SyncAllInstagramData;
 use App\Models\InstagramAccount;
+use App\Models\User;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
@@ -18,7 +19,7 @@ class Index extends Component
 
     public function syncNow(int $accountId): void
     {
-        $account = $this->resolveUserAccount($accountId);
+        $account = User::resolveInstagramAccount($accountId);
         $this->authorize('update', $account);
 
         if ($account->sync_status === SyncStatus::Syncing) {
@@ -35,7 +36,7 @@ class Index extends Component
 
     public function setPrimary(int $accountId): void
     {
-        $account = $this->resolveUserAccount($accountId);
+        $account = User::resolveInstagramAccount($accountId);
         $this->authorize('update', $account);
 
         $user = Auth::user();
@@ -51,7 +52,7 @@ class Index extends Component
 
     public function confirmDisconnect(int $accountId): void
     {
-        $account = $this->resolveUserAccount($accountId);
+        $account = User::resolveInstagramAccount($accountId);
         $this->authorize('view', $account);
 
         $user = Auth::user();
@@ -81,7 +82,7 @@ class Index extends Component
             return;
         }
 
-        $account = $this->resolveUserAccount($this->disconnectingAccountId);
+        $account = User::resolveInstagramAccount($this->disconnectingAccountId);
         $this->authorize('delete', $account);
 
         $wasPrimary = $account->is_primary;
@@ -125,18 +126,5 @@ class Index extends Component
             ->orderByDesc('is_primary')
             ->orderBy('username')
             ->get() ?? collect();
-    }
-
-    private function resolveUserAccount(int $accountId): InstagramAccount
-    {
-        $account = Auth::user()?->instagramAccounts()
-            ->whereKey($accountId)
-            ->first();
-
-        if ($account === null) {
-            abort(404);
-        }
-
-        return $account;
     }
 }
