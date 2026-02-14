@@ -94,7 +94,7 @@
 
                         <div class="absolute right-2 top-2 flex flex-col items-end gap-1">
                             <div class="inline-flex items-center gap-1 rounded-full bg-zinc-950/80 px-2 py-1 text-xs font-semibold text-white">
-                                <span>ER</span>
+                                <span>Engagement</span>
                                 <span>{{ number_format((float) $item->engagement_rate, 2) }}%</span>
                             </div>
 

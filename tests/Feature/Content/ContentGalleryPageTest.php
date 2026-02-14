@@ -26,6 +26,7 @@ test('authenticated users can view scoped content gallery page', function (): vo
 
     InstagramMedia::factory()->for($account)->create([
         'caption' => 'Owner gallery post',
+        'engagement_rate' => 6.25,
     ]);
 
     InstagramMedia::factory()->for($otherAccount)->create([
@@ -37,6 +38,7 @@ test('authenticated users can view scoped content gallery page', function (): vo
         ->assertSuccessful()
         ->assertSee('Content')
         ->assertSee('Owner gallery post')
+        ->assertSee('6.25%')
         ->assertDontSee('Hidden outsider post')
         ->assertSee('href="'.route('content.index').'"', false);
 });
