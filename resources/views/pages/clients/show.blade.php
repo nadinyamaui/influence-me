@@ -196,21 +196,22 @@
         @endif
     </section>
 
-    @if ($confirmingRevokePortalAccess)
-        <div class="fixed inset-0 z-40 flex items-center justify-center bg-zinc-900/60 p-4">
-            <div class="w-full max-w-lg rounded-2xl border border-zinc-200 bg-white p-6 shadow-xl dark:border-zinc-700 dark:bg-zinc-900">
-                <h2 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100">Revoke portal access?</h2>
-                <p class="mt-2 text-sm text-zinc-600 dark:text-zinc-300">This removes the client user account and blocks portal access immediately.</p>
+    <flux:modal
+        name="client-revoke-portal-modal"
+        wire:model="confirmingRevokePortalAccess"
+        @close="cancelRevokePortalAccess"
+        class="max-w-lg"
+    >
+        <h2 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100">Revoke portal access?</h2>
+        <p class="mt-2 text-sm text-zinc-600 dark:text-zinc-300">This removes the client user account and blocks portal access immediately.</p>
 
-                <div class="mt-5 flex justify-end gap-2">
-                    <flux:button type="button" variant="filled" wire:click="cancelRevokePortalAccess">
-                        Cancel
-                    </flux:button>
-                    <flux:button type="button" variant="danger" wire:click="revokePortalAccess">
-                        Revoke Access
-                    </flux:button>
-                </div>
-            </div>
+        <div class="mt-5 flex justify-end gap-2">
+            <flux:button type="button" variant="filled" wire:click="cancelRevokePortalAccess">
+                Cancel
+            </flux:button>
+            <flux:button type="button" variant="danger" wire:click="revokePortalAccess">
+                Revoke Access
+            </flux:button>
         </div>
-    @endif
+    </flux:modal>
 </div>

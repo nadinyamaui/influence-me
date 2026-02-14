@@ -92,11 +92,18 @@
                             >
                         @endif
 
-                        @if ($selectionMode)
-                            <div class="absolute right-2 top-2 flex h-6 w-6 items-center justify-center rounded-full border border-white/80 bg-zinc-950/70 text-xs font-semibold text-white">
-                                {{ $isSelected ? '✓' : '' }}
+                        <div class="absolute right-2 top-2 flex flex-col items-end gap-1">
+                            <div class="inline-flex items-center gap-1 rounded-full bg-zinc-950/80 px-2 py-1 text-xs font-semibold text-white">
+                                <span>ER</span>
+                                <span>{{ number_format((float) $item->engagement_rate, 2) }}%</span>
                             </div>
-                        @endif
+
+                            @if ($selectionMode)
+                                <div class="flex h-6 w-6 items-center justify-center rounded-full border border-white/80 bg-zinc-950/70 text-xs font-semibold text-white">
+                                    {{ $isSelected ? '✓' : '' }}
+                                </div>
+                            @endif
+                        </div>
 
                         <div class="absolute left-2 top-2 inline-flex items-center gap-1 rounded-full bg-zinc-950/80 px-2 py-1 text-xs font-medium text-white">
                             @if ($item->media_type === MediaType::Reel)
@@ -125,9 +132,14 @@
         </section>
     @endif
 
-    @if ($showDetailModal && $selectedMedia)
-        <div class="fixed inset-0 z-40 flex items-center justify-center bg-zinc-900/60 p-4">
-            <div class="grid w-full max-w-5xl gap-5 rounded-2xl border border-zinc-200 bg-white p-5 shadow-xl lg:grid-cols-2 dark:border-zinc-700 dark:bg-zinc-900">
+    @if ($selectedMedia)
+        <flux:modal
+            name="content-detail-modal"
+            wire:model="showDetailModal"
+            @close="closeDetailModal"
+            class="max-w-5xl"
+        >
+            <div class="grid gap-5 lg:grid-cols-2">
                 <div class="space-y-4">
                     <div class="overflow-hidden rounded-xl border border-zinc-200 bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-800">
                         @if ($selectedMedia->media_url || $selectedMedia->thumbnail_url)
@@ -211,63 +223,67 @@
                     </div>
                 </div>
             </div>
-        </div>
+        </flux:modal>
     @endif
 
-    @if ($showLinkModal)
-        <div class="fixed inset-0 z-50 flex items-center justify-center bg-zinc-900/60 p-4">
-            <div class="w-full max-w-xl rounded-2xl border border-zinc-200 bg-white p-6 shadow-xl dark:border-zinc-700 dark:bg-zinc-900">
-                <h2 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100">{{ $linkingBatch ? 'Link Selected Content to Client' : 'Link Content to Client' }}</h2>
+    <flux:modal
+        name="content-link-modal"
+        wire:model="showLinkModal"
+        @close="closeLinkModal"
+        class="max-w-xl"
+    >
+        <h2 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100">{{ $linkingBatch ? 'Link Selected Content to Client' : 'Link Content to Client' }}</h2>
 
-                <form wire:submit="saveLink" class="mt-5 space-y-4">
-                    <flux:select wire:model="linkClientId" :label="__('Client')">
-                        <option value="">Select a client</option>
-                        @foreach ($availableClients as $client)
-                            <option value="{{ $client->id }}">{{ $client->name }}</option>
-                        @endforeach
-                    </flux:select>
-                    @error('linkClientId')
-                        <p class="text-sm font-medium text-rose-600 dark:text-rose-300">{{ $message }}</p>
-                    @enderror
+        <form wire:submit="saveLink" class="mt-5 space-y-4">
+            <flux:select wire:model="linkClientId" :label="__('Client')">
+                <option value="">Select a client</option>
+                @foreach ($availableClients as $client)
+                    <option value="{{ $client->id }}">{{ $client->name }}</option>
+                @endforeach
+            </flux:select>
+            @error('linkClientId')
+                <p class="text-sm font-medium text-rose-600 dark:text-rose-300">{{ $message }}</p>
+            @enderror
 
-                    <flux:input wire:model="linkCampaignName" :label="__('Campaign Name (Optional)')" />
-                    @error('linkCampaignName')
-                        <p class="text-sm font-medium text-rose-600 dark:text-rose-300">{{ $message }}</p>
-                    @enderror
+            <flux:input wire:model="linkCampaignName" :label="__('Campaign Name (Optional)')" />
+            @error('linkCampaignName')
+                <p class="text-sm font-medium text-rose-600 dark:text-rose-300">{{ $message }}</p>
+            @enderror
 
-                    <flux:textarea wire:model="linkNotes" :label="__('Notes (Optional)')" />
-                    @error('linkNotes')
-                        <p class="text-sm font-medium text-rose-600 dark:text-rose-300">{{ $message }}</p>
-                    @enderror
+            <flux:textarea wire:model="linkNotes" :label="__('Notes (Optional)')" />
+            @error('linkNotes')
+                <p class="text-sm font-medium text-rose-600 dark:text-rose-300">{{ $message }}</p>
+            @enderror
 
-                    <div class="flex justify-end gap-2 pt-2">
-                        <flux:button type="button" variant="filled" wire:click="closeLinkModal">
-                            Cancel
-                        </flux:button>
-                        <flux:button type="submit" variant="primary">
-                            Save
-                        </flux:button>
-                    </div>
-                </form>
+            <div class="flex justify-end gap-2 pt-2">
+                <flux:button type="button" variant="filled" wire:click="closeLinkModal">
+                    Cancel
+                </flux:button>
+                <flux:button type="submit" variant="primary">
+                    Save
+                </flux:button>
             </div>
-        </div>
-    @endif
+        </form>
+    </flux:modal>
 
     @if ($confirmingUnlinkClientId)
-        <div class="fixed inset-0 z-50 flex items-center justify-center bg-zinc-900/60 p-4">
-            <div class="w-full max-w-md rounded-2xl border border-zinc-200 bg-white p-6 shadow-xl dark:border-zinc-700 dark:bg-zinc-900">
-                <h2 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100">Remove link to {{ $unlinkClient?->name ?? 'this client' }}?</h2>
+        <flux:modal
+            name="content-unlink-client-modal"
+            :show="$confirmingUnlinkClientId !== null"
+            @close="cancelUnlinkClient"
+            class="max-w-md"
+        >
+            <h2 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100">Remove link to {{ $unlinkClient?->name ?? 'this client' }}?</h2>
 
-                <div class="mt-5 flex justify-end gap-2">
-                    <flux:button type="button" variant="filled" wire:click="cancelUnlinkClient">
-                        Cancel
-                    </flux:button>
-                    <flux:button type="button" variant="danger" wire:click="unlinkFromClient">
-                        Unlink
-                    </flux:button>
-                </div>
+            <div class="mt-5 flex justify-end gap-2">
+                <flux:button type="button" variant="filled" wire:click="cancelUnlinkClient">
+                    Cancel
+                </flux:button>
+                <flux:button type="button" variant="danger" wire:click="unlinkFromClient">
+                    Unlink
+                </flux:button>
             </div>
-        </div>
+        </flux:modal>
     @endif
 
     @if ($selectionMode)

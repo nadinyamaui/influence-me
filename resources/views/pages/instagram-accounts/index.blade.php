@@ -189,33 +189,28 @@
     @endif
 
     @if ($disconnectingAccountId)
-        <div class="fixed inset-0 z-40 flex items-center justify-center bg-zinc-900/60 p-4">
-            <div class="w-full max-w-md rounded-2xl border border-zinc-200 bg-white p-6 shadow-xl dark:border-zinc-700 dark:bg-zinc-900">
-                <h2 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100">Disconnect account?</h2>
-                <p class="mt-2 text-sm text-zinc-600 dark:text-zinc-300">
-                    You are about to disconnect
-                    <span class="font-semibold text-zinc-900 dark:text-zinc-100">
-                        {{ '@'.($this->disconnectingAccount()?->username ?? 'this account') }}
-                    </span>.
-                </p>
+        <flux:modal
+            name="instagram-disconnect-modal"
+            :show="$disconnectingAccountId !== null"
+            @close="cancelDisconnect"
+            class="max-w-md"
+        >
+            <h2 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100">Disconnect account?</h2>
+            <p class="mt-2 text-sm text-zinc-600 dark:text-zinc-300">
+                You are about to disconnect
+                <span class="font-semibold text-zinc-900 dark:text-zinc-100">
+                    {{ '@'.($this->disconnectingAccount()?->username ?? 'this account') }}
+                </span>.
+            </p>
 
-                <div class="mt-5 flex justify-end gap-2">
-                    <button
-                        type="button"
-                        wire:click="cancelDisconnect"
-                        class="inline-flex items-center rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 transition hover:bg-zinc-100 dark:border-zinc-600 dark:text-zinc-200 dark:hover:bg-zinc-800"
-                    >
-                        Cancel
-                    </button>
-                    <button
-                        type="button"
-                        wire:click="disconnect"
-                        class="inline-flex items-center rounded-lg bg-rose-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-rose-700"
-                    >
-                        Disconnect
-                    </button>
-                </div>
+            <div class="mt-5 flex justify-end gap-2">
+                <flux:button type="button" variant="filled" wire:click="cancelDisconnect">
+                    Cancel
+                </flux:button>
+                <flux:button type="button" variant="danger" wire:click="disconnect">
+                    Disconnect
+                </flux:button>
             </div>
-        </div>
+        </flux:modal>
     @endif
 </div>
