@@ -24,7 +24,7 @@ class Show extends Component
 
     public bool $confirmingRevokePortalAccess = false;
 
-    public Collection $linkedContentGroups;
+    private ?Collection $linkedContentGroups = null;
 
     public array $linkedContentSummaryData = [];
 
@@ -43,7 +43,7 @@ class Show extends Component
     {
         return view('pages.clients.show', [
             'summary' => $this->summary(),
-            'linkedContentGroups' => $this->linkedContentGroups,
+            'linkedContentGroups' => $this->linkedContentGroups ?? collect(),
             'linkedContentSummary' => $this->linkedContentSummaryData,
             'hasPortalAccess' => $this->client->clientUser()->exists(),
         ])->layout('layouts.app', [
