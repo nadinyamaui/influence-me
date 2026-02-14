@@ -29,6 +29,11 @@ class Index extends Component
 
     public ?string $dateTo = null;
 
+    public array $dateRange = [
+        'start' => null,
+        'end' => null,
+    ];
+
     public string $sortBy = 'most_recent';
 
     public ?int $selectedMediaId = null;
@@ -74,16 +79,34 @@ class Index extends Component
         $this->resetCursor();
     }
 
-    public function updatedDateFrom(?string $value): void
+    public function updatedDateRange(mixed $value): void
     {
-        $this->dateFrom = blank($value) ? null : $value;
+        $range = $this->normalizeDateRangeValue($value);
+        $this->dateFrom = $range['start'];
+        $this->dateTo = $range['end'];
+        $this->dateRange = $range;
+
         $this->resetCursor();
     }
 
-    public function updatedDateTo(?string $value): void
+    private function normalizeDateRangeValue(mixed $value): array
     {
-        $this->dateTo = blank($value) ? null : $value;
-        $this->resetCursor();
+        $start = null;
+        $end = null;
+
+        if (is_string($value)) {
+            $parts = array_map('trim', explode('/', $value, 2));
+            $start = $parts[0] ?? null;
+            $end = $parts[1] ?? null;
+        } elseif (is_array($value)) {
+            $start = $value['start'] ?? null;
+            $end = $value['end'] ?? null;
+        }
+
+        return [
+            'start' => blank($start) ? null : (string) $start,
+            'end' => blank($end) ? null : (string) $end,
+        ];
     }
 
     public function updatedSortBy(string $value): void

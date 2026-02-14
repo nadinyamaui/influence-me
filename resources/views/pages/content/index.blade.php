@@ -47,9 +47,7 @@
                 @endforeach
             </flux:select>
 
-            <flux:input type="date" wire:model.live="dateFrom" :label="__('Date From')" />
-
-            <flux:input type="date" wire:model.live="dateTo" :label="__('Date To')" />
+            <flux:date-picker mode="range" wire:model.live="dateRange" :clearable="true" :label="__('Date Range')" />
 
             <flux:select wire:model.live="sortBy" :label="__('Sort By')">
                 @foreach ($sortOptions as $sortValue => $label)
