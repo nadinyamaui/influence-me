@@ -77,7 +77,8 @@ it('marks account as failed when the chained sync workflow throws', function ():
     $instagramGraphService->shouldNotReceive('syncAudienceDemographics');
     app()->bind(InstagramGraphService::class, fn () => $instagramGraphService);
 
-    app(SyncAllInstagramData::class, ['account' => $account])->handle();
+    expect(fn () => app(SyncAllInstagramData::class, ['account' => $account])->handle())
+        ->toThrow(InstagramApiException::class, 'Insights sync failed');
 
     $account->refresh();
 

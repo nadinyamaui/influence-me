@@ -60,6 +60,8 @@ class SyncAllInstagramData implements ShouldQueue
                 'sync_status' => SyncStatus::Failed,
                 'last_sync_error' => $exception->getMessage(),
             ]);
+
+            throw $exception;
         }
     }
 }
