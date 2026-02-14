@@ -4,17 +4,40 @@
 @endphp
 
 <div class="flex h-full w-full flex-1 flex-col gap-6">
-    <div>
-        <h1 class="text-2xl font-semibold text-zinc-900 dark:text-zinc-100">Instagram Accounts</h1>
-        <p class="mt-1 text-sm text-zinc-600 dark:text-zinc-300">View all connected Instagram accounts and their sync health.</p>
+    <div class="flex flex-wrap items-start justify-between gap-3">
+        <div>
+            <h1 class="text-2xl font-semibold text-zinc-900 dark:text-zinc-100">Instagram Accounts</h1>
+            <p class="mt-1 text-sm text-zinc-600 dark:text-zinc-300">View all connected Instagram accounts and their sync health.</p>
+        </div>
+
+        @if ($accounts->isNotEmpty())
+            <a
+                href="{{ route('auth.facebook.add') }}"
+                class="inline-flex items-center rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-zinc-700 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300"
+            >
+                Connect Another Account
+            </a>
+        @endif
     </div>
+
+    @if (session('status'))
+        <div class="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-800 dark:border-emerald-900/40 dark:bg-emerald-950/50 dark:text-emerald-200">
+            {{ session('status') }}
+        </div>
+    @endif
+
+    @if ($errors->has('oauth') || $errors->has('disconnect'))
+        <div class="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-800 dark:border-rose-900/40 dark:bg-rose-950/50 dark:text-rose-200">
+            {{ $errors->first('oauth') ?? $errors->first('disconnect') }}
+        </div>
+    @endif
 
     @if ($accounts->isEmpty())
         <section class="rounded-2xl border border-dashed border-zinc-300 bg-white p-8 text-center dark:border-zinc-700 dark:bg-zinc-900/40">
             <h2 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100">No Instagram accounts connected.</h2>
             <p class="mt-2 text-sm text-zinc-600 dark:text-zinc-300">Click below to connect your first account.</p>
             <a
-                href="#"
+                href="{{ route('auth.facebook.add') }}"
                 class="mt-5 inline-flex items-center rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-zinc-700 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300"
             >
                 Connect Instagram Account
@@ -30,7 +53,7 @@
                     $syncStatusValue = $account->sync_status?->value ?? SyncStatus::Idle->value;
                 @endphp
 
-                <article class="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-700 dark:bg-zinc-900">
+                <article wire:key="instagram-account-{{ $account->id }}" class="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-700 dark:bg-zinc-900">
                     <div class="flex items-start gap-3">
                         @if ($account->profile_picture_url)
                             <img
@@ -103,8 +126,59 @@
                             @endif
                         </div>
                     </div>
+
+                    <div class="mt-5 flex items-center justify-end gap-2">
+                        @if (! $account->is_primary)
+                            <button
+                                type="button"
+                                wire:click="setPrimary({{ $account->id }})"
+                                class="inline-flex items-center rounded-md border border-zinc-300 px-3 py-1.5 text-xs font-medium text-zinc-700 transition hover:bg-zinc-100 dark:border-zinc-600 dark:text-zinc-200 dark:hover:bg-zinc-800"
+                            >
+                                Set Primary
+                            </button>
+                        @endif
+
+                        <button
+                            type="button"
+                            wire:click="confirmDisconnect({{ $account->id }})"
+                            class="inline-flex items-center rounded-md border border-rose-300 px-3 py-1.5 text-xs font-medium text-rose-700 transition hover:bg-rose-50 dark:border-rose-800 dark:text-rose-200 dark:hover:bg-rose-950/40"
+                        >
+                            Disconnect
+                        </button>
+                    </div>
                 </article>
             @endforeach
         </section>
+    @endif
+
+    @if ($disconnectingAccountId)
+        <div class="fixed inset-0 z-40 flex items-center justify-center bg-zinc-900/60 p-4">
+            <div class="w-full max-w-md rounded-2xl border border-zinc-200 bg-white p-6 shadow-xl dark:border-zinc-700 dark:bg-zinc-900">
+                <h2 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100">Disconnect account?</h2>
+                <p class="mt-2 text-sm text-zinc-600 dark:text-zinc-300">
+                    You are about to disconnect
+                    <span class="font-semibold text-zinc-900 dark:text-zinc-100">
+                        {{ '@'.($this->disconnectingAccount()?->username ?? 'this account') }}
+                    </span>.
+                </p>
+
+                <div class="mt-5 flex justify-end gap-2">
+                    <button
+                        type="button"
+                        wire:click="cancelDisconnect"
+                        class="inline-flex items-center rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 transition hover:bg-zinc-100 dark:border-zinc-600 dark:text-zinc-200 dark:hover:bg-zinc-800"
+                    >
+                        Cancel
+                    </button>
+                    <button
+                        type="button"
+                        wire:click="disconnect"
+                        class="inline-flex items-center rounded-lg bg-rose-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-rose-700"
+                    >
+                        Disconnect
+                    </button>
+                </div>
+            </div>
+        </div>
     @endif
 </div>
