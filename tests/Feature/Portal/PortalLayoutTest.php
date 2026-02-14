@@ -11,7 +11,9 @@ test('portal dashboard requires authenticated client guard', function (): void {
 });
 
 test('authenticated client users can view the portal dashboard layout', function (): void {
-    $client = Client::factory()->create();
+    $client = Client::factory()->create([
+        'name' => 'Avery Client',
+    ]);
     $clientUser = ClientUser::factory()->for($client)->create([
         'name' => 'Avery Client',
         'email' => 'avery@example.test',
@@ -21,7 +23,7 @@ test('authenticated client users can view the portal dashboard layout', function
         ->get(route('portal.dashboard'))
         ->assertSuccessful()
         ->assertSee('Influence Me - Client Portal')
-        ->assertSee('Portal Dashboard (coming soon)')
+        ->assertSee('Welcome back, Avery Client')
         ->assertSee('Dashboard')
         ->assertSee('Proposals')
         ->assertSee('Invoices')

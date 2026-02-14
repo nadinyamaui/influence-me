@@ -5,6 +5,9 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
+- RFC 037: added `App\Livewire\Portal\Dashboard` and updated `routes/portal.php` to serve `/portal/dashboard` as a client-guarded Livewire page with scoped metrics and recent activity data.
+- RFC 037: replaced `resources/views/pages/portal/dashboard.blade.php` placeholder content with a summary dashboard (active proposals, pending invoices total, linked content, total reach) and recent proposals/invoices lists with status badges and placeholder detail links.
+- RFC 037: added feature coverage in `tests/Feature/Portal/PortalDashboardTest.php` and updated `tests/Feature/Portal/PortalLayoutTest.php` for dashboard rendering updates and strict client data scoping.
 - RFC 036: added `App\Services\Clients\ClientPortalAccessService` and `App\Mail\ClientPortalInvitation` with `resources/views/mail/client-portal-invitation.blade.php` to handle portal invite creation, temporary credentials, welcome email delivery, and revoke workflows.
 - RFC 036: extended `App\Livewire\Clients\Show` and `resources/views/pages/clients/show.blade.php` with invite/revoke portal actions, validation/error states, and status-aware portal access controls.
 - RFC 036: added feature coverage in `tests/Feature/Clients/ClientPortalAccessTest.php` for invite success, no-email guardrails, invitation email content, revoke behavior, and portal-status UI rendering.
