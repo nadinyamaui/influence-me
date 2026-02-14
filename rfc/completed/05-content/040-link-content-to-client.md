@@ -74,3 +74,7 @@ public function unlinkFromClient(int $mediaId, int $clientId): void
 - [ ] Duplicate links prevented (unique constraint)
 - [ ] Authorization enforced
 - [ ] Feature tests cover link, batch link, and unlink
+
+## Forward Compatibility Note
+
+This RFC remains historical for the initial implementation. Campaign-first linking requirements are defined in RFCs `093`, `094`, and `096`.

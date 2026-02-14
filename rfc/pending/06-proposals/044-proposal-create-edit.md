@@ -84,3 +84,7 @@ public function update(): void
 - [ ] Delete with confirmation works
 - [ ] Authorization enforced
 - [ ] Feature tests cover create, edit, and validation
+
+## Campaign Context Note
+
+Optional campaign context requirements for proposal experiences are defined in RFC `098`.

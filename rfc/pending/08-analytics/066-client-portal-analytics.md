@@ -62,3 +62,7 @@ Update `href="#"` for "Analytics" to `route('portal.analytics.index')`.
 - [ ] Data properly scoped (client cannot see other clients' data)
 - [ ] Empty state when no linked content
 - [ ] Feature test verifies data scoping
+
+## Campaign Source Note
+
+Campaign-first analytics sourcing requirements are defined in RFC `099`.
