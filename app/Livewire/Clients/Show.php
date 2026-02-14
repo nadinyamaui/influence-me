@@ -5,7 +5,10 @@ namespace App\Livewire\Clients;
 use App\Enums\InvoiceStatus;
 use App\Enums\ProposalStatus;
 use App\Models\Client;
+use App\Services\Clients\ClientPortalAccessService;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\ValidationException;
 use Livewire\Component;
 
 class Show extends Component
@@ -15,6 +18,8 @@ class Show extends Component
     public Client $client;
 
     public string $activeTab = 'overview';
+
+    public bool $confirmingRevokePortalAccess = false;
 
     public function mount(Client $client): void
     {
@@ -31,6 +36,61 @@ class Show extends Component
         ])->layout('layouts.app', [
             'title' => __('Client Details'),
         ]);
+    }
+
+    public function inviteToPortal(ClientPortalAccessService $portalAccessService): void
+    {
+        $this->authorize('update', $this->client);
+
+        $influencerName = Auth::user()?->name ?? 'Your influencer';
+
+        try {
+            $portalAccessService->invite($this->client, $influencerName);
+        } catch (ValidationException $exception) {
+            $this->setErrorBag($exception->validator->errors());
+
+            return;
+        }
+
+        $this->resetErrorBag();
+        session()->flash('status', 'Portal invitation sent successfully.');
+    }
+
+    public function confirmRevokePortalAccess(): void
+    {
+        $this->authorize('update', $this->client);
+
+        if (! $this->client->clientUser()->exists()) {
+            $this->addError('revoke', 'Portal access is not active for this client.');
+
+            return;
+        }
+
+        $this->resetErrorBag('revoke');
+        $this->confirmingRevokePortalAccess = true;
+    }
+
+    public function cancelRevokePortalAccess(): void
+    {
+        $this->confirmingRevokePortalAccess = false;
+    }
+
+    public function revokePortalAccess(ClientPortalAccessService $portalAccessService): void
+    {
+        $this->authorize('update', $this->client);
+
+        try {
+            $portalAccessService->revoke($this->client);
+        } catch (ValidationException $exception) {
+            $this->setErrorBag($exception->validator->errors());
+            $this->confirmingRevokePortalAccess = false;
+
+            return;
+        }
+
+        $this->confirmingRevokePortalAccess = false;
+        $this->resetErrorBag();
+        session()->flash('status', 'Portal access revoked.');
     }
 
     private function summary(): array

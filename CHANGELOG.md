@@ -5,6 +5,9 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
+- RFC 036: added `App\Services\Clients\ClientPortalAccessService` and `App\Mail\ClientPortalInvitation` with `resources/views/mail/client-portal-invitation.blade.php` to handle portal invite creation, temporary credentials, welcome email delivery, and revoke workflows.
+- RFC 036: extended `App\Livewire\Clients\Show` and `resources/views/pages/clients/show.blade.php` with invite/revoke portal actions, validation/error states, and status-aware portal access controls.
+- RFC 036: added feature coverage in `tests/Feature/Clients/ClientPortalAccessTest.php` for invite success, no-email guardrails, invitation email content, revoke behavior, and portal-status UI rendering.
 - RFC 035: added dedicated portal layout templates `resources/views/layouts/portal.blade.php` and `resources/views/layouts/portal/sidebar.blade.php` with client-portal branding, simplified navigation, and client-user logout menu controls.
 - RFC 035: added `resources/views/pages/portal/dashboard.blade.php` placeholder on the new portal layout and wired `/portal/dashboard` in `routes/portal.php` behind a dedicated `client.auth` middleware alias that enforces the client guard and redirects guests to `/portal/login`.
 - RFC 035: added feature coverage in `tests/Feature/Portal/PortalLayoutTest.php` for client-guard access control, portal layout rendering, and logout behavior.

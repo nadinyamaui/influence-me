@@ -30,6 +30,12 @@
         </div>
     @endif
 
+    @if ($errors->has('invite') || $errors->has('revoke'))
+        <div class="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-800 dark:border-rose-900/40 dark:bg-rose-950/50 dark:text-rose-200">
+            {{ $errors->first('invite') ?? $errors->first('revoke') }}
+        </div>
+    @endif
+
     <section class="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-700 dark:bg-zinc-900">
         <h2 class="text-sm font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-300">Client Info</h2>
 
@@ -51,11 +57,18 @@
         <div class="mt-5 rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm dark:border-zinc-700 dark:bg-zinc-800/60">
             @if ($hasPortalAccess)
                 <p class="font-medium text-emerald-700 dark:text-emerald-300">Portal access: Active</p>
+                <flux:button type="button" variant="danger" class="mt-3" wire:click="confirmRevokePortalAccess">
+                    Revoke Portal Access
+                </flux:button>
             @else
                 <p class="font-medium text-zinc-800 dark:text-zinc-100">Portal access: No portal access</p>
 
                 @if (blank($client->email))
                     <p class="mt-1 text-zinc-600 dark:text-zinc-300">Add an email to enable portal access.</p>
+                @else
+                    <flux:button type="button" variant="primary" class="mt-3" wire:click="inviteToPortal">
+                        Invite to Portal
+                    </flux:button>
                 @endif
             @endif
         </div>
@@ -124,4 +137,22 @@
             </div>
         @endif
     </section>
+
+    @if ($confirmingRevokePortalAccess)
+        <div class="fixed inset-0 z-40 flex items-center justify-center bg-zinc-900/60 p-4">
+            <div class="w-full max-w-lg rounded-2xl border border-zinc-200 bg-white p-6 shadow-xl dark:border-zinc-700 dark:bg-zinc-900">
+                <h2 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100">Revoke portal access?</h2>
+                <p class="mt-2 text-sm text-zinc-600 dark:text-zinc-300">This removes the client user account and blocks portal access immediately.</p>
+
+                <div class="mt-5 flex justify-end gap-2">
+                    <flux:button type="button" variant="filled" wire:click="cancelRevokePortalAccess">
+                        Cancel
+                    </flux:button>
+                    <flux:button type="button" variant="danger" wire:click="revokePortalAccess">
+                        Revoke Access
+                    </flux:button>
+                </div>
+            </div>
+        </div>
+    @endif
 </div>
