@@ -91,7 +91,11 @@ test('authenticated users can set a non-primary account as primary', function ()
 
     Livewire::actingAs($user)
         ->test(Index::class)
-        ->call('setPrimary', $secondaryAccount->id);
+        ->call('setPrimary', $secondaryAccount->id)
+        ->assertDispatched('toast-show', function (string $name, array $params): bool {
+            return ($params['slots']['text'] ?? null) === 'Primary Instagram account updated.'
+                && ($params['dataset']['variant'] ?? null) === 'success';
+        });
 
     expect($primaryAccount->fresh()->is_primary)->toBeFalse()
         ->and($secondaryAccount->fresh()->is_primary)->toBeTrue();
@@ -113,7 +117,11 @@ test('authenticated users can disconnect an account after confirmation', functio
         ->call('confirmDisconnect', $secondAccount->id)
         ->assertSet('disconnectingAccountId', $secondAccount->id)
         ->call('disconnect')
-        ->assertSet('disconnectingAccountId', null);
+        ->assertSet('disconnectingAccountId', null)
+        ->assertDispatched('toast-show', function (string $name, array $params): bool {
+            return ($params['slots']['text'] ?? null) === 'Instagram account disconnected.'
+                && ($params['dataset']['variant'] ?? null) === 'success';
+        });
 
     $this->assertDatabaseMissing('instagram_accounts', ['id' => $secondAccount->id]);
     $this->assertDatabaseHas('instagram_accounts', ['id' => $firstAccount->id]);

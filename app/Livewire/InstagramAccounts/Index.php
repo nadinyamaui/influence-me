@@ -6,6 +6,7 @@ use App\Enums\SyncStatus;
 use App\Jobs\SyncAllInstagramData;
 use App\Models\InstagramAccount;
 use App\Models\User;
+use Flux\Flux;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
@@ -42,7 +43,7 @@ class Index extends Component
         Auth::user()->instagramAccounts()->update(['is_primary' => false]);
         $account->update(['is_primary' => true]);
 
-        session()->flash('status', 'Primary Instagram account updated.');
+        Flux::toast('Primary Instagram account updated.', variant: 'success');
     }
 
     public function confirmDisconnect(int $accountId): void
@@ -87,7 +88,7 @@ class Index extends Component
         }
 
         $this->disconnectingAccountId = null;
-        session()->flash('status', 'Instagram account disconnected.');
+        Flux::toast('Instagram account disconnected.', variant: 'success');
     }
 
     public function render()

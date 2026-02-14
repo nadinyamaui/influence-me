@@ -36,7 +36,11 @@ test('authenticated users can create a client from the create form', function ()
         ->set('form.notes', 'Primary partner account.')
         ->call('save')
         ->assertHasNoErrors()
-        ->assertRedirect(route('clients.index'));
+        ->assertRedirect(route('clients.index'))
+        ->assertDispatched('toast-show', function (string $name, array $params): bool {
+            return ($params['slots']['text'] ?? null) === 'Client created successfully.'
+                && ($params['dataset']['variant'] ?? null) === 'success';
+        });
 
     $client = Client::query()->first();
 

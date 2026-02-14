@@ -4,6 +4,7 @@ namespace App\Livewire\Clients;
 
 use App\Livewire\Forms\ClientForm;
 use App\Models\Client;
+use Flux\Flux;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
@@ -27,7 +28,7 @@ class Create extends Component
 
         Auth::user()->clients()->create($this->form->payload());
 
-        session()->flash('status', 'Client created successfully.');
+        Flux::toast('Client created successfully.', variant: 'success');
 
         return $this->redirectRoute('clients.index', navigate: true);
     }

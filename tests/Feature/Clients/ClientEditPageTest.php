@@ -62,7 +62,11 @@ test('owners can update client details', function (): void {
         ->set('form.notes', 'Updated notes')
         ->call('save')
         ->assertHasNoErrors()
-        ->assertRedirect(route('clients.show', $client));
+        ->assertRedirect(route('clients.show', $client))
+        ->assertDispatched('toast-show', function (string $name, array $params): bool {
+            return ($params['slots']['text'] ?? null) === 'Client updated successfully.'
+                && ($params['dataset']['variant'] ?? null) === 'success';
+        });
 
     $updatedClient = $client->fresh();
 
@@ -108,7 +112,11 @@ test('owners can delete clients from edit page and related proposals and invoice
         ->call('confirmDelete')
         ->assertSet('confirmingDelete', true)
         ->call('delete')
-        ->assertRedirect(route('clients.index'));
+        ->assertRedirect(route('clients.index'))
+        ->assertDispatched('toast-show', function (string $name, array $params): bool {
+            return ($params['slots']['text'] ?? null) === 'Client deleted successfully.'
+                && ($params['dataset']['variant'] ?? null) === 'success';
+        });
 
     $this->assertDatabaseMissing('clients', ['id' => $client->id]);
     $this->assertDatabaseMissing('proposals', ['id' => $proposal->id]);

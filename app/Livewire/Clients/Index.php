@@ -5,9 +5,10 @@ namespace App\Livewire\Clients;
 use App\Enums\ClientType;
 use App\Models\Client;
 use App\Models\User;
+use Flux\Flux;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -68,7 +69,7 @@ class Index extends Component
         $client->delete();
 
         $this->deletingClientId = null;
-        session()->flash('status', 'Client deleted.');
+        Flux::toast('Client deleted.', variant: 'success');
     }
 
     public function render()

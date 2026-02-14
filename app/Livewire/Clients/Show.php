@@ -6,6 +6,7 @@ use App\Enums\InvoiceStatus;
 use App\Enums\ProposalStatus;
 use App\Models\Client;
 use App\Services\Clients\ClientPortalAccessService;
+use Flux\Flux;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
@@ -53,7 +54,7 @@ class Show extends Component
         }
 
         $this->resetErrorBag();
-        session()->flash('status', 'Portal invitation sent successfully.');
+        Flux::toast('Portal invitation sent successfully.', variant: 'success');
     }
 
     public function confirmRevokePortalAccess(): void
@@ -90,7 +91,7 @@ class Show extends Component
 
         $this->confirmingRevokePortalAccess = false;
         $this->resetErrorBag();
-        session()->flash('status', 'Portal access revoked.');
+        Flux::toast('Portal access revoked.', variant: 'success');
     }
 
     private function summary(): array

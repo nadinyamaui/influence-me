@@ -137,7 +137,11 @@ test('owners can delete clients from the list page', function (): void {
         ->call('confirmDelete', $client->id)
         ->assertSet('deletingClientId', $client->id)
         ->call('delete')
-        ->assertSet('deletingClientId', null);
+        ->assertSet('deletingClientId', null)
+        ->assertDispatched('toast-show', function (string $name, array $params): bool {
+            return ($params['slots']['text'] ?? null) === 'Client deleted.'
+                && ($params['dataset']['variant'] ?? null) === 'success';
+        });
 
     $this->assertDatabaseMissing('clients', ['id' => $client->id]);
 });

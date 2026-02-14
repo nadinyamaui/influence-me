@@ -20,7 +20,11 @@ test('inviting a client to portal creates client user and sends welcome email', 
     Livewire::actingAs($owner)
         ->test(Show::class, ['client' => $client])
         ->call('inviteToPortal')
-        ->assertHasNoErrors();
+        ->assertHasNoErrors()
+        ->assertDispatched('toast-show', function (string $name, array $params): bool {
+            return ($params['slots']['text'] ?? null) === 'Portal invitation sent successfully.'
+                && ($params['dataset']['variant'] ?? null) === 'success';
+        });
 
     $clientUser = ClientUser::query()
         ->where('client_id', $client->id)
@@ -72,7 +76,11 @@ test('revoke portal access removes existing client user account', function (): v
         ->assertSet('confirmingRevokePortalAccess', true)
         ->call('revokePortalAccess')
         ->assertHasNoErrors()
-        ->assertSet('confirmingRevokePortalAccess', false);
+        ->assertSet('confirmingRevokePortalAccess', false)
+        ->assertDispatched('toast-show', function (string $name, array $params): bool {
+            return ($params['slots']['text'] ?? null) === 'Portal access revoked.'
+                && ($params['dataset']['variant'] ?? null) === 'success';
+        });
 
     $this->assertDatabaseMissing('client_users', ['id' => $clientUser->id]);
 });

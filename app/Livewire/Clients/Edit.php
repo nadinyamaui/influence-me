@@ -4,6 +4,7 @@ namespace App\Livewire\Clients;
 
 use App\Livewire\Forms\ClientForm;
 use App\Models\Client;
+use Flux\Flux;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Livewire\Component;
 
@@ -33,7 +34,7 @@ class Edit extends Component
 
         $this->client->update($this->form->payload());
 
-        session()->flash('status', 'Client updated successfully.');
+        Flux::toast('Client updated successfully.', variant: 'success');
 
         return $this->redirectRoute('clients.show', ['client' => $this->client->id], navigate: true);
     }
@@ -57,7 +58,7 @@ class Edit extends Component
         $this->client->delete();
 
         $this->confirmingDelete = false;
-        session()->flash('status', 'Client deleted successfully.');
+        Flux::toast('Client deleted successfully.', variant: 'success');
 
         return $this->redirectRoute('clients.index', navigate: true);
     }
