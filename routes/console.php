@@ -27,8 +27,11 @@ Schedule::call(function (): void {
 })->hourly()->name('refresh-instagram-insights');
 
 Schedule::call(function (): void {
+    $refreshWindowStart = now();
+    $refreshWindowEnd = $refreshWindowStart->copy()->addDays(7);
+
     InstagramAccount::query()
-        ->where('token_expires_at', '<=', now()->addDays(7))
+        ->whereBetween('token_expires_at', [$refreshWindowStart, $refreshWindowEnd])
         ->each(function (InstagramAccount $account): void {
             RefreshInstagramToken::dispatch($account);
         });
