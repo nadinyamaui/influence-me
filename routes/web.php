@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\FacebookAuthController;
+use App\Livewire\Clients\Index as ClientsIndex;
 use App\Livewire\Dashboard;
 use App\Livewire\InstagramAccounts\Index as InstagramAccountsIndex;
 use Illuminate\Support\Facades\Route;
@@ -23,6 +24,10 @@ Route::livewire('dashboard', Dashboard::class)
 Route::livewire('instagram-accounts', InstagramAccountsIndex::class)
     ->middleware(['auth'])
     ->name('instagram-accounts.index');
+
+Route::livewire('clients', ClientsIndex::class)
+    ->middleware(['auth'])
+    ->name('clients.index');
 
 require __DIR__.'/settings.php';
 require __DIR__.'/portal.php';

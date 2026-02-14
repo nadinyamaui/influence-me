@@ -5,6 +5,9 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
+- RFC 031: added `App\Livewire\Clients\Index`, `resources/views/pages/clients/index.blade.php`, and `routes/web.php` wiring for authenticated `/clients` with query-level search/type filtering, pagination, empty state messaging, and row actions.
+- RFC 031: updated `resources/views/layouts/app/sidebar.blade.php` to route the Clients nav item to `clients.index` with active-state handling.
+- RFC 031: added feature coverage in `tests/Feature/Clients/ClientListPageTest.php` and updated `tests/Feature/NavigationStructureTest.php` for scoped listing, search/filter behavior, pagination, empty state rendering, and navigation link assertions.
 - RFC 030: added manual account sync action `syncNow` to `app/Livewire/InstagramAccounts/Index.php` with ownership authorization, duplicate-sync guard, immediate `sync_status=syncing` UI feedback, and queued `App\Jobs\SyncAllInstagramData` dispatch.
 - RFC 030: updated `resources/views/pages/instagram-accounts/index.blade.php` with per-account "Sync Now" controls (disabled while syncing), `wire:poll.5s` status refresh while syncing, RFC-compliant status copy ("Up to date", "Syncing...", "Sync failed"), failed-sync collapsible `last_sync_error` display, and expiring/expired token "Re-authenticate" links.
 - RFC 030: expanded `tests/Feature/InstagramAccountsPageTest.php` to verify manual sync dispatch and syncing-state persistence, skip-dispatch when already syncing, failed-sync error rendering, and polling/status text visibility on the accounts page.
