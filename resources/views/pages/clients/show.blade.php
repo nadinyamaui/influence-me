@@ -1,5 +1,6 @@
 @php
     use App\Enums\ClientType;
+    use Illuminate\Support\Str;
 @endphp
 
 <div class="flex h-full w-full flex-1 flex-col gap-6">
@@ -114,9 +115,66 @@
         @endif
 
         @if ($activeTab === 'content')
-            <div class="mt-5 rounded-xl border border-dashed border-zinc-300 p-6 text-sm text-zinc-600 dark:border-zinc-700 dark:text-zinc-300">
-                Content tab coming soon.
-            </div>
+            @if ($linkedContentGroups->isEmpty())
+                <div class="mt-5 rounded-xl border border-dashed border-zinc-300 p-6 text-sm text-zinc-600 dark:border-zinc-700 dark:text-zinc-300">
+                    No content linked to this client yet. Go to the Content browser to link posts.
+                </div>
+            @else
+                <div class="mt-5 grid gap-4 md:grid-cols-4">
+                    <div class="rounded-xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-700 dark:bg-zinc-800/60">
+                        <p class="text-xs uppercase tracking-wide text-zinc-500 dark:text-zinc-300">Total linked posts</p>
+                        <p class="mt-2 text-2xl font-semibold text-zinc-900 dark:text-zinc-100">{{ number_format($linkedContentSummary['total_posts']) }}</p>
+                    </div>
+                    <div class="rounded-xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-700 dark:bg-zinc-800/60">
+                        <p class="text-xs uppercase tracking-wide text-zinc-500 dark:text-zinc-300">Total reach</p>
+                        <p class="mt-2 text-2xl font-semibold text-zinc-900 dark:text-zinc-100">{{ number_format($linkedContentSummary['total_reach']) }}</p>
+                    </div>
+                    <div class="rounded-xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-700 dark:bg-zinc-800/60">
+                        <p class="text-xs uppercase tracking-wide text-zinc-500 dark:text-zinc-300">Total impressions</p>
+                        <p class="mt-2 text-2xl font-semibold text-zinc-900 dark:text-zinc-100">{{ number_format($linkedContentSummary['total_impressions']) }}</p>
+                    </div>
+                    <div class="rounded-xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-700 dark:bg-zinc-800/60">
+                        <p class="text-xs uppercase tracking-wide text-zinc-500 dark:text-zinc-300">Average engagement rate</p>
+                        <p class="mt-2 text-2xl font-semibold text-zinc-900 dark:text-zinc-100">{{ number_format($linkedContentSummary['average_engagement_rate'], 2) }}%</p>
+                    </div>
+                </div>
+
+                <div class="mt-5 space-y-4">
+                    @foreach ($linkedContentGroups as $campaignName => $campaignMedia)
+                        <section class="rounded-xl border border-zinc-200 p-4 dark:border-zinc-700">
+                            <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
+                                <h3 class="text-sm font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-300">{{ $campaignName }}</h3>
+                                <p class="text-sm text-zinc-600 dark:text-zinc-300">{{ number_format($campaignMedia->count()) }} posts · {{ number_format($campaignMedia->sum('reach')) }} reach</p>
+                            </div>
+
+                            <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                                @foreach ($campaignMedia as $linkedMedia)
+                                    <article wire:key="client-content-{{ $linkedMedia->id }}" class="rounded-xl border border-zinc-200 bg-zinc-50 p-3 dark:border-zinc-700 dark:bg-zinc-800/60">
+                                        <div class="flex gap-3">
+                                            <div class="h-14 w-14 shrink-0 overflow-hidden rounded-lg bg-zinc-200 dark:bg-zinc-700">
+                                                @if ($linkedMedia->thumbnail_url || $linkedMedia->media_url)
+                                                    <img src="{{ $linkedMedia->thumbnail_url ?? $linkedMedia->media_url }}" alt="{{ $linkedMedia->caption ? Str::limit($linkedMedia->caption, 30) : 'Instagram content' }}" class="h-full w-full object-cover">
+                                                @endif
+                                            </div>
+                                            <div class="min-w-0 flex-1">
+                                                <p class="text-sm font-medium text-zinc-900 dark:text-zinc-100">{{ Str::limit($linkedMedia->caption ?? 'No caption', 30) }}</p>
+                                                <p class="mt-1 text-xs text-zinc-500 dark:text-zinc-300">{{ number_format($linkedMedia->like_count) }} likes · {{ number_format($linkedMedia->reach) }} reach</p>
+                                                <p class="mt-1 text-xs text-zinc-500 dark:text-zinc-300">{{ $linkedMedia->published_at?->format('M j, Y') ?? 'Unpublished' }}</p>
+                                            </div>
+                                        </div>
+
+                                        <div class="mt-3 flex justify-end">
+                                            <flux:button type="button" size="sm" variant="danger" wire:click="unlinkContent({{ $linkedMedia->id }})">
+                                                Unlink
+                                            </flux:button>
+                                        </div>
+                                    </article>
+                                @endforeach
+                            </div>
+                        </section>
+                    @endforeach
+                </div>
+            @endif
         @endif
 
         @if ($activeTab === 'proposals')

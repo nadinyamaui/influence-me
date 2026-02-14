@@ -6,7 +6,10 @@ use App\Enums\InvoiceStatus;
 use App\Enums\ProposalStatus;
 use App\Models\Client;
 use App\Services\Clients\ClientPortalAccessService;
+use App\Services\Content\ContentClientLinkService;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 use Livewire\Component;
@@ -30,8 +33,12 @@ class Show extends Component
 
     public function render()
     {
+        $linkedContentMedia = $this->linkedContentMedia();
+
         return view('pages.clients.show', [
             'summary' => $this->summary(),
+            'linkedContentGroups' => $this->groupedLinkedContent($linkedContentMedia),
+            'linkedContentSummary' => $this->linkedContentSummary($linkedContentMedia),
             'hasPortalAccess' => $this->client->clientUser()->exists(),
         ])->layout('layouts.app', [
             'title' => __('Client Details'),
@@ -93,6 +100,21 @@ class Show extends Component
         session()->flash('status', 'Portal access revoked.');
     }
 
+    public function unlinkContent(int $mediaId, ContentClientLinkService $linkService): void
+    {
+        $this->authorize('update', $this->client);
+
+        $media = $this->client->instagramMedia()
+            ->whereKey($mediaId)
+            ->firstOrFail();
+
+        $this->authorize('linkToClient', $media);
+
+        $linkService->unlink(Auth::user(), $media, $this->client);
+
+        session()->flash('status', 'Content unlinked from client.');
+    }
+
     private function summary(): array
     {
         $pendingInvoiceQuery = $this->client->invoices()
@@ -106,6 +128,36 @@ class Show extends Component
             'active_proposals' => $this->client->proposals()->where('status', ProposalStatus::Sent)->count(),
             'pending_invoices' => $pendingInvoiceQuery->count(),
             'pending_invoice_total' => (float) $pendingInvoiceQuery->sum('total'),
+        ];
+    }
+
+    private function linkedContentMedia(): EloquentCollection
+    {
+        return $this->client->instagramMedia()
+            ->orderByRaw('case when campaign_media.campaign_name is null then 1 else 0 end')
+            ->orderBy('campaign_media.campaign_name')
+            ->orderByDesc('published_at')
+            ->get();
+    }
+
+    private function groupedLinkedContent(EloquentCollection $linkedContentMedia): Collection
+    {
+        return $linkedContentMedia->groupBy(function ($media): string {
+            return $media->pivot->campaign_name ?? 'Uncategorized';
+        });
+    }
+
+    private function linkedContentSummary(EloquentCollection $linkedContentMedia): array
+    {
+        $averageEngagementRate = $linkedContentMedia->isEmpty()
+            ? 0
+            : (float) $linkedContentMedia->avg(fn ($media): float => (float) $media->engagement_rate);
+
+        return [
+            'total_posts' => $linkedContentMedia->count(),
+            'total_reach' => (int) $linkedContentMedia->sum('reach'),
+            'total_impressions' => (int) $linkedContentMedia->sum('impressions'),
+            'average_engagement_rate' => round($averageEngagementRate, 2),
         ];
     }
 }
