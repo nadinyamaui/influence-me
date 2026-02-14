@@ -9,7 +9,7 @@
             <p class="mt-1 text-sm text-zinc-600 dark:text-zinc-300">Manage your client relationships and campaign assignments.</p>
         </div>
 
-        <flux:button :href="url('/clients/create')" variant="primary" wire:navigate>
+        <flux:button :href="route('clients.create')" variant="primary" wire:navigate>
             Add Client
         </flux:button>
     </div>

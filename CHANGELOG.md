@@ -5,6 +5,9 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
+- RFC 032: added `/clients/create` Livewire page via `App\Livewire\Clients\Create` and `resources/views/pages/clients/create.blade.php` with Flux form fields for full client profile capture and cancel/save actions.
+- RFC 032: added `app/Http/Requests/StoreClientRequest.php` and integrated its validation rules into the create workflow so new clients are created under the authenticated influencer only.
+- RFC 032: added feature coverage in `tests/Feature/Clients/ClientCreatePageTest.php` for page rendering, successful creation/redirect flow, and invalid payload validation failures.
 - RFC 031: added `App\Livewire\Clients\Index`, `resources/views/pages/clients/index.blade.php`, and `routes/web.php` wiring for authenticated `/clients` with query-level search/type filtering, pagination, empty state messaging, and row actions.
 - RFC 031: updated `resources/views/layouts/app/sidebar.blade.php` to route the Clients nav item to `clients.index` with active-state handling.
 - RFC 031: added feature coverage in `tests/Feature/Clients/ClientListPageTest.php` and updated `tests/Feature/NavigationStructureTest.php` for scoped listing, search/filter behavior, pagination, empty state rendering, and navigation link assertions.
