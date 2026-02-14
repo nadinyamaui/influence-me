@@ -71,3 +71,7 @@ Update `href="#"` for "Proposals" to `route('portal.proposals.index')`.
 - [ ] Cannot view draft proposals
 - [ ] Cannot view other clients' proposals
 - [ ] Feature tests verify list, detail, and authorization
+
+## Campaign Context Note
+
+Optional campaign context display in the client portal proposal experience is defined in RFC `098`.

@@ -58,3 +58,7 @@ $campaignBreakdown = $linkedMedia->groupBy('pivot.campaign_name');
 - [ ] Comparison to account average shown
 - [ ] Empty state if no linked content
 - [ ] Feature test verifies aggregation
+
+## Campaign Source Note
+
+Campaign-first analytics sourcing requirements are defined in RFC `099`.

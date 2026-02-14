@@ -59,3 +59,7 @@ Route::livewire('proposals/{proposal}', 'proposals.show')
 - [ ] Revision notes displayed when status is Revised
 - [ ] Authorization enforced (only owning user)
 - [ ] Feature test verifies display for each status
+
+## Campaign Context Note
+
+Optional campaign context display for proposal detail pages is defined in RFC `098`.

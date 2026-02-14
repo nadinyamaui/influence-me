@@ -52,3 +52,7 @@ $linkedMedia = $client->instagramMedia()
 - [ ] Unlink action works from this view
 - [ ] Empty state shown when no linked content
 - [ ] Feature test verifies display and grouping
+
+## Forward Compatibility Note
+
+This RFC remains historical for the initial implementation. Campaign-entity grouping requirements are defined in RFCs `097` and `099`.

@@ -1,6 +1,6 @@
 # Influence Me Agent Delivery Guide
 
-This file is generated from the RFC set in `/rfc` (RFC `000` through `092`).
+This file is generated from the RFC set in `/rfc` (RFC `000` through `099`).
 Use it as the execution contract for AI agents working in this repository.
 
 ## Source of Truth
@@ -34,6 +34,7 @@ Influence Me is an influencer operating system that centralizes:
 - Data ownership is strict: influencers see only their data; clients see only their client-scoped data (RFC `012`)
 - `ScheduledPost` is planning/tracking CRUD in MVP, not direct Instagram auto-publishing
 - External integrations (Instagram Graph API, TikTok API, Stripe) must be wrapped in service classes with typed error handling
+- Campaigns are first-class client-owned records; campaign identity must come from campaign entities, not free-text pivot metadata
 
 ## Domain Model Baseline (RFC 001/002)
 
@@ -52,6 +53,7 @@ Core entities:
 - `Invoice`
 - `InvoiceItem`
 - `ScheduledPost`
+- `Campaign`
 - `campaign_media` pivot
 
 Required enums:
@@ -114,6 +116,7 @@ Additional scheduler requirements:
 - `020-030`: Instagram services, sync jobs, orchestration, accounts UI
 - `031-037`: Client management and client portal foundation
 - `038-042`: Content gallery, linking, client content tab, schedule timeline
+- `093-099`: Campaign-first content architecture (campaign schema, campaign-media linking, campaign UI, proposal/analytics context)
 - `043-048`: Proposal CRUD, send flow, client approval/revision workflow
 - `049-057`: Invoicing CRUD, Stripe payment link/webhook, overdue handling
 - `058-066`: Analytics dashboard + client-scoped analytics
@@ -299,3 +302,10 @@ A change is done only when:
 - `090` TikTok Manual Sync Trigger and Status UI
 - `091` TikTok Content Browser Integration
 - `092` TikTok Analytics Dashboard Integration
+- `093` Campaign Model and Schema (Content Domain)
+- `094` Campaign-Media Pivot Refactor
+- `095` Client Campaigns Section (Dedicated UI)
+- `096` Link Content to Campaign (Single + Batch)
+- `097` Client Content Tab by Campaign Entity
+- `098` Proposal-Campaign Context Display
+- `099` Campaign Analytics Source Update
