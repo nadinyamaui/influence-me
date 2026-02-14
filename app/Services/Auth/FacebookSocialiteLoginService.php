@@ -26,7 +26,7 @@ class FacebookSocialiteLoginService
             ->redirect();
     }
 
-    public function resolveUserFromCallback(): User
+    public function createUserAndAccounts(): User
     {
         $socialiteUser = Socialite::driver('facebook')->user();
         if (! $socialiteUser->getId()) {

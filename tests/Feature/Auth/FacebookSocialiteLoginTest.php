@@ -40,7 +40,7 @@ it('redirects to dashboard after successful facebook callback', function (): voi
     $user = User::factory()->create();
 
     $loginService = \Mockery::mock(FacebookSocialiteLoginService::class);
-    $loginService->shouldReceive('resolveUserFromCallback')
+    $loginService->shouldReceive('createUserAndAccounts')
         ->once()
         ->andReturnUsing(function () use ($user) {
             auth()->login($user);
@@ -57,7 +57,7 @@ it('redirects to dashboard after successful facebook callback', function (): voi
 
 it('returns to login when facebook oauth callback fails', function (): void {
     $loginService = \Mockery::mock(FacebookSocialiteLoginService::class);
-    $loginService->shouldReceive('resolveUserFromCallback')
+    $loginService->shouldReceive('createUserAndAccounts')
         ->once()
         ->andThrow(new RuntimeException('Denied'));
     app()->instance(FacebookSocialiteLoginService::class, $loginService);
@@ -73,7 +73,7 @@ it('returns to login when facebook oauth callback fails', function (): void {
 
 it('returns to login with social auth error message when callback raises social authentication exception', function (): void {
     $loginService = \Mockery::mock(FacebookSocialiteLoginService::class);
-    $loginService->shouldReceive('resolveUserFromCallback')
+    $loginService->shouldReceive('createUserAndAccounts')
         ->once()
         ->andThrow(new SocialAuthenticationException('Facebook denied access to the requested scopes.'));
     app()->instance(FacebookSocialiteLoginService::class, $loginService);

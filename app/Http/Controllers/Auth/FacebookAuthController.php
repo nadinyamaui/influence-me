@@ -26,7 +26,7 @@ class FacebookAuthController extends Controller
     public function callback(Request $request): RedirectResponse
     {
         try {
-            $user = $this->loginService->resolveUserFromCallback();
+            $user = $this->loginService->createUserAndAccounts();
 
             return redirect()->intended(route('dashboard', absolute: false));
         } catch (SocialAuthenticationException $exception) {

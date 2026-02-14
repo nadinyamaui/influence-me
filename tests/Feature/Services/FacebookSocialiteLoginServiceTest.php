@@ -52,7 +52,7 @@ it('throws a social authentication exception when facebook does not return an id
         ->once()
         ->andReturn($socialiteUser);
 
-    app(FacebookSocialiteLoginService::class)->resolveUserFromCallback();
+    app(FacebookSocialiteLoginService::class)->createUserAndAccounts();
 })->throws(SocialAuthenticationException::class, 'Facebook did not return required account information.');
 
 it('throws a social authentication exception when another user already has the callback email', function (): void {
@@ -85,7 +85,7 @@ it('throws a social authentication exception when another user already has the c
         ->once()
         ->andReturn($socialiteUser);
 
-    app(FacebookSocialiteLoginService::class)->resolveUserFromCallback();
+    app(FacebookSocialiteLoginService::class)->createUserAndAccounts();
 })->throws(SocialAuthenticationException::class, 'A user with this email already exists.');
 
 it('creates the influencer user, logs them in, and syncs instagram accounts on callback', function (): void {
@@ -152,7 +152,7 @@ it('creates the influencer user, logs them in, and syncs instagram accounts on c
             ],
         ]));
 
-    $resolvedUser = $service->resolveUserFromCallback();
+    $resolvedUser = $service->createUserAndAccounts();
 
     expect($resolvedUser->socialite_user_type)->toBe('facebook')
         ->and($resolvedUser->socialite_user_id)->toBe('1234567890123')
@@ -241,7 +241,7 @@ it('updates existing user and instagram account records on callback', function (
             ],
         ]));
 
-    $resolvedUser = $service->resolveUserFromCallback();
+    $resolvedUser = $service->createUserAndAccounts();
 
     expect($resolvedUser->id)->toBe($existingUser->id)
         ->and($resolvedUser->name)->toBe('Updated Name')
@@ -315,7 +315,7 @@ it('throws a social authentication exception when instagram account is linked to
             ],
         ]));
 
-    expect(fn () => $service->resolveUserFromCallback())
+    expect(fn () => $service->createUserAndAccounts())
         ->toThrow(SocialAuthenticationException::class, 'One or more Instagram accounts are linked to a different user.');
     $this->assertDatabaseMissing('users', [
         'socialite_user_type' => 'facebook',
