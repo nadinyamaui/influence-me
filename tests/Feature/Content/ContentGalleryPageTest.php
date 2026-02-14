@@ -156,6 +156,7 @@ test('content detail modal displays metrics caption permalink and linked clients
         ->assertSee('@modalaccount')
         ->assertSee('Modal Client')
         ->assertSee('Launch Campaign')
+        ->assertSee('href="' . route('clients.show', $client) . '"', false)
         ->call('closeDetailModal')
         ->assertSet('showDetailModal', false);
 });
