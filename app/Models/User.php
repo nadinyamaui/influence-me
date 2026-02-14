@@ -90,4 +90,17 @@ class User extends Authenticatable
 
         return $account;
     }
+
+    public static function resolveClient(int $clientId): Client
+    {
+        $client = Auth::user()?->clients()
+            ->whereKey($clientId)
+            ->first();
+
+        if ($client === null) {
+            abort(404);
+        }
+
+        return $client;
+    }
 }

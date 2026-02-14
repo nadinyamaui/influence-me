@@ -30,7 +30,7 @@
                 </flux:sidebar.group>
 
                 <flux:sidebar.group :heading="__('Manage')" class="grid">
-                    <flux:sidebar.item icon="users" href="#">
+                    <flux:sidebar.item icon="users" :href="route('clients.index')" :current="request()->routeIs('clients.*')" wire:navigate>
                         {{ __('Clients') }}
                     </flux:sidebar.item>
 

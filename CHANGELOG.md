@@ -5,6 +5,27 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
+- RFC 037: added `App\Livewire\Portal\Dashboard` and updated `routes/portal.php` to serve `/portal/dashboard` as a client-guarded Livewire page with scoped metrics and recent activity data.
+- RFC 037: replaced `resources/views/pages/portal/dashboard.blade.php` placeholder content with a summary dashboard (active proposals, pending invoices total, linked content, total reach) and recent proposals/invoices lists with status badges and placeholder detail links.
+- RFC 037: added feature coverage in `tests/Feature/Portal/PortalDashboardTest.php` and updated `tests/Feature/Portal/PortalLayoutTest.php` for dashboard rendering updates and strict client data scoping.
+- RFC 036: added `App\Services\Clients\ClientPortalAccessService` and `App\Mail\ClientPortalInvitation` with `resources/views/mail/client-portal-invitation.blade.php` to handle portal invite creation, temporary credentials, welcome email delivery, and revoke workflows.
+- RFC 036: extended `App\Livewire\Clients\Show` and `resources/views/pages/clients/show.blade.php` with invite/revoke portal actions, validation/error states, and status-aware portal access controls.
+- RFC 036: added feature coverage in `tests/Feature/Clients/ClientPortalAccessTest.php` for invite success, no-email guardrails, invitation email content, revoke behavior, and portal-status UI rendering.
+- RFC 035: added dedicated portal layout templates `resources/views/layouts/portal.blade.php` and `resources/views/layouts/portal/sidebar.blade.php` with client-portal branding, simplified navigation, and client-user logout menu controls.
+- RFC 035: added `resources/views/pages/portal/dashboard.blade.php` placeholder on the new portal layout and wired `/portal/dashboard` in `routes/portal.php` behind a dedicated `client.auth` middleware alias that enforces the client guard and redirects guests to `/portal/login`.
+- RFC 035: added feature coverage in `tests/Feature/Portal/PortalLayoutTest.php` for client-guard access control, portal layout rendering, and logout behavior.
+- RFC 034: added `/clients/{client}` via `App\Livewire\Clients\Show` and `resources/views/pages/clients/show.blade.php` with owner-scoped client overview, portal-access status display, edit navigation, and tabbed placeholder sections.
+- RFC 034: updated clients list/detail wiring so “View” uses `clients.show` and edit saves redirect back to the client detail page.
+- RFC 034: added feature coverage in `tests/Feature/Clients/ClientDetailPageTest.php` for authorized rendering, forbidden access for non-owners, tab placeholder visibility, and summary metric display.
+- RFC 033: added `/clients/{client}/edit` via `App\Livewire\Clients\Edit` and `resources/views/pages/clients/edit.blade.php` with owner-only prefilled editing, validation-backed updates, and a modal-confirmed delete action.
+- RFC 033: added `app/Http/Requests/UpdateClientRequest.php` and connected it to Livewire update validation while preserving client ownership authorization checks.
+- RFC 033: added feature coverage in `tests/Feature/Clients/ClientEditPageTest.php` for authorized rendering, unauthorized access denial, update validation/persistence, and cascade delete behavior for related proposals and invoices.
+- RFC 032: added `/clients/create` Livewire page via `App\Livewire\Clients\Create` and `resources/views/pages/clients/create.blade.php` with Flux form fields for full client profile capture and cancel/save actions.
+- RFC 032: added `app/Http/Requests/StoreClientRequest.php` and integrated its validation rules into the create workflow so new clients are created under the authenticated influencer only.
+- RFC 032: added feature coverage in `tests/Feature/Clients/ClientCreatePageTest.php` for page rendering, successful creation/redirect flow, and invalid payload validation failures.
+- RFC 031: added `App\Livewire\Clients\Index`, `resources/views/pages/clients/index.blade.php`, and `routes/web.php` wiring for authenticated `/clients` with query-level search/type filtering, pagination, empty state messaging, and row actions.
+- RFC 031: updated `resources/views/layouts/app/sidebar.blade.php` to route the Clients nav item to `clients.index` with active-state handling.
+- RFC 031: added feature coverage in `tests/Feature/Clients/ClientListPageTest.php` and updated `tests/Feature/NavigationStructureTest.php` for scoped listing, search/filter behavior, pagination, empty state rendering, and navigation link assertions.
 - RFC 030: added manual account sync action `syncNow` to `app/Livewire/InstagramAccounts/Index.php` with ownership authorization, duplicate-sync guard, immediate `sync_status=syncing` UI feedback, and queued `App\Jobs\SyncAllInstagramData` dispatch.
 - RFC 030: updated `resources/views/pages/instagram-accounts/index.blade.php` with per-account "Sync Now" controls (disabled while syncing), `wire:poll.5s` status refresh while syncing, RFC-compliant status copy ("Up to date", "Syncing...", "Sync failed"), failed-sync collapsible `last_sync_error` display, and expiring/expired token "Re-authenticate" links.
 - RFC 030: expanded `tests/Feature/InstagramAccountsPageTest.php` to verify manual sync dispatch and syncing-state persistence, skip-dispatch when already syncing, failed-sync error rendering, and polling/status text visibility on the accounts page.
