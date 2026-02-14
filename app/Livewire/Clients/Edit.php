@@ -58,7 +58,7 @@ class Edit extends Component
 
         session()->flash('status', 'Client updated successfully.');
 
-        return $this->redirect('/clients/'.$this->client->id, navigate: true);
+        return $this->redirectRoute('clients.show', ['client' => $this->client->id], navigate: true);
     }
 
     public function confirmDelete(): void

@@ -77,7 +77,7 @@
                                 <td class="px-4 py-3">
                                     <div class="flex justify-end gap-2">
                                         <a
-                                            href="{{ url('/clients/'.$client->id) }}"
+                                            href="{{ route('clients.show', $client) }}"
                                             class="inline-flex items-center rounded-md border border-zinc-300 px-3 py-1.5 text-xs font-medium text-zinc-700 transition hover:bg-zinc-100 dark:border-zinc-600 dark:text-zinc-200 dark:hover:bg-zinc-800"
                                             wire:navigate
                                         >

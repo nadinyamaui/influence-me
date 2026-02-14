@@ -5,6 +5,9 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
+- RFC 034: added `/clients/{client}` via `App\Livewire\Clients\Show` and `resources/views/pages/clients/show.blade.php` with owner-scoped client overview, portal-access status display, edit navigation, and tabbed placeholder sections.
+- RFC 034: updated clients list/detail wiring so “View” uses `clients.show` and edit saves redirect back to the client detail page.
+- RFC 034: added feature coverage in `tests/Feature/Clients/ClientDetailPageTest.php` for authorized rendering, forbidden access for non-owners, tab placeholder visibility, and summary metric display.
 - RFC 033: added `/clients/{client}/edit` via `App\Livewire\Clients\Edit` and `resources/views/pages/clients/edit.blade.php` with owner-only prefilled editing, validation-backed updates, and a modal-confirmed delete action.
 - RFC 033: added `app/Http/Requests/UpdateClientRequest.php` and connected it to Livewire update validation while preserving client ownership authorization checks.
 - RFC 033: added feature coverage in `tests/Feature/Clients/ClientEditPageTest.php` for authorized rendering, unauthorized access denial, update validation/persistence, and cascade delete behavior for related proposals and invoices.

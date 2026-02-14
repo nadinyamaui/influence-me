@@ -62,7 +62,7 @@ test('owners can update client details', function (): void {
         ->set('notes', 'Updated notes')
         ->call('save')
         ->assertHasNoErrors()
-        ->assertRedirect('/clients/'.$client->id);
+        ->assertRedirect(route('clients.show', $client));
 
     $updatedClient = $client->fresh();
 
