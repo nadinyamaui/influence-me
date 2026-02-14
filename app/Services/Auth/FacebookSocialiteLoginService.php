@@ -39,11 +39,7 @@ class FacebookSocialiteLoginService
         $this->ensureInstagramAccountsBelongToUser($existingUser, $accounts);
         $user = $this->createUpdateUser($socialiteUser);
         auth()->login($user);
-        $accounts->each(function ($account) use ($user) {
-            $user->instagramAccounts()->updateOrCreate([
-                'instagram_user_id' => $account['instagram_user_id'],
-            ], $account);
-        });
+        $this->upsertInstagramAccounts($accounts, $user);
 
         return $user;
     }
@@ -117,5 +113,14 @@ class FacebookSocialiteLoginService
     protected function getAccounts(string $id, string $token): Collection
     {
         return new Client($token, $id)->accounts();
+    }
+
+    protected function upsertInstagramAccounts($accounts, $user): void
+    {
+        $accounts->each(function ($account) use ($user) {
+            $user->instagramAccounts()->updateOrCreate([
+                'instagram_user_id' => $account['instagram_user_id'],
+            ], $account);
+        });
     }
 }
