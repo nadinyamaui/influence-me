@@ -251,7 +251,7 @@
         name="content-link-modal"
         wire:model="showLinkModal"
         @close="closeLinkModal"
-        class="max-w-xl"
+        class="max-w-2xl sm:min-w-[42rem]"
     >
         <h2 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100">{{ $linkingBatch ? 'Link Selected Content to Client' : 'Link Content to Client' }}</h2>
 
