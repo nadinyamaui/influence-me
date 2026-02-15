@@ -285,7 +285,7 @@ class Index extends Component
         ]);
 
         $user = Auth::user();
-        $campaign = $this->resolveCampaign((int) $validated['linkCampaignId']);
+        $campaign = Campaign::resolveForUser((int) $validated['linkCampaignId']);
         $notes = blank($validated['linkNotes']) ? null : $validated['linkNotes'];
 
         if ($this->linkingBatch) {
@@ -538,14 +538,6 @@ class Index extends Component
     {
         return Auth::user()->clients()
             ->whereKey($clientId)
-            ->firstOrFail();
-    }
-
-    private function resolveCampaign(int $campaignId): Campaign
-    {
-        return Campaign::query()
-            ->whereKey($campaignId)
-            ->whereIn('client_id', Auth::user()->clients()->select('id'))
             ->firstOrFail();
     }
 
