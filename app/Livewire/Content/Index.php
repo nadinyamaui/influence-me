@@ -7,6 +7,7 @@ use App\Livewire\Forms\CampaignForm;
 use App\Models\Campaign;
 use App\Models\Client;
 use App\Models\InstagramMedia;
+use App\Models\User;
 use App\Services\Content\ContentClientLinkService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
@@ -137,8 +138,8 @@ class Index extends Component
     public function render()
     {
         return view('pages.content.index', [
-            'availableClients' => $this->availableClients(),
-            'accounts' => $this->accounts(),
+            'availableClients' => User::availableClients(),
+            'accounts' => User::accounts(),
             'media' => $this->media(),
             'mediaTypeFilters' => $this->mediaTypeFilters(),
             'selectedMedia' => $this->selectedMedia(),
@@ -439,20 +440,6 @@ class Index extends Component
             ->orderBy($sortField, $sortDirection)
             ->orderByDesc('id')
             ->cursorPaginate(24, ['*'], 'cursor');
-    }
-
-    private function accounts(): Collection
-    {
-        return Auth::user()->instagramAccounts()
-            ->orderBy('username')
-            ->get(['id', 'username']);
-    }
-
-    private function availableClients(): Collection
-    {
-        return Auth::user()->clients()
-            ->orderBy('name')
-            ->get(['id', 'name']);
     }
 
     private function selectedMedia(): ?InstagramMedia
