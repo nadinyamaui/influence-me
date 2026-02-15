@@ -278,9 +278,9 @@
 
             @if ($showInlineCampaignForm)
                 <div class="space-y-3 rounded-xl border border-zinc-200 bg-zinc-50 p-3 dark:border-zinc-700 dark:bg-zinc-800/60">
-                    <flux:input wire:model="inlineCampaignName" :label="__('Campaign Name')" />
+                    <flux:input wire:model="campaignForm.name" :label="__('Campaign Name')" />
 
-                    <flux:textarea wire:model="inlineCampaignDescription" :label="__('Campaign Description (Optional)')" />
+                    <flux:textarea wire:model="campaignForm.description" :label="__('Campaign Description (Optional)')" />
 
                     <div class="flex justify-end">
                         <flux:button type="button" size="sm" variant="primary" wire:click="createInlineCampaign">

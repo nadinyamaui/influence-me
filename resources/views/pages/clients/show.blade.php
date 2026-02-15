@@ -283,11 +283,11 @@
         <h2 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100">{{ $editingCampaignId ? 'Edit Campaign' : 'Create Campaign' }}</h2>
 
         <form wire:submit="saveCampaign" class="mt-5 space-y-4">
-            <flux:input wire:model="campaignName" :label="__('Campaign Name')" />
+            <flux:input wire:model="campaignForm.name" :label="__('Campaign Name')" />
 
-            <flux:textarea wire:model="campaignDescription" :label="__('Description (Optional)')" />
+            <flux:textarea wire:model="campaignForm.description" :label="__('Description (Optional)')" />
 
-            <flux:select wire:model="campaignProposalId" :label="__('Proposal (Optional)')">
+            <flux:select wire:model="campaignForm.proposalId" :label="__('Proposal (Optional)')">
                 <option value="">No linked proposal</option>
                 @foreach ($campaignProposals as $proposal)
                     <option value="{{ $proposal->id }}">{{ $proposal->title }} ({{ Str::of($proposal->status->value)->headline() }})</option>

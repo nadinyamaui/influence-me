@@ -198,9 +198,9 @@ test('campaigns tab shows empty state then supports campaign create edit unlink 
         ->set('activeTab', 'campaigns')
         ->assertSee('Add Campaign')
         ->call('openCreateCampaignModal')
-        ->set('campaignName', 'Spring Launch')
-        ->set('campaignDescription', 'Seasonal campaign rollout')
-        ->set('campaignProposalId', (string) $proposal->id)
+        ->set('campaignForm.name', 'Spring Launch')
+        ->set('campaignForm.description', 'Seasonal campaign rollout')
+        ->set('campaignForm.proposalId', (string) $proposal->id)
         ->call('saveCampaign')
         ->assertSee('Spring Launch')
         ->assertSee('Client Proposal');
@@ -210,9 +210,9 @@ test('campaigns tab shows empty state then supports campaign create edit unlink 
     expect($campaign)->not->toBeNull();
 
     $component->call('openEditCampaignModal', $campaign->id)
-        ->set('campaignName', 'Spring Launch Updated')
-        ->set('campaignDescription', '')
-        ->set('campaignProposalId', '')
+        ->set('campaignForm.name', 'Spring Launch Updated')
+        ->set('campaignForm.description', '')
+        ->set('campaignForm.proposalId', '')
         ->call('saveCampaign')
         ->assertSee('Spring Launch Updated')
         ->assertSee('Proposal: Not linked')
@@ -235,10 +235,10 @@ test('campaign create enforces client scoped proposal validation', function (): 
         ->test(Show::class, ['client' => $client])
         ->set('activeTab', 'campaigns')
         ->call('openCreateCampaignModal')
-        ->set('campaignName', 'Invalid Proposal Link')
-        ->set('campaignProposalId', (string) $otherClientProposal->id)
+        ->set('campaignForm.name', 'Invalid Proposal Link')
+        ->set('campaignForm.proposalId', (string) $otherClientProposal->id)
         ->call('saveCampaign')
-        ->assertHasErrors(['campaignProposalId']);
+        ->assertHasErrors(['campaignForm.proposalId']);
 });
 
 test('campaigns tab shows empty state when client has no campaigns', function (): void {

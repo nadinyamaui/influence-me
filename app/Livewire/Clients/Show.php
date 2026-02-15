@@ -4,6 +4,7 @@ namespace App\Livewire\Clients;
 
 use App\Enums\InvoiceStatus;
 use App\Enums\ProposalStatus;
+use App\Livewire\Forms\CampaignForm;
 use App\Models\Campaign;
 use App\Models\Client;
 use App\Models\InstagramMedia;
@@ -15,7 +16,6 @@ use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Livewire\Component;
 
@@ -41,11 +41,7 @@ class Show extends Component
 
     public ?int $confirmingDeleteCampaignId = null;
 
-    public string $campaignName = '';
-
-    public string $campaignDescription = '';
-
-    public ?string $campaignProposalId = null;
+    public CampaignForm $campaignForm;
 
     public function mount(Client $client): void
     {
@@ -163,10 +159,8 @@ class Show extends Component
         $this->authorize('update', $this->client);
 
         $this->editingCampaignId = null;
-        $this->campaignName = '';
-        $this->campaignDescription = '';
-        $this->campaignProposalId = null;
-        $this->resetErrorBag(['campaignName', 'campaignDescription', 'campaignProposalId']);
+        $this->campaignForm->clear();
+        $this->resetErrorBag(['campaignForm.name', 'campaignForm.description', 'campaignForm.proposalId']);
         $this->showCampaignModal = true;
     }
 
@@ -176,17 +170,15 @@ class Show extends Component
         $this->authorize('update', $campaign);
 
         $this->editingCampaignId = $campaign->id;
-        $this->campaignName = $campaign->name;
-        $this->campaignDescription = $campaign->description ?? '';
-        $this->campaignProposalId = $campaign->proposal_id !== null ? (string) $campaign->proposal_id : null;
-        $this->resetErrorBag(['campaignName', 'campaignDescription', 'campaignProposalId']);
+        $this->campaignForm->setCampaign($campaign);
+        $this->resetErrorBag(['campaignForm.name', 'campaignForm.description', 'campaignForm.proposalId']);
         $this->showCampaignModal = true;
     }
 
     public function closeCampaignModal(): void
     {
         $this->showCampaignModal = false;
-        $this->resetErrorBag(['campaignName', 'campaignDescription', 'campaignProposalId']);
+        $this->resetErrorBag(['campaignForm.name', 'campaignForm.description', 'campaignForm.proposalId']);
     }
 
     public function saveCampaign(): void
@@ -200,31 +192,14 @@ class Show extends Component
             $this->authorize('update', $campaign);
         }
 
-        $validated = $this->validate([
-            'campaignName' => [
-                'required',
-                'string',
-                'max:255',
-                Rule::unique('campaigns', 'name')
-                    ->where(fn ($builder) => $builder->where('client_id', $this->client->id))
-                    ->ignore($this->editingCampaignId),
-            ],
-            'campaignDescription' => ['nullable', 'string', 'max:5000'],
-            'campaignProposalId' => [
-                'nullable',
-                Rule::exists('proposals', 'id')->where(fn ($builder) => $builder
-                    ->where('user_id', Auth::id())
-                    ->where('client_id', $this->client->id)),
-            ],
-        ]);
+        $this->campaignForm->validateForClient(
+            clientId: $this->client->id,
+            userId: (int) Auth::id(),
+            ignoreCampaignId: $this->editingCampaignId,
+            includeProposal: true,
+        );
 
-        $payload = [
-            'name' => $validated['campaignName'],
-            'description' => $validated['campaignDescription'] !== '' ? $validated['campaignDescription'] : null,
-            'proposal_id' => $validated['campaignProposalId'] !== null && $validated['campaignProposalId'] !== ''
-                ? (int) $validated['campaignProposalId']
-                : null,
-        ];
+        $payload = $this->campaignForm->payload(includeProposal: true);
 
         if ($campaign === null) {
             $this->client->campaigns()->create($payload);

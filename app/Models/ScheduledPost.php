@@ -14,6 +14,14 @@ class ScheduledPost extends Model
 
     protected $guarded = [];
 
+    public static function resolveOwnedPost(int $scheduledPostId, int $userId): self
+    {
+        return self::query()
+            ->where('user_id', $userId)
+            ->whereKey($scheduledPostId)
+            ->firstOrFail();
+    }
+
     protected function casts(): array
     {
         return [

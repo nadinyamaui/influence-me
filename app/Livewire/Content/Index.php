@@ -3,6 +3,7 @@
 namespace App\Livewire\Content;
 
 use App\Enums\MediaType;
+use App\Livewire\Forms\CampaignForm;
 use App\Models\Campaign;
 use App\Models\Client;
 use App\Models\InstagramMedia;
@@ -53,9 +54,7 @@ class Index extends Component
 
     public bool $showInlineCampaignForm = false;
 
-    public string $inlineCampaignName = '';
-
-    public string $inlineCampaignDescription = '';
+    public CampaignForm $campaignForm;
 
     public string $linkNotes = '';
 
@@ -156,8 +155,7 @@ class Index extends Component
         if ($value === null || $value === '') {
             $this->linkCampaignId = null;
             $this->showInlineCampaignForm = false;
-            $this->inlineCampaignName = '';
-            $this->inlineCampaignDescription = '';
+            $this->campaignForm->clear(clearProposal: false);
 
             return;
         }
@@ -168,8 +166,7 @@ class Index extends Component
             $this->linkClientId = null;
             $this->linkCampaignId = null;
             $this->showInlineCampaignForm = false;
-            $this->inlineCampaignName = '';
-            $this->inlineCampaignDescription = '';
+            $this->campaignForm->clear(clearProposal: false);
         } elseif ($this->linkCampaignId !== null && ! $this->linkCampaignOptions()->contains('id', (int) $this->linkCampaignId)) {
             $this->linkCampaignId = null;
         }
@@ -338,9 +335,8 @@ class Index extends Component
         $this->showInlineCampaignForm = ! $this->showInlineCampaignForm;
 
         if (! $this->showInlineCampaignForm) {
-            $this->inlineCampaignName = '';
-            $this->inlineCampaignDescription = '';
-            $this->resetErrorBag(['inlineCampaignName', 'inlineCampaignDescription']);
+            $this->campaignForm->clear(clearProposal: false);
+            $this->resetErrorBag(['campaignForm.name', 'campaignForm.description']);
         }
     }
 
@@ -352,28 +348,21 @@ class Index extends Component
                 'integer',
                 Rule::exists('clients', 'id')->where(fn ($builder) => $builder->where('user_id', Auth::id())),
             ],
-            'inlineCampaignName' => [
-                'required',
-                'string',
-                'max:255',
-                Rule::unique('campaigns', 'name')->where(fn ($builder) => $builder->where('client_id', (int) $this->linkClientId)),
-            ],
-            'inlineCampaignDescription' => ['nullable', 'string', 'max:5000'],
         ]);
+
+        $this->campaignForm->validateForClient(
+            clientId: (int) $validated['linkClientId'],
+            userId: (int) Auth::id(),
+            includeProposal: false,
+        );
 
         $client = $this->resolveClient((int) $validated['linkClientId']);
-
-        $campaign = $client->campaigns()->create([
-            'name' => $validated['inlineCampaignName'],
-            'description' => blank($validated['inlineCampaignDescription']) ? null : $validated['inlineCampaignDescription'],
-            'proposal_id' => null,
-        ]);
+        $campaign = $client->campaigns()->create($this->campaignForm->payload(includeProposal: false) + ['proposal_id' => null]);
 
         $this->linkCampaignId = (string) $campaign->id;
         $this->showInlineCampaignForm = false;
-        $this->inlineCampaignName = '';
-        $this->inlineCampaignDescription = '';
-        $this->resetErrorBag(['inlineCampaignName', 'inlineCampaignDescription']);
+        $this->campaignForm->clear(clearProposal: false);
+        $this->resetErrorBag(['campaignForm.name', 'campaignForm.description']);
     }
 
     public function confirmUnlinkClient(int $clientId): void
@@ -578,9 +567,8 @@ class Index extends Component
         $this->linkClientId = null;
         $this->linkCampaignId = null;
         $this->showInlineCampaignForm = false;
-        $this->inlineCampaignName = '';
-        $this->inlineCampaignDescription = '';
+        $this->campaignForm->clear(clearProposal: false);
         $this->linkNotes = '';
-        $this->resetErrorBag(['linkClientId', 'linkCampaignId', 'inlineCampaignName', 'inlineCampaignDescription', 'linkNotes']);
+        $this->resetErrorBag(['linkClientId', 'linkCampaignId', 'campaignForm.name', 'campaignForm.description', 'linkNotes']);
     }
 }

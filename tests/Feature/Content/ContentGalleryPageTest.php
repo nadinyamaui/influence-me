@@ -327,8 +327,8 @@ test('inline campaign creation works in content linking flow', function (): void
         ->call('openSingleLinkModal')
         ->set('linkClientId', (string) $client->id)
         ->call('toggleInlineCampaignForm')
-        ->set('inlineCampaignName', 'Inline Launch Campaign')
-        ->set('inlineCampaignDescription', 'Created from link flow')
+        ->set('campaignForm.name', 'Inline Launch Campaign')
+        ->set('campaignForm.description', 'Created from link flow')
         ->call('createInlineCampaign')
         ->call('saveLink');
 
