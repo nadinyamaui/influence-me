@@ -32,9 +32,10 @@ class Index extends Component
 
     public string $mediaTypeFilter = 'all';
 
-    public ?string $dateFrom = null;
-
-    public ?string $dateTo = null;
+    public array $dateRange = [
+        'start' => null,
+        'end' => null,
+    ];
 
     public bool $showPostModal = false;
 
@@ -104,6 +105,28 @@ class Index extends Component
         if ($value !== 'all' && ! in_array($value, array_map(fn (MediaType $mediaType): string => $mediaType->value, MediaType::cases()), true)) {
             $this->mediaTypeFilter = 'all';
         }
+    }
+
+    public function updatedDateRange(mixed $value): void
+    {
+        $start = null;
+        $end = null;
+
+        if (is_string($value)) {
+            $parts = array_map('trim', explode('/', $value, 2));
+            $start = $parts[0] ?? null;
+            $end = $parts[1] ?? null;
+        }
+
+        if (is_array($value)) {
+            $start = $value['start'] ?? null;
+            $end = $value['end'] ?? null;
+        }
+
+        $this->dateRange = [
+            'start' => blank($start) ? null : (string) $start,
+            'end' => blank($end) ? null : (string) $end,
+        ];
     }
 
     public function openCreateModal(): void
@@ -304,8 +327,8 @@ class Index extends Component
             ->when($this->accountFilter !== 'all', fn (Builder $builder): Builder => $builder->where('instagram_account_id', (int) $this->accountFilter))
             ->when($this->campaignFilter !== 'all', fn (Builder $builder): Builder => $builder->where('campaign_id', (int) $this->campaignFilter))
             ->when($this->mediaTypeFilter !== 'all', fn (Builder $builder): Builder => $builder->where('media_type', $this->mediaTypeFilter))
-            ->when(filled($this->dateFrom), fn (Builder $builder): Builder => $builder->whereDate('scheduled_at', '>=', $this->dateFrom))
-            ->when(filled($this->dateTo), fn (Builder $builder): Builder => $builder->whereDate('scheduled_at', '<=', $this->dateTo))
+            ->when(filled($this->dateRange['start'] ?? null), fn (Builder $builder): Builder => $builder->whereDate('scheduled_at', '>=', (string) ($this->dateRange['start'] ?? null)))
+            ->when(filled($this->dateRange['end'] ?? null), fn (Builder $builder): Builder => $builder->whereDate('scheduled_at', '<=', (string) ($this->dateRange['end'] ?? null)))
             ->orderBy('scheduled_at')
             ->get();
 

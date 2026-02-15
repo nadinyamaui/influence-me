@@ -59,8 +59,7 @@
                 @endforeach
             </flux:select>
 
-            <flux:input type="date" wire:model.live="dateFrom" :label="__('From')" />
-            <flux:input type="date" wire:model.live="dateTo" :label="__('To')" />
+            <flux:date-picker mode="range" wire:model.live="dateRange" :clearable="true" :label="__('Date Range')" />
         </div>
     </section>
 

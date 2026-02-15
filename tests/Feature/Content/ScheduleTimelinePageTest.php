@@ -109,8 +109,10 @@ test('schedule filters are applied in query layer', function (): void {
         ->set('accountFilter', (string) $accountA->id)
         ->set('campaignFilter', (string) $campaignA->id)
         ->set('mediaTypeFilter', MediaType::Reel->value)
-        ->set('dateFrom', now()->addDays(2)->format('Y-m-d'))
-        ->set('dateTo', now()->addDays(4)->format('Y-m-d'))
+        ->set('dateRange', [
+            'start' => now()->addDays(2)->format('Y-m-d'),
+            'end' => now()->addDays(4)->format('Y-m-d'),
+        ])
         ->assertSee('Filtered Target')
         ->assertDontSee('Filtered Out');
 });
