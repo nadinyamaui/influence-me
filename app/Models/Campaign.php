@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -34,5 +35,25 @@ class Campaign extends Model
         return $this->belongsToMany(InstagramMedia::class, 'campaign_media')
             ->withPivot('notes')
             ->withTimestamps();
+    }
+
+    public static function resolveForUser(int $campaignId): self
+    {
+        $userId = auth()->id();
+
+        if ($userId === null) {
+            abort(404);
+        }
+
+        $campaign = self::query()
+            ->whereKey($campaignId)
+            ->whereHas('client', fn (Builder $builder): Builder => $builder->where('user_id', $userId))
+            ->first();
+
+        if ($campaign === null) {
+            abort(404);
+        }
+
+        return $campaign;
     }
 }
