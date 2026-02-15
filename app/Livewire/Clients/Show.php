@@ -328,12 +328,42 @@ class Show extends Component
             ->orderBy('name')
             ->get();
 
-        return $campaigns
+        $groups = $campaigns
             ->filter(fn (Campaign $campaign): bool => $campaign->instagramMedia->isNotEmpty())
-            ->mapWithKeys(function (Campaign $campaign): array {
-                return [$campaign->name => collect($campaign->instagramMedia->all())];
+            ->map(function (Campaign $campaign): array {
+                $media = collect($campaign->instagramMedia->all());
+
+                return [
+                    'key' => 'campaign-'.$campaign->id,
+                    'campaign_id' => $campaign->id,
+                    'campaign_name' => $campaign->name,
+                    'media' => $media,
+                    'total_posts' => $media->count(),
+                    'total_reach' => (int) $media->sum('reach'),
+                ];
             })
-            ->map(fn (Collection $group): Collection => collect($group->all()));
+            ->values();
+
+        $uncategorizedMedia = $linkedContentMedia
+            ->filter(function (InstagramMedia $media): bool {
+                return $media->campaigns
+                    ->where('client_id', $this->client->id)
+                    ->isEmpty();
+            })
+            ->values();
+
+        if ($uncategorizedMedia->isNotEmpty()) {
+            $groups->push([
+                'key' => 'uncategorized',
+                'campaign_id' => null,
+                'campaign_name' => 'Uncategorized',
+                'media' => $uncategorizedMedia,
+                'total_posts' => $uncategorizedMedia->count(),
+                'total_reach' => (int) $uncategorizedMedia->sum('reach'),
+            ]);
+        }
+
+        return $groups;
     }
 
     private function linkedContentSummary(EloquentCollection $linkedContentMedia): array

@@ -102,7 +102,7 @@ test('non-owners cannot view client detail page', function (): void {
         ->assertForbidden();
 });
 
-test('content tab groups linked media by campaign and shows aggregate stats', function (): void {
+test('content tab groups linked media by campaign entity and shows aggregate stats', function (): void {
     $owner = User::factory()->create();
 
     $client = Client::factory()->for($owner)->create();
@@ -129,28 +129,32 @@ test('content tab groups linked media by campaign and shows aggregate stats', fu
         'engagement_rate' => 2.0,
     ]);
 
-    $launchCampaign = Campaign::factory()->for($client)->create([
-        'name' => 'Launch Campaign',
-    ]);
-    $uncategorizedCampaign = Campaign::factory()->for($client)->create([
-        'name' => 'Uncategorized',
-    ]);
+    $launchCampaign = Campaign::factory()->for($client)->create(['name' => 'Launch Campaign']);
+    $secondCampaign = Campaign::factory()->for($client)->create(['name' => 'Retention Campaign']);
 
     $launchCampaign->instagramMedia()->attach($launchFirst->id);
     $launchCampaign->instagramMedia()->attach($launchSecond->id);
-    $uncategorizedCampaign->instagramMedia()->attach($uncategorized->id);
+    $secondCampaign->instagramMedia()->attach($uncategorized->id);
 
-    Livewire::actingAs($owner)
+    $component = Livewire::actingAs($owner)
         ->test(Show::class, ['client' => $client])
         ->set('activeTab', 'content')
         ->assertSee('Launch Campaign')
-        ->assertSee('Uncategorized')
+        ->assertSee('Retention Campaign')
         ->assertSee('1,800')
         ->assertSee('3,500')
         ->assertSee('4.00%')
         ->assertSee('Launch Post One')
         ->assertSee('Launch Post Two')
         ->assertSee('No Campaign Post');
+
+    $campaignIds = collect($component->get('linkedContentGroups'))
+        ->pluck('campaign_id')
+        ->filter()
+        ->all();
+
+    expect($campaignIds)->toContain($launchCampaign->id)
+        ->and($campaignIds)->toContain($secondCampaign->id);
 });
 
 test('owners can unlink linked media from client content tab', function (): void {

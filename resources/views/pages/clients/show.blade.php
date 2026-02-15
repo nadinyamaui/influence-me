@@ -143,15 +143,15 @@
                 </div>
 
                 <div class="mt-5 space-y-4">
-                    @foreach ($linkedContentGroups as $campaignName => $campaignMedia)
-                        <section class="rounded-xl border border-zinc-200 p-4 dark:border-zinc-700">
+                    @foreach ($linkedContentGroups as $group)
+                        <section wire:key="client-content-group-{{ $group['key'] }}" class="rounded-xl border border-zinc-200 p-4 dark:border-zinc-700">
                             <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
-                                <h3 class="text-sm font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-300">{{ $campaignName }}</h3>
-                                <p class="text-sm text-zinc-600 dark:text-zinc-300">{{ number_format($campaignMedia->count()) }} posts · {{ number_format($campaignMedia->sum('reach')) }} reach</p>
+                                <h3 class="text-sm font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-300">{{ $group['campaign_name'] }}</h3>
+                                <p class="text-sm text-zinc-600 dark:text-zinc-300">{{ number_format($group['total_posts']) }} posts · {{ number_format($group['total_reach']) }} reach</p>
                             </div>
 
                             <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-                                @foreach ($campaignMedia as $linkedMedia)
+                                @foreach ($group['media'] as $linkedMedia)
                                     <article wire:key="client-content-{{ $linkedMedia->id }}" class="rounded-xl border border-zinc-200 bg-zinc-50 p-3 dark:border-zinc-700 dark:bg-zinc-800/60">
                                         <div class="flex gap-3">
                                             <div class="h-14 w-14 shrink-0 overflow-hidden rounded-lg bg-zinc-200 dark:bg-zinc-700">
