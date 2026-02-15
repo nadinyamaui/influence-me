@@ -357,7 +357,7 @@ class Index extends Component
             includeProposal: false,
         );
 
-        $client = $this->resolveClient((int) $validated['linkClientId']);
+        $client = User::resolveClient((int) $validated['linkClientId']);
         $campaign = $client->campaigns()->create($this->campaignForm->payload(includeProposal: false) + ['proposal_id' => null]);
 
         $this->linkCampaignId = (string) $campaign->id;
@@ -375,7 +375,7 @@ class Index extends Component
         $media = InstagramMedia::resolveForUser($this->selectedMediaId);
         $this->authorize('linkToClient', $media);
 
-        $client = $this->resolveClient($clientId);
+        $client = User::resolveClient($clientId);
 
         $this->confirmingUnlinkClientId = $client->id;
     }
@@ -394,7 +394,7 @@ class Index extends Component
         $media = InstagramMedia::resolveForUser($this->selectedMediaId);
         $this->authorize('linkToClient', $media);
 
-        $client = $this->resolveClient($this->confirmingUnlinkClientId);
+        $client = User::resolveClient($this->confirmingUnlinkClientId);
 
         $linkService->unlink(Auth::user(), $media, $client);
 
@@ -508,13 +508,6 @@ class Index extends Component
             ->whereIn('id', $selectedIds)
             ->whereHas('instagramAccount', fn (Builder $builder): Builder => $builder->where('user_id', Auth::id()))
             ->get();
-    }
-
-    private function resolveClient(int $clientId): Client
-    {
-        return Auth::user()->clients()
-            ->whereKey($clientId)
-            ->firstOrFail();
     }
 
     private function linkCampaignOptions(): Collection
