@@ -142,6 +142,7 @@ it('applies proposal policy rules', function (): void {
         ->and($ownerGate->allows('create', Proposal::class))->toBeTrue()
         ->and($ownerGate->allows('view', $draftProposal))->toBeTrue()
         ->and($ownerGate->allows('update', $draftProposal))->toBeTrue()
+        ->and($ownerGate->allows('update', $sentProposal))->toBeFalse()
         ->and($ownerGate->allows('delete', $draftProposal))->toBeTrue()
         ->and($ownerGate->allows('send', $draftProposal))->toBeTrue()
         ->and($ownerGate->allows('send', $sentProposal))->toBeFalse()
