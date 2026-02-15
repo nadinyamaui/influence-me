@@ -165,7 +165,7 @@ test('content detail modal displays metrics caption permalink and linked clients
         ->assertSet('showDetailModal', false);
 });
 
-test('single media can be linked to a client and duplicate links are prevented', function (): void {
+test('single media cannot be linked to the same campaign twice', function (): void {
     $user = User::factory()->create();
     $account = InstagramAccount::factory()->for($user)->create();
     $client = Client::factory()->for($user)->create();
@@ -186,7 +186,8 @@ test('single media can be linked to a client and duplicate links are prevented',
         ->set('linkClientId', (string) $client->id)
         ->set('linkCampaignId', (string) $campaign->id)
         ->set('linkNotes', 'Paid collaboration')
-        ->call('saveLink');
+        ->call('saveLink')
+        ->assertHasErrors(['linkCampaignId']);
 
     $this->assertDatabaseHas('campaign_media', [
         'campaign_id' => $campaign->id,

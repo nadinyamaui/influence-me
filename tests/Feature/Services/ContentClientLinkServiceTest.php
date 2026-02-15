@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Services\Content\ContentClientLinkService;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 test('content client link service links a media item to a client', function (): void {
     $user = User::factory()->create();
@@ -92,4 +93,24 @@ test('content client link service enforces ownership boundaries', function (): v
 
     expect(fn (): mixed => $service->link($outsider, $ownerMedia, $ownerCampaign, null))
         ->toThrow(AuthorizationException::class);
+});
+
+test('content client link service prevents duplicate campaign media links', function (): void {
+    $user = User::factory()->create();
+    $client = Client::factory()->for($user)->create();
+    $account = InstagramAccount::factory()->for($user)->create();
+    $media = InstagramMedia::factory()->for($account)->create();
+    $campaign = Campaign::factory()->for($client)->create();
+
+    $service = app(ContentClientLinkService::class);
+
+    $service->link($user, $media, $campaign, 'Initial notes');
+
+    expect(fn (): mixed => $service->link($user, $media, $campaign, 'Second notes'))
+        ->toThrow(ValidationException::class);
+
+    expect(DB::table('campaign_media')
+        ->where('campaign_id', $campaign->id)
+        ->where('instagram_media_id', $media->id)
+        ->count())->toBe(1);
 });

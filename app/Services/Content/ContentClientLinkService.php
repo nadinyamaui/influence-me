@@ -8,6 +8,7 @@ use App\Models\InstagramMedia;
 use App\Models\User;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
+use Illuminate\Validation\ValidationException;
 
 class ContentClientLinkService
 {
@@ -15,6 +16,7 @@ class ContentClientLinkService
     {
         $this->ensureCampaignOwnership($user, $campaign);
         $this->ensureMediaOwnership($user, $media);
+        $this->ensureNotAlreadyLinked($campaign, $media);
 
         $campaign->instagramMedia()->syncWithoutDetaching([
             $media->id => ['notes' => $notes],
@@ -61,6 +63,17 @@ class ContentClientLinkService
 
         if ($media->instagramAccount?->user_id !== $user->id) {
             throw new AuthorizationException('You are not allowed to modify this media-client link.');
+        }
+    }
+
+    private function ensureNotAlreadyLinked(Campaign $campaign, InstagramMedia $media): void
+    {
+        $alreadyLinked = $campaign->instagramMedia()->whereKey($media->id)->exists();
+
+        if ($alreadyLinked) {
+            throw ValidationException::withMessages([
+                'linkCampaignId' => 'This post is already linked to the selected campaign.',
+            ]);
         }
     }
 }
