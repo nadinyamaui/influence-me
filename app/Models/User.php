@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 
@@ -102,5 +103,19 @@ class User extends Authenticatable
         }
 
         return $client;
+    }
+
+    public static function accounts(): Collection
+    {
+        return Auth::user()?->instagramAccounts()
+            ->orderBy('username')
+            ->get(['id', 'username']) ?? collect();
+    }
+
+    public static function availableClients(): Collection
+    {
+        return Auth::user()?->clients()
+            ->orderBy('name')
+            ->get(['id', 'name']) ?? collect();
     }
 }
