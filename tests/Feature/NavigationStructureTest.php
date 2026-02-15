@@ -16,11 +16,12 @@ it('renders the app sidebar with all RFC 013 navigation groups and links', funct
         ->assertSeeTextInOrder(['Dashboard', 'Content', 'Analytics', 'Clients', 'Proposals', 'Invoices', 'Accounts'])
         ->assertSee('href="'.route('dashboard').'"', false)
         ->assertSee('href="'.route('clients.index').'"', false)
+        ->assertSee('href="'.route('proposals.index').'"', false)
         ->assertSee('href="'.route('instagram-accounts.index').'"', false)
         ->assertDontSee('Repository')
         ->assertDontSee('Documentation');
 
-    expect(substr_count($response->getContent(), 'href="#"'))->toBeGreaterThanOrEqual(3);
+    expect(substr_count($response->getContent(), 'href="#"'))->toBeGreaterThanOrEqual(2);
 });
 
 it('renders the header layout variant with matching RFC 013 navigation links', function () {
@@ -43,9 +44,10 @@ BLADE
         ->assertSeeText('Instagram')
         ->assertSeeTextInOrder(['Dashboard', 'Content', 'Analytics', 'Clients', 'Proposals', 'Invoices', 'Accounts'])
         ->assertSee('href="'.route('dashboard').'"', false)
+        ->assertSee('href="'.route('proposals.index').'"', false)
         ->assertSee('href="'.route('instagram-accounts.index').'"', false)
         ->assertDontSee('Repository')
         ->assertDontSee('Documentation');
 
-    expect(substr_count($response->getContent(), 'href="#"'))->toBeGreaterThanOrEqual(10);
+    expect(substr_count($response->getContent(), 'href="#"'))->toBeGreaterThanOrEqual(8);
 });
