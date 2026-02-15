@@ -22,7 +22,7 @@
                 <flux:navbar.item icon="users" href="#">
                     {{ __('Clients') }}
                 </flux:navbar.item>
-                <flux:navbar.item icon="document-text" href="#">
+                <flux:navbar.item icon="document-text" :href="route('proposals.index')" :current="request()->routeIs('proposals.*')" wire:navigate>
                     {{ __('Proposals') }}
                 </flux:navbar.item>
                 <flux:navbar.item icon="banknotes" href="#">
@@ -62,7 +62,7 @@
                     <flux:sidebar.item icon="users" href="#">
                         {{ __('Clients') }}
                     </flux:sidebar.item>
-                    <flux:sidebar.item icon="document-text" href="#">
+                    <flux:sidebar.item icon="document-text" :href="route('proposals.index')" :current="request()->routeIs('proposals.*')" wire:navigate>
                         {{ __('Proposals') }}
                     </flux:sidebar.item>
                     <flux:sidebar.item icon="banknotes" href="#">
