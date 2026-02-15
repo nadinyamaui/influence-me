@@ -70,7 +70,13 @@
                         @foreach ($proposals as $proposal)
                             <tr wire:key="proposal-row-{{ $proposal->id }}">
                                 <td class="px-4 py-3">
-                                    <span class="font-medium text-zinc-900 dark:text-zinc-100">{{ $proposal->title }}</span>
+                                    <a
+                                        href="{{ route('proposals.show', $proposal) }}"
+                                        wire:navigate
+                                        class="font-medium text-zinc-900 underline-offset-2 hover:underline dark:text-zinc-100"
+                                    >
+                                        {{ $proposal->title }}
+                                    </a>
                                 </td>
                                 <td class="px-4 py-3 text-zinc-700 dark:text-zinc-200">{{ $proposal->client?->name ?? '—' }}</td>
                                 <td class="px-4 py-3 text-zinc-700 dark:text-zinc-200">{{ number_format($proposal->campaigns_count) }}</td>

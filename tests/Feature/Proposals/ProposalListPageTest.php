@@ -212,3 +212,17 @@ test('sidebar link points to proposals index', function (): void {
         ->assertSuccessful()
         ->assertSee('href="'.route('proposals.index').'"', false);
 });
+
+test('proposal title links to proposal preview page', function (): void {
+    $user = User::factory()->create();
+    $client = Client::factory()->for($user)->create();
+    $proposal = Proposal::factory()->for($user)->for($client)->create([
+        'title' => 'Linked Preview Proposal',
+    ]);
+
+    $this->actingAs($user)
+        ->get(route('proposals.index'))
+        ->assertSuccessful()
+        ->assertSee('href="'.route('proposals.show', $proposal).'"', false)
+        ->assertSee('Linked Preview Proposal');
+});
