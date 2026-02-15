@@ -44,7 +44,7 @@ class Index extends Component
 
     public function confirmDelete(int $proposalId): void
     {
-        $proposal = $this->resolveProposal($proposalId);
+        $proposal = User::resolveProposal($proposalId);
         $this->authorize('delete', $proposal);
 
         $this->resetErrorBag('delete');
@@ -62,7 +62,7 @@ class Index extends Component
             return;
         }
 
-        $proposal = $this->resolveProposal($this->deletingProposalId);
+        $proposal = User::resolveProposal($this->deletingProposalId);
         $this->authorize('delete', $proposal);
 
         $proposal->delete();
@@ -125,18 +125,5 @@ class Index extends Component
             fn (ProposalStatus $status): string => $status->value,
             ProposalStatus::cases(),
         );
-    }
-
-    private function resolveProposal(int $proposalId): Proposal
-    {
-        $proposal = Auth::user()->proposals()
-            ->whereKey($proposalId)
-            ->first();
-
-        if ($proposal === null) {
-            abort(404);
-        }
-
-        return $proposal;
     }
 }
