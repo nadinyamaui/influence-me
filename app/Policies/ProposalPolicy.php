@@ -44,6 +44,6 @@ class ProposalPolicy
     {
         return $user instanceof User
             && $user->id === $proposal->user_id
-            && $proposal->status === ProposalStatus::Draft;
+            && in_array($proposal->status, [ProposalStatus::Draft, ProposalStatus::Revised], true);
     }
 }

@@ -5,18 +5,93 @@ namespace App\Services\Proposals;
 use App\Enums\MediaType;
 use App\Enums\ProposalStatus;
 use App\Enums\ScheduledPostStatus;
+use App\Mail\ProposalSent;
 use App\Models\Campaign;
 use App\Models\Client;
 use App\Models\InstagramAccount;
 use App\Models\Proposal;
+use App\Models\ScheduledPost;
 use App\Models\User;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\ValidationException;
 
 class ProposalWorkflowService
 {
+    public function send(User $user, Proposal $proposal): Proposal
+    {
+        $this->ensureOwner($user, $proposal);
+        $this->assertSendable($proposal);
+
+        return DB::transaction(function () use ($proposal): Proposal {
+            $proposal->update([
+                'status' => ProposalStatus::Sent,
+                'sent_at' => now(),
+                'responded_at' => null,
+            ]);
+
+            $proposal->loadMissing(['user', 'client.clientUser']);
+
+            Mail::to($proposal->client->email)->send(new ProposalSent($proposal));
+
+            return $proposal->refresh();
+        });
+    }
+
+    public function assertSendable(Proposal $proposal): void
+    {
+        if (! in_array($proposal->status, [ProposalStatus::Draft, ProposalStatus::Revised], true)) {
+            throw ValidationException::withMessages([
+                'send' => 'Only draft or revised proposals can be sent.',
+            ]);
+        }
+
+        $proposal->loadMissing('client', 'campaigns:id,name,proposal_id');
+
+        if (blank($proposal->client?->email)) {
+            throw ValidationException::withMessages([
+                'send' => 'Add a client email before sending this proposal.',
+            ]);
+        }
+
+        if ($proposal->campaigns->isEmpty()) {
+            throw ValidationException::withMessages([
+                'send' => 'Link at least one campaign before sending this proposal.',
+            ]);
+        }
+
+        $campaignIds = $proposal->campaigns->pluck('id')->all();
+
+        $campaignsWithoutScheduledContent = Campaign::query()
+            ->whereIn('id', $campaignIds)
+            ->whereDoesntHave('scheduledPosts')
+            ->pluck('name')
+            ->all();
+
+        if ($campaignsWithoutScheduledContent !== []) {
+            throw ValidationException::withMessages([
+                'send' => 'Every linked campaign must include at least one scheduled content item.',
+            ]);
+        }
+
+        $hasInvalidScopeEntries = ScheduledPost::query()
+            ->whereIn('campaign_id', $campaignIds)
+            ->where(function ($query) use ($proposal): void {
+                $query->where('user_id', '!=', $proposal->user_id)
+                    ->orWhere('client_id', '!=', $proposal->client_id)
+                    ->orWhereNull('client_id');
+            })
+            ->exists();
+
+        if ($hasInvalidScopeEntries) {
+            throw ValidationException::withMessages([
+                'send' => 'Scheduled content must belong to the same influencer and client as this proposal.',
+            ]);
+        }
+    }
+
     public function createDraft(User $user, array $payload): Proposal
     {
         return $user->proposals()->create([

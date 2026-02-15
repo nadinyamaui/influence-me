@@ -4,6 +4,18 @@
 @endphp
 
 <div class="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-6">
+    @if (session('status'))
+        <div class="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-800 dark:border-emerald-900/40 dark:bg-emerald-950/50 dark:text-emerald-200">
+            {{ session('status') }}
+        </div>
+    @endif
+
+    @if ($errors->has('send'))
+        <div class="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-800 dark:border-rose-900/40 dark:bg-rose-950/50 dark:text-rose-200">
+            {{ $errors->first('send') }}
+        </div>
+    @endif
+
     <div class="flex flex-wrap items-start justify-between gap-3">
         <div>
             <h1 class="text-2xl font-semibold text-zinc-900 dark:text-zinc-100">{{ $proposal->title }}</h1>
@@ -24,14 +36,14 @@
                 <flux:button :href="route('proposals.edit', $proposal)" wire:navigate variant="filled">
                     Edit
                 </flux:button>
-                <flux:button type="button" variant="primary" disabled>
+                <flux:button type="button" variant="primary" wire:click="confirmSend">
                     Send to Client
                 </flux:button>
             @elseif ($proposal->status === ProposalStatus::Revised)
                 <flux:button :href="route('proposals.edit', $proposal)" wire:navigate variant="filled">
                     Edit
                 </flux:button>
-                <flux:button type="button" variant="primary" disabled>
+                <flux:button type="button" variant="primary" wire:click="confirmSend">
                     Send Again
                 </flux:button>
             @elseif ($proposal->status === ProposalStatus::Sent)
@@ -131,4 +143,25 @@
         <p>Sent at: {{ $proposal->sent_at?->format('M j, Y g:i A') ?? 'Not sent yet' }}</p>
         <p class="mt-1">Responded at: {{ $proposal->responded_at?->format('M j, Y g:i A') ?? 'No response yet' }}</p>
     </section>
+
+    <flux:modal
+        name="proposal-send-modal"
+        wire:model="confirmingSend"
+        @close="cancelSend"
+        class="max-w-lg"
+    >
+        <h2 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100">Send proposal to client?</h2>
+        <p class="mt-2 text-sm text-zinc-600 dark:text-zinc-300">
+            Send this proposal to {{ $proposal->client?->name ?? 'this client' }} at {{ $proposal->client?->email ?? 'no email on file' }}?
+        </p>
+
+        <div class="mt-5 flex justify-end gap-2">
+            <flux:button type="button" variant="filled" wire:click="cancelSend">
+                Cancel
+            </flux:button>
+            <flux:button type="button" variant="primary" wire:click="send">
+                Send
+            </flux:button>
+        </div>
+    </flux:modal>
 </div>
