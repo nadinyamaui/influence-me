@@ -1,7 +1,7 @@
 # 048 - Proposal Approval and Revision Workflow
 
 **Labels:** `feature`, `proposals`
-**Depends on:** #047
+**Depends on:** #047, #098
 
 ## Description
 
@@ -51,6 +51,7 @@ public function requestChanges(string $notes): void
 - Actions only available when status is `Sent`
 - Revision notes required when requesting changes (min: 10 chars)
 - Cannot approve/revise if already responded
+- Approval/revision acts on the full proposal package, including all linked campaigns and scheduled content
 
 ### Create Mailables
 
@@ -80,4 +81,5 @@ public function requestChanges(string $notes): void
 - [ ] Emails sent to influencer for both actions
 - [ ] Actions only available when status is Sent
 - [ ] Cannot act on already-responded proposals
+- [ ] Approval/revision is exercised against proposals that include multiple campaigns and scheduled content
 - [ ] Feature tests cover approve, request changes, and email dispatch
