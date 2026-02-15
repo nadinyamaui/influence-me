@@ -1,7 +1,7 @@
 # 047 - Client Portal Proposals List and Detail
 
 **Labels:** `feature`, `proposals`, `clients`, `ui`
-**Depends on:** #035, #046
+**Depends on:** #035, #046, #098
 
 ## Description
 
@@ -26,6 +26,8 @@ Route::livewire('portal/proposals/{proposal}', 'portal.proposals.show')
 | Column | Content |
 |--------|---------|
 | Title | Links to detail |
+| Campaigns | Count of campaigns in proposal |
+| Scheduled Content | Total scheduled content item count |
 | Status | Badge |
 | Received | sent_at date |
 | Actions | View |
@@ -39,6 +41,9 @@ Implement filtering in the Livewire component query, not in Blade.
 - Status badge
 - Received date
 - Rendered markdown content (same as influencer view)
+- Campaign schedule context:
+  - Show all campaigns linked to the proposal
+  - For each campaign, show scheduled content rows including media type and scheduled datetime
 - Action buttons: "Approve" and "Request Changes" (implemented in #048)
 
 ### Authorization
@@ -67,11 +72,8 @@ Update `href="#"` for "Proposals" to `route('portal.proposals.index')`.
 - [ ] Proposals list shows only sent/approved/rejected/revised proposals
 - [ ] Filter logic is implemented in the Livewire component query layer
 - [ ] Proposal detail renders markdown correctly
+- [ ] Proposal detail renders campaign schedule context for linked campaigns
 - [ ] Data scoped to authenticated client
 - [ ] Cannot view draft proposals
 - [ ] Cannot view other clients' proposals
 - [ ] Feature tests verify list, detail, and authorization
-
-## Campaign Context Note
-
-Optional campaign context display in the client portal proposal experience is defined in RFC `098`.

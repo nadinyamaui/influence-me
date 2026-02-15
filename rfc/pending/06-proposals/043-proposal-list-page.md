@@ -1,11 +1,11 @@
 # 043 - Proposal List Page
 
 **Labels:** `feature`, `proposals`, `ui`
-**Depends on:** #008, #012, #013
+**Depends on:** #008, #012, #013, #093
 
 ## Description
 
-Create a Livewire page at `/proposals` that displays all proposals for the authenticated influencer with filtering by status and client.
+Create a Livewire page at `/proposals` that displays all proposals for the authenticated influencer with filtering by status and client. Proposal rows must surface campaign planning context so users can quickly assess proposal scope.
 
 ## Implementation
 
@@ -33,6 +33,8 @@ Route::livewire('proposals', 'proposals.index')
 |--------|---------|
 | Title | Proposal title (links to detail) |
 | Client | Client name |
+| Campaigns | Count of linked campaigns |
+| Scheduled Content | Total scheduled content items across linked campaigns |
 | Status | Color badge (Draft=gray, Sent=blue, Approved=green, Rejected=red, Revised=amber) |
 | Created | Date created |
 | Last Updated | Date updated |
@@ -57,6 +59,7 @@ Update sidebar `href="#"` for "Proposals" to `route('proposals.index')`.
 - [ ] Lists only proposals belonging to authenticated user
 - [ ] Status filter works with correct badge colors
 - [ ] Client filter works
+- [ ] Campaign count and scheduled content count are accurate per proposal
 - [ ] Filter logic is implemented in the Livewire component query layer
 - [ ] Pagination works
 - [ ] Empty state shown when no proposals

@@ -1,7 +1,7 @@
 # 042 - Schedule Timeline Page
 
 **Labels:** `feature`, `content`, `ui`
-**Depends on:** #010, #013
+**Depends on:** #010, #013, #093
 
 ## Description
 
@@ -27,6 +27,8 @@ Route::livewire('schedule', 'schedule.index')
 - Status: All, Planned, Published, Cancelled
 - Client: dropdown of clients (or All)
 - Instagram Account: dropdown
+- Campaign: dropdown of user's campaigns (or All)
+- Media Type: All, Post, Reel, Story
 - Date range: from/to
 - Apply all filters in the Livewire component query (not by filtering data in Blade)
 
@@ -37,7 +39,10 @@ Each entry shows:
 - Title
 - Description (truncated)
 - Client name (or "No client")
+- Campaign name (or "No campaign")
+- Media type badge (`Post`, `Reel`, `Story`)
 - Instagram account (@username)
+- Proposal context badge when campaign is linked to a proposal (`Draft`, `Sent`, `Approved`, `Rejected`, `Revised`)
 - Actions: Edit, Delete, Mark as Published, Mark as Cancelled
 
 **Day Grouping:**
@@ -56,6 +61,8 @@ Flux UI modal with:
 - Title (required, text input)
 - Description (optional, textarea)
 - Client (optional, select from user's clients)
+- Campaign (optional, select scoped to selected client when present)
+- Media Type (required, select: Post, Reel, Story)
 - Instagram Account (required, select from connected accounts)
 - Date & Time (required, datetime picker)
 - Status (select: Planned, Published, Cancelled)
@@ -66,6 +73,8 @@ Flux UI modal with:
 - `title`: required, string, max:255
 - `description`: nullable, string, max:5000
 - `client_id`: nullable, exists:clients,id
+- `campaign_id`: nullable, exists:campaigns,id (scoped to user/client)
+- `media_type`: required, in:post,reel,story
 - `instagram_account_id`: required, exists:instagram_accounts,id
 - `scheduled_at`: required, date, after:now (for new posts)
 - `status`: required, in:planned,published,cancelled
@@ -85,9 +94,12 @@ Update sidebar `href="#"` for "Schedule" to `route('schedule.index')`.
 - [ ] Page renders at `/schedule` with chronological list
 - [ ] Posts grouped by day
 - [ ] Filters work: status, client, account, date range
+- [ ] Campaign and media type filters work
 - [ ] Filter logic is implemented in the Livewire component query layer
 - [ ] Create modal works with all fields
 - [ ] Edit modal pre-fills existing data
+- [ ] Timeline entries show campaign and media type context
+- [ ] Timeline entries show proposal status context when available
 - [ ] Status can be changed (Planned → Published/Cancelled)
 - [ ] Delete with confirmation works
 - [ ] Authorization enforced

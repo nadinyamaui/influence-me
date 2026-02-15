@@ -5,7 +5,7 @@
 
 ## Description
 
-Introduce campaigns as first-class entities owned by clients. Campaigns can optionally link to a proposal.
+Introduce campaigns as first-class entities owned by clients. Campaigns can optionally link to a proposal. A proposal may have multiple linked campaigns.
 
 ## Implementation
 
@@ -26,10 +26,12 @@ Unique index:
 - `Client hasMany Campaign`
 - `Campaign belongsTo Client`
 - `Campaign belongsTo Proposal` (nullable)
+- `Proposal hasMany Campaign`
 
 ### Authorization
 - Campaign operations must be scoped to the authenticated influencer's owned client records.
 - Linking a proposal to campaign is allowed only when proposal and campaign belong to the same influencer and client.
+- A single campaign can belong to at most one proposal at a time.
 
 ## Files to Create/Modify
 - `database/migrations/xxxx_create_campaigns_table.php`
@@ -42,5 +44,6 @@ Unique index:
 - [ ] Campaign schema is created with required foreign keys and unique index
 - [ ] Campaign belongs to a client
 - [ ] Campaign may belong to a proposal (nullable)
+- [ ] Proposal can include multiple campaigns through campaign records
 - [ ] Ownership policy coverage exists for campaign actions
 - [ ] Tests cover success and authorization boundaries

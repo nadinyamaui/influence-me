@@ -1,7 +1,7 @@
 # 010 - ScheduledPost Model and Factory
 
 **Labels:** `feature`, `foundation`, `content`
-**Depends on:** #001, #002, #003, #006
+**Depends on:** #001, #002, #003, #006, #093
 
 ## Description
 
@@ -16,13 +16,14 @@ protected $guarded = [];
 ```
 
 Expected persisted attributes:
-`user_id`, `client_id`, `instagram_account_id`, `title`, `description`, `scheduled_at`, `status`
+`user_id`, `client_id`, `campaign_id`, `instagram_account_id`, `title`, `description`, `media_type`, `scheduled_at`, `status`
 
 ### Casts
 ```php
 protected function casts(): array
 {
     return [
+        'media_type' => MediaType::class,
         'status' => ScheduledPostStatus::class,
         'scheduled_at' => 'datetime',
     ];
@@ -32,6 +33,7 @@ protected function casts(): array
 ### Relationships
 - `belongsTo(User::class)`
 - `belongsTo(Client::class)` - nullable
+- `belongsTo(Campaign::class)` - nullable
 - `belongsTo(InstagramAccount::class)`
 
 ### Factory States
@@ -58,6 +60,8 @@ public function scheduledPosts(): HasMany
 - [ ] Model created with `protected $guarded = [];` and required casts
 - [ ] Relationships defined with return type hints
 - [ ] Client relationship is nullable
+- [ ] Campaign relationship is nullable
+- [ ] `media_type` is cast to `MediaType`
 - [ ] Factory produces valid instances with all states
 - [ ] User model has `scheduledPosts()` relationship
 - [ ] Tests verify factory and relationships

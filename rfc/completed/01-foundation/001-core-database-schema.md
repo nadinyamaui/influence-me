@@ -155,9 +155,11 @@ Unique: `[client_id, instagram_media_id]`
 | id | bigIncrements | |
 | user_id | foreignId | constrained, cascadeOnDelete |
 | client_id | foreignId, nullable | constrained, nullOnDelete |
+| campaign_id | foreignId, nullable | constrained, nullOnDelete |
 | instagram_account_id | foreignId | constrained, cascadeOnDelete |
 | title | string | |
 | description | text, nullable | |
+| media_type | string | Post, Reel, Story |
 | scheduled_at | timestamp | |
 | status | string, default 'planned' | Planned, Published, Cancelled |
 | timestamps | | |
