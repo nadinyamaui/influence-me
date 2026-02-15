@@ -14,11 +14,16 @@ class ContentClientLinkService
     {
         $this->ensureOwnership($user, $media, $client);
 
-        $media->clients()->syncWithoutDetaching([
-            $client->id => [
-                'campaign_name' => $campaignName,
-                'notes' => $notes,
-            ],
+        $name = trim((string) ($campaignName ?? ''));
+        $resolvedCampaignName = $name !== '' ? $name : 'Uncategorized';
+
+        $campaign = $client->campaigns()->firstOrCreate(
+            ['name' => $resolvedCampaignName],
+            ['proposal_id' => null, 'description' => null],
+        );
+
+        $campaign->instagramMedia()->syncWithoutDetaching([
+            $media->id => ['notes' => $notes],
         ]);
     }
 
@@ -33,7 +38,10 @@ class ContentClientLinkService
     {
         $this->ensureOwnership($user, $media, $client);
 
-        $media->clients()->detach($client->id);
+        $client->campaigns()
+            ->with('instagramMedia')
+            ->get()
+            ->each(fn ($campaign): int => $campaign->instagramMedia()->detach($media->id));
     }
 
     private function ensureOwnership(User $user, InstagramMedia $media, Client $client): void
@@ -41,7 +49,7 @@ class ContentClientLinkService
         $media->loadMissing('instagramAccount');
 
         $ownsClient = $client->user_id === $user->id;
-        $ownsMedia = $media->instagramAccount->user_id === $user->id;
+        $ownsMedia = $media->instagramAccount?->user_id === $user->id;
 
         if (! $ownsClient || ! $ownsMedia) {
             throw new AuthorizationException('You are not allowed to modify this media-client link.');

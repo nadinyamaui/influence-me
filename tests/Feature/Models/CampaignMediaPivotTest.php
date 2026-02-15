@@ -1,58 +1,58 @@
 <?php
 
+use App\Models\Campaign;
 use App\Models\Client;
 use App\Models\InstagramMedia;
 
-it('stores pivot data with timestamps when linking media to a client', function (): void {
+it('stores pivot data with timestamps when linking media to a campaign', function (): void {
     $client = Client::factory()->create();
+    $campaign = Campaign::factory()->for($client)->create();
     $media = InstagramMedia::factory()->create();
 
-    $client->instagramMedia()->attach($media->id, [
-        'campaign_name' => 'Spring Launch',
+    $campaign->instagramMedia()->attach($media->id, [
         'notes' => 'Main feed feature',
     ]);
 
-    $linkedMedia = $client->instagramMedia()->first();
+    $linkedMedia = $campaign->instagramMedia()->first();
 
     expect($linkedMedia)->not->toBeNull()
-        ->and($linkedMedia->pivot->campaign_name)->toBe('Spring Launch')
         ->and($linkedMedia->pivot->notes)->toBe('Main feed feature')
         ->and($linkedMedia->pivot->created_at)->not->toBeNull()
         ->and($linkedMedia->pivot->updated_at)->not->toBeNull();
 });
 
-it('supports detaching linked media from a client relationship', function (): void {
+it('supports detaching linked media from a campaign relationship', function (): void {
     $client = Client::factory()->create();
+    $campaign = Campaign::factory()->for($client)->create();
     $media = InstagramMedia::factory()->create();
 
-    $client->instagramMedia()->attach($media->id, [
-        'campaign_name' => 'Holiday Push',
+    $campaign->instagramMedia()->attach($media->id, [
         'notes' => 'Temporary campaign',
     ]);
 
-    expect($client->instagramMedia)->toHaveCount(1)
-        ->and($media->clients)->toHaveCount(1);
+    expect($campaign->instagramMedia)->toHaveCount(1)
+        ->and($media->campaigns)->toHaveCount(1);
 
-    $client->instagramMedia()->detach($media->id);
+    $campaign->instagramMedia()->detach($media->id);
 
-    expect($client->fresh()->instagramMedia)->toHaveCount(0)
-        ->and($media->fresh()->clients)->toHaveCount(0);
+    expect($campaign->fresh()->instagramMedia)->toHaveCount(0)
+        ->and($media->fresh()->campaigns)->toHaveCount(0);
 });
 
-it('supports detaching linked clients from a media relationship', function (): void {
+it('supports detaching linked campaigns from a media relationship', function (): void {
     $client = Client::factory()->create();
+    $campaign = Campaign::factory()->for($client)->create();
     $media = InstagramMedia::factory()->create();
 
-    $media->clients()->attach($client->id, [
-        'campaign_name' => 'Product Teaser',
+    $media->campaigns()->attach($campaign->id, [
         'notes' => 'Story sequence',
     ]);
 
-    expect($media->clients)->toHaveCount(1)
-        ->and($client->instagramMedia)->toHaveCount(1);
+    expect($media->campaigns)->toHaveCount(1)
+        ->and($campaign->instagramMedia)->toHaveCount(1);
 
-    $media->clients()->detach($client->id);
+    $media->campaigns()->detach($campaign->id);
 
-    expect($media->fresh()->clients)->toHaveCount(0)
-        ->and($client->fresh()->instagramMedia)->toHaveCount(0);
+    expect($media->fresh()->campaigns)->toHaveCount(0)
+        ->and($campaign->fresh()->instagramMedia)->toHaveCount(0);
 });

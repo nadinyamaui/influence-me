@@ -1,11 +1,11 @@
 <?php
 
 use App\Enums\ClientType;
+use App\Models\Campaign;
 use App\Models\Client;
 use App\Models\InstagramMedia;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
@@ -27,12 +27,12 @@ it('supports brand and individual factory states', function (): void {
         ->and($individual->company_name)->toBeNull();
 });
 
-it('defines user client user proposals invoices and media relationships', function (): void {
+it('defines user client user proposals invoices and campaigns relationships', function (): void {
     $client = Client::factory()->create();
+    $campaign = Campaign::factory()->for($client)->create();
     $media = InstagramMedia::factory()->create();
 
-    $client->instagramMedia()->attach($media->id, [
-        'campaign_name' => 'Spring Campaign',
+    $campaign->instagramMedia()->attach($media->id, [
         'notes' => 'Feature placement',
     ]);
 
@@ -42,15 +42,17 @@ it('defines user client user proposals invoices and media relationships', functi
         ->getReturnType()?->getName();
     $invoicesReturnType = (new ReflectionMethod(Client::class, 'invoices'))
         ->getReturnType()?->getName();
+    $campaignsReturnType = (new ReflectionMethod(Client::class, 'campaigns'))
+        ->getReturnType()?->getName();
 
     expect($client->user())->toBeInstanceOf(BelongsTo::class)
         ->and($clientUserReturnType)->toBe(HasOne::class)
         ->and($proposalsReturnType)->toBe(HasMany::class)
         ->and($invoicesReturnType)->toBe(HasMany::class)
-        ->and($client->instagramMedia())->toBeInstanceOf(BelongsToMany::class)
-        ->and($client->instagramMedia)->toHaveCount(1)
-        ->and($client->instagramMedia->first()->id)->toBe($media->id)
-        ->and($client->instagramMedia->first()->pivot->campaign_name)->toBe('Spring Campaign');
+        ->and($campaignsReturnType)->toBe(HasMany::class)
+        ->and($client->campaigns)->toHaveCount(1)
+        ->and($campaign->fresh()->instagramMedia)->toHaveCount(1)
+        ->and($campaign->fresh()->instagramMedia->first()->id)->toBe($media->id);
 });
 
 it('defines user clients relationship', function (): void {

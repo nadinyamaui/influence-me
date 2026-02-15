@@ -340,12 +340,12 @@ class Index extends Component
         }
 
         if ($this->clientId === 'without_clients') {
-            $query->whereDoesntHave('clients', fn (Builder $builder): Builder => $builder
-                ->where('clients.user_id', Auth::id()));
+            $query->whereDoesntHave('campaigns', fn (Builder $builder): Builder => $builder
+                ->whereHas('client', fn (Builder $clientBuilder): Builder => $clientBuilder->where('user_id', Auth::id())));
         } elseif ($this->clientId !== 'all') {
-            $query->whereHas('clients', fn (Builder $builder): Builder => $builder
-                ->whereKey((int) $this->clientId)
-                ->where('clients.user_id', Auth::id()));
+            $query->whereHas('campaigns', fn (Builder $builder): Builder => $builder
+                ->where('campaigns.client_id', (int) $this->clientId)
+                ->whereHas('client', fn (Builder $clientBuilder): Builder => $clientBuilder->where('user_id', Auth::id())));
         }
 
         if (filled($range['start'])) {
@@ -385,8 +385,9 @@ class Index extends Component
         return InstagramMedia::query()
             ->with([
                 'instagramAccount',
-                'clients' => fn ($builder) => $builder
-                    ->where('user_id', Auth::id())
+                'campaigns' => fn ($builder) => $builder
+                    ->whereHas('client', fn (Builder $clientBuilder): Builder => $clientBuilder->where('user_id', Auth::id()))
+                    ->with('client')
                     ->orderBy('name'),
             ])
             ->whereKey($this->selectedMediaId)
