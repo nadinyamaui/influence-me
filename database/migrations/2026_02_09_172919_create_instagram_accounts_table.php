@@ -15,8 +15,8 @@ return new class extends Migration
             $table->string('username');
             $table->string('name')->nullable();
             $table->text('biography')->nullable();
-            $table->string('profile_picture_url')->nullable();
-            $table->string('account_type');
+            $table->text('profile_picture_url')->nullable();
+            $table->string('account_type')->nullable();
             $table->unsignedInteger('followers_count')->default(0);
             $table->unsignedInteger('following_count')->default(0);
             $table->unsignedInteger('media_count')->default(0);

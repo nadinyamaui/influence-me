@@ -15,15 +15,15 @@ return new class extends Migration
             $table->string('media_type');
             $table->text('caption')->nullable();
             $table->string('permalink')->nullable();
-            $table->string('media_url')->nullable();
-            $table->string('thumbnail_url')->nullable();
+            $table->text('media_url')->nullable();
+            $table->text('thumbnail_url')->nullable();
             $table->timestamp('published_at')->nullable();
             $table->unsignedInteger('like_count')->default(0);
             $table->unsignedInteger('comments_count')->default(0);
             $table->unsignedInteger('saved_count')->default(0);
             $table->unsignedInteger('shares_count')->default(0);
             $table->unsignedInteger('reach')->default(0);
-            $table->unsignedInteger('impressions')->default(0);
+            $table->unsignedInteger('impressions')->nullable()->default(0);
             $table->decimal('engagement_rate', 5, 2)->default(0);
             $table->timestamps();
         });
