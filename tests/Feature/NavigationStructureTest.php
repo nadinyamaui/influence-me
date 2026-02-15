@@ -20,7 +20,7 @@ it('renders the app sidebar with all RFC 013 navigation groups and links', funct
         ->assertDontSee('Repository')
         ->assertDontSee('Documentation');
 
-    expect(substr_count($response->getContent(), 'href="#"'))->toBeGreaterThanOrEqual(3);
+    expect(substr_count($response->getContent(), 'href="#"'))->toBeGreaterThanOrEqual(2);
 });
 
 it('renders the header layout variant with matching RFC 013 navigation links', function () {

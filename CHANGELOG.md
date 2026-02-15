@@ -5,6 +5,9 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
+- RFC 043: added authenticated `/proposals` route via `app/Livewire/Proposals/Index.php` and `resources/views/pages/proposals/index.blade.php` with query-layer status/client filtering, influencer-only proposal scoping, pagination, campaign and scheduled-content counts, status badges, and row-level view/edit/delete actions.
+- RFC 043: updated influencer navigation in `routes/web.php` and `resources/views/layouts/app/sidebar.blade.php` to route the Proposals nav item to `proposals.index` with active-state handling.
+- RFC 043: added feature coverage in `tests/Feature/Proposals/ProposalListPageTest.php` for route access, ownership scoping, filters, counts, pagination, empty state, and delete action flow; updated `tests/Feature/NavigationStructureTest.php` placeholder-link expectation for the routed proposals item.
 - RFC 042: added authenticated `/schedule` timeline route via `app/Livewire/Schedule/Index.php` and `resources/views/pages/schedule/index.blade.php` with query-layer filtering (status/client/account/campaign/media-type/date), day-grouped chronological rendering, CRUD modal workflows, status transitions, proposal-context badges, and delete confirmation.
 - RFC 042: added `app/Http/Requests/StoreScheduledPostRequest.php`, `database/migrations/2026_02_15_120000_add_campaign_and_media_type_to_scheduled_posts_table.php`, and scheduled-post campaign/media-type model support in `app/Models/ScheduledPost.php`, `app/Models/Campaign.php`, and `database/factories/ScheduledPostFactory.php`.
 - RFC 042: wired schedule navigation in `routes/web.php`, `resources/views/layouts/app/sidebar.blade.php`, and `resources/views/layouts/app/header.blade.php`, and added feature coverage in `tests/Feature/Content/ScheduleTimelinePageTest.php` with navigation assertion updates in `tests/Feature/NavigationStructureTest.php`.
