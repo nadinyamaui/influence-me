@@ -4,7 +4,9 @@ namespace App\Livewire\Proposals;
 
 use App\Enums\ProposalStatus;
 use App\Models\Proposal;
+use App\Services\Proposals\ProposalWorkflowService;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Validation\ValidationException;
 use Livewire\Component;
 
 class Show extends Component
@@ -13,17 +15,64 @@ class Show extends Component
 
     public Proposal $proposal;
 
+    public bool $confirmingSend = false;
+
     public function mount(Proposal $proposal): void
     {
         $this->authorize('view', $proposal);
 
         $this->proposal = $proposal->load([
-            'client:id,name',
+            'client:id,name,email',
             'campaigns' => fn ($query) => $query->orderBy('name'),
             'campaigns.scheduledPosts' => fn ($query) => $query
                 ->with('instagramAccount:id,username')
                 ->orderBy('scheduled_at'),
         ]);
+    }
+
+    public function confirmSend(ProposalWorkflowService $proposalWorkflowService): void
+    {
+        $this->authorize('send', $this->proposal);
+
+        try {
+            $proposalWorkflowService->assertSendable($this->proposal);
+        } catch (ValidationException $exception) {
+            $this->setErrorBag($exception->validator->errors());
+
+            return;
+        }
+
+        $this->resetErrorBag('send');
+        $this->confirmingSend = true;
+    }
+
+    public function cancelSend(): void
+    {
+        $this->confirmingSend = false;
+    }
+
+    public function send(ProposalWorkflowService $proposalWorkflowService): void
+    {
+        $this->authorize('send', $this->proposal);
+
+        try {
+            $this->proposal = $proposalWorkflowService->send(auth()->user(), $this->proposal)->load([
+                'client:id,name,email',
+                'campaigns' => fn ($query) => $query->orderBy('name'),
+                'campaigns.scheduledPosts' => fn ($query) => $query
+                    ->with('instagramAccount:id,username')
+                    ->orderBy('scheduled_at'),
+            ]);
+        } catch (ValidationException $exception) {
+            $this->setErrorBag($exception->validator->errors());
+            $this->confirmingSend = false;
+
+            return;
+        }
+
+        $this->confirmingSend = false;
+        $this->resetErrorBag();
+        session()->flash('status', 'Proposal sent to '.$this->proposal->client->name.'.');
     }
 
     public function statusLabel(): string

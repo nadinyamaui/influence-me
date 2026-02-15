@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
+- RFC 046: implemented proposal send workflow in `app/Services/Proposals/ProposalWorkflowService.php` with send-time validation for client email, status eligibility, linked campaign requirements, scheduled-content presence, and influencer/client scope enforcement before mutating proposal state.
+- RFC 046: wired send confirmation and execution in `app/Livewire/Proposals/Show.php` and `resources/views/pages/proposals/show.blade.php`, including a confirmation modal, actionable validation error messaging, and success flash feedback after send.
+- RFC 046: added proposal notification mailer `app/Mail/ProposalSent.php` and template `resources/views/mail/proposal-sent.blade.php` with proposal title/preview, influencer attribution, client-portal CTA when portal access exists, and influencer reply-to support.
+- RFC 046: added feature coverage in `tests/Feature/Proposals/ProposalSendWorkflowTest.php` for draft/revised send success and validation failure paths; updated proposal send policy coverage in `tests/Feature/Authorization/ModelPoliciesTest.php`.
 - RFC 044: added authenticated proposal create/edit flows via `app/Livewire/Proposals/Create.php`, `app/Livewire/Proposals/Edit.php`, `resources/views/pages/proposals/create.blade.php`, and `resources/views/pages/proposals/edit.blade.php` with markdown preview toggle, campaign builder, per-campaign scheduled content builder, status-aware read-only mode, duplicate workflow, and edit-page delete confirmation.
 - RFC 044: added `app/Http/Requests/StoreProposalRequest.php` and `app/Services/Proposals/ProposalWorkflowService.php` to enforce scoped validation (client/campaign/account ownership), proposal draft workflow orchestration, campaign linking/creation, scheduled content sync, and proposal duplication.
 - RFC 044: wired create/edit proposal routes in `routes/web.php`, updated proposal list actions in `resources/views/pages/proposals/index.blade.php` to navigate to create/edit pages, and enforced draft/revised-only proposal updates in `app/Policies/ProposalPolicy.php`.

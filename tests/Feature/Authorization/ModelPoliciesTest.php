@@ -128,6 +128,7 @@ it('applies proposal policy rules', function (): void {
     $otherClient = Client::factory()->for($outsider)->create();
 
     $draftProposal = Proposal::factory()->for($owner)->for($client)->draft()->create();
+    $revisedProposal = Proposal::factory()->for($owner)->for($client)->revised()->create();
     $sentProposal = Proposal::factory()->for($owner)->for($client)->sent()->create();
 
     $matchingClientUser = ClientUser::factory()->for($client)->create();
@@ -145,6 +146,7 @@ it('applies proposal policy rules', function (): void {
         ->and($ownerGate->allows('update', $sentProposal))->toBeFalse()
         ->and($ownerGate->allows('delete', $draftProposal))->toBeTrue()
         ->and($ownerGate->allows('send', $draftProposal))->toBeTrue()
+        ->and($ownerGate->allows('send', $revisedProposal))->toBeTrue()
         ->and($ownerGate->allows('send', $sentProposal))->toBeFalse()
         ->and($outsiderGate->allows('view', $draftProposal))->toBeFalse()
         ->and($outsiderGate->allows('update', $draftProposal))->toBeFalse()
