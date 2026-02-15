@@ -5,6 +5,9 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
+- RFC 042: added authenticated `/schedule` timeline route via `app/Livewire/Schedule/Index.php` and `resources/views/pages/schedule/index.blade.php` with query-layer filtering (status/client/account/campaign/media-type/date), day-grouped chronological rendering, CRUD modal workflows, status transitions, proposal-context badges, and delete confirmation.
+- RFC 042: added `app/Http/Requests/StoreScheduledPostRequest.php`, `database/migrations/2026_02_15_120000_add_campaign_and_media_type_to_scheduled_posts_table.php`, and scheduled-post campaign/media-type model support in `app/Models/ScheduledPost.php`, `app/Models/Campaign.php`, and `database/factories/ScheduledPostFactory.php`.
+- RFC 042: wired schedule navigation in `routes/web.php`, `resources/views/layouts/app/sidebar.blade.php`, and `resources/views/layouts/app/header.blade.php`, and added feature coverage in `tests/Feature/Content/ScheduleTimelinePageTest.php` with navigation assertion updates in `tests/Feature/NavigationStructureTest.php`.
 - RFC 093: added first-class campaign domain support with `app/Models/Campaign.php`, `database/migrations/2026_02_14_200000_create_campaigns_table.php`, `database/factories/CampaignFactory.php`, `app/Policies/CampaignPolicy.php`, and reverse relationships in `app/Models/Client.php`/`app/Models/Proposal.php`.
 - RFC 093: expanded authorization coverage in `tests/Feature/Authorization/ModelPoliciesTest.php` and added dedicated campaign model coverage in `tests/Feature/Models/CampaignTest.php`.
 - RFC 094: refactored `campaign_media` to campaign-owned links via `database/migrations/2026_02_14_200100_refactor_campaign_media_table.php`, updated `app/Models/InstagramMedia.php` and `app/Services/Content/ContentClientLinkService.php` to use `campaign_id + instagram_media_id`, and removed pivot `campaign_name` dependency.

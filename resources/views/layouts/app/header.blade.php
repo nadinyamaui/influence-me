@@ -16,7 +16,7 @@
                 <flux:navbar.item icon="photo" href="#">
                     {{ __('Content') }}
                 </flux:navbar.item>
-                <flux:navbar.item icon="calendar" href="#">
+                <flux:navbar.item icon="calendar" :href="route('schedule.index')" :current="request()->routeIs('schedule.index')" wire:navigate>
                     {{ __('Schedule') }}
                 </flux:navbar.item>
                 <flux:navbar.item icon="chart-bar" href="#">
@@ -56,7 +56,7 @@
                     <flux:sidebar.item icon="photo" href="#">
                         {{ __('Content') }}
                     </flux:sidebar.item>
-                    <flux:sidebar.item icon="calendar" href="#">
+                    <flux:sidebar.item icon="calendar" :href="route('schedule.index')" :current="request()->routeIs('schedule.index')" wire:navigate>
                         {{ __('Schedule') }}
                     </flux:sidebar.item>
                     <flux:sidebar.item icon="chart-bar" href="#">
