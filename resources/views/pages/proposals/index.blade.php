@@ -9,7 +9,7 @@
             <p class="mt-1 text-sm text-zinc-600 dark:text-zinc-300">Manage your proposals and track client responses.</p>
         </div>
 
-        <flux:button href="#" variant="primary" title="New Proposal" aria-label="New Proposal">
+        <flux:button :href="route('proposals.create')" variant="primary" title="New Proposal" aria-label="New Proposal" wire:navigate>
             <i class="fa-solid fa-plus" aria-hidden="true"></i>
         </flux:button>
     </div>
@@ -100,7 +100,8 @@
                                     <div class="flex justify-end gap-2">
                                         @if ($proposal->status === ProposalStatus::Draft)
                                             <a
-                                                href="#"
+                                                href="{{ route('proposals.edit', $proposal) }}"
+                                                wire:navigate
                                                 class="inline-flex items-center rounded-md border border-zinc-300 px-3 py-1.5 text-xs font-medium text-zinc-700 transition hover:bg-zinc-100 dark:border-zinc-600 dark:text-zinc-200 dark:hover:bg-zinc-800"
                                                 title="Edit"
                                                 aria-label="Edit"
