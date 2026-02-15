@@ -62,7 +62,7 @@ class Index extends Component
 
     public function updatedMediaType(string $value): void
     {
-        if (! in_array($value, $this->mediaTypeFilters(), true)) {
+        if (! in_array($value, MediaType::filters(), true)) {
             $this->mediaType = 'all';
         }
 
@@ -140,7 +140,7 @@ class Index extends Component
             'availableClients' => $this->availableClients(),
             'accounts' => $this->accounts(),
             'media' => $this->media(),
-            'mediaTypeFilters' => $this->mediaTypeFilters(),
+            'mediaTypeFilters' => MediaType::filters(),
             'selectedMedia' => $this->selectedMedia(),
             'sortOptions' => $this->sortOptions(),
             'unlinkClient' => $this->unlinkClient(),
@@ -410,7 +410,7 @@ class Index extends Component
             ->with('instagramAccount')
             ->whereHas('instagramAccount', fn (Builder $builder): Builder => $builder->where('user_id', Auth::id()));
 
-        if ($this->mediaType !== 'all' && in_array($this->mediaType, $this->mediaTypeFilters(), true)) {
+        if ($this->mediaType !== 'all' && in_array($this->mediaType, MediaType::filters(), true)) {
             $query->where('media_type', $this->mediaType);
         }
 
@@ -483,17 +483,6 @@ class Index extends Component
         return Auth::user()->clients()
             ->whereKey($this->confirmingUnlinkClientId)
             ->first();
-    }
-
-    private function mediaTypeFilters(): array
-    {
-        return array_merge(
-            ['all'],
-            array_map(
-                static fn (MediaType $mediaType): string => $mediaType->value,
-                MediaType::cases(),
-            ),
-        );
     }
 
     private function sortMap(): array

@@ -16,6 +16,15 @@ it('defines all media type enum cases', function (): void {
         ->and(MediaType::Story->value)->toBe('story');
 });
 
+it('provides media type filters including all option', function (): void {
+    expect(MediaType::filters())->toBe([
+        'all',
+        'post',
+        'reel',
+        'story',
+    ]);
+});
+
 it('parses image and carousel media as post', function (): void {
     expect(MediaType::parse(['media_type' => 'IMAGE']))->toBe(MediaType::Post)
         ->and(MediaType::parse(['media_type' => 'CAROUSEL_ALBUM']))->toBe(MediaType::Post);
