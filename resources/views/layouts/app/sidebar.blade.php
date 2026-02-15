@@ -20,10 +20,6 @@
                         {{ __('Content') }}
                     </flux:sidebar.item>
 
-                    <flux:sidebar.item icon="calendar" :href="route('schedule.index')" :current="request()->routeIs('schedule.index')" wire:navigate>
-                        {{ __('Schedule') }}
-                    </flux:sidebar.item>
-
                     <flux:sidebar.item icon="chart-bar" href="#">
                         {{ __('Analytics') }}
                     </flux:sidebar.item>

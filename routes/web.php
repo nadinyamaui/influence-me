@@ -8,7 +8,6 @@ use App\Livewire\Clients\Show as ClientsShow;
 use App\Livewire\Content\Index as ContentIndex;
 use App\Livewire\Dashboard;
 use App\Livewire\InstagramAccounts\Index as InstagramAccountsIndex;
-use App\Livewire\Schedule\Index as ScheduleIndex;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -29,9 +28,6 @@ Route::middleware(['auth'])->group(function (): void {
 
     Route::livewire('content', ContentIndex::class)
         ->name('content.index');
-
-    Route::livewire('schedule', ScheduleIndex::class)
-        ->name('schedule.index');
 
     Route::livewire('clients', ClientsIndex::class)
         ->name('clients.index');
