@@ -11,23 +11,24 @@ use App\Models\ScheduledPost;
 use App\Models\User;
 use Livewire\Livewire;
 
-function proposalPayload(int $clientId, int $instagramAccountId): array
+function proposalWorkflowPayload(int $instagramAccountId): array
 {
     return [
         'title' => 'Q2 Campaign Proposal',
-        'client_id' => (string) $clientId,
         'content' => "# Proposal\n\nCampaign scope in markdown.",
         'campaigns' => [[
             'id' => null,
             'name' => 'Spring Launch',
             'description' => 'Campaign plan details',
-            'scheduled_items' => [[
-                'title' => 'Teaser Reel',
-                'description' => 'Countdown to launch',
-                'media_type' => 'reel',
-                'instagram_account_id' => (string) $instagramAccountId,
-                'scheduled_at' => now()->addDay()->format('Y-m-d\TH:i'),
-            ]],
+        ]],
+        'scheduledItems' => [[
+            'id' => null,
+            'campaign_index' => 0,
+            'title' => 'Teaser Reel',
+            'description' => 'Countdown to launch',
+            'media_type' => 'reel',
+            'instagram_account_id' => (string) $instagramAccountId,
+            'scheduled_at' => now()->addDay()->format('Y-m-d\TH:i'),
         ]],
     ];
 }
@@ -42,125 +43,39 @@ test('guests are redirected from create and edit proposal pages', function (): v
         ->assertRedirect(route('login'));
 });
 
-test('authenticated influencer can create a draft proposal with campaign and scheduled content', function (): void {
+test('authenticated influencer can create an initial draft proposal and continue to the step flow', function (): void {
     $user = User::factory()->create();
     $client = Client::factory()->for($user)->create();
-    $account = InstagramAccount::factory()->for($user)->create();
-
-    $payload = proposalPayload($client->id, $account->id);
 
     Livewire::actingAs($user)
         ->test(ProposalCreate::class)
-        ->set('title', $payload['title'])
-        ->set('client_id', $payload['client_id'])
-        ->set('content', $payload['content'])
-        ->set('campaigns', $payload['campaigns'])
+        ->set('title', 'Q2 Campaign Proposal')
+        ->set('client_id', (string) $client->id)
         ->call('save')
-        ->assertRedirect(route('proposals.index'));
+        ->assertRedirect();
 
     $proposal = Proposal::query()->where('user_id', $user->id)->first();
 
     expect($proposal)->not->toBeNull()
         ->and($proposal->status)->toBe(ProposalStatus::Draft)
-        ->and($proposal->client_id)->toBe($client->id);
-
-    $campaign = Campaign::query()->where('proposal_id', $proposal->id)->first();
-
-    expect($campaign)->not->toBeNull()
-        ->and($campaign->name)->toBe('Spring Launch');
-
-    $scheduledPost = ScheduledPost::query()->where('campaign_id', $campaign->id)->first();
-
-    expect($scheduledPost)->not->toBeNull()
-        ->and($scheduledPost->title)->toBe('Teaser Reel')
-        ->and($scheduledPost->media_type->value)->toBe('reel')
-        ->and($scheduledPost->instagram_account_id)->toBe($account->id);
+        ->and($proposal->client_id)->toBe($client->id)
+        ->and($proposal->content)->toBe('');
 });
 
-test('linking an existing campaign on create does not remove existing scheduled posts', function (): void {
-    $user = User::factory()->create();
-    $client = Client::factory()->for($user)->create();
-    $account = InstagramAccount::factory()->for($user)->create();
-
-    $existingCampaign = Campaign::factory()->for($client)->create([
-        'proposal_id' => null,
-        'name' => 'Evergreen Campaign',
-    ]);
-
-    ScheduledPost::factory()->for($user)->for($client)->create([
-        'campaign_id' => $existingCampaign->id,
-        'instagram_account_id' => $account->id,
-        'title' => 'Existing Scheduled Post',
-    ]);
-
-    $payload = proposalPayload($client->id, $account->id);
-    $payload['campaigns'][0]['id'] = $existingCampaign->id;
-
-    Livewire::actingAs($user)
-        ->test(ProposalCreate::class)
-        ->set('title', $payload['title'])
-        ->set('client_id', $payload['client_id'])
-        ->set('content', $payload['content'])
-        ->set('campaigns', $payload['campaigns'])
-        ->call('save')
-        ->assertRedirect(route('proposals.index'));
-
-    expect(ScheduledPost::query()->where('campaign_id', $existingCampaign->id)->count())->toBe(2);
-});
-
-test('create page enforces scoped ownership validation for client campaign and instagram account', function (): void {
+test('create page enforces scoped ownership validation for client selection', function (): void {
     $user = User::factory()->create();
     $otherUser = User::factory()->create();
-
-    $client = Client::factory()->for($user)->create();
     $otherClient = Client::factory()->for($otherUser)->create();
 
-    $account = InstagramAccount::factory()->for($user)->create();
-    $otherAccount = InstagramAccount::factory()->for($otherUser)->create();
-
-    $otherCampaign = Campaign::factory()->for($otherClient)->create();
-
-    $payload = proposalPayload($otherClient->id, $otherAccount->id);
-    $payload['campaigns'][0]['id'] = $otherCampaign->id;
-
     Livewire::actingAs($user)
         ->test(ProposalCreate::class)
-        ->set('title', $payload['title'])
-        ->set('client_id', $payload['client_id'])
-        ->set('content', $payload['content'])
-        ->set('campaigns', $payload['campaigns'])
+        ->set('title', 'Scoped Proposal')
+        ->set('client_id', (string) $otherClient->id)
         ->call('save')
-        ->assertHasErrors([
-            'client_id',
-            'campaigns.0.id',
-            'campaigns.0.scheduled_items.0.instagram_account_id',
-        ]);
-
-    $validPayload = proposalPayload($client->id, $account->id);
-    $validPayload['campaigns'] = [];
-
-    Livewire::actingAs($user)
-        ->test(ProposalCreate::class)
-        ->set('title', $validPayload['title'])
-        ->set('client_id', $validPayload['client_id'])
-        ->set('content', $validPayload['content'])
-        ->set('campaigns', $validPayload['campaigns'])
-        ->call('save')
-        ->assertHasErrors(['campaigns']);
+        ->assertHasErrors(['client_id']);
 });
 
-test('markdown preview toggle renders proposal markdown on create page', function (): void {
-    $user = User::factory()->create();
-
-    Livewire::actingAs($user)
-        ->test(ProposalCreate::class)
-        ->set('content', '# Heading')
-        ->call('togglePreview')
-        ->assertSet('previewMode', true)
-        ->assertSeeHtml('<h1>Heading</h1>');
-});
-
-test('edit page loads existing proposal data and updates draft proposals', function (): void {
+test('edit page loads existing proposal data and updates draft proposals through stepped payload', function (): void {
     $user = User::factory()->create();
     $client = Client::factory()->for($user)->create();
     $account = InstagramAccount::factory()->for($user)->create();
@@ -182,6 +97,8 @@ test('edit page loads existing proposal data and updates draft proposals', funct
         'media_type' => 'post',
     ]);
 
+    $payload = proposalWorkflowPayload($account->id);
+
     $component = Livewire::actingAs($user)
         ->test(ProposalEdit::class, ['proposal' => $proposal]);
 
@@ -189,9 +106,11 @@ test('edit page loads existing proposal data and updates draft proposals', funct
         ->assertSet('title', 'Original Title')
         ->assertSet('client_id', (string) $client->id)
         ->assertSet('campaigns.0.id', $campaign->id)
-        ->assertSet('campaigns.0.scheduled_items.0.title', 'Original Post')
+        ->assertSet('scheduledItems.0.title', 'Original Post')
         ->set('title', 'Updated Title')
-        ->set('campaigns.0.scheduled_items.0.media_type', 'story')
+        ->set('content', $payload['content'])
+        ->set('campaigns', $payload['campaigns'])
+        ->set('scheduledItems', $payload['scheduledItems'])
         ->call('update')
         ->assertRedirect(route('proposals.index'));
 
@@ -199,9 +118,76 @@ test('edit page loads existing proposal data and updates draft proposals', funct
 
     expect($proposal->title)->toBe('Updated Title');
 
-    $updatedScheduledPost = ScheduledPost::query()->where('campaign_id', $campaign->id)->first();
+    $updatedCampaign = Campaign::query()->where('proposal_id', $proposal->id)->first();
+    $updatedScheduledPost = ScheduledPost::query()->where('campaign_id', $updatedCampaign->id)->first();
 
-    expect($updatedScheduledPost->media_type->value)->toBe('story');
+    expect($updatedCampaign->name)->toBe('Spring Launch')
+        ->and($updatedScheduledPost)->not->toBeNull()
+        ->and($updatedScheduledPost->media_type->value)->toBe('reel');
+});
+
+test('linking an existing campaign on edit does not remove existing scheduled posts', function (): void {
+    $user = User::factory()->create();
+    $client = Client::factory()->for($user)->create();
+    $account = InstagramAccount::factory()->for($user)->create();
+
+    $proposal = Proposal::factory()->for($user)->for($client)->draft()->create();
+
+    $existingCampaign = Campaign::factory()->for($client)->create([
+        'proposal_id' => null,
+        'name' => 'Evergreen Campaign',
+    ]);
+
+    $existingScheduledPost = ScheduledPost::factory()->for($user)->for($client)->create([
+        'campaign_id' => $existingCampaign->id,
+        'instagram_account_id' => $account->id,
+        'title' => 'Existing Scheduled Post',
+    ]);
+
+    Livewire::actingAs($user)
+        ->test(ProposalEdit::class, ['proposal' => $proposal])
+        ->set('campaigns', [[
+            'id' => $existingCampaign->id,
+            'name' => 'Evergreen Campaign',
+            'description' => '',
+        ]])
+        ->set('scheduledItems', [
+            [
+                'id' => $existingScheduledPost->id,
+                'campaign_index' => 0,
+                'title' => $existingScheduledPost->title,
+                'description' => $existingScheduledPost->description ?? '',
+                'media_type' => $existingScheduledPost->media_type->value,
+                'instagram_account_id' => (string) $existingScheduledPost->instagram_account_id,
+                'scheduled_at' => $existingScheduledPost->scheduled_at->format('Y-m-d\TH:i'),
+            ],
+            [
+                'id' => null,
+                'campaign_index' => 0,
+                'title' => 'New Scheduled Post',
+                'description' => '',
+                'media_type' => 'post',
+                'instagram_account_id' => (string) $account->id,
+                'scheduled_at' => now()->addDay()->format('Y-m-d\TH:i'),
+            ],
+        ])
+        ->call('update')
+        ->assertRedirect(route('proposals.index'));
+
+    expect(ScheduledPost::query()->where('campaign_id', $existingCampaign->id)->count())->toBe(2);
+});
+
+test('markdown preview toggle renders proposal markdown on edit page', function (): void {
+    $user = User::factory()->create();
+    $client = Client::factory()->for($user)->create();
+    $proposal = Proposal::factory()->for($user)->for($client)->draft()->create();
+
+    Livewire::actingAs($user)
+        ->test(ProposalEdit::class, ['proposal' => $proposal])
+        ->set('content', '# Heading')
+        ->call('togglePreview')
+        ->assertSet('previewMode', true)
+        ->assertSeeHtml('<h1>Heading</h1>');
 });
 
 test('sent proposals render read-only state and can be duplicated', function (): void {

@@ -13,6 +13,16 @@ use Illuminate\Validation\ValidationException;
 
 class ProposalWorkflowService
 {
+    public function createDraft(User $user, array $payload): Proposal
+    {
+        return $user->proposals()->create([
+            'client_id' => (int) $payload['client_id'],
+            'title' => $payload['title'],
+            'content' => '',
+            'status' => ProposalStatus::Draft,
+        ]);
+    }
+
     public function createDraftWithCampaignSchedule(User $user, array $payload): Proposal
     {
         return DB::transaction(function () use ($user, $payload): Proposal {

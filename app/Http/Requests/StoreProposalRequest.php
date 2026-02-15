@@ -72,4 +72,18 @@ class StoreProposalRequest extends FormRequest
             'campaigns.*.scheduled_items.*.scheduled_at' => ['required', 'date'],
         ];
     }
+
+    public static function initialRulesFor(int $userId): array
+    {
+        return [
+            'title' => ['required', 'string', 'max:255'],
+            'client_id' => [
+                'required',
+                'integer',
+                Rule::exists('clients', 'id')->where(
+                    fn ($query) => $query->where('user_id', $userId),
+                ),
+            ],
+        ];
+    }
 }

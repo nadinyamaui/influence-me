@@ -28,7 +28,11 @@ class Edit extends Component
 
     public bool $confirmingDelete = false;
 
+    public int $currentStep = 1;
+
     public array $campaigns = [];
+
+    public array $scheduledItems = [];
 
     public function mount(Proposal $proposal): void
     {
@@ -36,11 +40,6 @@ class Edit extends Component
 
         $this->proposal = $proposal;
         $this->fillFromProposal();
-    }
-
-    protected function rules(): array
-    {
-        return StoreProposalRequest::rulesFor((int) auth()->id(), $this->client_id !== '' ? (int) $this->client_id : null);
     }
 
     public function addCampaign(): void
@@ -64,29 +63,74 @@ class Edit extends Component
         if ($this->campaigns === []) {
             $this->campaigns = [self::emptyCampaign()];
         }
+
+        $this->scheduledItems = collect($this->scheduledItems)
+            ->map(function (array $scheduledItem) use ($campaignIndex): ?array {
+                $itemCampaignIndex = (int) ($scheduledItem['campaign_index'] ?? 0);
+
+                if ($itemCampaignIndex === $campaignIndex) {
+                    return null;
+                }
+
+                if ($itemCampaignIndex > $campaignIndex) {
+                    $itemCampaignIndex--;
+                }
+
+                return [
+                    'id' => $scheduledItem['id'] ?? null,
+                    'campaign_index' => $itemCampaignIndex,
+                    'title' => $scheduledItem['title'] ?? '',
+                    'description' => $scheduledItem['description'] ?? '',
+                    'media_type' => $scheduledItem['media_type'] ?? MediaType::Post->value,
+                    'instagram_account_id' => $scheduledItem['instagram_account_id'] ?? '',
+                    'scheduled_at' => $scheduledItem['scheduled_at'] ?? '',
+                ];
+            })
+            ->filter()
+            ->values()
+            ->all();
+
+        if ($this->scheduledItems === []) {
+            $this->scheduledItems = [self::emptyScheduledItem()];
+        }
     }
 
-    public function addScheduledItem(int $campaignIndex): void
+    public function addScheduledItem(): void
     {
         if (! $this->isEditable()) {
             abort(403);
         }
 
-        $this->campaigns[$campaignIndex]['scheduled_items'][] = self::emptyScheduledItem();
+        $this->scheduledItems[] = self::emptyScheduledItem();
     }
 
-    public function removeScheduledItem(int $campaignIndex, int $scheduledItemIndex): void
+    public function removeScheduledItem(int $scheduledItemIndex): void
     {
         if (! $this->isEditable()) {
             abort(403);
         }
 
-        unset($this->campaigns[$campaignIndex]['scheduled_items'][$scheduledItemIndex]);
-        $this->campaigns[$campaignIndex]['scheduled_items'] = array_values($this->campaigns[$campaignIndex]['scheduled_items']);
+        unset($this->scheduledItems[$scheduledItemIndex]);
+        $this->scheduledItems = array_values($this->scheduledItems);
 
-        if ($this->campaigns[$campaignIndex]['scheduled_items'] === []) {
-            $this->campaigns[$campaignIndex]['scheduled_items'] = [self::emptyScheduledItem()];
+        if ($this->scheduledItems === []) {
+            $this->scheduledItems = [self::emptyScheduledItem()];
         }
+    }
+
+    public function goToStep(int $step): void
+    {
+        $this->currentStep = max(1, min(3, $step));
+    }
+
+    public function nextStep(): void
+    {
+        $this->goToStep($this->currentStep + 1);
+    }
+
+    public function previousStep(): void
+    {
+        $this->goToStep($this->currentStep - 1);
     }
 
     public function togglePreview(): void
@@ -102,7 +146,10 @@ class Edit extends Component
             abort(403);
         }
 
-        $validated = $this->validate();
+        $validated = validator(
+            $this->buildPayload(),
+            StoreProposalRequest::rulesFor((int) auth()->id(), $this->client_id !== '' ? (int) $this->client_id : null),
+        )->validate();
 
         $proposalWorkflowService->updateDraftWithCampaignSchedule(auth()->user(), $this->proposal, $validated);
 
@@ -171,22 +218,11 @@ class Edit extends Component
         $this->content = $this->proposal->content;
 
         $this->campaigns = $this->proposal->campaigns
+            ->values()
             ->map(fn ($campaign): array => [
                 'id' => $campaign->id,
                 'name' => $campaign->name,
                 'description' => $campaign->description ?? '',
-                'scheduled_items' => $campaign->scheduledPosts
-                    ->sortBy('scheduled_at')
-                    ->values()
-                    ->map(fn ($scheduledPost): array => [
-                        'id' => $scheduledPost->id,
-                        'title' => $scheduledPost->title,
-                        'description' => $scheduledPost->description ?? '',
-                        'media_type' => $scheduledPost->media_type->value,
-                        'instagram_account_id' => (string) $scheduledPost->instagram_account_id,
-                        'scheduled_at' => $scheduledPost->scheduled_at->format('Y-m-d\TH:i'),
-                    ])
-                    ->all(),
             ])
             ->all();
 
@@ -194,11 +230,62 @@ class Edit extends Component
             $this->campaigns = [self::emptyCampaign()];
         }
 
-        foreach ($this->campaigns as $index => $campaign) {
-            if ($campaign['scheduled_items'] === []) {
-                $this->campaigns[$index]['scheduled_items'] = [self::emptyScheduledItem()];
+        $this->scheduledItems = [];
+
+        foreach ($this->proposal->campaigns->values() as $campaignIndex => $campaign) {
+            foreach ($campaign->scheduledPosts->sortBy('scheduled_at')->values() as $scheduledPost) {
+                $this->scheduledItems[] = [
+                    'id' => $scheduledPost->id,
+                    'campaign_index' => $campaignIndex,
+                    'title' => $scheduledPost->title,
+                    'description' => $scheduledPost->description ?? '',
+                    'media_type' => $scheduledPost->media_type->value,
+                    'instagram_account_id' => (string) $scheduledPost->instagram_account_id,
+                    'scheduled_at' => $scheduledPost->scheduled_at->format('Y-m-d\TH:i'),
+                ];
             }
         }
+
+        if ($this->scheduledItems === []) {
+            $this->scheduledItems = [self::emptyScheduledItem()];
+        }
+    }
+
+    private function buildPayload(): array
+    {
+        $campaigns = collect($this->campaigns)
+            ->values()
+            ->map(fn (array $campaign): array => [
+                'id' => filled($campaign['id'] ?? null) ? (int) $campaign['id'] : null,
+                'name' => $campaign['name'] ?? '',
+                'description' => $campaign['description'] ?? '',
+                'scheduled_items' => [],
+            ])
+            ->all();
+
+        foreach ($this->scheduledItems as $scheduledItem) {
+            $campaignIndex = (int) ($scheduledItem['campaign_index'] ?? 0);
+
+            if (! array_key_exists($campaignIndex, $campaigns)) {
+                $campaignIndex = 0;
+            }
+
+            $campaigns[$campaignIndex]['scheduled_items'][] = [
+                'id' => filled($scheduledItem['id'] ?? null) ? (int) $scheduledItem['id'] : null,
+                'title' => $scheduledItem['title'] ?? '',
+                'description' => $scheduledItem['description'] ?? '',
+                'media_type' => $scheduledItem['media_type'] ?? MediaType::Post->value,
+                'instagram_account_id' => $scheduledItem['instagram_account_id'] ?? '',
+                'scheduled_at' => $scheduledItem['scheduled_at'] ?? '',
+            ];
+        }
+
+        return [
+            'title' => $this->title,
+            'client_id' => $this->client_id,
+            'content' => $this->content,
+            'campaigns' => $campaigns,
+        ];
     }
 
     private static function emptyCampaign(): array
@@ -207,7 +294,6 @@ class Edit extends Component
             'id' => null,
             'name' => '',
             'description' => '',
-            'scheduled_items' => [self::emptyScheduledItem()],
         ];
     }
 
@@ -215,6 +301,7 @@ class Edit extends Component
     {
         return [
             'id' => null,
+            'campaign_index' => 0,
             'title' => '',
             'description' => '',
             'media_type' => MediaType::Post->value,
