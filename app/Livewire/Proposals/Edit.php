@@ -178,17 +178,6 @@ class Edit extends Component
         return $this->redirectRoute('proposals.index', navigate: true);
     }
 
-    public function duplicate(ProposalWorkflowService $proposalWorkflowService)
-    {
-        $this->authorize('view', $this->proposal);
-
-        $duplicate = $proposalWorkflowService->duplicate(auth()->user(), $this->proposal);
-
-        session()->flash('status', 'Proposal duplicated as draft.');
-
-        return $this->redirectRoute('proposals.edit', ['proposal' => $duplicate->id], navigate: true);
-    }
-
     public function isEditable(): bool
     {
         return in_array($this->proposal->status, [ProposalStatus::Draft, ProposalStatus::Revised], true);

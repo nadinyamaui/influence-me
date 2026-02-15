@@ -293,7 +293,7 @@ test('markdown preview toggle renders proposal markdown on edit page', function 
         ->assertSeeHtml('<h1>Heading</h1>');
 });
 
-test('sent proposals render read-only state and can be duplicated', function (): void {
+test('sent proposals render read-only state', function (): void {
     $user = User::factory()->create();
     $client = Client::factory()->for($user)->create();
 
@@ -304,18 +304,7 @@ test('sent proposals render read-only state and can be duplicated', function ():
 
     Livewire::actingAs($user)
         ->test(ProposalEdit::class, ['proposal' => $proposal])
-        ->assertSee('This proposal is read-only')
-        ->assertSee('Duplicate')
-        ->call('duplicate')
-        ->assertRedirect();
-
-    $duplicate = Proposal::query()
-        ->where('user_id', $user->id)
-        ->where('title', 'Sent Proposal (Copy)')
-        ->first();
-
-    expect($duplicate)->not->toBeNull()
-        ->and($duplicate->status)->toBe(ProposalStatus::Draft);
+        ->assertSee('This proposal is read-only');
 });
 
 test('users cannot update sent proposals', function (): void {

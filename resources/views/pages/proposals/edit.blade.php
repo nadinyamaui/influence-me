@@ -10,11 +10,6 @@
         </div>
 
         <div class="flex items-center gap-2">
-            @if (! $this->isEditable())
-                <flux:button type="button" variant="primary" wire:click="duplicate">
-                    Duplicate
-                </flux:button>
-            @endif
             <flux:button :href="route('proposals.index')" variant="filled" wire:navigate>
                 Back
             </flux:button>

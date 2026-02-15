@@ -27,22 +27,6 @@ class ProposalWorkflowService
         ]);
     }
 
-    public function createDraftWithCampaignSchedule(User $user, array $payload): Proposal
-    {
-        return DB::transaction(function () use ($user, $payload): Proposal {
-            $proposal = $user->proposals()->create([
-                'client_id' => (int) $payload['client_id'],
-                'title' => $payload['title'],
-                'content' => $payload['content'],
-                'status' => ProposalStatus::Draft,
-            ]);
-
-            $this->syncCampaignsAndScheduledItems($proposal, $user, $payload['campaigns'], false);
-
-            return $proposal;
-        });
-    }
-
     public function updateDraftWithCampaignSchedule(User $user, Proposal $proposal, array $payload): Proposal
     {
         $this->ensureOwner($user, $proposal);
@@ -62,40 +46,6 @@ class ProposalWorkflowService
             $this->syncCampaignsAndScheduledItems($proposal, $user, $campaignPayloads, true);
 
             return $proposal->refresh();
-        });
-    }
-
-    public function duplicate(User $user, Proposal $proposal): Proposal
-    {
-        $this->ensureOwner($user, $proposal);
-
-        return DB::transaction(function () use ($user, $proposal): Proposal {
-            $duplicate = $user->proposals()->create([
-                'client_id' => $proposal->client_id,
-                'title' => $proposal->title.' (Copy)',
-                'content' => $proposal->content,
-                'status' => ProposalStatus::Draft,
-                'revision_notes' => null,
-                'sent_at' => null,
-                'responded_at' => null,
-            ]);
-
-            $proposal->loadMissing('campaigns.scheduledPosts');
-
-            foreach ($proposal->campaigns as $campaign) {
-                $copiedCampaign = $campaign->replicate(['proposal_id']);
-                $copiedCampaign->proposal_id = $duplicate->id;
-                $copiedCampaign->save();
-
-                foreach ($campaign->scheduledPosts as $scheduledPost) {
-                    $copiedScheduledPost = $scheduledPost->replicate(['campaign_id', 'status']);
-                    $copiedScheduledPost->campaign_id = $copiedCampaign->id;
-                    $copiedScheduledPost->status = ScheduledPostStatus::Planned;
-                    $copiedScheduledPost->save();
-                }
-            }
-
-            return $duplicate;
         });
     }
 
