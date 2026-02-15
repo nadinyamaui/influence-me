@@ -2,6 +2,7 @@
 
 namespace App\Services\Content;
 
+use App\Models\Campaign;
 use App\Models\Client;
 use App\Models\InstagramMedia;
 use App\Models\User;
@@ -10,33 +11,27 @@ use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 
 class ContentClientLinkService
 {
-    public function link(User $user, InstagramMedia $media, Client $client, ?string $campaignName, ?string $notes): void
+    public function link(User $user, InstagramMedia $media, Campaign $campaign, ?string $notes): void
     {
-        $this->ensureOwnership($user, $media, $client);
-
-        $name = trim((string) ($campaignName ?? ''));
-        $resolvedCampaignName = $name !== '' ? $name : 'Uncategorized';
-
-        $campaign = $client->campaigns()->firstOrCreate(
-            ['name' => $resolvedCampaignName],
-            ['proposal_id' => null, 'description' => null],
-        );
+        $this->ensureCampaignOwnership($user, $campaign);
+        $this->ensureMediaOwnership($user, $media);
 
         $campaign->instagramMedia()->syncWithoutDetaching([
             $media->id => ['notes' => $notes],
         ]);
     }
 
-    public function batchLink(User $user, EloquentCollection $mediaItems, Client $client, ?string $campaignName, ?string $notes): void
+    public function batchLink(User $user, EloquentCollection $mediaItems, Campaign $campaign, ?string $notes): void
     {
         foreach ($mediaItems as $media) {
-            $this->link($user, $media, $client, $campaignName, $notes);
+            $this->link($user, $media, $campaign, $notes);
         }
     }
 
     public function unlink(User $user, InstagramMedia $media, Client $client): void
     {
-        $this->ensureOwnership($user, $media, $client);
+        $this->ensureClientOwnership($user, $client);
+        $this->ensureMediaOwnership($user, $media);
 
         $client->campaigns()
             ->with('instagramMedia')
@@ -44,14 +39,27 @@ class ContentClientLinkService
             ->each(fn ($campaign): int => $campaign->instagramMedia()->detach($media->id));
     }
 
-    private function ensureOwnership(User $user, InstagramMedia $media, Client $client): void
+    private function ensureCampaignOwnership(User $user, Campaign $campaign): void
+    {
+        $campaign->loadMissing('client');
+
+        if ($campaign->client?->user_id !== $user->id) {
+            throw new AuthorizationException('You are not allowed to modify this media-client link.');
+        }
+    }
+
+    private function ensureClientOwnership(User $user, Client $client): void
+    {
+        if ($client->user_id !== $user->id) {
+            throw new AuthorizationException('You are not allowed to modify this media-client link.');
+        }
+    }
+
+    private function ensureMediaOwnership(User $user, InstagramMedia $media): void
     {
         $media->loadMissing('instagramAccount');
 
-        $ownsClient = $client->user_id === $user->id;
-        $ownsMedia = $media->instagramAccount?->user_id === $user->id;
-
-        if (! $ownsClient || ! $ownsMedia) {
+        if ($media->instagramAccount?->user_id !== $user->id) {
             throw new AuthorizationException('You are not allowed to modify this media-client link.');
         }
     }

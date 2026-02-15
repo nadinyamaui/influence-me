@@ -3,6 +3,7 @@
 namespace App\Livewire\Content;
 
 use App\Enums\MediaType;
+use App\Models\Campaign;
 use App\Models\Client;
 use App\Models\InstagramMedia;
 use App\Services\Content\ContentClientLinkService;
@@ -48,7 +49,13 @@ class Index extends Component
 
     public ?string $linkClientId = null;
 
-    public string $linkCampaignName = '';
+    public ?string $linkCampaignId = null;
+
+    public bool $showInlineCampaignForm = false;
+
+    public string $inlineCampaignName = '';
+
+    public string $inlineCampaignDescription = '';
 
     public string $linkNotes = '';
 
@@ -138,9 +145,34 @@ class Index extends Component
             'selectedMedia' => $this->selectedMedia(),
             'sortOptions' => $this->sortOptions(),
             'unlinkClient' => $this->unlinkClient(),
+            'linkCampaigns' => $this->linkCampaignOptions(),
         ])->layout('layouts.app', [
             'title' => __('Content'),
         ]);
+    }
+
+    public function updatedLinkClientId(?string $value): void
+    {
+        if ($value === null || $value === '') {
+            $this->linkCampaignId = null;
+            $this->showInlineCampaignForm = false;
+            $this->inlineCampaignName = '';
+            $this->inlineCampaignDescription = '';
+
+            return;
+        }
+
+        $ownsClient = Auth::user()->clients()->whereKey((int) $value)->exists();
+
+        if (! $ownsClient) {
+            $this->linkClientId = null;
+            $this->linkCampaignId = null;
+            $this->showInlineCampaignForm = false;
+            $this->inlineCampaignName = '';
+            $this->inlineCampaignDescription = '';
+        } elseif ($this->linkCampaignId !== null && ! $this->linkCampaignOptions()->contains('id', (int) $this->linkCampaignId)) {
+            $this->linkCampaignId = null;
+        }
     }
 
     public function openDetailModal(int $mediaId): void
@@ -241,13 +273,22 @@ class Index extends Component
                 'integer',
                 Rule::exists('clients', 'id')->where(fn ($builder) => $builder->where('user_id', Auth::id())),
             ],
-            'linkCampaignName' => ['nullable', 'string', 'max:255'],
+            'linkCampaignId' => [
+                'required',
+                'integer',
+                Rule::exists('campaigns', 'id')->where(function ($builder) {
+                    if ($this->linkClientId !== null) {
+                        $builder->where('client_id', (int) $this->linkClientId);
+                    }
+
+                    return $builder->whereIn('client_id', Auth::user()->clients()->select('id'));
+                }),
+            ],
             'linkNotes' => ['nullable', 'string', 'max:2000'],
         ]);
 
         $user = Auth::user();
-        $client = $this->resolveClient((int) $validated['linkClientId']);
-        $campaignName = blank($validated['linkCampaignName']) ? null : $validated['linkCampaignName'];
+        $campaign = $this->resolveCampaign((int) $validated['linkCampaignId']);
         $notes = blank($validated['linkNotes']) ? null : $validated['linkNotes'];
 
         if ($this->linkingBatch) {
@@ -262,7 +303,7 @@ class Index extends Component
                 $this->authorize('linkToClient', $media);
             }
 
-            $linkService->batchLink($user, $mediaItems, $client, $campaignName, $notes);
+            $linkService->batchLink($user, $mediaItems, $campaign, $notes);
 
             $this->cancelSelectionMode();
             $this->showLinkModal = false;
@@ -279,11 +320,60 @@ class Index extends Component
         $media = InstagramMedia::resolveForUser($this->selectedMediaId);
         $this->authorize('linkToClient', $media);
 
-        $linkService->link($user, $media, $client, $campaignName, $notes);
+        $linkService->link($user, $media, $campaign, $notes);
 
         $this->showLinkModal = false;
         $this->resetLinkForm();
         session()->flash('status', 'Content linked to client.');
+    }
+
+    public function toggleInlineCampaignForm(): void
+    {
+        if ($this->linkClientId === null || $this->linkClientId === '') {
+            $this->addError('linkClientId', 'Select a client before creating a campaign.');
+
+            return;
+        }
+
+        $this->showInlineCampaignForm = ! $this->showInlineCampaignForm;
+
+        if (! $this->showInlineCampaignForm) {
+            $this->inlineCampaignName = '';
+            $this->inlineCampaignDescription = '';
+            $this->resetErrorBag(['inlineCampaignName', 'inlineCampaignDescription']);
+        }
+    }
+
+    public function createInlineCampaign(): void
+    {
+        $validated = $this->validate([
+            'linkClientId' => [
+                'required',
+                'integer',
+                Rule::exists('clients', 'id')->where(fn ($builder) => $builder->where('user_id', Auth::id())),
+            ],
+            'inlineCampaignName' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('campaigns', 'name')->where(fn ($builder) => $builder->where('client_id', (int) $this->linkClientId)),
+            ],
+            'inlineCampaignDescription' => ['nullable', 'string', 'max:5000'],
+        ]);
+
+        $client = $this->resolveClient((int) $validated['linkClientId']);
+
+        $campaign = $client->campaigns()->create([
+            'name' => $validated['inlineCampaignName'],
+            'description' => blank($validated['inlineCampaignDescription']) ? null : $validated['inlineCampaignDescription'],
+            'proposal_id' => null,
+        ]);
+
+        $this->linkCampaignId = (string) $campaign->id;
+        $this->showInlineCampaignForm = false;
+        $this->inlineCampaignName = '';
+        $this->inlineCampaignDescription = '';
+        $this->resetErrorBag(['inlineCampaignName', 'inlineCampaignDescription']);
     }
 
     public function confirmUnlinkClient(int $clientId): void
@@ -462,11 +552,35 @@ class Index extends Component
             ->firstOrFail();
     }
 
+    private function resolveCampaign(int $campaignId): Campaign
+    {
+        return Campaign::query()
+            ->whereKey($campaignId)
+            ->whereIn('client_id', Auth::user()->clients()->select('id'))
+            ->firstOrFail();
+    }
+
+    private function linkCampaignOptions(): Collection
+    {
+        if ($this->linkClientId === null || $this->linkClientId === '') {
+            return collect();
+        }
+
+        return Campaign::query()
+            ->where('client_id', (int) $this->linkClientId)
+            ->whereIn('client_id', Auth::user()->clients()->select('id'))
+            ->orderBy('name')
+            ->get(['id', 'name']);
+    }
+
     private function resetLinkForm(): void
     {
         $this->linkClientId = null;
-        $this->linkCampaignName = '';
+        $this->linkCampaignId = null;
+        $this->showInlineCampaignForm = false;
+        $this->inlineCampaignName = '';
+        $this->inlineCampaignDescription = '';
         $this->linkNotes = '';
-        $this->resetErrorBag(['linkClientId', 'linkCampaignName', 'linkNotes']);
+        $this->resetErrorBag(['linkClientId', 'linkCampaignId', 'inlineCampaignName', 'inlineCampaignDescription', 'linkNotes']);
     }
 }

@@ -264,8 +264,43 @@
                 <p class="text-sm font-medium text-rose-600 dark:text-rose-300">{{ $message }}</p>
             @enderror
 
-            <flux:input wire:model="linkCampaignName" :label="__('Campaign Name (Optional)')" />
-            @error('linkCampaignName')
+            <div class="space-y-2">
+                <flux:select wire:model="linkCampaignId" :label="__('Campaign')">
+                    <option value="">Select a campaign</option>
+                    @foreach ($linkCampaigns as $campaign)
+                        <option value="{{ $campaign->id }}">{{ $campaign->name }}</option>
+                    @endforeach
+                </flux:select>
+                @error('linkCampaignId')
+                    <p class="text-sm font-medium text-rose-600 dark:text-rose-300">{{ $message }}</p>
+                @enderror
+
+                <flux:button type="button" size="sm" variant="filled" wire:click="toggleInlineCampaignForm">
+                    {{ $showInlineCampaignForm ? 'Cancel Campaign Create' : 'Create Campaign' }}
+                </flux:button>
+            </div>
+
+            @if ($showInlineCampaignForm)
+                <div class="space-y-3 rounded-xl border border-zinc-200 bg-zinc-50 p-3 dark:border-zinc-700 dark:bg-zinc-800/60">
+                    <flux:input wire:model="inlineCampaignName" :label="__('Campaign Name')" />
+                    @error('inlineCampaignName')
+                        <p class="text-sm font-medium text-rose-600 dark:text-rose-300">{{ $message }}</p>
+                    @enderror
+
+                    <flux:textarea wire:model="inlineCampaignDescription" :label="__('Campaign Description (Optional)')" />
+                    @error('inlineCampaignDescription')
+                        <p class="text-sm font-medium text-rose-600 dark:text-rose-300">{{ $message }}</p>
+                    @enderror
+
+                    <div class="flex justify-end">
+                        <flux:button type="button" size="sm" variant="primary" wire:click="createInlineCampaign">
+                            Save Campaign
+                        </flux:button>
+                    </div>
+                </div>
+            @endif
+
+            @error('linkSelection')
                 <p class="text-sm font-medium text-rose-600 dark:text-rose-300">{{ $message }}</p>
             @enderror
 

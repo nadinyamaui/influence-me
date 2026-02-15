@@ -14,14 +14,13 @@ test('content client link service links a media item to a client', function (): 
     $client = Client::factory()->for($user)->create();
     $account = InstagramAccount::factory()->for($user)->create();
     $media = InstagramMedia::factory()->for($account)->create();
+    $campaign = Campaign::factory()->for($client)->create([
+        'name' => 'Service Campaign',
+    ]);
 
     $service = app(ContentClientLinkService::class);
 
-    $service->link($user, $media, $client, 'Service Campaign', 'Service Notes');
-
-    $campaign = Campaign::query()->where('client_id', $client->id)->where('name', 'Service Campaign')->first();
-
-    expect($campaign)->not->toBeNull();
+    $service->link($user, $media, $campaign, 'Service Notes');
 
     $this->assertDatabaseHas('campaign_media', [
         'campaign_id' => $campaign->id,
@@ -37,20 +36,18 @@ test('content client link service batch links media items', function (): void {
 
     $firstMedia = InstagramMedia::factory()->for($account)->create();
     $secondMedia = InstagramMedia::factory()->for($account)->create();
+    $campaign = Campaign::factory()->for($client)->create([
+        'name' => 'Batch Service Campaign',
+    ]);
 
     $service = app(ContentClientLinkService::class);
 
     $service->batchLink(
         $user,
         InstagramMedia::query()->whereKey([$firstMedia->id, $secondMedia->id])->get(),
-        $client,
-        'Batch Service Campaign',
+        $campaign,
         null,
     );
-
-    $campaign = Campaign::query()->where('client_id', $client->id)->where('name', 'Batch Service Campaign')->first();
-
-    expect($campaign)->not->toBeNull();
 
     $this->assertDatabaseHas('campaign_media', [
         'campaign_id' => $campaign->id,
@@ -87,11 +84,12 @@ test('content client link service enforces ownership boundaries', function (): v
     $outsider = User::factory()->create();
 
     $ownerClient = Client::factory()->for($owner)->create();
+    $ownerCampaign = Campaign::factory()->for($ownerClient)->create();
     $ownerAccount = InstagramAccount::factory()->for($owner)->create();
     $ownerMedia = InstagramMedia::factory()->for($ownerAccount)->create();
 
     $service = app(ContentClientLinkService::class);
 
-    expect(fn (): mixed => $service->link($outsider, $ownerMedia, $ownerClient, null, null))
+    expect(fn (): mixed => $service->link($outsider, $ownerMedia, $ownerCampaign, null))
         ->toThrow(AuthorizationException::class);
 });

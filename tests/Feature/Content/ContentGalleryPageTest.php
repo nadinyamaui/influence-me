@@ -169,6 +169,9 @@ test('single media can be linked to a client and duplicate links are prevented',
     $user = User::factory()->create();
     $account = InstagramAccount::factory()->for($user)->create();
     $client = Client::factory()->for($user)->create();
+    $campaign = Campaign::factory()->for($client)->create([
+        'name' => 'Spring Launch',
+    ]);
     $media = InstagramMedia::factory()->for($account)->create();
 
     Livewire::actingAs($user)
@@ -176,18 +179,14 @@ test('single media can be linked to a client and duplicate links are prevented',
         ->call('openDetailModal', $media->id)
         ->call('openSingleLinkModal')
         ->set('linkClientId', (string) $client->id)
-        ->set('linkCampaignName', 'Spring Launch')
+        ->set('linkCampaignId', (string) $campaign->id)
         ->set('linkNotes', 'Paid collaboration')
         ->call('saveLink')
         ->call('openSingleLinkModal')
         ->set('linkClientId', (string) $client->id)
-        ->set('linkCampaignName', 'Spring Launch')
+        ->set('linkCampaignId', (string) $campaign->id)
         ->set('linkNotes', 'Paid collaboration')
         ->call('saveLink');
-
-    $campaign = Campaign::query()->where('client_id', $client->id)->where('name', 'Spring Launch')->first();
-
-    expect($campaign)->not->toBeNull();
 
     $this->assertDatabaseHas('campaign_media', [
         'campaign_id' => $campaign->id,
@@ -205,6 +204,9 @@ test('batch selection mode links all selected media to a client', function (): v
     $user = User::factory()->create();
     $account = InstagramAccount::factory()->for($user)->create();
     $client = Client::factory()->for($user)->create();
+    $campaign = Campaign::factory()->for($client)->create([
+        'name' => 'Batch Campaign',
+    ]);
 
     $firstMedia = InstagramMedia::factory()->for($account)->create();
     $secondMedia = InstagramMedia::factory()->for($account)->create();
@@ -217,14 +219,10 @@ test('batch selection mode links all selected media to a client', function (): v
         ->call('toggleSelectedMedia', $secondMedia->id)
         ->call('openBatchLinkModal')
         ->set('linkClientId', (string) $client->id)
-        ->set('linkCampaignName', 'Batch Campaign')
+        ->set('linkCampaignId', (string) $campaign->id)
         ->call('saveLink')
         ->assertSet('selectionMode', false)
         ->assertSet('selectedMediaIds', []);
-
-    $campaign = Campaign::query()->where('client_id', $client->id)->where('name', 'Batch Campaign')->first();
-
-    expect($campaign)->not->toBeNull();
 
     $this->assertDatabaseHas('campaign_media', [
         'campaign_id' => $campaign->id,
@@ -272,6 +270,7 @@ test('users cannot link content to clients they do not own', function (): void {
     $outsider = User::factory()->create();
 
     $ownerClient = Client::factory()->for($owner)->create();
+    $ownerCampaign = Campaign::factory()->for($ownerClient)->create();
 
     $outsiderAccount = InstagramAccount::factory()->for($outsider)->create();
     $outsiderMedia = InstagramMedia::factory()->for($outsiderAccount)->create();
@@ -281,12 +280,42 @@ test('users cannot link content to clients they do not own', function (): void {
         ->call('openDetailModal', $outsiderMedia->id)
         ->call('openSingleLinkModal')
         ->set('linkClientId', (string) $ownerClient->id)
-        ->set('linkCampaignName', 'Unauthorized')
+        ->set('linkCampaignId', (string) $ownerCampaign->id)
         ->call('saveLink')
-        ->assertHasErrors(['linkClientId']);
+        ->assertHasErrors(['linkClientId', 'linkCampaignId']);
 
     $this->assertDatabaseMissing('campaign_media', [
         'instagram_media_id' => $outsiderMedia->id,
+    ]);
+});
+
+test('inline campaign creation works in content linking flow', function (): void {
+    $user = User::factory()->create();
+    $account = InstagramAccount::factory()->for($user)->create();
+    $client = Client::factory()->for($user)->create();
+    $media = InstagramMedia::factory()->for($account)->create();
+
+    Livewire::actingAs($user)
+        ->test(Index::class)
+        ->call('openDetailModal', $media->id)
+        ->call('openSingleLinkModal')
+        ->set('linkClientId', (string) $client->id)
+        ->call('toggleInlineCampaignForm')
+        ->set('inlineCampaignName', 'Inline Launch Campaign')
+        ->set('inlineCampaignDescription', 'Created from link flow')
+        ->call('createInlineCampaign')
+        ->call('saveLink');
+
+    $campaign = Campaign::query()
+        ->where('client_id', $client->id)
+        ->where('name', 'Inline Launch Campaign')
+        ->first();
+
+    expect($campaign)->not->toBeNull();
+
+    $this->assertDatabaseHas('campaign_media', [
+        'campaign_id' => $campaign->id,
+        'instagram_media_id' => $media->id,
     ]);
 });
 
