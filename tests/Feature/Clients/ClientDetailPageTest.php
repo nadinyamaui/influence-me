@@ -62,6 +62,7 @@ test('owner can view client detail page with summary and tabs', function (): voi
         ->assertSee('Portal access: Active')
         ->assertSee('Overview')
         ->assertSee('Content')
+        ->assertSee('Campaigns')
         ->assertSee('Proposals')
         ->assertSee('Invoices')
         ->assertSee('Analytics')
@@ -79,6 +80,9 @@ test('owner can view client detail page with summary and tabs', function (): voi
         ->assertSee('Average engagement rate')
         ->assertSee('Uncategorized')
         ->assertSee('Unlink')
+        ->set('activeTab', 'campaigns')
+        ->assertSee('Campaigns')
+        ->assertSee('Add Campaign')
         ->set('activeTab', 'proposals')
         ->assertSee('Proposals tab coming soon.')
         ->set('activeTab', 'invoices')
@@ -170,4 +174,75 @@ test('owners can unlink linked media from client content tab', function (): void
         'campaign_id' => $campaign->id,
         'instagram_media_id' => $media->id,
     ]);
+});
+
+test('campaigns tab shows empty state then supports campaign create edit unlink proposal and delete', function (): void {
+    $owner = User::factory()->create();
+    $client = Client::factory()->for($owner)->create();
+    $otherClient = Client::factory()->for($owner)->create();
+
+    $proposal = Proposal::factory()->for($owner)->for($client)->create([
+        'title' => 'Client Proposal',
+    ]);
+
+    Proposal::factory()->for($owner)->for($otherClient)->create([
+        'title' => 'Other Client Proposal',
+    ]);
+
+    $component = Livewire::actingAs($owner)
+        ->test(Show::class, ['client' => $client])
+        ->set('activeTab', 'campaigns')
+        ->assertSee('Add Campaign')
+        ->call('openCreateCampaignModal')
+        ->set('campaignName', 'Spring Launch')
+        ->set('campaignDescription', 'Seasonal campaign rollout')
+        ->set('campaignProposalId', (string) $proposal->id)
+        ->call('saveCampaign')
+        ->assertSee('Spring Launch')
+        ->assertSee('Client Proposal');
+
+    $campaign = Campaign::query()->where('client_id', $client->id)->where('name', 'Spring Launch')->first();
+
+    expect($campaign)->not->toBeNull();
+
+    $component->call('openEditCampaignModal', $campaign->id)
+        ->set('campaignName', 'Spring Launch Updated')
+        ->set('campaignDescription', '')
+        ->set('campaignProposalId', '')
+        ->call('saveCampaign')
+        ->assertSee('Spring Launch Updated')
+        ->assertSee('Proposal: Not linked')
+        ->call('confirmDeleteCampaign', $campaign->id)
+        ->call('deleteCampaign');
+
+    $this->assertDatabaseMissing('campaigns', [
+        'id' => $campaign->id,
+    ]);
+});
+
+test('campaign create enforces client scoped proposal validation', function (): void {
+    $owner = User::factory()->create();
+    $client = Client::factory()->for($owner)->create();
+    $otherClient = Client::factory()->for($owner)->create();
+
+    $otherClientProposal = Proposal::factory()->for($owner)->for($otherClient)->create();
+
+    Livewire::actingAs($owner)
+        ->test(Show::class, ['client' => $client])
+        ->set('activeTab', 'campaigns')
+        ->call('openCreateCampaignModal')
+        ->set('campaignName', 'Invalid Proposal Link')
+        ->set('campaignProposalId', (string) $otherClientProposal->id)
+        ->call('saveCampaign')
+        ->assertHasErrors(['campaignProposalId']);
+});
+
+test('campaigns tab shows empty state when client has no campaigns', function (): void {
+    $owner = User::factory()->create();
+    $client = Client::factory()->for($owner)->create();
+
+    Livewire::actingAs($owner)
+        ->test(Show::class, ['client' => $client])
+        ->set('activeTab', 'campaigns')
+        ->assertSee('No campaigns yet. Add a campaign to organize this client');
 });

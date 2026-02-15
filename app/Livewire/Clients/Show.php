@@ -7,6 +7,7 @@ use App\Enums\ProposalStatus;
 use App\Models\Campaign;
 use App\Models\Client;
 use App\Models\InstagramMedia;
+use App\Models\Proposal;
 use App\Services\Clients\ClientPortalAccessService;
 use App\Services\Content\ContentClientLinkService;
 use Illuminate\Database\Eloquent\Builder;
@@ -14,6 +15,7 @@ use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Livewire\Component;
 
@@ -32,6 +34,18 @@ class Show extends Component
     public array $linkedContentSummaryData = [];
 
     public bool $linkedContentLoaded = false;
+
+    public bool $showCampaignModal = false;
+
+    public ?int $editingCampaignId = null;
+
+    public ?int $confirmingDeleteCampaignId = null;
+
+    public string $campaignName = '';
+
+    public string $campaignDescription = '';
+
+    public ?string $campaignProposalId = null;
 
     public function mount(Client $client): void
     {
@@ -53,6 +67,8 @@ class Show extends Component
             'summary' => $this->summary(),
             'linkedContentGroups' => $this->linkedContentGroups ?? collect(),
             'linkedContentSummary' => $this->linkedContentSummaryData,
+            'campaigns' => $this->campaigns(),
+            'campaignProposals' => $this->campaignProposals(),
             'hasPortalAccess' => $this->client->clientUser()->exists(),
         ])->layout('layouts.app', [
             'title' => __('Client Details'),
@@ -142,6 +158,118 @@ class Show extends Component
         session()->flash('status', 'Content unlinked from client.');
     }
 
+    public function openCreateCampaignModal(): void
+    {
+        $this->authorize('update', $this->client);
+
+        $this->editingCampaignId = null;
+        $this->campaignName = '';
+        $this->campaignDescription = '';
+        $this->campaignProposalId = null;
+        $this->resetErrorBag(['campaignName', 'campaignDescription', 'campaignProposalId']);
+        $this->showCampaignModal = true;
+    }
+
+    public function openEditCampaignModal(int $campaignId): void
+    {
+        $campaign = $this->resolveClientCampaign($campaignId);
+        $this->authorize('update', $campaign);
+
+        $this->editingCampaignId = $campaign->id;
+        $this->campaignName = $campaign->name;
+        $this->campaignDescription = $campaign->description ?? '';
+        $this->campaignProposalId = $campaign->proposal_id !== null ? (string) $campaign->proposal_id : null;
+        $this->resetErrorBag(['campaignName', 'campaignDescription', 'campaignProposalId']);
+        $this->showCampaignModal = true;
+    }
+
+    public function closeCampaignModal(): void
+    {
+        $this->showCampaignModal = false;
+        $this->resetErrorBag(['campaignName', 'campaignDescription', 'campaignProposalId']);
+    }
+
+    public function saveCampaign(): void
+    {
+        $this->authorize('update', $this->client);
+
+        $campaign = null;
+
+        if ($this->editingCampaignId !== null) {
+            $campaign = $this->resolveClientCampaign($this->editingCampaignId);
+            $this->authorize('update', $campaign);
+        }
+
+        $validated = $this->validate([
+            'campaignName' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('campaigns', 'name')
+                    ->where(fn ($builder) => $builder->where('client_id', $this->client->id))
+                    ->ignore($this->editingCampaignId),
+            ],
+            'campaignDescription' => ['nullable', 'string', 'max:5000'],
+            'campaignProposalId' => [
+                'nullable',
+                Rule::exists('proposals', 'id')->where(fn ($builder) => $builder
+                    ->where('user_id', Auth::id())
+                    ->where('client_id', $this->client->id)),
+            ],
+        ]);
+
+        $payload = [
+            'name' => $validated['campaignName'],
+            'description' => $validated['campaignDescription'] !== '' ? $validated['campaignDescription'] : null,
+            'proposal_id' => $validated['campaignProposalId'] !== null && $validated['campaignProposalId'] !== ''
+                ? (int) $validated['campaignProposalId']
+                : null,
+        ];
+
+        if ($campaign === null) {
+            $this->client->campaigns()->create($payload);
+            session()->flash('status', 'Campaign created.');
+        } else {
+            $campaign->update($payload);
+            session()->flash('status', 'Campaign updated.');
+        }
+
+        $this->closeCampaignModal();
+    }
+
+    public function confirmDeleteCampaign(int $campaignId): void
+    {
+        $campaign = $this->resolveClientCampaign($campaignId);
+        $this->authorize('delete', $campaign);
+
+        $this->confirmingDeleteCampaignId = $campaign->id;
+    }
+
+    public function cancelDeleteCampaign(): void
+    {
+        $this->confirmingDeleteCampaignId = null;
+    }
+
+    public function deleteCampaign(): void
+    {
+        if ($this->confirmingDeleteCampaignId === null) {
+            return;
+        }
+
+        $campaign = $this->resolveClientCampaign($this->confirmingDeleteCampaignId);
+        $this->authorize('delete', $campaign);
+
+        $campaign->delete();
+        $this->confirmingDeleteCampaignId = null;
+
+        if ($this->activeTab === 'content') {
+            $this->linkedContentLoaded = false;
+            $this->loadLinkedContent();
+        }
+
+        session()->flash('status', 'Campaign deleted.');
+    }
+
     private function loadLinkedContent(): void
     {
         if ($this->linkedContentLoaded) {
@@ -228,5 +356,30 @@ class Show extends Component
             ->select('instagram_media.*')
             ->whereHas('campaigns', fn (Builder $builder): Builder => $builder->where('campaigns.client_id', $this->client->id))
             ->distinct();
+    }
+
+    private function campaigns(): EloquentCollection
+    {
+        return $this->client->campaigns()
+            ->with('proposal')
+            ->withCount('instagramMedia')
+            ->orderBy('name')
+            ->get();
+    }
+
+    private function campaignProposals(): EloquentCollection
+    {
+        return Proposal::query()
+            ->where('user_id', Auth::id())
+            ->where('client_id', $this->client->id)
+            ->orderByDesc('created_at')
+            ->get(['id', 'title', 'status']);
+    }
+
+    private function resolveClientCampaign(int $campaignId): Campaign
+    {
+        return $this->client->campaigns()
+            ->whereKey($campaignId)
+            ->firstOrFail();
     }
 }
