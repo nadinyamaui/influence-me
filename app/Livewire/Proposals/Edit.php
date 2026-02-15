@@ -4,8 +4,6 @@ namespace App\Livewire\Proposals;
 
 use App\Enums\MediaType;
 use App\Enums\ProposalStatus;
-use App\Http\Requests\StoreProposalRequest;
-use App\Models\Campaign;
 use App\Models\Proposal;
 use App\Models\User;
 use App\Services\Proposals\ProposalWorkflowService;
@@ -123,13 +121,17 @@ class Edit extends Component
         $this->currentStep = max(1, min(3, $step));
     }
 
-    public function nextStep(): void
+    public function nextStep(ProposalWorkflowService $proposalWorkflowService): void
     {
+        $this->persistDraft($proposalWorkflowService);
+
         $this->goToStep($this->currentStep + 1);
     }
 
-    public function previousStep(): void
+    public function previousStep(ProposalWorkflowService $proposalWorkflowService): void
     {
+        $this->persistDraft($proposalWorkflowService);
+
         $this->goToStep($this->currentStep - 1);
     }
 
@@ -146,12 +148,7 @@ class Edit extends Component
             abort(403);
         }
 
-        $validated = validator(
-            $this->buildPayload(),
-            StoreProposalRequest::rulesFor((int) auth()->id(), $this->client_id !== '' ? (int) $this->client_id : null),
-        )->validate();
-
-        $proposalWorkflowService->updateDraftWithCampaignSchedule(auth()->user(), $this->proposal, $validated);
+        $proposalWorkflowService->updateDraftWithCampaignSchedule(auth()->user(), $this->proposal, $this->buildPayload());
 
         session()->flash('status', 'Proposal updated.');
 
@@ -202,7 +199,6 @@ class Edit extends Component
         return view('pages.proposals.edit', [
             'clients' => User::availableClients(),
             'instagramAccounts' => User::accounts(),
-            'availableCampaigns' => $this->availableCampaigns(),
             'mediaTypes' => MediaType::cases(),
         ])->layout('layouts.app', [
             'title' => __('Edit Proposal'),
@@ -310,16 +306,12 @@ class Edit extends Component
         ];
     }
 
-    private function availableCampaigns()
+    private function persistDraft(ProposalWorkflowService $proposalWorkflowService): void
     {
-        if ($this->client_id === '' || ! is_numeric($this->client_id)) {
-            return collect();
+        if (! $this->isEditable()) {
+            return;
         }
 
-        return Campaign::query()
-            ->where('client_id', (int) $this->client_id)
-            ->whereHas('client', fn ($query) => $query->where('user_id', auth()->id()))
-            ->orderBy('name')
-            ->get(['id', 'name']);
+        $proposalWorkflowService->updateDraftWithCampaignSchedule(auth()->user(), $this->proposal, $this->buildPayload());
     }
 }

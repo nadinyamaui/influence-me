@@ -98,6 +98,7 @@ test('edit page loads existing proposal data and updates draft proposals through
     ]);
 
     $payload = proposalWorkflowPayload($account->id);
+    $payload['campaigns'][0]['id'] = $campaign->id;
 
     $component = Livewire::actingAs($user)
         ->test(ProposalEdit::class, ['proposal' => $proposal]);
@@ -126,7 +127,7 @@ test('edit page loads existing proposal data and updates draft proposals through
         ->and($updatedScheduledPost->media_type->value)->toBe('reel');
 });
 
-test('linking an existing campaign on edit does not remove existing scheduled posts', function (): void {
+test('linking an existing campaign on edit is ignored while saving draft', function (): void {
     $user = User::factory()->create();
     $client = Client::factory()->for($user)->create();
     $account = InstagramAccount::factory()->for($user)->create();
@@ -174,7 +175,109 @@ test('linking an existing campaign on edit does not remove existing scheduled po
         ->call('update')
         ->assertRedirect(route('proposals.index'));
 
-    expect(ScheduledPost::query()->where('campaign_id', $existingCampaign->id)->count())->toBe(2);
+    expect(ScheduledPost::query()->where('campaign_id', $existingCampaign->id)->count())->toBe(1);
+});
+
+test('saving as draft skips validation and persists safe defaults', function (): void {
+    $user = User::factory()->create();
+    $client = Client::factory()->for($user)->create();
+
+    $proposal = Proposal::factory()->for($user)->for($client)->draft()->create([
+        'title' => 'Original Title',
+        'content' => '# Original',
+    ]);
+
+    Livewire::actingAs($user)
+        ->test(ProposalEdit::class, ['proposal' => $proposal])
+        ->set('title', '')
+        ->set('client_id', '')
+        ->set('content', '')
+        ->set('campaigns', [[
+            'id' => null,
+            'name' => '',
+            'description' => '',
+        ]])
+        ->set('scheduledItems', [[
+            'id' => null,
+            'campaign_index' => 0,
+            'title' => '',
+            'description' => '',
+            'media_type' => 'invalid-type',
+            'instagram_account_id' => '',
+            'scheduled_at' => '',
+        ]])
+        ->call('update')
+        ->assertRedirect(route('proposals.index'));
+
+    $proposal->refresh();
+
+    expect($proposal->title)->toBe('')
+        ->and($proposal->content)->toBe('')
+        ->and($proposal->client_id)->toBe($client->id)
+        ->and(Campaign::query()->where('proposal_id', $proposal->id)->exists())->toBeFalse()
+        ->and(ScheduledPost::query()->where('client_id', $client->id)->where('user_id', $user->id)->count())->toBe(0);
+});
+
+test('next and previous step actions persist draft changes', function (): void {
+    $user = User::factory()->create();
+    $client = Client::factory()->for($user)->create();
+
+    $proposal = Proposal::factory()->for($user)->for($client)->draft()->create([
+        'title' => 'Original Title',
+        'content' => '# Original',
+    ]);
+
+    $component = Livewire::actingAs($user)
+        ->test(ProposalEdit::class, ['proposal' => $proposal])
+        ->set('title', 'Saved On Next')
+        ->call('nextStep')
+        ->assertSet('currentStep', 2);
+
+    $proposal->refresh();
+
+    expect($proposal->title)->toBe('Saved On Next');
+
+    $component
+        ->set('content', '# Saved On Previous')
+        ->call('previousStep')
+        ->assertSet('currentStep', 1);
+
+    $proposal->refresh();
+
+    expect($proposal->content)->toBe('# Saved On Previous');
+});
+
+test('step navigation autosave does not create duplicate campaigns with same name', function (): void {
+    $user = User::factory()->create();
+    $client = Client::factory()->for($user)->create();
+    $account = InstagramAccount::factory()->for($user)->create();
+
+    $proposal = Proposal::factory()->for($user)->for($client)->draft()->create();
+
+    Livewire::actingAs($user)
+        ->test(ProposalEdit::class, ['proposal' => $proposal])
+        ->set('campaigns', [[
+            'id' => null,
+            'name' => 'Nombre 2',
+            'description' => '',
+        ]])
+        ->set('scheduledItems', [[
+            'id' => null,
+            'campaign_index' => 0,
+            'title' => 'Post One',
+            'description' => '',
+            'media_type' => 'post',
+            'instagram_account_id' => (string) $account->id,
+            'scheduled_at' => now()->addDay()->format('Y-m-d\TH:i'),
+        ]])
+        ->call('nextStep')
+        ->call('previousStep');
+
+    expect(Campaign::query()
+        ->where('client_id', $client->id)
+        ->where('proposal_id', $proposal->id)
+        ->where('name', 'Nombre 2')
+        ->count())->toBe(1);
 });
 
 test('markdown preview toggle renders proposal markdown on edit page', function (): void {

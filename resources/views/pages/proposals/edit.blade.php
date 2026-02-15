@@ -102,18 +102,7 @@
 
                 @foreach ($campaigns as $campaignIndex => $campaign)
                     <article wire:key="step-campaign-{{ $campaignIndex }}" class="rounded-xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-700 dark:bg-zinc-800/60">
-                        <div class="grid gap-4 md:grid-cols-2">
-                            <flux:field>
-                                <flux:label>Existing Campaign (Optional)</flux:label>
-                                <flux:select wire:model="campaigns.{{ $campaignIndex }}.id" :disabled="! $this->isEditable()">
-                                    <option value="">Create new campaign</option>
-                                    @foreach ($availableCampaigns as $existingCampaign)
-                                        <option value="{{ $existingCampaign->id }}">{{ $existingCampaign->name }}</option>
-                                    @endforeach
-                                </flux:select>
-                                <flux:error name="campaigns.{{ $campaignIndex }}.id" />
-                            </flux:field>
-
+                        <div class="grid gap-4">
                             <flux:field>
                                 <flux:label>Campaign Name</flux:label>
                                 <flux:input wire:model="campaigns.{{ $campaignIndex }}.name" :disabled="! $this->isEditable()" />

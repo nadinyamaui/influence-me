@@ -2,12 +2,16 @@
 
 namespace App\Services\Proposals;
 
+use App\Enums\MediaType;
 use App\Enums\ProposalStatus;
 use App\Enums\ScheduledPostStatus;
 use App\Models\Campaign;
+use App\Models\Client;
+use App\Models\InstagramAccount;
 use App\Models\Proposal;
 use App\Models\User;
 use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
@@ -45,14 +49,17 @@ class ProposalWorkflowService
         $this->ensureEditable($proposal);
 
         return DB::transaction(function () use ($proposal, $user, $payload): Proposal {
+            $clientId = $this->resolveDraftClientId($user, $proposal, $payload);
+            $campaignPayloads = $this->normalizeDraftCampaignPayloads($payload['campaigns'] ?? []);
+
             $proposal->update([
-                'client_id' => (int) $payload['client_id'],
-                'title' => $payload['title'],
-                'content' => $payload['content'],
+                'client_id' => $clientId,
+                'title' => is_string($payload['title'] ?? null) ? $payload['title'] : $proposal->title,
+                'content' => is_string($payload['content'] ?? null) ? $payload['content'] : $proposal->content,
             ]);
 
-            $this->detachRemovedCampaigns($proposal, $payload['campaigns']);
-            $this->syncCampaignsAndScheduledItems($proposal, $user, $payload['campaigns'], true);
+            $this->detachRemovedCampaigns($proposal, $campaignPayloads);
+            $this->syncCampaignsAndScheduledItems($proposal, $user, $campaignPayloads, true);
 
             return $proposal->refresh();
         });
@@ -96,20 +103,24 @@ class ProposalWorkflowService
     {
         foreach ($campaignPayloads as $campaignPayload) {
             $campaign = $this->resolveOrCreateCampaign($proposal, $user, $campaignPayload);
-            $scheduledItemIds = [];
 
-            foreach ($campaignPayload['scheduled_items'] as $scheduledItemPayload) {
+            if ($campaign === null) {
+                continue;
+            }
+
+            $scheduledItemIds = [];
+            $canPruneItems = true;
+
+            foreach ($campaignPayload['scheduled_items'] ?? [] as $scheduledItemPayload) {
+                $scheduledAttributes = $this->resolveScheduledPostAttributes($proposal, $user, $scheduledItemPayload);
+
+                if ($scheduledAttributes === null) {
+                    $canPruneItems = false;
+
+                    continue;
+                }
+
                 $scheduledItemId = $scheduledItemPayload['id'] ?? null;
-                $attributes = [
-                    'user_id' => $user->id,
-                    'client_id' => $proposal->client_id,
-                    'instagram_account_id' => (int) $scheduledItemPayload['instagram_account_id'],
-                    'title' => $scheduledItemPayload['title'],
-                    'description' => $scheduledItemPayload['description'] ?? null,
-                    'media_type' => $scheduledItemPayload['media_type'],
-                    'scheduled_at' => $scheduledItemPayload['scheduled_at'],
-                    'status' => ScheduledPostStatus::Planned,
-                ];
 
                 if ($scheduledItemId !== null) {
                     $scheduledPost = $campaign->scheduledPosts()
@@ -118,22 +129,22 @@ class ProposalWorkflowService
                         ->first();
 
                     if ($scheduledPost === null) {
-                        throw ValidationException::withMessages([
-                            'campaigns' => 'One or more scheduled items are invalid.',
-                        ]);
+                        $canPruneItems = false;
+
+                        continue;
                     }
 
-                    $scheduledPost->update($attributes);
+                    $scheduledPost->update($scheduledAttributes);
                     $scheduledItemIds[] = $scheduledPost->id;
 
                     continue;
                 }
 
-                $scheduledPost = $campaign->scheduledPosts()->create($attributes);
+                $scheduledPost = $campaign->scheduledPosts()->create($scheduledAttributes);
                 $scheduledItemIds[] = $scheduledPost->id;
             }
 
-            if ($pruneMissingItems) {
+            if ($pruneMissingItems && $canPruneItems) {
                 $campaign->scheduledPosts()
                     ->where('user_id', $user->id)
                     ->when(
@@ -146,15 +157,38 @@ class ProposalWorkflowService
         }
     }
 
-    private function resolveOrCreateCampaign(Proposal $proposal, User $user, array $campaignPayload): Campaign
+    private function resolveOrCreateCampaign(Proposal $proposal, User $user, array $campaignPayload): ?Campaign
     {
         $campaignId = $campaignPayload['id'] ?? null;
+        $campaignName = is_string($campaignPayload['name'] ?? null) ? trim($campaignPayload['name']) : '';
 
         if ($campaignId === null) {
+            if ($campaignName === '') {
+                return null;
+            }
+
+            $existingCampaign = Campaign::query()
+                ->where('client_id', $proposal->client_id)
+                ->where('name', $campaignName)
+                ->first();
+
+            if ($existingCampaign !== null) {
+                if ($existingCampaign->proposal_id !== null && $existingCampaign->proposal_id !== $proposal->id) {
+                    return null;
+                }
+
+                $existingCampaign->update([
+                    'proposal_id' => $proposal->id,
+                    'description' => $campaignPayload['description'] ?? $existingCampaign->description,
+                ]);
+
+                return $existingCampaign;
+            }
+
             return Campaign::query()->create([
                 'client_id' => $proposal->client_id,
                 'proposal_id' => $proposal->id,
-                'name' => $campaignPayload['name'],
+                'name' => $campaignName,
                 'description' => $campaignPayload['description'] ?? null,
             ]);
         }
@@ -162,24 +196,16 @@ class ProposalWorkflowService
         $campaign = Campaign::query()
             ->whereKey((int) $campaignId)
             ->where('client_id', $proposal->client_id)
+            ->where('proposal_id', $proposal->id)
             ->whereHas('client', fn ($query) => $query->where('user_id', $user->id))
             ->first();
 
         if ($campaign === null) {
-            throw ValidationException::withMessages([
-                'campaigns' => 'One or more campaigns are invalid for the selected client.',
-            ]);
-        }
-
-        if ($campaign->proposal_id !== null && $campaign->proposal_id !== $proposal->id) {
-            throw ValidationException::withMessages([
-                'campaigns' => 'Selected campaigns must not already be linked to another proposal.',
-            ]);
+            return null;
         }
 
         $campaign->update([
-            'proposal_id' => $proposal->id,
-            'name' => $campaignPayload['name'] ?? $campaign->name,
+            'name' => $campaignName !== '' ? $campaignName : $campaign->name,
             'description' => $campaignPayload['description'] ?? $campaign->description,
         ]);
 
@@ -194,12 +220,12 @@ class ProposalWorkflowService
             ->map(fn ($id): int => (int) $id)
             ->all();
 
+        if ($campaignIds === []) {
+            return;
+        }
+
         $proposal->campaigns()
-            ->when(
-                $campaignIds !== [],
-                fn ($query) => $query->whereNotIn('id', $campaignIds),
-                fn ($query) => $query,
-            )
+            ->whereNotIn('id', $campaignIds)
             ->update(['proposal_id' => null]);
     }
 
@@ -217,5 +243,99 @@ class ProposalWorkflowService
                 'proposal' => 'Only draft or revised proposals can be edited.',
             ]);
         }
+    }
+
+    private function resolveDraftClientId(User $user, Proposal $proposal, array $payload): int
+    {
+        $clientId = $payload['client_id'] ?? null;
+
+        if (! is_numeric($clientId)) {
+            return $proposal->client_id;
+        }
+
+        $ownedClientExists = Client::query()
+            ->where('user_id', $user->id)
+            ->whereKey((int) $clientId)
+            ->exists();
+
+        return $ownedClientExists ? (int) $clientId : $proposal->client_id;
+    }
+
+    private function normalizeDraftCampaignPayloads(array $campaignPayloads): array
+    {
+        return collect($campaignPayloads)
+            ->values()
+            ->map(fn (array $campaignPayload): array => [
+                'id' => filled($campaignPayload['id'] ?? null) ? (int) $campaignPayload['id'] : null,
+                'name' => is_string($campaignPayload['name'] ?? null) ? $campaignPayload['name'] : '',
+                'description' => is_string($campaignPayload['description'] ?? null) ? $campaignPayload['description'] : '',
+                'scheduled_items' => is_array($campaignPayload['scheduled_items'] ?? null) ? $campaignPayload['scheduled_items'] : [],
+            ])
+            ->all();
+    }
+
+    private function resolveScheduledPostAttributes(Proposal $proposal, User $user, array $scheduledItemPayload): ?array
+    {
+        $instagramAccountId = $this->resolveOwnedInstagramAccountId($user, $scheduledItemPayload['instagram_account_id'] ?? null);
+        $scheduledAt = $this->resolveScheduledAt($scheduledItemPayload['scheduled_at'] ?? null);
+        $mediaType = $this->resolveMediaType($scheduledItemPayload['media_type'] ?? null);
+        $title = is_string($scheduledItemPayload['title'] ?? null) ? trim($scheduledItemPayload['title']) : '';
+
+        if ($instagramAccountId === null || $scheduledAt === null || $mediaType === null || $title === '') {
+            return null;
+        }
+
+        return [
+            'user_id' => $user->id,
+            'client_id' => $proposal->client_id,
+            'instagram_account_id' => $instagramAccountId,
+            'title' => $title,
+            'description' => is_string($scheduledItemPayload['description'] ?? null) ? $scheduledItemPayload['description'] : null,
+            'media_type' => $mediaType,
+            'scheduled_at' => $scheduledAt,
+            'status' => ScheduledPostStatus::Planned,
+        ];
+    }
+
+    private function resolveOwnedInstagramAccountId(User $user, mixed $instagramAccountId): ?int
+    {
+        if (! is_numeric($instagramAccountId)) {
+            return null;
+        }
+
+        $accountId = (int) $instagramAccountId;
+
+        $ownedAccountExists = InstagramAccount::query()
+            ->where('user_id', $user->id)
+            ->whereKey($accountId)
+            ->exists();
+
+        return $ownedAccountExists ? $accountId : null;
+    }
+
+    private function resolveScheduledAt(mixed $scheduledAt): ?Carbon
+    {
+        if (! is_string($scheduledAt) || trim($scheduledAt) === '') {
+            return null;
+        }
+
+        try {
+            return Carbon::parse($scheduledAt);
+        } catch (\Throwable) {
+            return null;
+        }
+    }
+
+    private function resolveMediaType(mixed $mediaType): ?string
+    {
+        if (! is_string($mediaType)) {
+            return null;
+        }
+
+        $mediaTypeValues = collect(MediaType::cases())
+            ->map(fn (MediaType $item): string => $item->value)
+            ->all();
+
+        return in_array($mediaType, $mediaTypeValues, true) ? $mediaType : null;
     }
 }
