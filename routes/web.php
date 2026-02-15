@@ -11,6 +11,7 @@ use App\Livewire\InstagramAccounts\Index as InstagramAccountsIndex;
 use App\Livewire\Proposals\Create as ProposalsCreate;
 use App\Livewire\Proposals\Edit as ProposalsEdit;
 use App\Livewire\Proposals\Index as ProposalsIndex;
+use App\Livewire\Proposals\Show as ProposalsShow;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -52,6 +53,9 @@ Route::middleware(['auth'])->group(function (): void {
 
     Route::livewire('proposals/{proposal}/edit', ProposalsEdit::class)
         ->name('proposals.edit');
+
+    Route::livewire('proposals/{proposal}', ProposalsShow::class)
+        ->name('proposals.show');
 
     Route::middleware(['verified'])->group(function (): void {
         Route::livewire('dashboard', Dashboard::class)
