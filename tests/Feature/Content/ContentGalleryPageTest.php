@@ -200,6 +200,31 @@ test('single media can be linked to a client and duplicate links are prevented',
         ->count())->toBe(1);
 });
 
+test('campaign options refresh when link client changes in the link modal', function (): void {
+    $user = User::factory()->create();
+    $account = InstagramAccount::factory()->for($user)->create();
+    $media = InstagramMedia::factory()->for($account)->create();
+
+    $clientA = Client::factory()->for($user)->create(['name' => 'Client A']);
+    $clientB = Client::factory()->for($user)->create(['name' => 'Client B']);
+
+    $campaignA = Campaign::factory()->for($clientA)->create(['name' => 'Campaign A']);
+    $campaignB = Campaign::factory()->for($clientB)->create(['name' => 'Campaign B']);
+
+    Livewire::actingAs($user)
+        ->test(Index::class)
+        ->call('openDetailModal', $media->id)
+        ->call('openSingleLinkModal')
+        ->set('linkClientId', (string) $clientA->id)
+        ->assertSee('Campaign A')
+        ->assertDontSee('Campaign B')
+        ->set('linkCampaignId', (string) $campaignA->id)
+        ->set('linkClientId', (string) $clientB->id)
+        ->assertSet('linkCampaignId', null)
+        ->assertSee('Campaign B')
+        ->assertDontSee('Campaign A');
+});
+
 test('batch selection mode links all selected media to a client', function (): void {
     $user = User::factory()->create();
     $account = InstagramAccount::factory()->for($user)->create();

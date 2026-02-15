@@ -254,7 +254,7 @@
         <h2 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100">{{ $linkingBatch ? 'Link Selected Content to Client' : 'Link Content to Client' }}</h2>
 
         <form wire:submit="saveLink" class="mt-5 space-y-4">
-            <flux:select wire:model="linkClientId" :label="__('Client')">
+            <flux:select wire:model.live="linkClientId" :label="__('Client')">
                 <option value="">Select a client</option>
                 @foreach ($availableClients as $client)
                     <option value="{{ $client->id }}">{{ $client->name }}</option>
@@ -265,7 +265,7 @@
             @enderror
 
             <div class="space-y-2">
-                <flux:select wire:model="linkCampaignId" :label="__('Campaign')">
+                <flux:select wire:model.live="linkCampaignId" wire:key="content-link-campaign-{{ $linkClientId ?? 'none' }}" :label="__('Campaign')">
                     <option value="">Select a campaign</option>
                     @foreach ($linkCampaigns as $campaign)
                         <option value="{{ $campaign->id }}">{{ $campaign->name }}</option>
