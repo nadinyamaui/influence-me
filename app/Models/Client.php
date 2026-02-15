@@ -46,4 +46,11 @@ class Client extends Model
     {
         return $this->hasMany(Campaign::class);
     }
+
+    public function resolveClientCampaign(int $campaignId): Campaign
+    {
+        return $this->campaigns()
+            ->whereKey($campaignId)
+            ->firstOrFail();
+    }
 }

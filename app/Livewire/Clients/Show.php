@@ -166,7 +166,7 @@ class Show extends Component
 
     public function openEditCampaignModal(int $campaignId): void
     {
-        $campaign = $this->resolveClientCampaign($campaignId);
+        $campaign = $this->client->resolveClientCampaign($campaignId);
         $this->authorize('update', $campaign);
 
         $this->editingCampaignId = $campaign->id;
@@ -188,7 +188,7 @@ class Show extends Component
         $campaign = null;
 
         if ($this->editingCampaignId !== null) {
-            $campaign = $this->resolveClientCampaign($this->editingCampaignId);
+            $campaign = $this->client->resolveClientCampaign($this->editingCampaignId);
             $this->authorize('update', $campaign);
         }
 
@@ -214,7 +214,7 @@ class Show extends Component
 
     public function confirmDeleteCampaign(int $campaignId): void
     {
-        $campaign = $this->resolveClientCampaign($campaignId);
+        $campaign = $this->client->resolveClientCampaign($campaignId);
         $this->authorize('delete', $campaign);
 
         $this->confirmingDeleteCampaignId = $campaign->id;
@@ -231,7 +231,7 @@ class Show extends Component
             return;
         }
 
-        $campaign = $this->resolveClientCampaign($this->confirmingDeleteCampaignId);
+        $campaign = $this->client->resolveClientCampaign($this->confirmingDeleteCampaignId);
         $this->authorize('delete', $campaign);
 
         $campaign->delete();
@@ -381,10 +381,4 @@ class Show extends Component
             ->get(['id', 'title', 'status']);
     }
 
-    private function resolveClientCampaign(int $campaignId): Campaign
-    {
-        return $this->client->campaigns()
-            ->whereKey($campaignId)
-            ->firstOrFail();
-    }
 }
