@@ -30,7 +30,7 @@
                         {{ __('Clients') }}
                     </flux:sidebar.item>
 
-                    <flux:sidebar.item icon="document-text" href="#">
+                    <flux:sidebar.item icon="document-text" :href="route('proposals.index')" :current="request()->routeIs('proposals.*')" wire:navigate>
                         {{ __('Proposals') }}
                     </flux:sidebar.item>
 

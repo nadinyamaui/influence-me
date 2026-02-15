@@ -105,6 +105,19 @@ class User extends Authenticatable
         return $client;
     }
 
+    public static function resolveProposal(int $proposalId): Proposal
+    {
+        $proposal = Auth::user()?->proposals()
+            ->whereKey($proposalId)
+            ->first();
+
+        if ($proposal === null) {
+            abort(404);
+        }
+
+        return $proposal;
+    }
+
     public static function accounts(): Collection
     {
         return Auth::user()?->instagramAccounts()
