@@ -49,8 +49,8 @@
         </flux:field>
 
         <div class="flex flex-wrap items-center justify-between gap-3">
-            <flux:button type="button" variant="danger" wire:click="confirmDelete">
-                Delete
+            <flux:button type="button" variant="danger" wire:click="confirmDelete" title="Delete Client" aria-label="Delete Client">
+                <i class="fa-solid fa-trash" aria-hidden="true"></i>
             </flux:button>
 
             <div class="flex items-center gap-3">
@@ -77,8 +77,8 @@
             <flux:button type="button" variant="filled" wire:click="cancelDelete">
                 Cancel
             </flux:button>
-            <flux:button type="button" variant="danger" wire:click="delete">
-                Delete Client
+            <flux:button type="button" variant="danger" wire:click="delete" title="Delete Client" aria-label="Delete Client">
+                <i class="fa-solid fa-trash" aria-hidden="true"></i>
             </flux:button>
         </div>
     </flux:modal>

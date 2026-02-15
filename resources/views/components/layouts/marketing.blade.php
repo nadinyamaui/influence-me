@@ -6,12 +6,7 @@
 <!DOCTYPE html>
 <html lang="en" class="scroll-smooth antialiased">
     <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>{{ $title }}</title>
-        <script src="https://cdn.tailwindcss.com"></script>
-        <script src="https://kit.fontawesome.com/3d9d39312b.js" crossorigin="anonymous"></script>
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&amp;display=swap" rel="stylesheet">
+        @include('partials.head')
         <style>
             body { font-family: 'Inter', sans-serif; }
             ::-webkit-scrollbar { width: 6px; }

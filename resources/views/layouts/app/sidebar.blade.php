@@ -20,10 +20,6 @@
                         {{ __('Content') }}
                     </flux:sidebar.item>
 
-                    <flux:sidebar.item icon="calendar" href="#">
-                        {{ __('Schedule') }}
-                    </flux:sidebar.item>
-
                     <flux:sidebar.item icon="chart-bar" href="#">
                         {{ __('Analytics') }}
                     </flux:sidebar.item>

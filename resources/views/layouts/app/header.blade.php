@@ -16,9 +16,6 @@
                 <flux:navbar.item icon="photo" href="#">
                     {{ __('Content') }}
                 </flux:navbar.item>
-                <flux:navbar.item icon="calendar" href="#">
-                    {{ __('Schedule') }}
-                </flux:navbar.item>
                 <flux:navbar.item icon="chart-bar" href="#">
                     {{ __('Analytics') }}
                 </flux:navbar.item>
@@ -55,9 +52,6 @@
                     </flux:sidebar.item>
                     <flux:sidebar.item icon="photo" href="#">
                         {{ __('Content') }}
-                    </flux:sidebar.item>
-                    <flux:sidebar.item icon="calendar" href="#">
-                        {{ __('Schedule') }}
                     </flux:sidebar.item>
                     <flux:sidebar.item icon="chart-bar" href="#">
                         {{ __('Analytics') }}

@@ -20,8 +20,8 @@
             </div>
         </div>
 
-        <flux:button :href="route('clients.edit', $client)" variant="primary" wire:navigate>
-            Edit
+        <flux:button :href="route('clients.edit', $client)" variant="primary" wire:navigate title="Edit Client" aria-label="Edit Client">
+            <i class="fa-solid fa-pen-to-square" aria-hidden="true"></i>
         </flux:button>
     </div>
 
@@ -84,6 +84,9 @@
                 <flux:navlist.item href="#" :current="$activeTab === 'content'" wire:click.prevent="$set('activeTab', 'content')">
                     Content
                 </flux:navlist.item>
+                <flux:navlist.item href="#" :current="$activeTab === 'campaigns'" wire:click.prevent="$set('activeTab', 'campaigns')">
+                    Campaigns
+                </flux:navlist.item>
                 <flux:navlist.item href="#" :current="$activeTab === 'proposals'" wire:click.prevent="$set('activeTab', 'proposals')">
                     Proposals
                 </flux:navlist.item>
@@ -140,15 +143,15 @@
                 </div>
 
                 <div class="mt-5 space-y-4">
-                    @foreach ($linkedContentGroups as $campaignName => $campaignMedia)
-                        <section class="rounded-xl border border-zinc-200 p-4 dark:border-zinc-700">
+                    @foreach ($linkedContentGroups as $group)
+                        <section wire:key="client-content-group-{{ $group['key'] }}" class="rounded-xl border border-zinc-200 p-4 dark:border-zinc-700">
                             <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
-                                <h3 class="text-sm font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-300">{{ $campaignName }}</h3>
-                                <p class="text-sm text-zinc-600 dark:text-zinc-300">{{ number_format($campaignMedia->count()) }} posts · {{ number_format($campaignMedia->sum('reach')) }} reach</p>
+                                <h3 class="text-sm font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-300">{{ $group['campaign_name'] }}</h3>
+                                <p class="text-sm text-zinc-600 dark:text-zinc-300">{{ number_format($group['total_posts']) }} posts · {{ number_format($group['total_reach']) }} reach</p>
                             </div>
 
                             <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-                                @foreach ($campaignMedia as $linkedMedia)
+                                @foreach ($group['media'] as $linkedMedia)
                                     <article wire:key="client-content-{{ $linkedMedia->id }}" class="rounded-xl border border-zinc-200 bg-zinc-50 p-3 dark:border-zinc-700 dark:bg-zinc-800/60">
                                         <div class="flex gap-3">
                                             <div class="h-14 w-14 shrink-0 overflow-hidden rounded-lg bg-zinc-200 dark:bg-zinc-700">
@@ -165,8 +168,8 @@
                                         </div>
 
                                         <div class="mt-3 flex justify-end">
-                                            <flux:button type="button" size="sm" variant="danger" wire:click="unlinkContent({{ $linkedMedia->id }})">
-                                                Unlink
+                                            <flux:button type="button" size="sm" variant="danger" wire:click="unlinkContent({{ $linkedMedia->id }})" title="Unlink" aria-label="Unlink">
+                                                <i class="fa-solid fa-link-slash" aria-hidden="true"></i>
                                             </flux:button>
                                         </div>
                                     </article>
@@ -176,6 +179,61 @@
                     @endforeach
                 </div>
             @endif
+        @endif
+
+        @if ($activeTab === 'campaigns')
+            <div class="mt-5 space-y-4">
+                <div class="flex items-center justify-between gap-3">
+                    <h2 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100">Campaigns</h2>
+                    <flux:button type="button" variant="primary" wire:click="openCreateCampaignModal" title="Add Campaign" aria-label="Add Campaign">
+                        <i class="fa-solid fa-plus" aria-hidden="true"></i>
+                    </flux:button>
+                </div>
+
+                <div wire:loading wire:target="openCreateCampaignModal,openEditCampaignModal,saveCampaign,deleteCampaign" class="rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm text-zinc-700 dark:border-zinc-700 dark:bg-zinc-800/60 dark:text-zinc-200">
+                    Updating campaigns...
+                </div>
+
+                @if ($campaigns->isEmpty())
+                    <div class="rounded-xl border border-dashed border-zinc-300 p-6 text-sm text-zinc-600 dark:border-zinc-700 dark:text-zinc-300">
+                        No campaigns yet. Add a campaign to organize this client's content.
+                    </div>
+                @else
+                    <div class="space-y-3">
+                        @foreach ($campaigns as $campaign)
+                            <article wire:key="client-campaign-{{ $campaign->id }}" class="rounded-xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-700 dark:bg-zinc-800/60">
+                                <div class="flex flex-wrap items-start justify-between gap-3">
+                                    <div>
+                                        <h3 class="text-base font-semibold text-zinc-900 dark:text-zinc-100">{{ $campaign->name }}</h3>
+                                        <p class="mt-1 text-sm text-zinc-600 dark:text-zinc-300">{{ $campaign->description ?? 'No description' }}</p>
+                                        <p class="mt-2 text-xs text-zinc-500 dark:text-zinc-300">
+                                            {{ number_format($campaign->instagram_media_count) }} linked posts
+                                            ·
+                                            Created {{ $campaign->created_at->format('M j, Y') }}
+                                        </p>
+                                        @if ($campaign->proposal)
+                                            <p class="mt-1 text-xs text-zinc-500 dark:text-zinc-300">
+                                                Proposal: {{ $campaign->proposal->title }} ({{ Str::of($campaign->proposal->status->value)->headline() }})
+                                            </p>
+                                        @else
+                                            <p class="mt-1 text-xs text-zinc-500 dark:text-zinc-300">Proposal: Not linked</p>
+                                        @endif
+                                    </div>
+
+                                    <div class="flex items-center gap-2">
+                                        <flux:button type="button" size="sm" variant="filled" wire:click="openEditCampaignModal({{ $campaign->id }})" title="Edit Campaign" aria-label="Edit Campaign">
+                                            <i class="fa-solid fa-pen-to-square" aria-hidden="true"></i>
+                                        </flux:button>
+                                        <flux:button type="button" size="sm" variant="danger" wire:click="confirmDeleteCampaign({{ $campaign->id }})" title="Delete Campaign" aria-label="Delete Campaign">
+                                            <i class="fa-solid fa-trash" aria-hidden="true"></i>
+                                        </flux:button>
+                                    </div>
+                                </div>
+                            </article>
+                        @endforeach
+                    </div>
+                @endif
+            </div>
         @endif
 
         @if ($activeTab === 'proposals')
@@ -215,4 +273,55 @@
             </flux:button>
         </div>
     </flux:modal>
+
+    <flux:modal
+        name="client-campaign-modal"
+        wire:model="showCampaignModal"
+        @close="closeCampaignModal"
+        class="max-w-xl"
+    >
+        <h2 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100">{{ $editingCampaignId ? 'Edit Campaign' : 'Create Campaign' }}</h2>
+
+        <form wire:submit="saveCampaign" class="mt-5 space-y-4">
+            <flux:input wire:model="campaignForm.name" :label="__('Campaign Name')" />
+
+            <flux:textarea wire:model="campaignForm.description" :label="__('Description (Optional)')" />
+
+            <flux:select wire:model="campaignForm.proposalId" :label="__('Proposal (Optional)')">
+                <option value="">No linked proposal</option>
+                @foreach ($campaignProposals as $proposal)
+                    <option value="{{ $proposal->id }}">{{ $proposal->title }} ({{ Str::of($proposal->status->value)->headline() }})</option>
+                @endforeach
+            </flux:select>
+
+            <div class="flex justify-end gap-2 pt-2">
+                <flux:button type="button" variant="filled" wire:click="closeCampaignModal">
+                    Cancel
+                </flux:button>
+                <flux:button type="submit" variant="primary">
+                    Save
+                </flux:button>
+            </div>
+        </form>
+    </flux:modal>
+
+    @if ($confirmingDeleteCampaignId)
+        <flux:modal
+            name="client-campaign-delete-modal"
+            :show="$confirmingDeleteCampaignId !== null"
+            @close="cancelDeleteCampaign"
+            class="max-w-md"
+        >
+            <h2 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100">Delete this campaign?</h2>
+
+            <div class="mt-5 flex justify-end gap-2">
+                <flux:button type="button" variant="filled" wire:click="cancelDeleteCampaign">
+                    Cancel
+                </flux:button>
+                <flux:button type="button" variant="danger" wire:click="deleteCampaign" title="Delete Campaign" aria-label="Delete Campaign">
+                    <i class="fa-solid fa-trash" aria-hidden="true"></i>
+                </flux:button>
+            </div>
+        </flux:modal>
+    @endif
 </div>

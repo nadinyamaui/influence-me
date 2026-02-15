@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\MediaType;
 use App\Enums\ScheduledPostStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -13,10 +14,19 @@ class ScheduledPost extends Model
 
     protected $guarded = [];
 
+    public static function resolveOwnedPost(int $scheduledPostId, int $userId): self
+    {
+        return self::query()
+            ->where('user_id', $userId)
+            ->whereKey($scheduledPostId)
+            ->firstOrFail();
+    }
+
     protected function casts(): array
     {
         return [
             'status' => ScheduledPostStatus::class,
+            'media_type' => MediaType::class,
             'scheduled_at' => 'datetime',
         ];
     }
@@ -29,6 +39,11 @@ class ScheduledPost extends Model
     public function client(): BelongsTo
     {
         return $this->belongsTo(Client::class);
+    }
+
+    public function campaign(): BelongsTo
+    {
+        return $this->belongsTo(Campaign::class);
     }
 
     public function instagramAccount(): BelongsTo

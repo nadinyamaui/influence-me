@@ -62,6 +62,7 @@ test('owner can view client detail page with summary and tabs', function (): voi
         ->assertSee('Portal access: Active')
         ->assertSee('Overview')
         ->assertSee('Content')
+        ->assertSee('Campaigns')
         ->assertSee('Proposals')
         ->assertSee('Invoices')
         ->assertSee('Analytics')
@@ -79,6 +80,9 @@ test('owner can view client detail page with summary and tabs', function (): voi
         ->assertSee('Average engagement rate')
         ->assertSee('Uncategorized')
         ->assertSee('Unlink')
+        ->set('activeTab', 'campaigns')
+        ->assertSee('Campaigns')
+        ->assertSee('Add Campaign')
         ->set('activeTab', 'proposals')
         ->assertSee('Proposals tab coming soon.')
         ->set('activeTab', 'invoices')
@@ -98,7 +102,7 @@ test('non-owners cannot view client detail page', function (): void {
         ->assertForbidden();
 });
 
-test('content tab groups linked media by campaign and shows aggregate stats', function (): void {
+test('content tab groups linked media by campaign entity and shows aggregate stats', function (): void {
     $owner = User::factory()->create();
 
     $client = Client::factory()->for($owner)->create();
@@ -125,28 +129,32 @@ test('content tab groups linked media by campaign and shows aggregate stats', fu
         'engagement_rate' => 2.0,
     ]);
 
-    $launchCampaign = Campaign::factory()->for($client)->create([
-        'name' => 'Launch Campaign',
-    ]);
-    $uncategorizedCampaign = Campaign::factory()->for($client)->create([
-        'name' => 'Uncategorized',
-    ]);
+    $launchCampaign = Campaign::factory()->for($client)->create(['name' => 'Launch Campaign']);
+    $secondCampaign = Campaign::factory()->for($client)->create(['name' => 'Retention Campaign']);
 
     $launchCampaign->instagramMedia()->attach($launchFirst->id);
     $launchCampaign->instagramMedia()->attach($launchSecond->id);
-    $uncategorizedCampaign->instagramMedia()->attach($uncategorized->id);
+    $secondCampaign->instagramMedia()->attach($uncategorized->id);
 
-    Livewire::actingAs($owner)
+    $component = Livewire::actingAs($owner)
         ->test(Show::class, ['client' => $client])
         ->set('activeTab', 'content')
         ->assertSee('Launch Campaign')
-        ->assertSee('Uncategorized')
+        ->assertSee('Retention Campaign')
         ->assertSee('1,800')
         ->assertSee('3,500')
         ->assertSee('4.00%')
         ->assertSee('Launch Post One')
         ->assertSee('Launch Post Two')
         ->assertSee('No Campaign Post');
+
+    $campaignIds = collect($component->get('linkedContentGroups'))
+        ->pluck('campaign_id')
+        ->filter()
+        ->all();
+
+    expect($campaignIds)->toContain($launchCampaign->id)
+        ->and($campaignIds)->toContain($secondCampaign->id);
 });
 
 test('owners can unlink linked media from client content tab', function (): void {
@@ -170,4 +178,75 @@ test('owners can unlink linked media from client content tab', function (): void
         'campaign_id' => $campaign->id,
         'instagram_media_id' => $media->id,
     ]);
+});
+
+test('campaigns tab shows empty state then supports campaign create edit unlink proposal and delete', function (): void {
+    $owner = User::factory()->create();
+    $client = Client::factory()->for($owner)->create();
+    $otherClient = Client::factory()->for($owner)->create();
+
+    $proposal = Proposal::factory()->for($owner)->for($client)->create([
+        'title' => 'Client Proposal',
+    ]);
+
+    Proposal::factory()->for($owner)->for($otherClient)->create([
+        'title' => 'Other Client Proposal',
+    ]);
+
+    $component = Livewire::actingAs($owner)
+        ->test(Show::class, ['client' => $client])
+        ->set('activeTab', 'campaigns')
+        ->assertSee('Add Campaign')
+        ->call('openCreateCampaignModal')
+        ->set('campaignForm.name', 'Spring Launch')
+        ->set('campaignForm.description', 'Seasonal campaign rollout')
+        ->set('campaignForm.proposalId', (string) $proposal->id)
+        ->call('saveCampaign')
+        ->assertSee('Spring Launch')
+        ->assertSee('Client Proposal');
+
+    $campaign = Campaign::query()->where('client_id', $client->id)->where('name', 'Spring Launch')->first();
+
+    expect($campaign)->not->toBeNull();
+
+    $component->call('openEditCampaignModal', $campaign->id)
+        ->set('campaignForm.name', 'Spring Launch Updated')
+        ->set('campaignForm.description', '')
+        ->set('campaignForm.proposalId', '')
+        ->call('saveCampaign')
+        ->assertSee('Spring Launch Updated')
+        ->assertSee('Proposal: Not linked')
+        ->call('confirmDeleteCampaign', $campaign->id)
+        ->call('deleteCampaign');
+
+    $this->assertDatabaseMissing('campaigns', [
+        'id' => $campaign->id,
+    ]);
+});
+
+test('campaign create enforces client scoped proposal validation', function (): void {
+    $owner = User::factory()->create();
+    $client = Client::factory()->for($owner)->create();
+    $otherClient = Client::factory()->for($owner)->create();
+
+    $otherClientProposal = Proposal::factory()->for($owner)->for($otherClient)->create();
+
+    Livewire::actingAs($owner)
+        ->test(Show::class, ['client' => $client])
+        ->set('activeTab', 'campaigns')
+        ->call('openCreateCampaignModal')
+        ->set('campaignForm.name', 'Invalid Proposal Link')
+        ->set('campaignForm.proposalId', (string) $otherClientProposal->id)
+        ->call('saveCampaign')
+        ->assertHasErrors(['campaignForm.proposalId']);
+});
+
+test('campaigns tab shows empty state when client has no campaigns', function (): void {
+    $owner = User::factory()->create();
+    $client = Client::factory()->for($owner)->create();
+
+    Livewire::actingAs($owner)
+        ->test(Show::class, ['client' => $client])
+        ->set('activeTab', 'campaigns')
+        ->assertSee('No campaigns yet. Add a campaign to organize this client');
 });
