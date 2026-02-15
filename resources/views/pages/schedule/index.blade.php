@@ -149,7 +149,7 @@
             <div class="grid gap-4 sm:grid-cols-2">
                 <div>
                     <flux:select wire:model.live="clientId" :label="__('Client')">
-                        <option value="">No client</option>
+                        <option value="">{{ $editingPostId ? 'No client' : 'Select client' }}</option>
                         @foreach ($clients as $client)
                             <option value="{{ $client->id }}">{{ $client->name }}</option>
                         @endforeach

@@ -60,7 +60,7 @@ test('client create form validates invalid input', function (): void {
         ->call('save')
         ->assertHasErrors([
             'form.name',
-            'form.email',
+            'form.email' => 'email',
             'form.company_name',
             'form.type',
             'form.phone',

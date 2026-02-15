@@ -48,10 +48,16 @@ class StoreScheduledPostRequest extends FormRequest
             $scheduledAtRules[] = 'after:now';
         }
 
+        $clientRules = ['nullable', 'integer'];
+
+        if ($isCreating) {
+            $clientRules = ['required', 'integer'];
+        }
+
         return [
             'title' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string', 'max:5000'],
-            'client_id' => ['nullable', 'integer'],
+            'client_id' => $clientRules,
             'campaign_id' => ['nullable', 'integer'],
             'media_type' => ['required', Rule::enum(MediaType::class)],
             'instagram_account_id' => ['required', 'integer'],

@@ -184,7 +184,7 @@ class Index extends Component
             StoreScheduledPostRequest::rulesForLivewire($isCreating),
             [
                 'clientId' => [
-                    'nullable',
+                    $isCreating ? 'required' : 'nullable',
                     Rule::exists('clients', 'id')->where(fn ($builder) => $builder->where('user_id', Auth::id())),
                 ],
                 'campaignId' => [

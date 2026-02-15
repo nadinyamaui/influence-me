@@ -154,6 +154,30 @@ test('owner can create edit mark status and delete scheduled post', function ():
     ]);
 });
 
+test('client is required when creating a scheduled post', function (): void {
+    $owner = User::factory()->create();
+
+    $account = InstagramAccount::factory()->for($owner)->create();
+
+    Livewire::actingAs($owner)
+        ->test(Index::class)
+        ->call('openCreateModal')
+        ->set('title', 'Client Required Post')
+        ->set('description', 'Missing client should fail')
+        ->set('clientId', '')
+        ->set('campaignId', '')
+        ->set('mediaType', MediaType::Post->value)
+        ->set('instagramAccountId', (string) $account->id)
+        ->set('scheduledAt', now()->addDays(2)->format('Y-m-d\\TH:i'))
+        ->set('status', ScheduledPostStatus::Planned->value)
+        ->call('savePost')
+        ->assertHasErrors(['clientId' => 'required']);
+
+    $this->assertDatabaseMissing('scheduled_posts', [
+        'title' => 'Client Required Post',
+    ]);
+});
+
 test('non-owners cannot access schedule page', function (): void {
     $owner = User::factory()->create();
     $outsider = User::factory()->create();

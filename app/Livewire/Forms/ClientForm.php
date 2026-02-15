@@ -25,7 +25,7 @@ class ClientForm extends Form
     {
         return [
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['nullable', 'string', 'email', 'max:255'],
+            'email' => ['nullable', 'email', 'max:255'],
             'company_name' => ['nullable', 'string', 'max:255'],
             'type' => ['required', 'string', Rule::enum(ClientType::class)],
             'phone' => ['nullable', 'string', 'max:50'],
