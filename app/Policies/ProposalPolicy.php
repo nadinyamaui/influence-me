@@ -30,7 +30,9 @@ class ProposalPolicy
 
     public function update(User|ClientUser $user, Proposal $proposal): bool
     {
-        return $user instanceof User && $user->id === $proposal->user_id;
+        return $user instanceof User
+            && $user->id === $proposal->user_id
+            && in_array($proposal->status, [ProposalStatus::Draft, ProposalStatus::Revised], true);
     }
 
     public function delete(User|ClientUser $user, Proposal $proposal): bool

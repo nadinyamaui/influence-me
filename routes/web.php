@@ -8,6 +8,8 @@ use App\Livewire\Clients\Show as ClientsShow;
 use App\Livewire\Content\Index as ContentIndex;
 use App\Livewire\Dashboard;
 use App\Livewire\InstagramAccounts\Index as InstagramAccountsIndex;
+use App\Livewire\Proposals\Create as ProposalsCreate;
+use App\Livewire\Proposals\Edit as ProposalsEdit;
 use App\Livewire\Proposals\Index as ProposalsIndex;
 use Illuminate\Support\Facades\Route;
 
@@ -44,6 +46,12 @@ Route::middleware(['auth'])->group(function (): void {
 
     Route::livewire('proposals', ProposalsIndex::class)
         ->name('proposals.index');
+
+    Route::livewire('proposals/create', ProposalsCreate::class)
+        ->name('proposals.create');
+
+    Route::livewire('proposals/{proposal}/edit', ProposalsEdit::class)
+        ->name('proposals.edit');
 
     Route::middleware(['verified'])->group(function (): void {
         Route::livewire('dashboard', Dashboard::class)

@@ -173,11 +173,12 @@ test('proposals list shows empty state when user has no proposals', function ():
         ->assertSee('No proposals yet. Create your first proposal to send to a client.');
 });
 
-test('edit button only shows for draft proposals', function (): void {
+test('edit button shows for draft and revised proposals only', function (): void {
     $user = User::factory()->create();
     $client = Client::factory()->for($user)->create();
 
     Proposal::factory()->for($user)->for($client)->draft()->create(['title' => 'Draft One']);
+    Proposal::factory()->for($user)->for($client)->revised()->create(['title' => 'Revised One']);
     Proposal::factory()->for($user)->for($client)->sent()->create(['title' => 'Sent One']);
 
     $response = $this->actingAs($user)->get(route('proposals.index'));
@@ -185,7 +186,7 @@ test('edit button only shows for draft proposals', function (): void {
     $response->assertSuccessful();
 
     $content = $response->getContent();
-    expect(substr_count($content, 'fa-pen-to-square'))->toBe(1);
+    expect(substr_count($content, 'fa-pen-to-square'))->toBe(2);
 });
 
 test('owners can delete proposals from the list page', function (): void {
