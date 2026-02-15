@@ -1,4 +1,0 @@
-interface:
-  display_name: "Feature Test Video Proof"
-  short_description: "Record browser test runs as MP4 proof videos."
-  default_prompt: "Record a feature test run as a video and save the MP4 artifact with pass/fail evidence."
