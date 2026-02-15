@@ -9,8 +9,8 @@
             <p class="mt-1 text-sm text-zinc-600 dark:text-zinc-300">Manage your client relationships and campaign assignments.</p>
         </div>
 
-        <flux:button :href="route('clients.create')" variant="primary" wire:navigate>
-            Add Client
+        <flux:button :href="route('clients.create')" variant="primary" wire:navigate title="Add Client" aria-label="Add Client">
+            <i class="fa-solid fa-plus" aria-hidden="true"></i>
         </flux:button>
     </div>
 
@@ -87,16 +87,20 @@
                                         <a
                                             href="{{ route('clients.edit', $client) }}"
                                             class="inline-flex items-center rounded-md border border-zinc-300 px-3 py-1.5 text-xs font-medium text-zinc-700 transition hover:bg-zinc-100 dark:border-zinc-600 dark:text-zinc-200 dark:hover:bg-zinc-800"
+                                            title="Edit"
+                                            aria-label="Edit"
                                             wire:navigate
                                         >
-                                            Edit
+                                            <i class="fa-solid fa-pen-to-square" aria-hidden="true"></i>
                                         </a>
                                         <button
                                             type="button"
                                             wire:click="confirmDelete({{ $client->id }})"
                                             class="inline-flex items-center rounded-md border border-rose-300 px-3 py-1.5 text-xs font-medium text-rose-700 transition hover:bg-rose-50 dark:border-rose-800 dark:text-rose-200 dark:hover:bg-rose-950/40"
+                                            title="Delete"
+                                            aria-label="Delete"
                                         >
-                                            Delete
+                                            <i class="fa-solid fa-trash" aria-hidden="true"></i>
                                         </button>
                                     </div>
                                 </td>
@@ -129,8 +133,8 @@
                 <flux:button type="button" variant="filled" wire:click="cancelDelete">
                     Cancel
                 </flux:button>
-                <flux:button type="button" variant="danger" wire:click="delete">
-                    Delete
+                <flux:button type="button" variant="danger" wire:click="delete" title="Delete" aria-label="Delete">
+                    <i class="fa-solid fa-trash" aria-hidden="true"></i>
                 </flux:button>
             </div>
         </flux:modal>

@@ -11,8 +11,8 @@
             <p class="mt-1 text-sm text-zinc-600 dark:text-zinc-300">Plan and track upcoming posts in a chronological timeline.</p>
         </div>
 
-        <flux:button type="button" variant="primary" wire:click="openCreateModal">
-            Add Post
+        <flux:button type="button" variant="primary" wire:click="openCreateModal" title="Add Post" aria-label="Add Post">
+            <i class="fa-solid fa-plus" aria-hidden="true"></i>
         </flux:button>
     </div>
 
@@ -108,7 +108,9 @@
                                     </div>
 
                                     <div class="flex flex-wrap items-center gap-2">
-                                        <flux:button type="button" size="sm" variant="filled" wire:click="openEditModal({{ $post->id }})">Edit</flux:button>
+                                        <flux:button type="button" size="sm" variant="filled" wire:click="openEditModal({{ $post->id }})" title="Edit Post" aria-label="Edit Post">
+                                            <i class="fa-solid fa-pen-to-square" aria-hidden="true"></i>
+                                        </flux:button>
 
                                         @if ($post->status !== ScheduledPostStatus::Published)
                                             <flux:button type="button" size="sm" variant="primary" wire:click="markPublished({{ $post->id }})">Mark as Published</flux:button>
@@ -118,7 +120,9 @@
                                             <flux:button type="button" size="sm" variant="filled" wire:click="markCancelled({{ $post->id }})">Mark as Cancelled</flux:button>
                                         @endif
 
-                                        <flux:button type="button" size="sm" variant="danger" wire:click="confirmDelete({{ $post->id }})">Delete</flux:button>
+                                        <flux:button type="button" size="sm" variant="danger" wire:click="confirmDelete({{ $post->id }})" title="Delete Post" aria-label="Delete Post">
+                                            <i class="fa-solid fa-trash" aria-hidden="true"></i>
+                                        </flux:button>
                                     </div>
                                 </div>
                             </article>
@@ -139,14 +143,8 @@
 
         <form wire:submit="savePost" class="mt-5 space-y-4">
             <flux:input wire:model="title" :label="__('Title')" />
-            @error('title')
-                <p class="text-sm font-medium text-rose-600 dark:text-rose-300">{{ $message }}</p>
-            @enderror
 
             <flux:textarea wire:model="description" :label="__('Description')" />
-            @error('description')
-                <p class="text-sm font-medium text-rose-600 dark:text-rose-300">{{ $message }}</p>
-            @enderror
 
             <div class="grid gap-4 sm:grid-cols-2">
                 <div>
@@ -156,9 +154,6 @@
                             <option value="{{ $client->id }}">{{ $client->name }}</option>
                         @endforeach
                     </flux:select>
-                    @error('clientId')
-                        <p class="text-sm font-medium text-rose-600 dark:text-rose-300">{{ $message }}</p>
-                    @enderror
                 </div>
 
                 <div>
@@ -168,9 +163,6 @@
                             <option value="{{ $campaign->id }}">{{ $campaign->name }}</option>
                         @endforeach
                     </flux:select>
-                    @error('campaignId')
-                        <p class="text-sm font-medium text-rose-600 dark:text-rose-300">{{ $message }}</p>
-                    @enderror
                 </div>
             </div>
 
@@ -181,9 +173,6 @@
                             <option value="{{ $mediaTypeOption->value }}">{{ Str::of($mediaTypeOption->value)->headline() }}</option>
                         @endforeach
                     </flux:select>
-                    @error('mediaType')
-                        <p class="text-sm font-medium text-rose-600 dark:text-rose-300">{{ $message }}</p>
-                    @enderror
                 </div>
 
                 <div>
@@ -193,18 +182,12 @@
                             <option value="{{ $account->id }}">{{ '@'.$account->username }}</option>
                         @endforeach
                     </flux:select>
-                    @error('instagramAccountId')
-                        <p class="text-sm font-medium text-rose-600 dark:text-rose-300">{{ $message }}</p>
-                    @enderror
                 </div>
             </div>
 
             <div class="grid gap-4 sm:grid-cols-2">
                 <div>
                     <flux:input type="datetime-local" wire:model="scheduledAt" :label="__('Date & Time')" />
-                    @error('scheduledAt')
-                        <p class="text-sm font-medium text-rose-600 dark:text-rose-300">{{ $message }}</p>
-                    @enderror
                 </div>
 
                 <div>
@@ -213,9 +196,6 @@
                             <option value="{{ $statusOption->value }}">{{ Str::of($statusOption->value)->headline() }}</option>
                         @endforeach
                     </flux:select>
-                    @error('status')
-                        <p class="text-sm font-medium text-rose-600 dark:text-rose-300">{{ $message }}</p>
-                    @enderror
                 </div>
             </div>
 
@@ -243,8 +223,8 @@
                 <flux:button type="button" variant="filled" wire:click="cancelDelete">
                     Cancel
                 </flux:button>
-                <flux:button type="button" variant="danger" wire:click="deletePost">
-                    Delete
+                <flux:button type="button" variant="danger" wire:click="deletePost" title="Delete Post" aria-label="Delete Post">
+                    <i class="fa-solid fa-trash" aria-hidden="true"></i>
                 </flux:button>
             </div>
         </flux:modal>

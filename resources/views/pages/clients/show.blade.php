@@ -20,8 +20,8 @@
             </div>
         </div>
 
-        <flux:button :href="route('clients.edit', $client)" variant="primary" wire:navigate>
-            Edit
+        <flux:button :href="route('clients.edit', $client)" variant="primary" wire:navigate title="Edit Client" aria-label="Edit Client">
+            <i class="fa-solid fa-pen-to-square" aria-hidden="true"></i>
         </flux:button>
     </div>
 
@@ -168,8 +168,8 @@
                                         </div>
 
                                         <div class="mt-3 flex justify-end">
-                                            <flux:button type="button" size="sm" variant="danger" wire:click="unlinkContent({{ $linkedMedia->id }})">
-                                                Unlink
+                                            <flux:button type="button" size="sm" variant="danger" wire:click="unlinkContent({{ $linkedMedia->id }})" title="Unlink" aria-label="Unlink">
+                                                <i class="fa-solid fa-link-slash" aria-hidden="true"></i>
                                             </flux:button>
                                         </div>
                                     </article>
@@ -185,8 +185,8 @@
             <div class="mt-5 space-y-4">
                 <div class="flex items-center justify-between gap-3">
                     <h2 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100">Campaigns</h2>
-                    <flux:button type="button" variant="primary" wire:click="openCreateCampaignModal">
-                        Add Campaign
+                    <flux:button type="button" variant="primary" wire:click="openCreateCampaignModal" title="Add Campaign" aria-label="Add Campaign">
+                        <i class="fa-solid fa-plus" aria-hidden="true"></i>
                     </flux:button>
                 </div>
 
@@ -221,11 +221,11 @@
                                     </div>
 
                                     <div class="flex items-center gap-2">
-                                        <flux:button type="button" size="sm" variant="filled" wire:click="openEditCampaignModal({{ $campaign->id }})">
-                                            Edit
+                                        <flux:button type="button" size="sm" variant="filled" wire:click="openEditCampaignModal({{ $campaign->id }})" title="Edit Campaign" aria-label="Edit Campaign">
+                                            <i class="fa-solid fa-pen-to-square" aria-hidden="true"></i>
                                         </flux:button>
-                                        <flux:button type="button" size="sm" variant="danger" wire:click="confirmDeleteCampaign({{ $campaign->id }})">
-                                            Delete
+                                        <flux:button type="button" size="sm" variant="danger" wire:click="confirmDeleteCampaign({{ $campaign->id }})" title="Delete Campaign" aria-label="Delete Campaign">
+                                            <i class="fa-solid fa-trash" aria-hidden="true"></i>
                                         </flux:button>
                                     </div>
                                 </div>
@@ -284,14 +284,8 @@
 
         <form wire:submit="saveCampaign" class="mt-5 space-y-4">
             <flux:input wire:model="campaignName" :label="__('Campaign Name')" />
-            @error('campaignName')
-                <p class="text-sm font-medium text-rose-600 dark:text-rose-300">{{ $message }}</p>
-            @enderror
 
             <flux:textarea wire:model="campaignDescription" :label="__('Description (Optional)')" />
-            @error('campaignDescription')
-                <p class="text-sm font-medium text-rose-600 dark:text-rose-300">{{ $message }}</p>
-            @enderror
 
             <flux:select wire:model="campaignProposalId" :label="__('Proposal (Optional)')">
                 <option value="">No linked proposal</option>
@@ -299,9 +293,6 @@
                     <option value="{{ $proposal->id }}">{{ $proposal->title }} ({{ Str::of($proposal->status->value)->headline() }})</option>
                 @endforeach
             </flux:select>
-            @error('campaignProposalId')
-                <p class="text-sm font-medium text-rose-600 dark:text-rose-300">{{ $message }}</p>
-            @enderror
 
             <div class="flex justify-end gap-2 pt-2">
                 <flux:button type="button" variant="filled" wire:click="closeCampaignModal">
@@ -327,8 +318,8 @@
                 <flux:button type="button" variant="filled" wire:click="cancelDeleteCampaign">
                     Cancel
                 </flux:button>
-                <flux:button type="button" variant="danger" wire:click="deleteCampaign">
-                    Delete
+                <flux:button type="button" variant="danger" wire:click="deleteCampaign" title="Delete Campaign" aria-label="Delete Campaign">
+                    <i class="fa-solid fa-trash" aria-hidden="true"></i>
                 </flux:button>
             </div>
         </flux:modal>

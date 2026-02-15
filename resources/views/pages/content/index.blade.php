@@ -172,8 +172,10 @@
                             target="_blank"
                             rel="noopener noreferrer"
                             class="inline-flex items-center text-sm font-medium text-sky-600 underline underline-offset-2 hover:text-sky-500 dark:text-sky-300 dark:hover:text-sky-200"
+                            title="View on Instagram"
+                            aria-label="View on Instagram"
                         >
-                            View on Instagram
+                            <i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i>
                         </a>
                     @endif
                 </div>
@@ -226,8 +228,8 @@
                                             </a>
                                             <p class="text-zinc-500 dark:text-zinc-300">{{ $campaign->name }}</p>
                                         </div>
-                                        <flux:button type="button" size="sm" variant="danger" wire:click="confirmUnlinkClient({{ $campaign->client_id }})">
-                                            Unlink
+                                        <flux:button type="button" size="sm" variant="danger" wire:click="confirmUnlinkClient({{ $campaign->client_id }})" title="Unlink" aria-label="Unlink">
+                                            <i class="fa-solid fa-link-slash" aria-hidden="true"></i>
                                         </flux:button>
                                     </div>
                                 @endforeach
@@ -260,9 +262,6 @@
                     <option value="{{ $client->id }}">{{ $client->name }}</option>
                 @endforeach
             </flux:select>
-            @error('linkClientId')
-                <p class="text-sm font-medium text-rose-600 dark:text-rose-300">{{ $message }}</p>
-            @enderror
 
             <div class="space-y-2">
                 <flux:select wire:model.live="linkCampaignId" wire:key="content-link-campaign-{{ $linkClientId ?? 'none' }}" :label="__('Campaign')">
@@ -271,9 +270,6 @@
                         <option value="{{ $campaign->id }}">{{ $campaign->name }}</option>
                     @endforeach
                 </flux:select>
-                @error('linkCampaignId')
-                    <p class="text-sm font-medium text-rose-600 dark:text-rose-300">{{ $message }}</p>
-                @enderror
 
                 <flux:button type="button" size="sm" variant="filled" wire:click="toggleInlineCampaignForm">
                     {{ $showInlineCampaignForm ? 'Cancel Campaign Create' : 'Create Campaign' }}
@@ -283,14 +279,8 @@
             @if ($showInlineCampaignForm)
                 <div class="space-y-3 rounded-xl border border-zinc-200 bg-zinc-50 p-3 dark:border-zinc-700 dark:bg-zinc-800/60">
                     <flux:input wire:model="inlineCampaignName" :label="__('Campaign Name')" />
-                    @error('inlineCampaignName')
-                        <p class="text-sm font-medium text-rose-600 dark:text-rose-300">{{ $message }}</p>
-                    @enderror
 
                     <flux:textarea wire:model="inlineCampaignDescription" :label="__('Campaign Description (Optional)')" />
-                    @error('inlineCampaignDescription')
-                        <p class="text-sm font-medium text-rose-600 dark:text-rose-300">{{ $message }}</p>
-                    @enderror
 
                     <div class="flex justify-end">
                         <flux:button type="button" size="sm" variant="primary" wire:click="createInlineCampaign">
@@ -305,9 +295,6 @@
             @enderror
 
             <flux:textarea wire:model="linkNotes" :label="__('Notes (Optional)')" />
-            @error('linkNotes')
-                <p class="text-sm font-medium text-rose-600 dark:text-rose-300">{{ $message }}</p>
-            @enderror
 
             <div class="flex justify-end gap-2 pt-2">
                 <flux:button type="button" variant="filled" wire:click="closeLinkModal">
@@ -333,8 +320,8 @@
                 <flux:button type="button" variant="filled" wire:click="cancelUnlinkClient">
                     Cancel
                 </flux:button>
-                <flux:button type="button" variant="danger" wire:click="unlinkFromClient">
-                    Unlink
+                <flux:button type="button" variant="danger" wire:click="unlinkFromClient" title="Unlink" aria-label="Unlink">
+                    <i class="fa-solid fa-link-slash" aria-hidden="true"></i>
                 </flux:button>
             </div>
         </flux:modal>
