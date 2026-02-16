@@ -49,7 +49,7 @@ class ProposalWorkflowService
             $lockedProposal = $this->lockProposalForResponse($proposal);
 
             $this->ensureClientScope($clientUser, $lockedProposal);
-            $this->assertApprovable($lockedProposal);
+            $this->assertRespondable($lockedProposal);
 
             $lockedProposal->update([
                 'status' => ProposalStatus::Approved,
@@ -81,7 +81,7 @@ class ProposalWorkflowService
             $lockedProposal = $this->lockProposalForResponse($proposal);
 
             $this->ensureClientScope($clientUser, $lockedProposal);
-            $this->assertRevisionRequestable($lockedProposal);
+            $this->assertRespondable($lockedProposal);
 
             $lockedProposal->update([
                 'status' => ProposalStatus::Revised,
@@ -327,24 +327,11 @@ class ProposalWorkflowService
         }
     }
 
-    private function assertApprovable(Proposal $proposal): void
+    private function assertRespondable(Proposal $proposal): void
     {
         if ($proposal->status !== ProposalStatus::Sent || $proposal->responded_at !== null) {
             throw ValidationException::withMessages([
-                'proposal' => 'Only sent proposals awaiting response can be approved.',
-            ]);
-        }
-    }
-
-    private function assertRevisionRequestable(Proposal $proposal): void
-    {
-        if ($proposal->status === ProposalStatus::Revised) {
-            return;
-        }
-
-        if ($proposal->status !== ProposalStatus::Sent || $proposal->responded_at !== null) {
-            throw ValidationException::withMessages([
-                'proposal' => 'Only sent or revised proposals can receive change requests.',
+                'proposal' => 'Only sent proposals awaiting response can be updated.',
             ]);
         }
     }
