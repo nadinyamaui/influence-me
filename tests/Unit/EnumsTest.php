@@ -63,6 +63,17 @@ it('defines all client type enum cases', function (): void {
         ->and(ClientType::Individual->value)->toBe('individual');
 });
 
+it('provides client type values and filters', function (): void {
+    expect(ClientType::values())->toBe([
+        'brand',
+        'individual',
+    ])->and(ClientType::filters())->toBe([
+        'all',
+        'brand',
+        'individual',
+    ]);
+});
+
 it('provides client type labels and badge classes', function (): void {
     expect(ClientType::Brand->label())->toBe('Brand')
         ->and(ClientType::Individual->label())->toBe('Individual')
@@ -77,6 +88,38 @@ it('defines all proposal status enum cases', function (): void {
         ->and(ProposalStatus::Approved->value)->toBe('approved')
         ->and(ProposalStatus::Rejected->value)->toBe('rejected')
         ->and(ProposalStatus::Revised->value)->toBe('revised');
+});
+
+it('provides proposal status values and filters', function (): void {
+    expect(ProposalStatus::values())->toBe([
+        'draft',
+        'sent',
+        'approved',
+        'rejected',
+        'revised',
+    ])->and(ProposalStatus::filters())->toBe([
+        'all',
+        'draft',
+        'sent',
+        'approved',
+        'rejected',
+        'revised',
+    ]);
+});
+
+it('provides client proposal status values and filters', function (): void {
+    expect(ProposalStatus::clientViewableValues())->toBe([
+        'sent',
+        'approved',
+        'rejected',
+        'revised',
+    ])->and(ProposalStatus::clientFilters())->toBe([
+        'all',
+        'sent',
+        'approved',
+        'rejected',
+        'revised',
+    ]);
 });
 
 it('provides proposal status labels and badge classes', function (): void {
@@ -99,6 +142,13 @@ it('defines all invoice status enum cases', function (): void {
         ->and(InvoiceStatus::Paid->value)->toBe('paid')
         ->and(InvoiceStatus::Overdue->value)->toBe('overdue')
         ->and(InvoiceStatus::Cancelled->value)->toBe('cancelled');
+});
+
+it('provides pending invoice statuses', function (): void {
+    expect(InvoiceStatus::pendingValues())->toBe([
+        'sent',
+        'overdue',
+    ]);
 });
 
 it('provides invoice status labels and badge classes', function (): void {

@@ -35,9 +35,10 @@
             />
 
             <flux:select wire:model.live="type" :label="__('Type')">
-                <option value="all">All</option>
-                @foreach (ClientType::cases() as $typeOption)
-                    <option value="{{ $typeOption->value }}">{{ $typeOption->label() }}</option>
+                @foreach (ClientType::filters() as $filterType)
+                    <option value="{{ $filterType }}">
+                        {{ $filterType === 'all' ? 'All' : ClientType::from($filterType)->label() }}
+                    </option>
                 @endforeach
             </flux:select>
         </div>

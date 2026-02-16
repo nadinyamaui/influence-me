@@ -18,7 +18,7 @@ class Index extends Component
 
     public function updatedStatus(): void
     {
-        if (! in_array($this->status, array_merge(['all'], $this->filterStatuses()), true)) {
+        if (! in_array($this->status, ProposalStatus::clientFilters(), true)) {
             $this->status = 'all';
         }
 
@@ -29,7 +29,7 @@ class Index extends Component
     {
         return view('pages.portal.proposals.index', [
             'proposals' => $this->proposals(),
-            'filterStatuses' => $this->filterStatuses(),
+            'filterStatuses' => ProposalStatus::clientViewableValues(),
         ])->layout('layouts.portal', [
             'title' => __('Proposals'),
         ]);
@@ -48,13 +48,13 @@ class Index extends Component
             });
 
         $query = $client->proposals()
-            ->whereIn('status', $this->filterStatuses())
+            ->whereIn('status', ProposalStatus::clientViewableValues())
             ->withCount('campaigns')
             ->addSelect(['scheduled_content_count' => $scheduledContentSubquery])
             ->orderByDesc('sent_at')
             ->orderByDesc('id');
 
-        if (in_array($this->status, $this->filterStatuses(), true)) {
+        if (in_array($this->status, ProposalStatus::clientViewableValues(), true)) {
             $query->where('status', $this->status);
         }
 
@@ -70,15 +70,5 @@ class Index extends Component
         }
 
         return $client;
-    }
-
-    private function filterStatuses(): array
-    {
-        return [
-            ProposalStatus::Sent->value,
-            ProposalStatus::Approved->value,
-            ProposalStatus::Rejected->value,
-            ProposalStatus::Revised->value,
-        ];
     }
 }

@@ -18,7 +18,7 @@ class Show extends Component
 
         $this->proposal = $client->proposals()
             ->whereKey($proposal->id)
-            ->whereIn('status', $this->viewableStatuses())
+            ->whereIn('status', ProposalStatus::clientViewableValues())
             ->with([
                 'campaigns' => fn ($query) => $query->orderBy('name'),
                 'campaigns.scheduledPosts' => fn ($query) => $query
@@ -50,15 +50,5 @@ class Show extends Component
         }
 
         return $client;
-    }
-
-    private function viewableStatuses(): array
-    {
-        return [
-            ProposalStatus::Sent->value,
-            ProposalStatus::Approved->value,
-            ProposalStatus::Rejected->value,
-            ProposalStatus::Revised->value,
-        ];
     }
 }

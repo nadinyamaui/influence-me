@@ -10,6 +10,14 @@ enum InvoiceStatus: string
     case Overdue = 'overdue';
     case Cancelled = 'cancelled';
 
+    public static function pendingValues(): array
+    {
+        return [
+            self::Sent->value,
+            self::Overdue->value,
+        ];
+    }
+
     public function label(): string
     {
         return match ($this) {

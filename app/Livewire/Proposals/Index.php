@@ -28,7 +28,7 @@ class Index extends Component
 
     public function updatedStatus(): void
     {
-        if (! in_array($this->status, array_merge(['all'], $this->filterStatuses()), true)) {
+        if (! in_array($this->status, ProposalStatus::filters(), true)) {
             $this->status = 'all';
         }
 
@@ -78,7 +78,7 @@ class Index extends Component
             ->addSelect(['scheduled_content_count' => $scheduledContentSubquery])
             ->latest();
 
-        if (in_array($this->status, $this->filterStatuses(), true)) {
+        if (in_array($this->status, ProposalStatus::values(), true)) {
             $query->where('status', $this->status);
         }
 
@@ -87,13 +87,5 @@ class Index extends Component
         }
 
         return $query->paginate(10);
-    }
-
-    private function filterStatuses(): array
-    {
-        return array_map(
-            fn (ProposalStatus $status): string => $status->value,
-            ProposalStatus::cases(),
-        );
     }
 }

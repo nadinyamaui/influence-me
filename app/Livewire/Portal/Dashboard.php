@@ -22,10 +22,7 @@ class Dashboard extends Component
             abort(403);
         }
 
-        $pendingInvoiceQuery = $client->invoices()->whereIn('status', [
-            InvoiceStatus::Sent,
-            InvoiceStatus::Overdue,
-        ]);
+        $pendingInvoiceQuery = $client->invoices()->whereIn('status', InvoiceStatus::pendingValues());
 
         $linkedMediaQuery = InstagramMedia::query()
             ->whereHas('campaigns', fn (Builder $builder): Builder => $builder->where('campaigns.client_id', $client->id));

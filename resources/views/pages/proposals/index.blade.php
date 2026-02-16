@@ -29,9 +29,10 @@
     <section class="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-700 dark:bg-zinc-900">
         <div class="grid gap-4 md:grid-cols-3">
             <flux:select wire:model.live="status" :label="__('Status')">
-                <option value="all">All</option>
-                @foreach (ProposalStatus::cases() as $statusOption)
-                    <option value="{{ $statusOption->value }}">{{ $statusOption->label() }}</option>
+                @foreach (ProposalStatus::filters() as $filterStatus)
+                    <option value="{{ $filterStatus }}">
+                        {{ $filterStatus === 'all' ? 'All' : ProposalStatus::from($filterStatus)->label() }}
+                    </option>
                 @endforeach
             </flux:select>
 
