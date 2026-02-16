@@ -228,7 +228,7 @@ test('client can request proposal changes and revision notes are required', func
         ->assertSet('requestingChanges', true)
         ->set('revisionNotes', 'Too short')
         ->call('requestChanges')
-        ->assertHasErrors(['revisionNotes'])
+        ->assertHasErrors(['revisionNotes' => 'min'])
         ->set('revisionNotes', 'Please add one more story and include boosted-post usage rights.')
         ->call('requestChanges')
         ->assertHasNoErrors()

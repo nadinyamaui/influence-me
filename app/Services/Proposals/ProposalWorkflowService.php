@@ -71,12 +71,6 @@ class ProposalWorkflowService
     {
         $notes = trim($revisionNotes);
 
-        if (mb_strlen($notes) < 10) {
-            throw ValidationException::withMessages([
-                'revisionNotes' => 'Revision notes must be at least 10 characters.',
-            ]);
-        }
-
         return DB::transaction(function () use ($clientUser, $proposal, $notes): Proposal {
             $lockedProposal = $this->lockProposalForResponse($proposal);
 

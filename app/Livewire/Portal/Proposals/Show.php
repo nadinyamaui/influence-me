@@ -116,11 +116,15 @@ class Show extends Component
 
     public function requestChanges(ProposalWorkflowService $proposalWorkflowService): void
     {
+        $validated = $this->validate([
+            'revisionNotes' => ['required', 'string', 'min:10'],
+        ]);
+
         try {
             $this->proposal = $proposalWorkflowService->requestChanges(
                 $this->authenticatedClientUser(),
                 $this->proposal,
-                $this->revisionNotes,
+                $validated['revisionNotes'],
             )->load([
                 'user:id,name,email',
                 'campaigns' => fn ($query) => $query->orderBy('name'),
