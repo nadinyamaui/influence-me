@@ -5,6 +5,9 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
+- RFC 047: added client-portal proposal browsing routes in `routes/portal.php` for `/portal/proposals` and `/portal/proposals/{proposal}` backed by new Livewire pages `app/Livewire/Portal/Proposals/Index.php` and `app/Livewire/Portal/Proposals/Show.php`.
+- RFC 047: added `resources/views/pages/portal/proposals/index.blade.php` and `resources/views/pages/portal/proposals/show.blade.php` with client-scoped sent/approved/rejected/revised proposal listing, query-layer status filtering, markdown proposal rendering, campaign schedule context, and placeholder approve/request-change actions for RFC 048.
+- RFC 047: updated portal navigation link wiring in `resources/views/layouts/portal/sidebar.blade.php` and added feature coverage in `tests/Feature/Portal/PortalProposalsTest.php` plus portal nav assertion update in `tests/Feature/Portal/PortalLayoutTest.php` for scope, authorization, and draft access denial.
 - RFC 046: implemented proposal send workflow in `app/Services/Proposals/ProposalWorkflowService.php` with send-time validation for client email, status eligibility, linked campaign requirements, scheduled-content presence, and influencer/client scope enforcement before mutating proposal state.
 - RFC 046: wired send confirmation and execution in `app/Livewire/Proposals/Show.php` and `resources/views/pages/proposals/show.blade.php`, including a confirmation modal, actionable validation error messaging, and success flash feedback after send.
 - RFC 046: added proposal notification mailer `app/Mail/ProposalSent.php` and template `resources/views/mail/proposal-sent.blade.php` with proposal title/preview, influencer attribution, client-portal CTA when portal access exists, and influencer reply-to support.

@@ -31,7 +31,7 @@
                         {{ __('Dashboard') }}
                     </flux:sidebar.item>
 
-                    <flux:sidebar.item icon="document-text" href="#">
+                    <flux:sidebar.item icon="document-text" :href="route('portal.proposals.index')" :current="request()->routeIs('portal.proposals.*')" wire:navigate>
                         {{ __('Proposals') }}
                     </flux:sidebar.item>
 
