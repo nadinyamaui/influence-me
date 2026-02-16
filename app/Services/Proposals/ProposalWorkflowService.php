@@ -45,31 +45,30 @@ class ProposalWorkflowService
 
     public function approve(ClientUser $clientUser, Proposal $proposal): Proposal
     {
-        $this->ensureClientScope($clientUser, $proposal);
-        $this->assertRespondable($proposal);
+        return DB::transaction(function () use ($clientUser, $proposal): Proposal {
+            $lockedProposal = $this->lockProposalForResponse($proposal);
 
-        return DB::transaction(function () use ($proposal): Proposal {
-            $proposal->update([
+            $this->ensureClientScope($clientUser, $lockedProposal);
+            $this->assertRespondable($lockedProposal);
+
+            $lockedProposal->update([
                 'status' => ProposalStatus::Approved,
                 'responded_at' => now(),
                 'revision_notes' => null,
             ]);
 
-            $proposal->loadMissing(['user', 'client']);
+            $lockedProposal->loadMissing(['user', 'client']);
 
-            if (filled($proposal->user?->email)) {
-                Mail::to($proposal->user->email)->send(new ProposalApproved($proposal));
+            if (filled($lockedProposal->user?->email)) {
+                Mail::to($lockedProposal->user->email)->send(new ProposalApproved($lockedProposal));
             }
 
-            return $proposal->refresh();
+            return $lockedProposal->refresh();
         });
     }
 
     public function requestChanges(ClientUser $clientUser, Proposal $proposal, string $revisionNotes): Proposal
     {
-        $this->ensureClientScope($clientUser, $proposal);
-        $this->assertRespondable($proposal);
-
         $notes = trim($revisionNotes);
 
         if (mb_strlen($notes) < 10) {
@@ -78,20 +77,25 @@ class ProposalWorkflowService
             ]);
         }
 
-        return DB::transaction(function () use ($proposal, $notes): Proposal {
-            $proposal->update([
+        return DB::transaction(function () use ($clientUser, $proposal, $notes): Proposal {
+            $lockedProposal = $this->lockProposalForResponse($proposal);
+
+            $this->ensureClientScope($clientUser, $lockedProposal);
+            $this->assertRespondable($lockedProposal);
+
+            $lockedProposal->update([
                 'status' => ProposalStatus::Revised,
                 'revision_notes' => $notes,
                 'responded_at' => now(),
             ]);
 
-            $proposal->loadMissing(['user', 'client']);
+            $lockedProposal->loadMissing(['user', 'client']);
 
-            if (filled($proposal->user?->email)) {
-                Mail::to($proposal->user->email)->send(new ProposalRevisionRequested($proposal));
+            if (filled($lockedProposal->user?->email)) {
+                Mail::to($lockedProposal->user->email)->send(new ProposalRevisionRequested($lockedProposal));
             }
 
-            return $proposal->refresh();
+            return $lockedProposal->refresh();
         });
     }
 
@@ -330,6 +334,14 @@ class ProposalWorkflowService
                 'proposal' => 'Only sent proposals awaiting response can be updated.',
             ]);
         }
+    }
+
+    private function lockProposalForResponse(Proposal $proposal): Proposal
+    {
+        return Proposal::query()
+            ->whereKey($proposal->id)
+            ->lockForUpdate()
+            ->firstOrFail();
     }
 
     private function ensureEditable(Proposal $proposal): void

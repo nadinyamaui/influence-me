@@ -264,3 +264,34 @@ test('client cannot approve or request changes after proposal has already been r
     expect($proposal->fresh()->status)->toBe(ProposalStatus::Approved);
     Mail::assertNothingSent();
 });
+
+test('stale portal proposal instance cannot overwrite prior client response', function (): void {
+    Mail::fake();
+
+    $influencer = User::factory()->create(['email' => 'influencer@example.test']);
+    $client = Client::factory()->for($influencer)->create();
+    $clientUser = ClientUser::factory()->for($client)->create();
+
+    $proposal = Proposal::factory()->for($influencer)->for($client)->sent()->create();
+
+    $firstSession = Livewire::actingAs($clientUser, 'client')
+        ->test(PortalProposalShow::class, ['proposal' => $proposal]);
+
+    $secondSession = Livewire::actingAs($clientUser, 'client')
+        ->test(PortalProposalShow::class, ['proposal' => $proposal]);
+
+    $firstSession->call('approve')->assertHasNoErrors();
+
+    $secondSession
+        ->call('requestChanges')
+        ->assertHasErrors(['proposal']);
+
+    $proposal->refresh();
+
+    expect($proposal->status)->toBe(ProposalStatus::Approved)
+        ->and($proposal->revision_notes)->toBeNull()
+        ->and($proposal->responded_at)->not->toBeNull();
+
+    Mail::assertSent(ProposalApproved::class, 1);
+    Mail::assertNotSent(ProposalRevisionRequested::class);
+});
