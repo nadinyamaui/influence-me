@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Builders\InstagramMediaBuilder;
 use App\Enums\MediaType;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -14,6 +15,11 @@ class InstagramMedia extends Model
     use HasFactory;
 
     protected $guarded = [];
+
+    public function newEloquentBuilder($query): InstagramMediaBuilder
+    {
+        return new InstagramMediaBuilder($query);
+    }
 
     protected function casts(): array
     {

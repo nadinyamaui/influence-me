@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Builders\AudienceDemographicBuilder;
 use App\Enums\DemographicType;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -12,6 +13,11 @@ class AudienceDemographic extends Model
     use HasFactory;
 
     protected $guarded = [];
+
+    public function newEloquentBuilder($query): AudienceDemographicBuilder
+    {
+        return new AudienceDemographicBuilder($query);
+    }
 
     protected function casts(): array
     {

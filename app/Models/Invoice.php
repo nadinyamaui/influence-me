@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Builders\InvoiceBuilder;
 use App\Enums\InvoiceStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -14,6 +15,11 @@ class Invoice extends Model
     use HasFactory;
 
     protected $guarded = [];
+
+    public function newEloquentBuilder($query): InvoiceBuilder
+    {
+        return new InvoiceBuilder($query);
+    }
 
     protected static function booted(): void
     {

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Builders\InstagramAccountBuilder;
 use App\Enums\AccountType;
 use App\Enums\SyncStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -14,6 +15,11 @@ class InstagramAccount extends Model
     use HasFactory;
 
     protected $guarded = [];
+
+    public function newEloquentBuilder($query): InstagramAccountBuilder
+    {
+        return new InstagramAccountBuilder($query);
+    }
 
     protected function casts(): array
     {

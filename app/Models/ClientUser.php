@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Builders\ClientUserBuilder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -22,6 +23,11 @@ class ClientUser extends Authenticatable
         'password',
         'remember_token',
     ];
+
+    public function newEloquentBuilder($query): ClientUserBuilder
+    {
+        return new ClientUserBuilder($query);
+    }
 
     protected function casts(): array
     {
