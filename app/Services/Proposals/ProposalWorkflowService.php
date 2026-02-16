@@ -329,7 +329,7 @@ class ProposalWorkflowService
 
     private function assertRespondable(Proposal $proposal): void
     {
-        if ($proposal->status !== ProposalStatus::Sent || $proposal->responded_at !== null) {
+        if (! $proposal->canRespond()) {
             throw ValidationException::withMessages([
                 'proposal' => 'Only sent proposals awaiting response can be updated.',
             ]);

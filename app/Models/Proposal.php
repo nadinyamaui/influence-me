@@ -37,4 +37,10 @@ class Proposal extends Model
     {
         return $this->hasMany(Campaign::class);
     }
+
+    public function canRespond(): bool
+    {
+        return $this->status === ProposalStatus::Sent
+            && $this->responded_at === null;
+    }
 }

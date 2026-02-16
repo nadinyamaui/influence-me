@@ -74,15 +74,9 @@ class Show extends Component
         ]);
     }
 
-    public function canRespond(): bool
-    {
-        return $this->proposal->status === ProposalStatus::Sent
-            && $this->proposal->responded_at === null;
-    }
-
     public function approve(ProposalWorkflowService $proposalWorkflowService): void
     {
-        if (! $this->canRespond()) {
+        if (! $this->proposal->canRespond()) {
             $this->addError('proposal', 'This proposal has already been responded to.');
 
             return;
@@ -110,7 +104,7 @@ class Show extends Component
 
     public function openRequestChanges(): void
     {
-        if (! $this->canRespond()) {
+        if (! $this->proposal->canRespond()) {
             $this->addError('proposal', 'This proposal has already been responded to.');
 
             return;
@@ -128,7 +122,7 @@ class Show extends Component
 
     public function requestChanges(ProposalWorkflowService $proposalWorkflowService): void
     {
-        if (! $this->canRespond()) {
+        if (! $this->proposal->canRespond()) {
             $this->addError('proposal', 'This proposal has already been responded to.');
 
             return;

@@ -72,3 +72,13 @@ it('defines user proposals relationship', function (): void {
         ->and($proposalsReturnType)->toBe(HasMany::class)
         ->and($user->proposals)->toHaveCount(2);
 });
+
+it('determines whether a proposal can receive a client response', function (): void {
+    $sent = Proposal::factory()->sent()->create();
+    $approved = Proposal::factory()->approved()->create();
+    $revised = Proposal::factory()->revised()->create();
+
+    expect($sent->canRespond())->toBeTrue()
+        ->and($approved->canRespond())->toBeFalse()
+        ->and($revised->canRespond())->toBeFalse();
+});
