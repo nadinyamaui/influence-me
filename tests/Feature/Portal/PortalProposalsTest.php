@@ -228,7 +228,7 @@ test('client can request proposal changes and revision notes are required', func
         ->assertSet('requestingChanges', true)
         ->set('revisionNotes', 'Too short')
         ->call('requestChanges')
-        ->assertHasErrors(['revisionNotes' => 'min'])
+        ->assertHasErrors(['revisionNotes'])
         ->set('revisionNotes', 'Please add one more story and include boosted-post usage rights.')
         ->call('requestChanges')
         ->assertHasNoErrors()
@@ -289,6 +289,7 @@ test('stale portal proposal instance cannot overwrite prior client response', fu
     $firstSession->call('approve')->assertHasNoErrors();
 
     $secondSession
+        ->set('revisionNotes', 'Please revise the schedule and include additional usage terms.')
         ->call('requestChanges')
         ->assertHasErrors(['proposal']);
 

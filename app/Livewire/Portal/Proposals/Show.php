@@ -116,16 +116,6 @@ class Show extends Component
 
     public function requestChanges(ProposalWorkflowService $proposalWorkflowService): void
     {
-        if (! $this->proposal->canRespond()) {
-            $this->addError('proposal', 'This proposal has already been responded to.');
-
-            return;
-        }
-
-        $this->validate([
-            'revisionNotes' => ['required', 'string', 'min:10'],
-        ]);
-
         try {
             $this->proposal = $proposalWorkflowService->requestChanges(
                 $this->authenticatedClientUser(),

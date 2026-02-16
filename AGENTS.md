@@ -158,6 +158,7 @@ Hard constraints:
 - No direct `Http::` usage in controllers, Livewire components, models, policies, or form requests
 - No direct SDK/facade calls for external APIs in controllers (must route through service/client abstractions)
 - No business rule branching duplicated between controller and service
+- Do not perform business/workflow validations in controllers/Livewire before invoking services; enforce them inside service methods and signal failures by throwing typed exceptions (for example `ValidationException`/`AuthorizationException`)
 - No persistence side effects hidden inside connectors
 - Do not use `data_get` for object property traversal; use nullsafe property access (`$object?->property?->property`) instead
 - Do not use custom normalize helper functions for request/session input; use Laravel validation rules (`$request->validate()` or Form Requests) and explicit defaults instead
