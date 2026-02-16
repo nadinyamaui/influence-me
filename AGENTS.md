@@ -142,6 +142,7 @@ All new and modified code must preserve strict layer boundaries:
 
 - `Controllers/Livewire components`: HTTP/UI orchestration only (request parsing, auth checks, response/redirect composition)
 - `Services`: use-case/business workflow orchestration only
+- `Builders`: reusable Eloquent query composition (search/filter/sort/ownership scopes) and query-scoped persistence helpers only
 - `Clients`: third-party/domain adapters (typed domain-level API calls)
 - `Connectors`: raw transport concerns (HTTP base URL, headers, retries/timeouts, low-level request methods)
 - `Models`: persistence and relationships only (no external API calls)
@@ -159,6 +160,12 @@ Hard constraints:
 - No direct SDK/facade calls for external APIs in controllers (must route through service/client abstractions)
 - No business rule branching duplicated between controller and service
 - No persistence side effects hidden inside connectors
+- Reusable/complex database query chains must be extracted to the model's custom `Builder` class; do not keep long `where`/`orWhere`/`whereHas`/`when`/`orderBy` chains inline in Livewire components, controllers, or services
+- Search behavior must live in builder methods (for example `search(string $term)`) instead of being reimplemented in page components
+- Multi-filter and sorting composition must live in builder methods (for example `filterByStatus(...)`, `forUser(...)`, `forClient(...)`, `applySort(...)`)
+- If creation logic is query-scoped and persistence-only, expose it via explicit builder methods (for example `createForUser(...)`, `createForClient(...)`); business workflow branching must remain in services
+- Builder methods must be chainable when appropriate and must return typed builder/model results
+- Do not duplicate identical query clauses across files; centralize them in builder methods and reuse them
 - Do not use `data_get` for object property traversal; use nullsafe property access (`$object?->property?->property`) instead
 - Do not use custom normalize helper functions for request/session input; use Laravel validation rules (`$request->validate()` or Form Requests) and explicit defaults instead
 - Do not use `isset()` for value retrieval/defaulting; use null coalescing (`??`) with explicit defaults instead
@@ -173,6 +180,7 @@ Testing requirements for decoupling:
 
 - Feature tests cover behavior at controller/page boundary
 - Unit/service tests cover workflow rules and guard/ownership rules
+- Builder unit tests cover query composition and scoped create helpers (search, filters, sorting, ownership constraints)
 - Client tests mock transport responses and verify mapping/error handling
 - Connector tests (if added) cover request composition only
 
