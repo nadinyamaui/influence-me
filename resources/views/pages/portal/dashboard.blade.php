@@ -1,8 +1,3 @@
-@php
-    use App\Enums\InvoiceStatus;
-    use App\Enums\ProposalStatus;
-@endphp
-
 <div class="flex h-full w-full flex-1 flex-col gap-6">
     <div>
         <h1 class="text-2xl font-semibold text-zinc-900 dark:text-zinc-100">Welcome back, {{ $client->name }}</h1>
@@ -53,20 +48,8 @@
                             <a href="{{ url('/portal/proposals/'.$proposal->id) }}" class="truncate text-sm font-medium text-zinc-900 hover:underline dark:text-zinc-100">
                                 {{ $proposal->title }}
                             </a>
-                            <span class="inline-flex rounded-full px-2 py-1 text-xs font-medium
-                                @if ($proposal->status === ProposalStatus::Sent)
-                                    bg-sky-100 text-sky-700 dark:bg-sky-900/40 dark:text-sky-200
-                                @elseif ($proposal->status === ProposalStatus::Approved)
-                                    bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-200
-                                @elseif ($proposal->status === ProposalStatus::Rejected)
-                                    bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-200
-                                @elseif ($proposal->status === ProposalStatus::Revised)
-                                    bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-200
-                                @else
-                                    bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-200
-                                @endif
-                            ">
-                                {{ ucfirst($proposal->status->value) }}
+                            <span class="inline-flex rounded-full px-2 py-1 text-xs font-medium {{ $proposal->status->badgeClasses() }}">
+                                {{ $proposal->status->label() }}
                             </span>
                         </li>
                     @endforeach
@@ -90,18 +73,8 @@
                             </a>
                             <div class="flex items-center gap-2">
                                 <span class="text-sm text-zinc-700 dark:text-zinc-200">${{ number_format((float) $invoice->total, 2) }}</span>
-                                <span class="inline-flex rounded-full px-2 py-1 text-xs font-medium
-                                    @if ($invoice->status === InvoiceStatus::Sent)
-                                        bg-sky-100 text-sky-700 dark:bg-sky-900/40 dark:text-sky-200
-                                    @elseif ($invoice->status === InvoiceStatus::Paid)
-                                        bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-200
-                                    @elseif ($invoice->status === InvoiceStatus::Overdue)
-                                        bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-200
-                                    @else
-                                        bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-200
-                                    @endif
-                                ">
-                                    {{ ucfirst($invoice->status->value) }}
+                                <span class="inline-flex rounded-full px-2 py-1 text-xs font-medium {{ $invoice->status->badgeClasses() }}">
+                                    {{ $invoice->status->label() }}
                                 </span>
                             </div>
                         </li>
