@@ -1,6 +1,5 @@
 @php
     use App\Enums\ProposalStatus;
-    use Illuminate\Support\Str;
 @endphp
 
 <div class="flex h-full w-full flex-1 flex-col gap-6">
@@ -31,7 +30,9 @@
         <div class="grid gap-4 md:grid-cols-3">
             <flux:select wire:model.live="status" :label="__('Status')">
                 @foreach (ProposalStatus::filters() as $filterStatus)
-                    <option value="{{ $filterStatus }}">{{ Str::of($filterStatus)->headline() }}</option>
+                    <option value="{{ $filterStatus }}">
+                        {{ $filterStatus === 'all' ? 'All' : ProposalStatus::from($filterStatus)->label() }}
+                    </option>
                 @endforeach
             </flux:select>
 
@@ -80,23 +81,9 @@
                                 <td class="px-4 py-3 text-zinc-700 dark:text-zinc-200">{{ number_format($proposal->campaigns_count) }}</td>
                                 <td class="px-4 py-3 text-zinc-700 dark:text-zinc-200">{{ number_format($proposal->scheduled_content_count ?? 0) }}</td>
                                 <td class="px-4 py-3">
-                                    @switch($proposal->status)
-                                        @case(ProposalStatus::Draft)
-                                            <span class="inline-flex rounded-full bg-zinc-100 px-2.5 py-1 text-xs font-medium text-zinc-700 dark:bg-zinc-700 dark:text-zinc-200">Draft</span>
-                                            @break
-                                        @case(ProposalStatus::Sent)
-                                            <span class="inline-flex rounded-full bg-blue-100 px-2.5 py-1 text-xs font-medium text-blue-700 dark:bg-blue-900/40 dark:text-blue-200">Sent</span>
-                                            @break
-                                        @case(ProposalStatus::Approved)
-                                            <span class="inline-flex rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-medium text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-200">Approved</span>
-                                            @break
-                                        @case(ProposalStatus::Rejected)
-                                            <span class="inline-flex rounded-full bg-rose-100 px-2.5 py-1 text-xs font-medium text-rose-700 dark:bg-rose-900/40 dark:text-rose-200">Rejected</span>
-                                            @break
-                                        @case(ProposalStatus::Revised)
-                                            <span class="inline-flex rounded-full bg-amber-100 px-2.5 py-1 text-xs font-medium text-amber-700 dark:bg-amber-900/40 dark:text-amber-200">Revised</span>
-                                            @break
-                                    @endswitch
+                                    <span class="inline-flex rounded-full px-2.5 py-1 text-xs font-medium {{ $proposal->status->badgeClasses() }}">
+                                        {{ $proposal->status->label() }}
+                                    </span>
                                 </td>
                                 <td class="px-4 py-3 text-zinc-700 dark:text-zinc-200">{{ $proposal->created_at->format('M d, Y') }}</td>
                                 <td class="px-4 py-3 text-zinc-700 dark:text-zinc-200">{{ $proposal->updated_at->format('M d, Y') }}</td>

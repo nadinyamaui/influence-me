@@ -165,6 +165,7 @@ Hard constraints:
 - Do not add method-level docblocks; methods should not include PHPDoc comments unless explicitly required by a framework or tooling constraint
 - Do not add inline comments inside function bodies; function code should be self-explanatory without internal comments
 - Enum-driven validation/filter option logic must live on enum classes (for example, status filter option lists), not in Livewire components, controllers, or Blade views
+- Enum UI presentation metadata (labels, badge/text color class maps) must live on the enum class (for example `label()` and `badgeClasses()`), not in Livewire components or Blade `@switch`/`@if` mappings
 - When using Flux form fields (`flux:input`, `flux:textarea`, `flux:select`, `flux:otp`), do not add manual Blade `@error(...)` rendering for those fields; rely on Flux validation error presentation
 - For simple yes/no action confirmations in Livewire, use native `wire:confirm` instead of custom confirmation modal state and modal components
 

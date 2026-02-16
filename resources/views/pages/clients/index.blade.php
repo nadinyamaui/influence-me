@@ -1,6 +1,5 @@
 @php
     use App\Enums\ClientType;
-    use Illuminate\Support\Str;
 @endphp
 
 <div class="flex h-full w-full flex-1 flex-col gap-6">
@@ -37,7 +36,9 @@
 
             <flux:select wire:model.live="type" :label="__('Type')">
                 @foreach (ClientType::filters() as $filterType)
-                    <option value="{{ $filterType }}">{{ Str::of($filterType)->headline() }}</option>
+                    <option value="{{ $filterType }}">
+                        {{ $filterType === 'all' ? 'All' : ClientType::from($filterType)->label() }}
+                    </option>
                 @endforeach
             </flux:select>
         </div>
@@ -75,11 +76,9 @@
                                 </td>
                                 <td class="px-4 py-3 text-zinc-700 dark:text-zinc-200">{{ $client->company_name ?? '—' }}</td>
                                 <td class="px-4 py-3">
-                                    @if ($client->type === ClientType::Brand)
-                                        <span class="inline-flex rounded-full bg-sky-100 px-2.5 py-1 text-xs font-medium text-sky-700 dark:bg-sky-900/40 dark:text-sky-200">Brand</span>
-                                    @else
-                                        <span class="inline-flex rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-medium text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-200">Individual</span>
-                                    @endif
+                                    <span class="inline-flex rounded-full px-2.5 py-1 text-xs font-medium {{ $client->type->badgeClasses() }}">
+                                        {{ $client->type->label() }}
+                                    </span>
                                 </td>
                                 <td class="px-4 py-3 text-zinc-700 dark:text-zinc-200">{{ $client->email ?? '—' }}</td>
                                 <td class="px-4 py-3 text-zinc-700 dark:text-zinc-200">{{ number_format($client->campaigns_count) }}</td>

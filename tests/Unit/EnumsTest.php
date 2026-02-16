@@ -74,6 +74,13 @@ it('provides client type values and filters', function (): void {
     ]);
 });
 
+it('provides client type labels and badge classes', function (): void {
+    expect(ClientType::Brand->label())->toBe('Brand')
+        ->and(ClientType::Individual->label())->toBe('Individual')
+        ->and(ClientType::Brand->badgeClasses())->toContain('bg-sky-100')
+        ->and(ClientType::Individual->badgeClasses())->toContain('bg-emerald-100');
+});
+
 it('defines all proposal status enum cases', function (): void {
     expect(ProposalStatus::cases())->toHaveCount(5)
         ->and(ProposalStatus::Draft->value)->toBe('draft')
@@ -115,6 +122,19 @@ it('provides client proposal status values and filters', function (): void {
     ]);
 });
 
+it('provides proposal status labels and badge classes', function (): void {
+    expect(ProposalStatus::Draft->label())->toBe('Draft')
+        ->and(ProposalStatus::Sent->label())->toBe('Sent')
+        ->and(ProposalStatus::Approved->label())->toBe('Approved')
+        ->and(ProposalStatus::Rejected->label())->toBe('Rejected')
+        ->and(ProposalStatus::Revised->label())->toBe('Revised')
+        ->and(ProposalStatus::Draft->badgeClasses())->toContain('bg-zinc-100')
+        ->and(ProposalStatus::Sent->badgeClasses())->toContain('bg-blue-100')
+        ->and(ProposalStatus::Approved->badgeClasses())->toContain('bg-emerald-100')
+        ->and(ProposalStatus::Rejected->badgeClasses())->toContain('bg-rose-100')
+        ->and(ProposalStatus::Revised->badgeClasses())->toContain('bg-amber-100');
+});
+
 it('defines all invoice status enum cases', function (): void {
     expect(InvoiceStatus::cases())->toHaveCount(5)
         ->and(InvoiceStatus::Draft->value)->toBe('draft')
@@ -129,6 +149,19 @@ it('provides pending invoice statuses', function (): void {
         'sent',
         'overdue',
     ]);
+});
+
+it('provides invoice status labels and badge classes', function (): void {
+    expect(InvoiceStatus::Draft->label())->toBe('Draft')
+        ->and(InvoiceStatus::Sent->label())->toBe('Sent')
+        ->and(InvoiceStatus::Paid->label())->toBe('Paid')
+        ->and(InvoiceStatus::Overdue->label())->toBe('Overdue')
+        ->and(InvoiceStatus::Cancelled->label())->toBe('Cancelled')
+        ->and(InvoiceStatus::Draft->badgeClasses())->toContain('bg-zinc-100')
+        ->and(InvoiceStatus::Sent->badgeClasses())->toContain('bg-sky-100')
+        ->and(InvoiceStatus::Paid->badgeClasses())->toContain('bg-emerald-100')
+        ->and(InvoiceStatus::Overdue->badgeClasses())->toContain('bg-rose-100')
+        ->and(InvoiceStatus::Cancelled->badgeClasses())->toContain('bg-zinc-100');
 });
 
 it('defines all scheduled post status enum cases', function (): void {
