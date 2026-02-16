@@ -72,18 +72,16 @@ class Index extends Component
                     ->whereColumn('campaigns.proposal_id', 'proposals.id');
             });
 
-        $query = Auth::user()->proposals()
+        $query = Proposal::query()
+            ->forUser()
             ->with('client')
             ->withCount('campaigns')
             ->addSelect(['scheduled_content_count' => $scheduledContentSubquery])
-            ->latest();
-
-        if (in_array($this->status, ProposalStatus::values(), true)) {
-            $query->where('status', $this->status);
-        }
+            ->filterByStatus($this->status)
+            ->latestFirst();
 
         if ($this->client !== 'all' && is_numeric($this->client)) {
-            $query->where('client_id', (int) $this->client);
+            $query->forClient((int) $this->client);
         }
 
         return $query->paginate(10);

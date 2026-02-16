@@ -332,7 +332,7 @@ class Show extends Component
     private function campaignProposals(): EloquentCollection
     {
         return Proposal::query()
-            ->forUser((int) Auth::id())
+            ->forUser()
             ->forClient($this->client->id)
             ->latestFirst()
             ->get(['id', 'title', 'status']);
