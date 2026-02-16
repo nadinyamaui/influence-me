@@ -5,6 +5,9 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
+- RFC 048: added client response workflow methods in `app/Services/Proposals/ProposalWorkflowService.php` for approve/request-changes actions with sent-only status gating, already-responded protection, client ownership enforcement, and influencer email dispatch.
+- RFC 048: added proposal response notification mailables `app/Mail/ProposalApproved.php` and `app/Mail/ProposalRevisionRequested.php` with templates `resources/views/mail/proposal-approved.blade.php` and `resources/views/mail/proposal-revision-requested.blade.php`.
+- RFC 048: updated `app/Livewire/Portal/Proposals/Show.php` and `resources/views/pages/portal/proposals/show.blade.php` to enable actionable Approve/Request Changes flows (including revision-notes modal), response-state UI gating, and flash/error messaging; expanded `tests/Feature/Portal/PortalProposalsTest.php` to cover approve, request changes, validation, non-replay constraints, and email delivery.
 - RFC 047: added client-portal proposal browsing routes in `routes/portal.php` for `/portal/proposals` and `/portal/proposals/{proposal}` backed by new Livewire pages `app/Livewire/Portal/Proposals/Index.php` and `app/Livewire/Portal/Proposals/Show.php`.
 - RFC 047: added `resources/views/pages/portal/proposals/index.blade.php` and `resources/views/pages/portal/proposals/show.blade.php` with client-scoped sent/approved/rejected/revised proposal listing, query-layer status filtering, markdown proposal rendering, campaign schedule context, and placeholder approve/request-change actions for RFC 048.
 - RFC 047: updated portal navigation link wiring in `resources/views/layouts/portal/sidebar.blade.php` and added feature coverage in `tests/Feature/Portal/PortalProposalsTest.php` plus portal nav assertion update in `tests/Feature/Portal/PortalLayoutTest.php` for scope, authorization, and draft access denial.

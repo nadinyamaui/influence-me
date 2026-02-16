@@ -1,8 +1,21 @@
 @php
+    use App\Enums\ProposalStatus;
     use Illuminate\Support\Str;
 @endphp
 
 <div class="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-6">
+    @if (session('status'))
+        <div class="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-800 dark:border-emerald-900/40 dark:bg-emerald-950/50 dark:text-emerald-200">
+            {{ session('status') }}
+        </div>
+    @endif
+
+    @if ($errors->has('response'))
+        <div class="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-800 dark:border-rose-900/40 dark:bg-rose-950/50 dark:text-rose-200">
+            {{ $errors->first('response') }}
+        </div>
+    @endif
+
     <div class="flex flex-wrap items-start justify-between gap-3">
         <div>
             <h1 class="text-2xl font-semibold text-zinc-900 dark:text-zinc-100">{{ $proposal->title }}</h1>
@@ -16,12 +29,24 @@
             <flux:button :href="route('portal.proposals.index')" wire:navigate variant="filled">
                 Back
             </flux:button>
-            <flux:button type="button" variant="primary" disabled>
-                Approve
-            </flux:button>
-            <flux:button type="button" variant="filled" disabled>
-                Request Changes
-            </flux:button>
+
+            @if ($proposal->status === ProposalStatus::Sent && $proposal->responded_at === null)
+                <flux:button
+                    type="button"
+                    variant="primary"
+                    wire:click="approve"
+                    wire:confirm="Approve this proposal?"
+                >
+                    Approve
+                </flux:button>
+                <flux:button type="button" variant="filled" wire:click="openRequestChangesModal">
+                    Request Changes
+                </flux:button>
+            @else
+                <span class="inline-flex rounded-full bg-zinc-100 px-3 py-1.5 text-xs font-medium text-zinc-700 dark:bg-zinc-800 dark:text-zinc-200">
+                    Response submitted
+                </span>
+            @endif
         </div>
     </div>
 
@@ -93,4 +118,40 @@
             </div>
         @endif
     </section>
+
+    @if ($proposal->status === ProposalStatus::Revised && filled($proposal->revision_notes))
+        <section class="rounded-2xl border border-amber-200 bg-amber-50 p-6 shadow-sm dark:border-amber-900/40 dark:bg-amber-950/50">
+            <h2 class="text-sm font-semibold uppercase tracking-wide text-amber-700 dark:text-amber-200">Revision Notes</h2>
+            <p class="mt-2 whitespace-pre-wrap text-sm text-amber-800 dark:text-amber-100">{{ $proposal->revision_notes }}</p>
+        </section>
+    @endif
+
+    @if ($showRequestChangesModal)
+        <flux:modal
+            name="proposal-request-changes-modal"
+            wire:model="showRequestChangesModal"
+            @close="closeRequestChangesModal"
+            class="max-w-xl"
+        >
+            <h2 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100">Request Changes</h2>
+
+            <form wire:submit="requestChanges" class="mt-5 space-y-4">
+                <flux:textarea
+                    wire:model="revisionNotes"
+                    :label="__('Revision Notes')"
+                    rows="5"
+                    required
+                />
+
+                <div class="flex justify-end gap-2 pt-2">
+                    <flux:button type="button" variant="filled" wire:click="closeRequestChangesModal">
+                        Cancel
+                    </flux:button>
+                    <flux:button type="submit" variant="primary">
+                        Submit Request
+                    </flux:button>
+                </div>
+            </form>
+        </flux:modal>
+    @endif
 </div>

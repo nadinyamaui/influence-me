@@ -5,6 +5,8 @@ namespace App\Services\Proposals;
 use App\Enums\MediaType;
 use App\Enums\ProposalStatus;
 use App\Enums\ScheduledPostStatus;
+use App\Mail\ProposalApproved;
+use App\Mail\ProposalRevisionRequested;
 use App\Mail\ProposalSent;
 use App\Models\Campaign;
 use App\Models\Client;
@@ -90,6 +92,54 @@ class ProposalWorkflowService
                 'send' => 'Scheduled content must belong to the same influencer and client as this proposal.',
             ]);
         }
+    }
+
+    public function approveByClient(Client $client, Proposal $proposal): Proposal
+    {
+        $this->ensureClientOwnsProposal($client, $proposal);
+        $this->assertPendingClientResponse($proposal);
+
+        return DB::transaction(function () use ($proposal): Proposal {
+            $proposal->update([
+                'status' => ProposalStatus::Approved,
+                'revision_notes' => null,
+                'responded_at' => now(),
+            ]);
+
+            $proposal->loadMissing('user');
+
+            Mail::to($proposal->user->email)->send(new ProposalApproved($proposal));
+
+            return $proposal->refresh();
+        });
+    }
+
+    public function requestChangesByClient(Client $client, Proposal $proposal, string $revisionNotes): Proposal
+    {
+        $this->ensureClientOwnsProposal($client, $proposal);
+        $this->assertPendingClientResponse($proposal);
+
+        $notes = trim($revisionNotes);
+
+        if (mb_strlen($notes) < 10) {
+            throw ValidationException::withMessages([
+                'revisionNotes' => 'Revision notes must be at least 10 characters.',
+            ]);
+        }
+
+        return DB::transaction(function () use ($proposal, $notes): Proposal {
+            $proposal->update([
+                'status' => ProposalStatus::Revised,
+                'revision_notes' => $notes,
+                'responded_at' => now(),
+            ]);
+
+            $proposal->loadMissing('user');
+
+            Mail::to($proposal->user->email)->send(new ProposalRevisionRequested($proposal));
+
+            return $proposal->refresh();
+        });
     }
 
     public function createDraft(User $user, array $payload): Proposal
@@ -261,6 +311,13 @@ class ProposalWorkflowService
         }
     }
 
+    private function ensureClientOwnsProposal(Client $client, Proposal $proposal): void
+    {
+        if ($proposal->client_id !== $client->id) {
+            throw new AuthorizationException('You are not authorized to respond to this proposal.');
+        }
+    }
+
     private function ensureEditable(Proposal $proposal): void
     {
         if (! in_array($proposal->status, [ProposalStatus::Draft, ProposalStatus::Revised], true)) {
@@ -336,6 +393,21 @@ class ProposalWorkflowService
             ->exists();
 
         return $ownedAccountExists ? $accountId : null;
+    }
+
+    private function assertPendingClientResponse(Proposal $proposal): void
+    {
+        if ($proposal->status !== ProposalStatus::Sent) {
+            throw ValidationException::withMessages([
+                'response' => 'Only sent proposals can be responded to.',
+            ]);
+        }
+
+        if ($proposal->responded_at !== null) {
+            throw ValidationException::withMessages([
+                'response' => 'This proposal has already been responded to.',
+            ]);
+        }
     }
 
     private function resolveScheduledAt(mixed $scheduledAt): ?Carbon
