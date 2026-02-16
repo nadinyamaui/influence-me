@@ -20,7 +20,7 @@
                         {{ __('Content') }}
                     </flux:sidebar.item>
 
-                    <flux:sidebar.item icon="chart-bar" href="#">
+                    <flux:sidebar.item icon="chart-bar" :href="route('analytics.index')" :current="request()->routeIs('analytics.index')" wire:navigate>
                         {{ __('Analytics') }}
                     </flux:sidebar.item>
                 </flux:sidebar.group>

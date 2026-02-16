@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\FacebookAuthController;
+use App\Livewire\Analytics\Index as AnalyticsIndex;
 use App\Livewire\Clients\Create as ClientsCreate;
 use App\Livewire\Clients\Edit as ClientsEdit;
 use App\Livewire\Clients\Index as ClientsIndex;
@@ -33,6 +34,9 @@ Route::middleware(['auth'])->group(function (): void {
 
     Route::livewire('content', ContentIndex::class)
         ->name('content.index');
+
+    Route::livewire('analytics', AnalyticsIndex::class)
+        ->name('analytics.index');
 
     Route::livewire('clients', ClientsIndex::class)
         ->name('clients.index');

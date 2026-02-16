@@ -1,6 +1,7 @@
 <?php
 
 use App\Enums\AccountType;
+use App\Enums\AnalyticsPeriod;
 use App\Enums\ClientType;
 use App\Enums\DemographicType;
 use App\Enums\InvoiceStatus;
@@ -207,4 +208,20 @@ it('defines all sync status enum cases', function (): void {
         ->and(SyncStatus::Idle->value)->toBe('idle')
         ->and(SyncStatus::Syncing->value)->toBe('syncing')
         ->and(SyncStatus::Failed->value)->toBe('failed');
+});
+
+it('defines analytics period options and default', function (): void {
+    expect(AnalyticsPeriod::default())->toBe(AnalyticsPeriod::ThirtyDays)
+        ->and(AnalyticsPeriod::values())->toBe([
+            '7_days',
+            '30_days',
+            '90_days',
+            'all',
+        ])
+        ->and(AnalyticsPeriod::options())->toBe([
+            '7_days' => '7 Days',
+            '30_days' => '30 Days',
+            '90_days' => '90 Days',
+            'all' => 'All Time',
+        ]);
 });

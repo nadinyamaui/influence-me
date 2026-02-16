@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
+- RFC 058: added authenticated influencer analytics overview route `analytics.index` in `routes/web.php` backed by new Livewire page `app/Livewire/Analytics/Index.php` and view `resources/views/pages/analytics/index.blade.php`.
+- RFC 058: implemented analytics period filtering via new enum `app/Enums/AnalyticsPeriod.php` and query-layer aggregation helpers in `app/Builders/InstagramMediaBuilder.php` and `app/Builders/InstagramAccountBuilder.php` for scoped account/period metrics.
+- RFC 058: added analytics overview cards (total followers, total posts with post/reel/story breakdown, average engagement rate, total reach with compact formatting), account filtering, period selector controls, and chart placeholder sections on `/analytics`.
+- RFC 058: updated influencer analytics navigation links in `resources/views/layouts/app/sidebar.blade.php` and `resources/views/layouts/app/header.blade.php`.
+- RFC 058: added feature coverage in `tests/Feature/Analytics/AnalyticsDashboardOverviewTest.php` and updated navigation assertions in `tests/Feature/NavigationStructureTest.php`.
 - RFC 049: added authenticated influencer invoice index route in `routes/web.php` and implemented `app/Livewire/Invoices/Index.php` with authorization, query-layer status/client filtering, paginated scoped listing, draft-only delete action, and summary metrics for outstanding totals, paid-this-month totals, and overdue count.
 - RFC 049: added invoice list page `resources/views/pages/invoices/index.blade.php` with summary cards, status/client filters, RFC-compliant status badges and due-date overdue highlighting, invoice/actions table, and empty state messaging.
 - RFC 049: extended invoice query/filter enum infrastructure in `app/Builders/InvoiceBuilder.php` and `app/Enums/InvoiceStatus.php`, added `User::resolveInvoice()` in `app/Models/User.php`, and updated influencer sidebar invoice navigation in `resources/views/layouts/app/sidebar.blade.php`.

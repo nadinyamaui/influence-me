@@ -2,6 +2,7 @@
 
 namespace App\Builders;
 
+use App\Enums\AnalyticsPeriod;
 use App\Enums\MediaType;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -112,5 +113,16 @@ class InstagramMediaBuilder extends Builder
                 ->with('client')
                 ->orderBy('name'),
         ]);
+    }
+
+    public function forAnalyticsPeriod(AnalyticsPeriod $period): self
+    {
+        $periodStart = $period->startsAt();
+
+        if ($periodStart === null) {
+            return $this;
+        }
+
+        return $this->where('published_at', '>=', $periodStart);
     }
 }
