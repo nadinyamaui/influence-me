@@ -76,12 +76,6 @@ class Show extends Component
 
     public function approve(ProposalWorkflowService $proposalWorkflowService): void
     {
-        if (! $this->proposal->canRespond()) {
-            $this->addError('proposal', 'This proposal has already been responded to.');
-
-            return;
-        }
-
         try {
             $this->proposal = $proposalWorkflowService->approve($this->authenticatedClientUser(), $this->proposal)->load([
                 'user:id,name,email',
