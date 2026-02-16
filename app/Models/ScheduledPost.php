@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Builders\ScheduledPostBuilder;
 use App\Enums\MediaType;
 use App\Enums\ScheduledPostStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -13,6 +14,11 @@ class ScheduledPost extends Model
     use HasFactory;
 
     protected $guarded = [];
+
+    public function newEloquentBuilder($query): ScheduledPostBuilder
+    {
+        return new ScheduledPostBuilder($query);
+    }
 
     public static function resolveOwnedPost(int $scheduledPostId, int $userId): self
     {

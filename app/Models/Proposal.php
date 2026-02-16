@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Builders\ProposalBuilder;
 use App\Enums\ProposalStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -13,6 +14,11 @@ class Proposal extends Model
     use HasFactory;
 
     protected $guarded = [];
+
+    public function newEloquentBuilder($query): ProposalBuilder
+    {
+        return new ProposalBuilder($query);
+    }
 
     protected function casts(): array
     {

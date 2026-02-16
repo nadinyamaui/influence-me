@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Builders\CampaignBuilder;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -14,6 +15,11 @@ class Campaign extends Model
     use HasFactory;
 
     protected $guarded = [];
+
+    public function newEloquentBuilder($query): CampaignBuilder
+    {
+        return new CampaignBuilder($query);
+    }
 
     public function client(): BelongsTo
     {

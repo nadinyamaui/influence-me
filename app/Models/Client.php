@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Builders\ClientBuilder;
 use App\Enums\ClientType;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -14,6 +15,11 @@ class Client extends Model
     use HasFactory;
 
     protected $guarded = [];
+
+    public function newEloquentBuilder($query): ClientBuilder
+    {
+        return new ClientBuilder($query);
+    }
 
     protected function casts(): array
     {
