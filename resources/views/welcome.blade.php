@@ -85,15 +85,15 @@
                             <i class="fa-brands fa-instagram text-base" aria-hidden="true"></i>
                             Continue with Instagram
                         </a>
+                        <a href="/login" class="inline-flex w-full items-center justify-center gap-2 rounded-full border border-white/35 bg-white/10 px-7 py-3 text-sm font-semibold text-white transition hover:bg-white/20 sm:w-auto">
+                            <i class="fa-solid fa-right-to-bracket" aria-hidden="true"></i>
+                            Login
+                        </a>
                         <a href="/pricing" class="inline-flex w-full items-center justify-center gap-2 rounded-full border border-white/35 bg-white/10 px-7 py-3 text-sm font-semibold text-white transition hover:bg-white/20 sm:w-auto">
                             <i class="fa-solid fa-layer-group" aria-hidden="true"></i>
                             Explore Pricing
                         </a>
                     </div>
-
-                    <p class="mt-6 text-xs uppercase tracking-[0.18em] text-slate-300">
-                        Official Instagram OAuth flow · no passwords
-                    </p>
                 </div>
 
                 <div class="relative lg:col-span-5">

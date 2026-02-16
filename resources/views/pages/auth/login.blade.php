@@ -61,9 +61,6 @@
             <flux:button :href="route('auth.facebook')" variant="primary" class="w-full" data-test="facebook-login-button">
                 {{ __('Continue with Facebook') }}
             </flux:button>
-            <p class="text-center text-sm text-zinc-600 dark:text-zinc-400">
-                {{ __('This uses Meta Login for Instagram Graph access.') }}
-            </p>
         </div>
 
         <div class="space-x-1 rtl:space-x-reverse text-center text-sm text-zinc-600 dark:text-zinc-400">
