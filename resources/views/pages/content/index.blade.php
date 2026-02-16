@@ -228,7 +228,15 @@
                                             </a>
                                             <p class="text-zinc-500 dark:text-zinc-300">{{ $campaign->name }}</p>
                                         </div>
-                                        <flux:button type="button" size="sm" variant="danger" wire:click="confirmUnlinkClient({{ $campaign->client_id }})" title="Unlink" aria-label="Unlink">
+                                        <flux:button
+                                            type="button"
+                                            size="sm"
+                                            variant="danger"
+                                            wire:click="unlinkFromClient({{ $campaign->client_id }})"
+                                            wire:confirm="Remove this client link from the selected media?"
+                                            title="Unlink"
+                                            aria-label="Unlink"
+                                        >
                                             <i class="fa-solid fa-link-slash" aria-hidden="true"></i>
                                         </flux:button>
                                     </div>
@@ -306,26 +314,6 @@
             </div>
         </form>
     </flux:modal>
-
-    @if ($confirmingUnlinkClientId)
-        <flux:modal
-            name="content-unlink-client-modal"
-            :show="$confirmingUnlinkClientId !== null"
-            @close="cancelUnlinkClient"
-            class="max-w-md"
-        >
-            <h2 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100">Remove link to {{ $unlinkClient?->name ?? 'this client' }}?</h2>
-
-            <div class="mt-5 flex justify-end gap-2">
-                <flux:button type="button" variant="filled" wire:click="cancelUnlinkClient">
-                    Cancel
-                </flux:button>
-                <flux:button type="button" variant="danger" wire:click="unlinkFromClient" title="Unlink" aria-label="Unlink">
-                    <i class="fa-solid fa-link-slash" aria-hidden="true"></i>
-                </flux:button>
-            </div>
-        </flux:modal>
-    @endif
 
     @if ($selectionMode)
         <div class="fixed inset-x-0 bottom-5 z-30 flex justify-center px-4">

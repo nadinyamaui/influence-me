@@ -136,10 +136,7 @@ test('owners can delete clients from the list page', function (): void {
 
     Livewire::actingAs($user)
         ->test(Index::class)
-        ->call('confirmDelete', $client->id)
-        ->assertSet('deletingClientId', $client->id)
-        ->call('delete')
-        ->assertSet('deletingClientId', null);
+        ->call('delete', $client->id);
 
     $this->assertDatabaseMissing('clients', ['id' => $client->id]);
 });

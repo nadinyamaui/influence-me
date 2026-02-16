@@ -36,12 +36,8 @@ test('influencer can send a draft proposal and client receives email', function 
 
     Livewire::actingAs($owner)
         ->test(Show::class, ['proposal' => $proposal])
-        ->call('confirmSend')
-        ->assertSet('confirmingSend', true)
-        ->assertSee('Send this proposal to Acme Client at acme@example.test?')
         ->call('send')
-        ->assertHasNoErrors()
-        ->assertSet('confirmingSend', false);
+        ->assertHasNoErrors();
 
     $proposal->refresh();
 
@@ -75,8 +71,6 @@ test('influencer can send a revised proposal', function (): void {
 
     Livewire::actingAs($owner)
         ->test(Show::class, ['proposal' => $proposal])
-        ->call('confirmSend')
-        ->assertSet('confirmingSend', true)
         ->call('send')
         ->assertHasNoErrors();
 
@@ -100,9 +94,8 @@ test('proposal cannot be sent when client email is missing', function (): void {
 
     Livewire::actingAs($owner)
         ->test(Show::class, ['proposal' => $proposal])
-        ->call('confirmSend')
-        ->assertHasErrors(['send'])
-        ->assertSet('confirmingSend', false);
+        ->call('send')
+        ->assertHasErrors(['send']);
 
     expect($proposal->fresh()->status)->toBe(ProposalStatus::Draft);
     Mail::assertNothingSent();
@@ -117,9 +110,8 @@ test('proposal cannot be sent when no campaign is linked', function (): void {
 
     Livewire::actingAs($owner)
         ->test(Show::class, ['proposal' => $proposal])
-        ->call('confirmSend')
-        ->assertHasErrors(['send'])
-        ->assertSet('confirmingSend', false);
+        ->call('send')
+        ->assertHasErrors(['send']);
 
     expect($proposal->fresh()->status)->toBe(ProposalStatus::Draft);
     Mail::assertNothingSent();
@@ -136,9 +128,8 @@ test('proposal cannot be sent when any linked campaign has no scheduled content'
 
     Livewire::actingAs($owner)
         ->test(Show::class, ['proposal' => $proposal])
-        ->call('confirmSend')
-        ->assertHasErrors(['send'])
-        ->assertSet('confirmingSend', false);
+        ->call('send')
+        ->assertHasErrors(['send']);
 
     expect($proposal->fresh()->status)->toBe(ProposalStatus::Draft);
     Mail::assertNothingSent();
@@ -162,9 +153,8 @@ test('proposal cannot be sent when linked scheduled content has mismatched scope
 
     Livewire::actingAs($owner)
         ->test(Show::class, ['proposal' => $proposal])
-        ->call('confirmSend')
-        ->assertHasErrors(['send'])
-        ->assertSet('confirmingSend', false);
+        ->call('send')
+        ->assertHasErrors(['send']);
 
     expect($proposal->fresh()->status)->toBe(ProposalStatus::Draft);
     Mail::assertNothingSent();

@@ -21,8 +21,6 @@ class Index extends Component
 
     public string $client = 'all';
 
-    public ?int $deletingProposalId = null;
-
     public function mount(): void
     {
         $this->authorize('viewAny', Proposal::class);
@@ -42,44 +40,16 @@ class Index extends Component
         $this->resetPage();
     }
 
-    public function confirmDelete(int $proposalId): void
+    public function delete(int $proposalId): void
     {
         $proposal = User::resolveProposal($proposalId);
         $this->authorize('delete', $proposal);
 
         $this->resetErrorBag('delete');
-        $this->deletingProposalId = $proposal->id;
-    }
-
-    public function cancelDelete(): void
-    {
-        $this->deletingProposalId = null;
-    }
-
-    public function delete(): void
-    {
-        if ($this->deletingProposalId === null) {
-            return;
-        }
-
-        $proposal = User::resolveProposal($this->deletingProposalId);
-        $this->authorize('delete', $proposal);
 
         $proposal->delete();
 
-        $this->deletingProposalId = null;
         session()->flash('status', 'Proposal deleted.');
-    }
-
-    public function deletingProposal(): ?Proposal
-    {
-        if ($this->deletingProposalId === null) {
-            return null;
-        }
-
-        return Auth::user()->proposals()
-            ->whereKey($this->deletingProposalId)
-            ->first();
     }
 
     public function render()

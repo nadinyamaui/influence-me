@@ -177,7 +177,8 @@
 
                         <button
                             type="button"
-                            wire:click="confirmDisconnect({{ $account->id }})"
+                            wire:click="disconnect({{ $account->id }})"
+                            wire:confirm="Disconnect @{{ $account->username }}?"
                             class="inline-flex items-center rounded-md border border-rose-300 px-3 py-1.5 text-xs font-medium text-rose-700 transition hover:bg-rose-50 dark:border-rose-800 dark:text-rose-200 dark:hover:bg-rose-950/40"
                         >
                             Disconnect
@@ -188,29 +189,4 @@
         </section>
     @endif
 
-    @if ($disconnectingAccountId)
-        <flux:modal
-            name="instagram-disconnect-modal"
-            :show="$disconnectingAccountId !== null"
-            @close="cancelDisconnect"
-            class="max-w-md"
-        >
-            <h2 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100">Disconnect account?</h2>
-            <p class="mt-2 text-sm text-zinc-600 dark:text-zinc-300">
-                You are about to disconnect
-                <span class="font-semibold text-zinc-900 dark:text-zinc-100">
-                    {{ '@'.($this->disconnectingAccount()?->username ?? 'this account') }}
-                </span>.
-            </p>
-
-            <div class="mt-5 flex justify-end gap-2">
-                <flux:button type="button" variant="filled" wire:click="cancelDisconnect">
-                    Cancel
-                </flux:button>
-                <flux:button type="button" variant="danger" wire:click="disconnect">
-                    Disconnect
-                </flux:button>
-            </div>
-        </flux:modal>
-    @endif
 </div>

@@ -49,7 +49,14 @@
         </flux:field>
 
         <div class="flex flex-wrap items-center justify-between gap-3">
-            <flux:button type="button" variant="danger" wire:click="confirmDelete" title="Delete Client" aria-label="Delete Client">
+            <flux:button
+                type="button"
+                variant="danger"
+                wire:click="delete"
+                wire:confirm="Delete this client and all related proposals and invoices?"
+                title="Delete Client"
+                aria-label="Delete Client"
+            >
                 <i class="fa-solid fa-trash" aria-hidden="true"></i>
             </flux:button>
 
@@ -64,22 +71,4 @@
         </div>
     </form>
 
-    <flux:modal
-        name="client-edit-delete-modal"
-        wire:model="confirmingDelete"
-        @close="cancelDelete"
-        class="max-w-lg"
-    >
-        <h2 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100">Delete this client?</h2>
-        <p class="mt-2 text-sm text-zinc-600 dark:text-zinc-300">Are you sure? This will also delete all proposals and invoices for this client.</p>
-
-        <div class="mt-5 flex justify-end gap-2">
-            <flux:button type="button" variant="filled" wire:click="cancelDelete">
-                Cancel
-            </flux:button>
-            <flux:button type="button" variant="danger" wire:click="delete" title="Delete Client" aria-label="Delete Client">
-                <i class="fa-solid fa-trash" aria-hidden="true"></i>
-            </flux:button>
-        </div>
-    </flux:modal>
 </div>

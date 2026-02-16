@@ -165,6 +165,7 @@ Hard constraints:
 - Do not add method-level docblocks; methods should not include PHPDoc comments unless explicitly required by a framework or tooling constraint
 - Do not add inline comments inside function bodies; function code should be self-explanatory without internal comments
 - When using Flux form fields (`flux:input`, `flux:textarea`, `flux:select`, `flux:otp`), do not add manual Blade `@error(...)` rendering for those fields; rely on Flux validation error presentation
+- For simple yes/no action confirmations in Livewire, use native `wire:confirm` instead of custom confirmation modal state and modal components
 
 Testing requirements for decoupling:
 

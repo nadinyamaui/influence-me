@@ -4,7 +4,6 @@ namespace App\Livewire\InstagramAccounts;
 
 use App\Enums\SyncStatus;
 use App\Jobs\SyncAllInstagramData;
-use App\Models\InstagramAccount;
 use App\Models\User;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Collection;
@@ -14,8 +13,6 @@ use Livewire\Component;
 class Index extends Component
 {
     use AuthorizesRequests;
-
-    public ?int $disconnectingAccountId = null;
 
     public function syncNow(int $accountId): void
     {
@@ -45,35 +42,18 @@ class Index extends Component
         session()->flash('status', 'Primary Instagram account updated.');
     }
 
-    public function confirmDisconnect(int $accountId): void
+    public function disconnect(int $accountId): void
     {
         $account = User::resolveInstagramAccount($accountId);
-        $this->authorize('view', $account);
+        $this->authorize('delete', $account);
 
         if (Auth::user()->instagramAccounts()->count() <= 1) {
             $this->addError('disconnect', 'You cannot disconnect your last Instagram account.');
-            $this->disconnectingAccountId = null;
 
             return;
         }
 
         $this->resetErrorBag('disconnect');
-        $this->disconnectingAccountId = $account->id;
-    }
-
-    public function cancelDisconnect(): void
-    {
-        $this->disconnectingAccountId = null;
-    }
-
-    public function disconnect(): void
-    {
-        if ($this->disconnectingAccountId === null) {
-            return;
-        }
-
-        $account = User::resolveInstagramAccount($this->disconnectingAccountId);
-        $this->authorize('delete', $account);
 
         $wasPrimary = $account->is_primary;
         $account->delete();
@@ -86,7 +66,6 @@ class Index extends Component
             $nextAccount?->update(['is_primary' => true]);
         }
 
-        $this->disconnectingAccountId = null;
         session()->flash('status', 'Instagram account disconnected.');
     }
 
@@ -97,17 +76,6 @@ class Index extends Component
         ])->layout('layouts.app', [
             'title' => __('Instagram Accounts'),
         ]);
-    }
-
-    public function disconnectingAccount(): ?InstagramAccount
-    {
-        if ($this->disconnectingAccountId === null) {
-            return null;
-        }
-
-        return Auth::user()->instagramAccounts()
-            ->whereKey($this->disconnectingAccountId)
-            ->first();
     }
 
     private function accounts(): Collection

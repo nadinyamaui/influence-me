@@ -21,8 +21,6 @@ class Index extends Component
 
     public string $type = 'all';
 
-    public ?int $deletingClientId = null;
-
     public function mount(): void
     {
         $this->authorize('viewAny', Client::class);
@@ -42,32 +40,15 @@ class Index extends Component
         $this->resetPage();
     }
 
-    public function confirmDelete(int $clientId): void
+    public function delete(int $clientId): void
     {
         $client = User::resolveClient($clientId);
         $this->authorize('delete', $client);
 
         $this->resetErrorBag('delete');
-        $this->deletingClientId = $client->id;
-    }
-
-    public function cancelDelete(): void
-    {
-        $this->deletingClientId = null;
-    }
-
-    public function delete(): void
-    {
-        if ($this->deletingClientId === null) {
-            return;
-        }
-
-        $client = User::resolveClient($this->deletingClientId);
-        $this->authorize('delete', $client);
 
         $client->delete();
 
-        $this->deletingClientId = null;
         session()->flash('status', 'Client deleted.');
     }
 
@@ -78,17 +59,6 @@ class Index extends Component
         ])->layout('layouts.app', [
             'title' => __('Clients'),
         ]);
-    }
-
-    public function deletingClient(): ?Client
-    {
-        if ($this->deletingClientId === null) {
-            return null;
-        }
-
-        return Auth::user()->clients()
-            ->whereKey($this->deletingClientId)
-            ->first();
     }
 
     private function clients(): LengthAwarePaginator

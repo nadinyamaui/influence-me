@@ -280,10 +280,7 @@ test('linked media can be unlinked from detail modal', function (): void {
     Livewire::actingAs($user)
         ->test(Index::class)
         ->call('openDetailModal', $media->id)
-        ->call('confirmUnlinkClient', $client->id)
-        ->assertSet('confirmingUnlinkClientId', $client->id)
-        ->call('unlinkFromClient')
-        ->assertSet('confirmingUnlinkClientId', null);
+        ->call('unlinkFromClient', $client->id);
 
     $this->assertDatabaseMissing('campaign_media', [
         'campaign_id' => $campaign->id,
