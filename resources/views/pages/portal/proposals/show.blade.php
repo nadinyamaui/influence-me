@@ -7,7 +7,7 @@
         <div>
             <h1 class="text-2xl font-semibold text-zinc-900 dark:text-zinc-100">{{ $proposal->title }}</h1>
             <div class="mt-2 flex flex-wrap items-center gap-2 text-sm text-zinc-600 dark:text-zinc-300">
-                <span class="inline-flex rounded-full px-2.5 py-1 text-xs font-medium {{ $this->statusClasses() }}">{{ $this->statusLabel() }}</span>
+                <span class="inline-flex rounded-full px-2.5 py-1 text-xs font-medium {{ $proposal->status->badgeClasses() }}">{{ $proposal->status->label() }}</span>
                 <span>Received {{ $proposal->sent_at?->format('M j, Y g:i A') ?? '—' }}</span>
             </div>
         </div>

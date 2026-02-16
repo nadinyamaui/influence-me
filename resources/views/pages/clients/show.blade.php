@@ -8,11 +8,7 @@
         <div>
             <h1 class="text-2xl font-semibold text-zinc-900 dark:text-zinc-100">{{ $client->name }}</h1>
             <div class="mt-2 flex flex-wrap items-center gap-2">
-                @if ($client->type === ClientType::Brand)
-                    <span class="inline-flex rounded-full bg-sky-100 px-2.5 py-1 text-xs font-medium text-sky-700 dark:bg-sky-900/40 dark:text-sky-200">Brand</span>
-                @else
-                    <span class="inline-flex rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-medium text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-200">Individual</span>
-                @endif
+                <span class="inline-flex rounded-full px-2.5 py-1 text-xs font-medium {{ $client->type->badgeClasses() }}">{{ $client->type->label() }}</span>
 
                 @if ($client->type === ClientType::Brand && filled($client->company_name))
                     <span class="text-sm text-zinc-600 dark:text-zinc-300">{{ $client->company_name }}</span>

@@ -30,8 +30,9 @@
         <flux:field>
             <flux:label>Client Type</flux:label>
             <flux:select wire:model="form.type" name="type">
-                <option value="{{ ClientType::Brand->value }}">Brand</option>
-                <option value="{{ ClientType::Individual->value }}">Individual</option>
+                @foreach (ClientType::cases() as $typeOption)
+                    <option value="{{ $typeOption->value }}">{{ $typeOption->label() }}</option>
+                @endforeach
             </flux:select>
             <flux:error name="form.type" />
         </flux:field>
