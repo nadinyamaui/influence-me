@@ -199,8 +199,11 @@ test('client can approve a sent proposal with campaign and scheduled content con
         ->and($proposal->responded_at)->not->toBeNull();
 
     Mail::assertSent(ProposalApproved::class, function (ProposalApproved $mail) use ($proposal): bool {
+        $rendered = $mail->render();
+
         return $mail->hasTo('influencer@example.test')
-            && $mail->proposal->is($proposal);
+            && $mail->proposal->is($proposal)
+            && str_contains($rendered, 'approved your proposal');
     });
 });
 
@@ -238,8 +241,11 @@ test('client can request proposal changes and revision notes are required', func
         ->and($proposal->responded_at)->not->toBeNull();
 
     Mail::assertSent(ProposalRevisionRequested::class, function (ProposalRevisionRequested $mail) use ($proposal): bool {
+        $rendered = $mail->render();
+
         return $mail->hasTo('creator@example.test')
-            && $mail->proposal->is($proposal);
+            && $mail->proposal->is($proposal)
+            && str_contains($rendered, 'requested changes to your proposal');
     });
 });
 
