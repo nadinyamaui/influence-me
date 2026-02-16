@@ -17,11 +17,12 @@ it('renders the app sidebar with all RFC 013 navigation groups and links', funct
         ->assertSee('href="'.route('dashboard').'"', false)
         ->assertSee('href="'.route('clients.index').'"', false)
         ->assertSee('href="'.route('proposals.index').'"', false)
+        ->assertSee('href="'.route('invoices.index').'"', false)
         ->assertSee('href="'.route('instagram-accounts.index').'"', false)
         ->assertDontSee('Repository')
         ->assertDontSee('Documentation');
 
-    expect(substr_count($response->getContent(), 'href="#"'))->toBeGreaterThanOrEqual(2);
+    expect(substr_count($response->getContent(), 'href="#"'))->toBeGreaterThanOrEqual(1);
 });
 
 it('renders the header layout variant with matching RFC 013 navigation links', function () {

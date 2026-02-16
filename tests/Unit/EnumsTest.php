@@ -151,6 +151,23 @@ it('provides pending invoice statuses', function (): void {
     ]);
 });
 
+it('provides invoice status filter values', function (): void {
+    expect(InvoiceStatus::values())->toBe([
+        'draft',
+        'sent',
+        'paid',
+        'overdue',
+        'cancelled',
+    ])->and(InvoiceStatus::filters())->toBe([
+        'all',
+        'draft',
+        'sent',
+        'paid',
+        'overdue',
+        'cancelled',
+    ]);
+});
+
 it('provides invoice status labels and badge classes', function (): void {
     expect(InvoiceStatus::Draft->label())->toBe('Draft')
         ->and(InvoiceStatus::Sent->label())->toBe('Sent')

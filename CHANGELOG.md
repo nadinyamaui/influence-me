@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
+- RFC 049: added authenticated influencer invoice index route in `routes/web.php` and implemented `app/Livewire/Invoices/Index.php` with authorization, query-layer status/client filtering, paginated scoped listing, draft-only delete action, and summary metrics for outstanding totals, paid-this-month totals, and overdue count.
+- RFC 049: added invoice list page `resources/views/pages/invoices/index.blade.php` with summary cards, status/client filters, RFC-compliant status badges and due-date overdue highlighting, invoice/actions table, and empty state messaging.
+- RFC 049: extended invoice query/filter enum infrastructure in `app/Builders/InvoiceBuilder.php` and `app/Enums/InvoiceStatus.php`, added `User::resolveInvoice()` in `app/Models/User.php`, and updated influencer sidebar invoice navigation in `resources/views/layouts/app/sidebar.blade.php`.
+- RFC 049: added feature coverage in `tests/Feature/Invoices/InvoiceListPageTest.php`, updated `tests/Feature/NavigationStructureTest.php` for invoices route assertions, and expanded `tests/Unit/EnumsTest.php` for invoice filter option methods.
 - RFC 048: added client response workflow methods in `app/Services/Proposals/ProposalWorkflowService.php` for approve/request-changes actions with sent-only status gating, already-responded protection, client ownership enforcement, and influencer email dispatch.
 - RFC 048: added proposal response notification mailables `app/Mail/ProposalApproved.php` and `app/Mail/ProposalRevisionRequested.php` with templates `resources/views/mail/proposal-approved.blade.php` and `resources/views/mail/proposal-revision-requested.blade.php`.
 - RFC 048: updated `app/Livewire/Portal/Proposals/Show.php` and `resources/views/pages/portal/proposals/show.blade.php` to enable actionable Approve/Request Changes flows (including revision-notes modal), response-state UI gating, and flash/error messaging; expanded `tests/Feature/Portal/PortalProposalsTest.php` to cover approve, request changes, validation, non-replay constraints, and email delivery.

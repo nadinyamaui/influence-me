@@ -10,6 +10,19 @@ enum InvoiceStatus: string
     case Overdue = 'overdue';
     case Cancelled = 'cancelled';
 
+    public static function values(): array
+    {
+        return array_map(
+            static fn (InvoiceStatus $status): string => $status->value,
+            self::cases(),
+        );
+    }
+
+    public static function filters(): array
+    {
+        return array_merge(['all'], self::values());
+    }
+
     public static function pendingValues(): array
     {
         return [
