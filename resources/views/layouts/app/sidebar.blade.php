@@ -34,7 +34,7 @@
                         {{ __('Proposals') }}
                     </flux:sidebar.item>
 
-                    <flux:sidebar.item icon="banknotes" href="#">
+                    <flux:sidebar.item icon="banknotes" :href="route('invoices.index')" :current="request()->routeIs('invoices.*')" wire:navigate>
                         {{ __('Invoices') }}
                     </flux:sidebar.item>
                 </flux:sidebar.group>
