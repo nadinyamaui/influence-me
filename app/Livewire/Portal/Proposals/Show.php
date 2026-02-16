@@ -4,13 +4,23 @@ namespace App\Livewire\Portal\Proposals;
 
 use App\Enums\ProposalStatus;
 use App\Models\Client;
+use App\Models\ClientUser;
 use App\Models\Proposal;
+use App\Services\Proposals\ProposalWorkflowService;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\ValidationException;
 use Livewire\Component;
 
 class Show extends Component
 {
+    use AuthorizesRequests;
+
     public Proposal $proposal;
+
+    public bool $requestingChanges = false;
+
+    public string $revisionNotes = '';
 
     public function mount(Proposal $proposal): void
     {
@@ -20,6 +30,7 @@ class Show extends Component
             ->whereKey($proposal->id)
             ->whereIn('status', $this->viewableStatuses())
             ->with([
+                'user:id,name,email',
                 'campaigns' => fn ($query) => $query->orderBy('name'),
                 'campaigns.scheduledPosts' => fn ($query) => $query
                     ->with('instagramAccount:id,username')
@@ -63,6 +74,94 @@ class Show extends Component
         ]);
     }
 
+    public function canRespond(): bool
+    {
+        return $this->proposal->status === ProposalStatus::Sent
+            && $this->proposal->responded_at === null;
+    }
+
+    public function approve(ProposalWorkflowService $proposalWorkflowService): void
+    {
+        if (! $this->canRespond()) {
+            $this->addError('proposal', 'This proposal has already been responded to.');
+
+            return;
+        }
+
+        try {
+            $this->proposal = $proposalWorkflowService->approve($this->authenticatedClientUser(), $this->proposal)->load([
+                'user:id,name,email',
+                'campaigns' => fn ($query) => $query->orderBy('name'),
+                'campaigns.scheduledPosts' => fn ($query) => $query
+                    ->with('instagramAccount:id,username')
+                    ->orderBy('scheduled_at'),
+            ]);
+        } catch (ValidationException $exception) {
+            $this->setErrorBag($exception->validator->errors());
+
+            return;
+        }
+
+        $this->requestingChanges = false;
+        $this->revisionNotes = '';
+        $this->resetErrorBag();
+        session()->flash('status', 'Proposal approved!');
+    }
+
+    public function openRequestChanges(): void
+    {
+        if (! $this->canRespond()) {
+            $this->addError('proposal', 'This proposal has already been responded to.');
+
+            return;
+        }
+
+        $this->requestingChanges = true;
+    }
+
+    public function cancelRequestChanges(): void
+    {
+        $this->requestingChanges = false;
+        $this->revisionNotes = '';
+        $this->resetErrorBag('revisionNotes');
+    }
+
+    public function requestChanges(ProposalWorkflowService $proposalWorkflowService): void
+    {
+        if (! $this->canRespond()) {
+            $this->addError('proposal', 'This proposal has already been responded to.');
+
+            return;
+        }
+
+        $this->validate([
+            'revisionNotes' => ['required', 'string', 'min:10'],
+        ]);
+
+        try {
+            $this->proposal = $proposalWorkflowService->requestChanges(
+                $this->authenticatedClientUser(),
+                $this->proposal,
+                $this->revisionNotes,
+            )->load([
+                'user:id,name,email',
+                'campaigns' => fn ($query) => $query->orderBy('name'),
+                'campaigns.scheduledPosts' => fn ($query) => $query
+                    ->with('instagramAccount:id,username')
+                    ->orderBy('scheduled_at'),
+            ]);
+        } catch (ValidationException $exception) {
+            $this->setErrorBag($exception->validator->errors());
+
+            return;
+        }
+
+        $this->requestingChanges = false;
+        $this->revisionNotes = '';
+        $this->resetErrorBag();
+        session()->flash('status', 'Revision request sent.');
+    }
+
     private function authenticatedClient(): Client
     {
         $client = Auth::guard('client')->user()?->client;
@@ -72,6 +171,17 @@ class Show extends Component
         }
 
         return $client;
+    }
+
+    private function authenticatedClientUser(): ClientUser
+    {
+        $clientUser = Auth::guard('client')->user();
+
+        if (! $clientUser instanceof ClientUser) {
+            abort(403);
+        }
+
+        return $clientUser;
     }
 
     private function viewableStatuses(): array

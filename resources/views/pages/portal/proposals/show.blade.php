@@ -3,6 +3,18 @@
 @endphp
 
 <div class="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-6">
+    @if (session('status'))
+        <div class="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-800 dark:border-emerald-900/40 dark:bg-emerald-950/50 dark:text-emerald-200">
+            {{ session('status') }}
+        </div>
+    @endif
+
+    @if ($errors->has('proposal'))
+        <div class="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-800 dark:border-rose-900/40 dark:bg-rose-950/50 dark:text-rose-200">
+            {{ $errors->first('proposal') }}
+        </div>
+    @endif
+
     <div class="flex flex-wrap items-start justify-between gap-3">
         <div>
             <h1 class="text-2xl font-semibold text-zinc-900 dark:text-zinc-100">{{ $proposal->title }}</h1>
@@ -16,12 +28,14 @@
             <flux:button :href="route('portal.proposals.index')" wire:navigate variant="filled">
                 Back
             </flux:button>
-            <flux:button type="button" variant="primary" disabled>
-                Approve
-            </flux:button>
-            <flux:button type="button" variant="filled" disabled>
-                Request Changes
-            </flux:button>
+            @if ($this->canRespond())
+                <flux:button type="button" variant="primary" wire:click="approve">
+                    Approve
+                </flux:button>
+                <flux:button type="button" variant="filled" wire:click="openRequestChanges">
+                    Request Changes
+                </flux:button>
+            @endif
         </div>
     </div>
 
@@ -93,4 +107,34 @@
             </div>
         @endif
     </section>
+
+    <flux:modal
+        name="proposal-request-changes-modal"
+        wire:model="requestingChanges"
+        @close="cancelRequestChanges"
+        class="max-w-lg"
+    >
+        <h2 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100">Request changes</h2>
+        <p class="mt-2 text-sm text-zinc-600 dark:text-zinc-300">
+            Tell {{ $proposal->user?->name ?? 'your influencer' }} what should be revised before approval.
+        </p>
+
+        <flux:textarea
+            wire:model.defer="revisionNotes"
+            name="revision-notes"
+            label="Revision Notes"
+            rows="5"
+            class="mt-4"
+            placeholder="Please add at least one story and clarify usage rights..."
+        />
+
+        <div class="mt-5 flex justify-end gap-2">
+            <flux:button type="button" variant="filled" wire:click="cancelRequestChanges">
+                Cancel
+            </flux:button>
+            <flux:button type="button" variant="primary" wire:click="requestChanges">
+                Send Request
+            </flux:button>
+        </div>
+    </flux:modal>
 </div>

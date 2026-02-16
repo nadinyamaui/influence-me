@@ -2,6 +2,9 @@
 
 use App\Enums\MediaType;
 use App\Enums\ProposalStatus;
+use App\Livewire\Portal\Proposals\Show as PortalProposalShow;
+use App\Mail\ProposalApproved;
+use App\Mail\ProposalRevisionRequested;
 use App\Models\Campaign;
 use App\Models\Client;
 use App\Models\ClientUser;
@@ -9,6 +12,7 @@ use App\Models\InstagramAccount;
 use App\Models\Proposal;
 use App\Models\ScheduledPost;
 use App\Models\User;
+use Illuminate\Support\Facades\Mail;
 use Livewire\Livewire;
 
 test('portal proposals list requires authenticated client guard', function (): void {
@@ -162,4 +166,101 @@ test('portal proposal detail cannot show other client proposals', function (): v
     $this->actingAs($clientUser, 'client')
         ->get(route('portal.proposals.show', $otherClientProposal))
         ->assertNotFound();
+});
+
+test('client can approve a sent proposal with campaign and scheduled content context', function (): void {
+    Mail::fake();
+
+    $influencer = User::factory()->create(['email' => 'influencer@example.test']);
+    $client = Client::factory()->for($influencer)->create();
+    $clientUser = ClientUser::factory()->for($client)->create();
+    $account = InstagramAccount::factory()->for($influencer)->create();
+
+    $proposal = Proposal::factory()->for($influencer)->for($client)->sent()->create([
+        'title' => 'Approval Scope Proposal',
+    ]);
+
+    $campaignA = Campaign::factory()->for($client)->for($proposal)->create();
+    $campaignB = Campaign::factory()->for($client)->for($proposal)->create();
+
+    ScheduledPost::factory()->for($influencer)->for($client)->for($campaignA)->for($account)->create();
+    ScheduledPost::factory()->for($influencer)->for($client)->for($campaignB)->for($account)->create();
+
+    Livewire::actingAs($clientUser, 'client')
+        ->test(PortalProposalShow::class, ['proposal' => $proposal])
+        ->assertSee('Approve')
+        ->assertSee('Request Changes')
+        ->call('approve')
+        ->assertHasNoErrors();
+
+    $proposal->refresh();
+
+    expect($proposal->status)->toBe(ProposalStatus::Approved)
+        ->and($proposal->responded_at)->not->toBeNull();
+
+    Mail::assertSent(ProposalApproved::class, function (ProposalApproved $mail) use ($proposal): bool {
+        return $mail->hasTo('influencer@example.test')
+            && $mail->proposal->is($proposal);
+    });
+});
+
+test('client can request proposal changes and revision notes are required', function (): void {
+    Mail::fake();
+
+    $influencer = User::factory()->create(['email' => 'creator@example.test']);
+    $client = Client::factory()->for($influencer)->create();
+    $clientUser = ClientUser::factory()->for($client)->create();
+    $account = InstagramAccount::factory()->for($influencer)->create();
+
+    $proposal = Proposal::factory()->for($influencer)->for($client)->sent()->create([
+        'title' => 'Needs Revision Proposal',
+    ]);
+
+    $campaign = Campaign::factory()->for($client)->for($proposal)->create();
+    ScheduledPost::factory()->for($influencer)->for($client)->for($campaign)->for($account)->create();
+
+    Livewire::actingAs($clientUser, 'client')
+        ->test(PortalProposalShow::class, ['proposal' => $proposal])
+        ->call('openRequestChanges')
+        ->assertSet('requestingChanges', true)
+        ->set('revisionNotes', 'Too short')
+        ->call('requestChanges')
+        ->assertHasErrors(['revisionNotes' => 'min'])
+        ->set('revisionNotes', 'Please add one more story and include boosted-post usage rights.')
+        ->call('requestChanges')
+        ->assertHasNoErrors()
+        ->assertSet('requestingChanges', false);
+
+    $proposal->refresh();
+
+    expect($proposal->status)->toBe(ProposalStatus::Revised)
+        ->and($proposal->revision_notes)->toBe('Please add one more story and include boosted-post usage rights.')
+        ->and($proposal->responded_at)->not->toBeNull();
+
+    Mail::assertSent(ProposalRevisionRequested::class, function (ProposalRevisionRequested $mail) use ($proposal): bool {
+        return $mail->hasTo('creator@example.test')
+            && $mail->proposal->is($proposal);
+    });
+});
+
+test('client cannot approve or request changes after proposal has already been responded to', function (): void {
+    Mail::fake();
+
+    $influencer = User::factory()->create(['email' => 'influencer@example.test']);
+    $client = Client::factory()->for($influencer)->create();
+    $clientUser = ClientUser::factory()->for($client)->create();
+
+    $proposal = Proposal::factory()->for($influencer)->for($client)->approved()->create();
+
+    Livewire::actingAs($clientUser, 'client')
+        ->test(PortalProposalShow::class, ['proposal' => $proposal])
+        ->assertDontSee('wire:click="approve"', false)
+        ->assertDontSee('wire:click="openRequestChanges"', false)
+        ->call('approve')
+        ->assertHasErrors(['proposal'])
+        ->call('openRequestChanges')
+        ->assertHasErrors(['proposal']);
+
+    expect($proposal->fresh()->status)->toBe(ProposalStatus::Approved);
+    Mail::assertNothingSent();
 });

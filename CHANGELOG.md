@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
+- RFC 048: implemented client portal proposal response workflow in `app/Livewire/Portal/Proposals/Show.php` and `resources/views/pages/portal/proposals/show.blade.php` with status-gated Approve and Request Changes actions, revision-notes modal validation, already-responded guardrails, and success/error flash messaging.
+- RFC 048: extended `app/Services/Proposals/ProposalWorkflowService.php` with client-scoped `approve` and `requestChanges` use-cases that enforce `Sent`-only response transitions, persist `responded_at` and `revision_notes`, and dispatch influencer notifications.
+- RFC 048: added influencer notification mailables and templates in `app/Mail/ProposalApproved.php`, `app/Mail/ProposalRevisionRequested.php`, `resources/views/mail/proposal-approved.blade.php`, and `resources/views/mail/proposal-revision-requested.blade.php`.
+- RFC 048: expanded portal feature coverage in `tests/Feature/Portal/PortalProposalsTest.php` for approve success, revision-request validation and persistence, response lockout after prior response, and email dispatch assertions using proposals with linked campaign/scheduled content context.
 - RFC 047: added client-portal proposal browsing routes in `routes/portal.php` for `/portal/proposals` and `/portal/proposals/{proposal}` backed by new Livewire pages `app/Livewire/Portal/Proposals/Index.php` and `app/Livewire/Portal/Proposals/Show.php`.
 - RFC 047: added `resources/views/pages/portal/proposals/index.blade.php` and `resources/views/pages/portal/proposals/show.blade.php` with client-scoped sent/approved/rejected/revised proposal listing, query-layer status filtering, markdown proposal rendering, campaign schedule context, and placeholder approve/request-change actions for RFC 048.
 - RFC 047: updated portal navigation link wiring in `resources/views/layouts/portal/sidebar.blade.php` and added feature coverage in `tests/Feature/Portal/PortalProposalsTest.php` plus portal nav assertion update in `tests/Feature/Portal/PortalLayoutTest.php` for scope, authorization, and draft access denial.

@@ -5,9 +5,12 @@ namespace App\Services\Proposals;
 use App\Enums\MediaType;
 use App\Enums\ProposalStatus;
 use App\Enums\ScheduledPostStatus;
+use App\Mail\ProposalApproved;
+use App\Mail\ProposalRevisionRequested;
 use App\Mail\ProposalSent;
 use App\Models\Campaign;
 use App\Models\Client;
+use App\Models\ClientUser;
 use App\Models\InstagramAccount;
 use App\Models\Proposal;
 use App\Models\ScheduledPost;
@@ -35,6 +38,58 @@ class ProposalWorkflowService
             $proposal->loadMissing(['user', 'client.clientUser']);
 
             Mail::to($proposal->client->email)->send(new ProposalSent($proposal));
+
+            return $proposal->refresh();
+        });
+    }
+
+    public function approve(ClientUser $clientUser, Proposal $proposal): Proposal
+    {
+        $this->ensureClientScope($clientUser, $proposal);
+        $this->assertRespondable($proposal);
+
+        return DB::transaction(function () use ($proposal): Proposal {
+            $proposal->update([
+                'status' => ProposalStatus::Approved,
+                'responded_at' => now(),
+                'revision_notes' => null,
+            ]);
+
+            $proposal->loadMissing(['user', 'client']);
+
+            if (filled($proposal->user?->email)) {
+                Mail::to($proposal->user->email)->send(new ProposalApproved($proposal));
+            }
+
+            return $proposal->refresh();
+        });
+    }
+
+    public function requestChanges(ClientUser $clientUser, Proposal $proposal, string $revisionNotes): Proposal
+    {
+        $this->ensureClientScope($clientUser, $proposal);
+        $this->assertRespondable($proposal);
+
+        $notes = trim($revisionNotes);
+
+        if (mb_strlen($notes) < 10) {
+            throw ValidationException::withMessages([
+                'revisionNotes' => 'Revision notes must be at least 10 characters.',
+            ]);
+        }
+
+        return DB::transaction(function () use ($proposal, $notes): Proposal {
+            $proposal->update([
+                'status' => ProposalStatus::Revised,
+                'revision_notes' => $notes,
+                'responded_at' => now(),
+            ]);
+
+            $proposal->loadMissing(['user', 'client']);
+
+            if (filled($proposal->user?->email)) {
+                Mail::to($proposal->user->email)->send(new ProposalRevisionRequested($proposal));
+            }
 
             return $proposal->refresh();
         });
@@ -258,6 +313,22 @@ class ProposalWorkflowService
     {
         if ($proposal->user_id !== $user->id) {
             throw new AuthorizationException('You are not authorized to modify this proposal.');
+        }
+    }
+
+    private function ensureClientScope(ClientUser $clientUser, Proposal $proposal): void
+    {
+        if ($proposal->client_id !== $clientUser->client_id) {
+            throw new AuthorizationException('You are not authorized to modify this proposal.');
+        }
+    }
+
+    private function assertRespondable(Proposal $proposal): void
+    {
+        if ($proposal->status !== ProposalStatus::Sent || $proposal->responded_at !== null) {
+            throw ValidationException::withMessages([
+                'proposal' => 'Only sent proposals awaiting response can be updated.',
+            ]);
         }
     }
 
