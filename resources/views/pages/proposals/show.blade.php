@@ -21,7 +21,13 @@
             <h1 class="text-2xl font-semibold text-zinc-900 dark:text-zinc-100">{{ $proposal->title }}</h1>
             <div class="mt-2 flex flex-wrap items-center gap-2 text-sm text-zinc-600 dark:text-zinc-300">
                 <span class="inline-flex rounded-full px-2.5 py-1 text-xs font-medium {{ $proposal->status->badgeClasses() }}">{{ $proposal->status->label() }}</span>
-                <span>{{ $proposal->client?->name ?? 'No client selected' }}</span>
+                @if ($proposal->client)
+                    <a href="{{ route('clients.show', $proposal->client) }}" wire:navigate class="font-medium text-zinc-700 underline decoration-zinc-400 underline-offset-2 transition hover:text-zinc-900 hover:decoration-zinc-600 dark:text-zinc-200 dark:decoration-zinc-500 dark:hover:text-zinc-100 dark:hover:decoration-zinc-300">
+                        {{ $proposal->client->name }}
+                    </a>
+                @else
+                    <span>No client selected</span>
+                @endif
                 <span>Created {{ $proposal->created_at->format('M j, Y g:i A') }}</span>
                 <span>Updated {{ $proposal->updated_at->format('M j, Y g:i A') }}</span>
             </div>
