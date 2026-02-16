@@ -74,15 +74,25 @@ class Show extends Component
         ]);
     }
 
-    public function canRespond(): bool
+    public function canApprove(): bool
     {
+        return $this->proposal->status === ProposalStatus::Sent
+            && $this->proposal->responded_at === null;
+    }
+
+    public function canRequestChanges(): bool
+    {
+        if ($this->proposal->status === ProposalStatus::Revised) {
+            return true;
+        }
+
         return $this->proposal->status === ProposalStatus::Sent
             && $this->proposal->responded_at === null;
     }
 
     public function approve(ProposalWorkflowService $proposalWorkflowService): void
     {
-        if (! $this->canRespond()) {
+        if (! $this->canApprove()) {
             $this->addError('proposal', 'This proposal has already been responded to.');
 
             return;
@@ -110,8 +120,8 @@ class Show extends Component
 
     public function openRequestChanges(): void
     {
-        if (! $this->canRespond()) {
-            $this->addError('proposal', 'This proposal has already been responded to.');
+        if (! $this->canRequestChanges()) {
+            $this->addError('proposal', 'This proposal cannot receive additional change requests.');
 
             return;
         }
@@ -128,8 +138,8 @@ class Show extends Component
 
     public function requestChanges(ProposalWorkflowService $proposalWorkflowService): void
     {
-        if (! $this->canRespond()) {
-            $this->addError('proposal', 'This proposal has already been responded to.');
+        if (! $this->canRequestChanges()) {
+            $this->addError('proposal', 'This proposal cannot receive additional change requests.');
 
             return;
         }

@@ -1,6 +1,5 @@
 <?php
 
-use App\Enums\ProposalStatus;
 use App\Models\Campaign;
 use App\Models\Client;
 use App\Models\InstagramAccount;
@@ -82,6 +81,7 @@ test('owner can view proposal markdown campaign totals and sorted scheduled cont
     $response->assertSuccessful()
         ->assertSee('Spring Launch Proposal')
         ->assertSee('Acme Corp')
+        ->assertSee('href="'.route('clients.show', $client).'"', false)
         ->assertSee('Campaign Plan')
         ->assertSee('2 campaigns')
         ->assertSee('3 scheduled items')

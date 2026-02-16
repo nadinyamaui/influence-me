@@ -301,3 +301,35 @@ test('stale portal proposal instance cannot overwrite prior client response', fu
     Mail::assertSent(ProposalApproved::class, 1);
     Mail::assertNotSent(ProposalRevisionRequested::class);
 });
+
+test('client can send additional change request when proposal is already revised', function (): void {
+    Mail::fake();
+
+    $influencer = User::factory()->create(['email' => 'influencer@example.test']);
+    $client = Client::factory()->for($influencer)->create();
+    $clientUser = ClientUser::factory()->for($client)->create();
+
+    $proposal = Proposal::factory()->for($influencer)->for($client)->revised()->create([
+        'revision_notes' => 'First pass notes.',
+    ]);
+
+    Livewire::actingAs($clientUser, 'client')
+        ->test(PortalProposalShow::class, ['proposal' => $proposal])
+        ->assertDontSee('wire:click="approve"', false)
+        ->assertSee('wire:click="openRequestChanges"', false)
+        ->call('openRequestChanges')
+        ->assertSet('requestingChanges', true)
+        ->set('revisionNotes', 'Second pass: add one carousel and adjust story timing.')
+        ->call('requestChanges')
+        ->assertHasNoErrors()
+        ->assertSet('requestingChanges', false);
+
+    $proposal->refresh();
+
+    expect($proposal->status)->toBe(ProposalStatus::Revised)
+        ->and($proposal->revision_notes)->toBe('Second pass: add one carousel and adjust story timing.')
+        ->and($proposal->responded_at)->not->toBeNull();
+
+    Mail::assertSent(ProposalRevisionRequested::class, 1);
+    Mail::assertNotSent(ProposalApproved::class);
+});

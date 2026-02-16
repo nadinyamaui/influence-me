@@ -28,10 +28,12 @@
             <flux:button :href="route('portal.proposals.index')" wire:navigate variant="filled">
                 Back
             </flux:button>
-            @if ($this->canRespond())
+            @if ($this->canApprove())
                 <flux:button type="button" variant="primary" wire:click="approve">
                     Approve
                 </flux:button>
+            @endif
+            @if ($this->canRequestChanges())
                 <flux:button type="button" variant="filled" wire:click="openRequestChanges">
                     Request Changes
                 </flux:button>
