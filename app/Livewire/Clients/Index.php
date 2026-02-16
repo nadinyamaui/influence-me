@@ -6,7 +6,6 @@ use App\Enums\ClientType;
 use App\Models\Client;
 use App\Models\User;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
@@ -65,22 +64,9 @@ class Index extends Component
     {
         $query = Auth::user()->clients()
             ->withCount('campaigns')
+            ->search($this->search)
+            ->filterByType($this->type)
             ->orderBy('name');
-
-        $search = trim($this->search);
-        if ($search !== '') {
-            $query->where(function (Builder $builder) use ($search): void {
-                $searchTerm = '%'.$search.'%';
-
-                $builder->where('name', 'like', $searchTerm)
-                    ->orWhere('email', 'like', $searchTerm)
-                    ->orWhere('company_name', 'like', $searchTerm);
-            });
-        }
-
-        if (in_array($this->type, ClientType::values(), true)) {
-            $query->where('type', $this->type);
-        }
 
         return $query->paginate(10);
     }

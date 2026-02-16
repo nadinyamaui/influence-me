@@ -2,8 +2,8 @@
 
 namespace App\Livewire\Clients;
 
-use App\Enums\InvoiceStatus;
 use App\Enums\ProposalStatus;
+use App\Builders\InstagramMediaBuilder;
 use App\Livewire\Forms\CampaignForm;
 use App\Models\Campaign;
 use App\Models\Client;
@@ -11,7 +11,6 @@ use App\Models\InstagramMedia;
 use App\Models\Proposal;
 use App\Services\Clients\ClientPortalAccessService;
 use App\Services\Content\ContentClientLinkService;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Collection;
@@ -122,7 +121,7 @@ class Show extends Component
 
         $media = InstagramMedia::query()
             ->whereKey($mediaId)
-            ->whereHas('campaigns', fn (Builder $builder): Builder => $builder->where('campaigns.client_id', $this->client->id))
+            ->forClient($this->client->id)
             ->firstOrFail();
 
         $this->authorize('linkToClient', $media);
@@ -236,7 +235,7 @@ class Show extends Component
     private function summary(): array
     {
         $pendingInvoiceQuery = $this->client->invoices()
-            ->whereIn('status', InvoiceStatus::pendingValues());
+            ->pending();
 
         $linkedMediaQuery = $this->linkedMediaQuery();
 
@@ -252,17 +251,15 @@ class Show extends Component
     {
         return $this->linkedMediaQuery()
             ->with('campaigns')
-            ->orderByDesc('published_at')
+            ->latestPublished()
             ->get();
     }
 
     private function groupedLinkedContent(EloquentCollection $linkedContentMedia): Collection
     {
         $campaigns = $this->client->campaigns()
-            ->with([
-                'instagramMedia' => fn ($builder) => $builder->orderByDesc('published_at'),
-            ])
-            ->orderBy('name')
+            ->withInstagramMediaOrderedByPublishedAtDesc()
+            ->orderedByName()
             ->get();
 
         $groups = $campaigns
@@ -317,29 +314,27 @@ class Show extends Component
         ];
     }
 
-    private function linkedMediaQuery(): Builder
+    private function linkedMediaQuery(): InstagramMediaBuilder
     {
         return InstagramMedia::query()
-            ->select('instagram_media.*')
-            ->whereHas('campaigns', fn (Builder $builder): Builder => $builder->where('campaigns.client_id', $this->client->id))
-            ->distinct();
+            ->forClient($this->client->id)
+            ->distinctMediaRows();
     }
 
     private function campaigns(): EloquentCollection
     {
         return $this->client->campaigns()
-            ->with('proposal')
-            ->withCount('instagramMedia')
-            ->orderBy('name')
+            ->withProposalAndMediaCount()
+            ->orderedByName()
             ->get();
     }
 
     private function campaignProposals(): EloquentCollection
     {
         return Proposal::query()
-            ->where('user_id', Auth::id())
-            ->where('client_id', $this->client->id)
-            ->orderByDesc('created_at')
+            ->forUser((int) Auth::id())
+            ->forClient($this->client->id)
+            ->latestFirst()
             ->get(['id', 'title', 'status']);
     }
 

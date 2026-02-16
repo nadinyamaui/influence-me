@@ -9,7 +9,6 @@ use App\Models\Client;
 use App\Models\InstagramMedia;
 use App\Models\User;
 use App\Services\Content\ContentClientLinkService;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Pagination\CursorPaginator;
@@ -383,39 +382,17 @@ class Index extends Component
     {
         [$sortField, $sortDirection] = $this->sortMap()[$this->sortBy] ?? $this->sortMap()['most_recent'];
         $range = $this->normalizeDateRangeValue($this->dateRange);
+        $userId = (int) Auth::id();
 
-        $query = InstagramMedia::query()
-            ->with('instagramAccount')
-            ->whereHas('instagramAccount', fn (Builder $builder): Builder => $builder->where('user_id', Auth::id()));
-
-        if ($this->mediaType !== 'all' && in_array($this->mediaType, MediaType::filters(), true)) {
-            $query->where('media_type', $this->mediaType);
-        }
-
-        if ($this->accountId !== 'all') {
-            $query->where('instagram_account_id', (int) $this->accountId);
-        }
-
-        if ($this->clientId === 'without_clients') {
-            $query->whereDoesntHave('campaigns', fn (Builder $builder): Builder => $builder
-                ->whereHas('client', fn (Builder $clientBuilder): Builder => $clientBuilder->where('user_id', Auth::id())));
-        } elseif ($this->clientId !== 'all') {
-            $query->whereHas('campaigns', fn (Builder $builder): Builder => $builder
-                ->where('campaigns.client_id', (int) $this->clientId)
-                ->whereHas('client', fn (Builder $clientBuilder): Builder => $clientBuilder->where('user_id', Auth::id())));
-        }
-
-        if (filled($range['start'])) {
-            $query->whereDate('published_at', '>=', $range['start']);
-        }
-
-        if (filled($range['end'])) {
-            $query->whereDate('published_at', '<=', $range['end']);
-        }
-
-        return $query
-            ->orderBy($sortField, $sortDirection)
-            ->orderByDesc('id')
+        return InstagramMedia::query()
+            ->withInstagramAccount()
+            ->forUser($userId)
+            ->filterByMediaType($this->mediaType)
+            ->filterByAccount($this->accountId)
+            ->filterByClient($this->clientId, $userId)
+            ->publishedFrom($range['start'])
+            ->publishedUntil($range['end'])
+            ->sortForGallery($sortField, $sortDirection)
             ->cursorPaginate(24, ['*'], 'cursor');
     }
 
@@ -426,15 +403,10 @@ class Index extends Component
         }
 
         return InstagramMedia::query()
-            ->with([
-                'instagramAccount',
-                'campaigns' => fn ($builder) => $builder
-                    ->whereHas('client', fn (Builder $clientBuilder): Builder => $clientBuilder->where('user_id', Auth::id()))
-                    ->with('client')
-                    ->orderBy('name'),
-            ])
+            ->withInstagramAccount()
+            ->withOwnedCampaignsForUser((int) Auth::id())
             ->whereKey($this->selectedMediaId)
-            ->whereHas('instagramAccount', fn (Builder $builder): Builder => $builder->where('user_id', Auth::id()))
+            ->forUser((int) Auth::id())
             ->first();
     }
 
@@ -472,7 +444,7 @@ class Index extends Component
 
         return InstagramMedia::query()
             ->whereIn('id', $selectedIds)
-            ->whereHas('instagramAccount', fn (Builder $builder): Builder => $builder->where('user_id', Auth::id()))
+            ->forUser((int) Auth::id())
             ->get();
     }
 
@@ -483,9 +455,9 @@ class Index extends Component
         }
 
         return Campaign::query()
-            ->where('client_id', (int) $this->linkClientId)
-            ->whereIn('client_id', Auth::user()->clients()->select('id'))
-            ->orderBy('name')
+            ->forClient((int) $this->linkClientId)
+            ->forUser((int) Auth::id())
+            ->orderedByName()
             ->get(['id', 'name']);
     }
 
