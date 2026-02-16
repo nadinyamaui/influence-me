@@ -2,6 +2,8 @@
 
 use App\Enums\MediaType;
 use App\Enums\ProposalStatus;
+use App\Mail\ProposalApproved;
+use App\Mail\ProposalRevisionRequested;
 use App\Models\Campaign;
 use App\Models\Client;
 use App\Models\ClientUser;
@@ -9,6 +11,7 @@ use App\Models\InstagramAccount;
 use App\Models\Proposal;
 use App\Models\ScheduledPost;
 use App\Models\User;
+use Illuminate\Support\Facades\Mail;
 use Livewire\Livewire;
 
 test('portal proposals list requires authenticated client guard', function (): void {
@@ -162,4 +165,148 @@ test('portal proposal detail cannot show other client proposals', function (): v
     $this->actingAs($clientUser, 'client')
         ->get(route('portal.proposals.show', $otherClientProposal))
         ->assertNotFound();
+});
+
+test('client can approve a sent proposal and influencer receives approval email', function (): void {
+    Mail::fake();
+
+    $influencer = User::factory()->create(['email' => 'influencer@example.test']);
+    $client = Client::factory()->for($influencer)->create();
+    $clientUser = ClientUser::factory()->for($client)->create();
+
+    $proposal = Proposal::factory()->for($influencer)->for($client)->sent()->create([
+        'title' => 'Spring Expansion Proposal',
+    ]);
+
+    $account = InstagramAccount::factory()->for($influencer)->create();
+
+    $campaignOne = Campaign::factory()->for($client)->for($proposal)->create([
+        'name' => 'Campaign One',
+    ]);
+    $campaignTwo = Campaign::factory()->for($client)->for($proposal)->create([
+        'name' => 'Campaign Two',
+    ]);
+
+    ScheduledPost::factory()->for($influencer)->for($client)->for($campaignOne)->for($account)->create();
+    ScheduledPost::factory()->for($influencer)->for($client)->for($campaignTwo)->for($account)->create();
+
+    Livewire::actingAs($clientUser, 'client')
+        ->test(\App\Livewire\Portal\Proposals\Show::class, ['proposal' => $proposal])
+        ->call('approve')
+        ->assertHasNoErrors();
+
+    $proposal->refresh();
+
+    expect($proposal->status)->toBe(ProposalStatus::Approved)
+        ->and($proposal->responded_at)->not->toBeNull();
+
+    Mail::assertSent(ProposalApproved::class, function (ProposalApproved $mail) use ($proposal): bool {
+        $rendered = $mail->render();
+
+        return $mail->hasTo('influencer@example.test')
+            && str_contains($rendered, 'Spring Expansion Proposal')
+            && str_contains($rendered, route('proposals.show', $proposal));
+    });
+});
+
+test('client can request proposal changes with notes and influencer receives revision email', function (): void {
+    Mail::fake();
+
+    $influencer = User::factory()->create(['email' => 'influencer@example.test']);
+    $client = Client::factory()->for($influencer)->create();
+    $clientUser = ClientUser::factory()->for($client)->create();
+
+    $proposal = Proposal::factory()->for($influencer)->for($client)->sent()->create([
+        'title' => 'Holiday Campaign Proposal',
+    ]);
+
+    $account = InstagramAccount::factory()->for($influencer)->create();
+
+    $campaignOne = Campaign::factory()->for($client)->for($proposal)->create([
+        'name' => 'Campaign Alpha',
+    ]);
+    $campaignTwo = Campaign::factory()->for($client)->for($proposal)->create([
+        'name' => 'Campaign Beta',
+    ]);
+
+    ScheduledPost::factory()->for($influencer)->for($client)->for($campaignOne)->for($account)->create();
+    ScheduledPost::factory()->for($influencer)->for($client)->for($campaignTwo)->for($account)->create();
+
+    $notes = 'Please increase story coverage and adjust timeline details.';
+
+    Livewire::actingAs($clientUser, 'client')
+        ->test(\App\Livewire\Portal\Proposals\Show::class, ['proposal' => $proposal])
+        ->set('revisionNotes', $notes)
+        ->call('requestChanges')
+        ->assertHasNoErrors();
+
+    $proposal->refresh();
+
+    expect($proposal->status)->toBe(ProposalStatus::Revised)
+        ->and($proposal->revision_notes)->toBe($notes)
+        ->and($proposal->responded_at)->not->toBeNull();
+
+    Mail::assertSent(ProposalRevisionRequested::class, function (ProposalRevisionRequested $mail) use ($proposal, $notes): bool {
+        $rendered = $mail->render();
+
+        return $mail->hasTo('influencer@example.test')
+            && str_contains($rendered, 'Holiday Campaign Proposal')
+            && str_contains($rendered, $notes)
+            && str_contains($rendered, route('proposals.edit', $proposal));
+    });
+});
+
+test('client cannot approve a proposal that has already been responded to', function (): void {
+    Mail::fake();
+
+    $influencer = User::factory()->create();
+    $client = Client::factory()->for($influencer)->create();
+    $clientUser = ClientUser::factory()->for($client)->create();
+
+    $proposal = Proposal::factory()->for($influencer)->for($client)->approved()->create();
+
+    Livewire::actingAs($clientUser, 'client')
+        ->test(\App\Livewire\Portal\Proposals\Show::class, ['proposal' => $proposal])
+        ->call('approve')
+        ->assertHasErrors(['response']);
+
+    expect($proposal->fresh()->status)->toBe(ProposalStatus::Approved);
+
+    Mail::assertNothingSent();
+});
+
+test('client request changes requires revision notes with at least ten characters', function (): void {
+    Mail::fake();
+
+    $influencer = User::factory()->create();
+    $client = Client::factory()->for($influencer)->create();
+    $clientUser = ClientUser::factory()->for($client)->create();
+
+    $proposal = Proposal::factory()->for($influencer)->for($client)->sent()->create();
+
+    Livewire::actingAs($clientUser, 'client')
+        ->test(\App\Livewire\Portal\Proposals\Show::class, ['proposal' => $proposal])
+        ->set('revisionNotes', 'Too short')
+        ->call('requestChanges')
+        ->assertHasErrors(['revisionNotes']);
+
+    expect($proposal->fresh()->status)->toBe(ProposalStatus::Sent)
+        ->and($proposal->fresh()->responded_at)->toBeNull();
+
+    Mail::assertNothingSent();
+});
+
+test('portal proposal detail only shows response actions for sent proposals', function (): void {
+    $influencer = User::factory()->create();
+    $client = Client::factory()->for($influencer)->create();
+    $clientUser = ClientUser::factory()->for($client)->create();
+
+    $proposal = Proposal::factory()->for($influencer)->for($client)->approved()->create();
+
+    $this->actingAs($clientUser, 'client')
+        ->get(route('portal.proposals.show', $proposal))
+        ->assertSuccessful()
+        ->assertDontSee('wire:click="approve"', false)
+        ->assertDontSee('Request Changes')
+        ->assertSee('Response submitted');
 });
