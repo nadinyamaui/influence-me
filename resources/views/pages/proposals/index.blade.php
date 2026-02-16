@@ -117,7 +117,8 @@
                                         @endif
                                         <button
                                             type="button"
-                                            wire:click="confirmDelete({{ $proposal->id }})"
+                                            wire:click="delete({{ $proposal->id }})"
+                                            wire:confirm="Are you sure you want to delete '{{ $proposal->title }}'?"
                                             class="inline-flex items-center rounded-md border border-rose-300 px-3 py-1.5 text-xs font-medium text-rose-700 transition hover:bg-rose-50 dark:border-rose-800 dark:text-rose-200 dark:hover:bg-rose-950/40"
                                             title="Delete"
                                             aria-label="Delete"
@@ -138,27 +139,4 @@
         </section>
     @endif
 
-    @if ($deletingProposalId)
-        <flux:modal
-            name="proposal-list-delete-modal"
-            :show="$deletingProposalId !== null"
-            @close="cancelDelete"
-            class="max-w-md"
-        >
-            <h2 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100">Delete proposal?</h2>
-            <p class="mt-2 text-sm text-zinc-600 dark:text-zinc-300">
-                You are about to delete
-                <span class="font-semibold text-zinc-900 dark:text-zinc-100">{{ $this->deletingProposal()?->title ?? 'this proposal' }}</span>.
-            </p>
-
-            <div class="mt-5 flex justify-end gap-2">
-                <flux:button type="button" variant="filled" wire:click="cancelDelete">
-                    Cancel
-                </flux:button>
-                <flux:button type="button" variant="danger" wire:click="delete" title="Delete" aria-label="Delete">
-                    <i class="fa-solid fa-trash" aria-hidden="true"></i>
-                </flux:button>
-            </div>
-        </flux:modal>
-    @endif
 </div>

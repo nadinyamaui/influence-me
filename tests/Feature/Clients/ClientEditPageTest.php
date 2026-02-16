@@ -105,8 +105,6 @@ test('owners can delete clients from edit page and related proposals and invoice
 
     Livewire::actingAs($owner)
         ->test(Edit::class, ['client' => $client])
-        ->call('confirmDelete')
-        ->assertSet('confirmingDelete', true)
         ->call('delete')
         ->assertRedirect(route('clients.index'));
 

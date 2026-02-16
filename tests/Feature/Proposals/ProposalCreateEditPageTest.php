@@ -339,8 +339,6 @@ test('users can delete proposals from edit page with confirmation', function ():
 
     Livewire::actingAs($user)
         ->test(ProposalEdit::class, ['proposal' => $proposal])
-        ->call('confirmDelete')
-        ->assertSet('confirmingDelete', true)
         ->call('delete')
         ->assertRedirect(route('proposals.index'));
 

@@ -58,7 +58,13 @@
         <div class="mt-5 rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm dark:border-zinc-700 dark:bg-zinc-800/60">
             @if ($hasPortalAccess)
                 <p class="font-medium text-emerald-700 dark:text-emerald-300">Portal access: Active</p>
-                <flux:button type="button" variant="danger" class="mt-3" wire:click="confirmRevokePortalAccess">
+                <flux:button
+                    type="button"
+                    variant="danger"
+                    class="mt-3"
+                    wire:click="revokePortalAccess"
+                    wire:confirm="Revoke portal access for this client?"
+                >
                     Revoke Portal Access
                 </flux:button>
             @else
@@ -224,7 +230,15 @@
                                         <flux:button type="button" size="sm" variant="filled" wire:click="openEditCampaignModal({{ $campaign->id }})" title="Edit Campaign" aria-label="Edit Campaign">
                                             <i class="fa-solid fa-pen-to-square" aria-hidden="true"></i>
                                         </flux:button>
-                                        <flux:button type="button" size="sm" variant="danger" wire:click="confirmDeleteCampaign({{ $campaign->id }})" title="Delete Campaign" aria-label="Delete Campaign">
+                                        <flux:button
+                                            type="button"
+                                            size="sm"
+                                            variant="danger"
+                                            wire:click="deleteCampaign({{ $campaign->id }})"
+                                            wire:confirm="Delete campaign '{{ $campaign->name }}'?"
+                                            title="Delete Campaign"
+                                            aria-label="Delete Campaign"
+                                        >
                                             <i class="fa-solid fa-trash" aria-hidden="true"></i>
                                         </flux:button>
                                     </div>
@@ -254,25 +268,6 @@
             </div>
         @endif
     </section>
-
-    <flux:modal
-        name="client-revoke-portal-modal"
-        wire:model="confirmingRevokePortalAccess"
-        @close="cancelRevokePortalAccess"
-        class="max-w-lg"
-    >
-        <h2 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100">Revoke portal access?</h2>
-        <p class="mt-2 text-sm text-zinc-600 dark:text-zinc-300">This removes the client user account and blocks portal access immediately.</p>
-
-        <div class="mt-5 flex justify-end gap-2">
-            <flux:button type="button" variant="filled" wire:click="cancelRevokePortalAccess">
-                Cancel
-            </flux:button>
-            <flux:button type="button" variant="danger" wire:click="revokePortalAccess">
-                Revoke Access
-            </flux:button>
-        </div>
-    </flux:modal>
 
     <flux:modal
         name="client-campaign-modal"
@@ -305,23 +300,4 @@
         </form>
     </flux:modal>
 
-    @if ($confirmingDeleteCampaignId)
-        <flux:modal
-            name="client-campaign-delete-modal"
-            :show="$confirmingDeleteCampaignId !== null"
-            @close="cancelDeleteCampaign"
-            class="max-w-md"
-        >
-            <h2 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100">Delete this campaign?</h2>
-
-            <div class="mt-5 flex justify-end gap-2">
-                <flux:button type="button" variant="filled" wire:click="cancelDeleteCampaign">
-                    Cancel
-                </flux:button>
-                <flux:button type="button" variant="danger" wire:click="deleteCampaign" title="Delete Campaign" aria-label="Delete Campaign">
-                    <i class="fa-solid fa-trash" aria-hidden="true"></i>
-                </flux:button>
-            </div>
-        </flux:modal>
-    @endif
 </div>

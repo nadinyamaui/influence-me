@@ -68,11 +68,8 @@ test('revoke portal access removes existing client user account', function (): v
 
     Livewire::actingAs($owner)
         ->test(Show::class, ['client' => $client])
-        ->call('confirmRevokePortalAccess')
-        ->assertSet('confirmingRevokePortalAccess', true)
         ->call('revokePortalAccess')
-        ->assertHasNoErrors()
-        ->assertSet('confirmingRevokePortalAccess', false);
+        ->assertHasNoErrors();
 
     $this->assertDatabaseMissing('client_users', ['id' => $clientUser->id]);
 });

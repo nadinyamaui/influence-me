@@ -59,8 +59,6 @@ class Index extends Component
 
     public string $linkNotes = '';
 
-    public ?int $confirmingUnlinkClientId = null;
-
     public function updatedMediaType(string $value): void
     {
         if (! in_array($value, MediaType::filters(), true)) {
@@ -144,7 +142,6 @@ class Index extends Component
             'mediaTypeFilters' => MediaType::filters(),
             'selectedMedia' => $this->selectedMedia(),
             'sortOptions' => $this->sortOptions(),
-            'unlinkClient' => $this->unlinkClient(),
             'linkCampaigns' => $this->linkCampaignOptions(),
         ])->layout('layouts.app', [
             'title' => __('Content'),
@@ -366,7 +363,7 @@ class Index extends Component
         $this->resetErrorBag(['campaignForm.name', 'campaignForm.description']);
     }
 
-    public function confirmUnlinkClient(int $clientId): void
+    public function unlinkFromClient(int $clientId, ContentClientLinkService $linkService): void
     {
         if ($this->selectedMediaId === null) {
             return;
@@ -377,28 +374,8 @@ class Index extends Component
 
         $client = User::resolveClient($clientId);
 
-        $this->confirmingUnlinkClientId = $client->id;
-    }
-
-    public function cancelUnlinkClient(): void
-    {
-        $this->confirmingUnlinkClientId = null;
-    }
-
-    public function unlinkFromClient(ContentClientLinkService $linkService): void
-    {
-        if ($this->selectedMediaId === null || $this->confirmingUnlinkClientId === null) {
-            return;
-        }
-
-        $media = InstagramMedia::resolveForUser($this->selectedMediaId);
-        $this->authorize('linkToClient', $media);
-
-        $client = User::resolveClient($this->confirmingUnlinkClientId);
-
         $linkService->unlink(Auth::user(), $media, $client);
 
-        $this->confirmingUnlinkClientId = null;
         session()->flash('status', 'Content unlinked from client.');
     }
 
@@ -458,17 +435,6 @@ class Index extends Component
             ])
             ->whereKey($this->selectedMediaId)
             ->whereHas('instagramAccount', fn (Builder $builder): Builder => $builder->where('user_id', Auth::id()))
-            ->first();
-    }
-
-    private function unlinkClient(): ?Client
-    {
-        if ($this->confirmingUnlinkClientId === null) {
-            return null;
-        }
-
-        return Auth::user()->clients()
-            ->whereKey($this->confirmingUnlinkClientId)
             ->first();
     }
 

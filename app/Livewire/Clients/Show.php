@@ -27,8 +27,6 @@ class Show extends Component
 
     public string $activeTab = 'overview';
 
-    public bool $confirmingRevokePortalAccess = false;
-
     public Collection $linkedContentGroups;
 
     public array $linkedContentSummaryData = [];
@@ -38,8 +36,6 @@ class Show extends Component
     public bool $showCampaignModal = false;
 
     public ?int $editingCampaignId = null;
-
-    public ?int $confirmingDeleteCampaignId = null;
 
     public CampaignForm $campaignForm;
 
@@ -96,7 +92,7 @@ class Show extends Component
         session()->flash('status', 'Portal invitation sent successfully.');
     }
 
-    public function confirmRevokePortalAccess(): void
+    public function revokePortalAccess(ClientPortalAccessService $portalAccessService): void
     {
         $this->authorize('update', $this->client);
 
@@ -107,28 +103,15 @@ class Show extends Component
         }
 
         $this->resetErrorBag('revoke');
-        $this->confirmingRevokePortalAccess = true;
-    }
-
-    public function cancelRevokePortalAccess(): void
-    {
-        $this->confirmingRevokePortalAccess = false;
-    }
-
-    public function revokePortalAccess(ClientPortalAccessService $portalAccessService): void
-    {
-        $this->authorize('update', $this->client);
 
         try {
             $portalAccessService->revoke($this->client);
         } catch (ValidationException $exception) {
             $this->setErrorBag($exception->validator->errors());
-            $this->confirmingRevokePortalAccess = false;
 
             return;
         }
 
-        $this->confirmingRevokePortalAccess = false;
         $this->resetErrorBag();
         session()->flash('status', 'Portal access revoked.');
     }
@@ -212,30 +195,12 @@ class Show extends Component
         $this->closeCampaignModal();
     }
 
-    public function confirmDeleteCampaign(int $campaignId): void
+    public function deleteCampaign(int $campaignId): void
     {
         $campaign = $this->client->resolveClientCampaign($campaignId);
         $this->authorize('delete', $campaign);
 
-        $this->confirmingDeleteCampaignId = $campaign->id;
-    }
-
-    public function cancelDeleteCampaign(): void
-    {
-        $this->confirmingDeleteCampaignId = null;
-    }
-
-    public function deleteCampaign(): void
-    {
-        if ($this->confirmingDeleteCampaignId === null) {
-            return;
-        }
-
-        $campaign = $this->client->resolveClientCampaign($this->confirmingDeleteCampaignId);
-        $this->authorize('delete', $campaign);
-
         $campaign->delete();
-        $this->confirmingDeleteCampaignId = null;
 
         if ($this->activeTab === 'content') {
             $this->linkedContentLoaded = false;

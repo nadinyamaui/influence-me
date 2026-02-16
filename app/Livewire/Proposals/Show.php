@@ -15,8 +15,6 @@ class Show extends Component
 
     public Proposal $proposal;
 
-    public bool $confirmingSend = false;
-
     public function mount(Proposal $proposal): void
     {
         $this->authorize('view', $proposal);
@@ -28,27 +26,6 @@ class Show extends Component
                 ->with('instagramAccount:id,username')
                 ->orderBy('scheduled_at'),
         ]);
-    }
-
-    public function confirmSend(ProposalWorkflowService $proposalWorkflowService): void
-    {
-        $this->authorize('send', $this->proposal);
-
-        try {
-            $proposalWorkflowService->assertSendable($this->proposal);
-        } catch (ValidationException $exception) {
-            $this->setErrorBag($exception->validator->errors());
-
-            return;
-        }
-
-        $this->resetErrorBag('send');
-        $this->confirmingSend = true;
-    }
-
-    public function cancelSend(): void
-    {
-        $this->confirmingSend = false;
     }
 
     public function send(ProposalWorkflowService $proposalWorkflowService): void
@@ -65,12 +42,10 @@ class Show extends Component
             ]);
         } catch (ValidationException $exception) {
             $this->setErrorBag($exception->validator->errors());
-            $this->confirmingSend = false;
 
             return;
         }
 
-        $this->confirmingSend = false;
         $this->resetErrorBag();
         session()->flash('status', 'Proposal sent to '.$this->proposal->client->name.'.');
     }

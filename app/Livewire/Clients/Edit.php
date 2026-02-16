@@ -15,8 +15,6 @@ class Edit extends Component
 
     public ClientForm $form;
 
-    public bool $confirmingDelete = false;
-
     public function mount(Client $client): void
     {
         $this->authorize('update', $client);
@@ -38,25 +36,12 @@ class Edit extends Component
         return $this->redirectRoute('clients.show', ['client' => $this->client->id], navigate: true);
     }
 
-    public function confirmDelete(): void
-    {
-        $this->authorize('delete', $this->client);
-
-        $this->confirmingDelete = true;
-    }
-
-    public function cancelDelete(): void
-    {
-        $this->confirmingDelete = false;
-    }
-
     public function delete()
     {
         $this->authorize('delete', $this->client);
 
         $this->client->delete();
 
-        $this->confirmingDelete = false;
         session()->flash('status', 'Client deleted successfully.');
 
         return $this->redirectRoute('clients.index', navigate: true);

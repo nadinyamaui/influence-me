@@ -110,10 +110,7 @@ test('authenticated users can disconnect an account after confirmation', functio
 
     Livewire::actingAs($user)
         ->test(Index::class)
-        ->call('confirmDisconnect', $secondAccount->id)
-        ->assertSet('disconnectingAccountId', $secondAccount->id)
-        ->call('disconnect')
-        ->assertSet('disconnectingAccountId', null);
+        ->call('disconnect', $secondAccount->id);
 
     $this->assertDatabaseMissing('instagram_accounts', ['id' => $secondAccount->id]);
     $this->assertDatabaseHas('instagram_accounts', ['id' => $firstAccount->id]);
@@ -129,9 +126,7 @@ test('users cannot disconnect their last instagram account', function (): void {
 
     Livewire::actingAs($user)
         ->test(Index::class)
-        ->call('confirmDisconnect', $account->id)
-        ->assertHasErrors(['disconnect'])
-        ->assertSet('disconnectingAccountId', null);
+        ->call('disconnect', $account->id);
 
     $this->assertDatabaseHas('instagram_accounts', ['id' => $account->id]);
 });

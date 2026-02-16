@@ -36,14 +36,24 @@
                 <flux:button :href="route('proposals.edit', $proposal)" wire:navigate variant="filled">
                     Edit
                 </flux:button>
-                <flux:button type="button" variant="primary" wire:click="confirmSend">
+                <flux:button
+                    type="button"
+                    variant="primary"
+                    wire:click="send"
+                    wire:confirm="Send this proposal to {{ $proposal->client?->name ?? 'this client' }}?"
+                >
                     Send to Client
                 </flux:button>
             @elseif ($proposal->status === ProposalStatus::Revised)
                 <flux:button :href="route('proposals.edit', $proposal)" wire:navigate variant="filled">
                     Edit
                 </flux:button>
-                <flux:button type="button" variant="primary" wire:click="confirmSend">
+                <flux:button
+                    type="button"
+                    variant="primary"
+                    wire:click="send"
+                    wire:confirm="Send this revised proposal to {{ $proposal->client?->name ?? 'this client' }}?"
+                >
                     Send Again
                 </flux:button>
             @elseif ($proposal->status === ProposalStatus::Sent)
@@ -144,24 +154,4 @@
         <p class="mt-1">Responded at: {{ $proposal->responded_at?->format('M j, Y g:i A') ?? 'No response yet' }}</p>
     </section>
 
-    <flux:modal
-        name="proposal-send-modal"
-        wire:model="confirmingSend"
-        @close="cancelSend"
-        class="max-w-lg"
-    >
-        <h2 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100">Send proposal to client?</h2>
-        <p class="mt-2 text-sm text-zinc-600 dark:text-zinc-300">
-            Send this proposal to {{ $proposal->client?->name ?? 'this client' }} at {{ $proposal->client?->email ?? 'no email on file' }}?
-        </p>
-
-        <div class="mt-5 flex justify-end gap-2">
-            <flux:button type="button" variant="filled" wire:click="cancelSend">
-                Cancel
-            </flux:button>
-            <flux:button type="button" variant="primary" wire:click="send">
-                Send
-            </flux:button>
-        </div>
-    </flux:modal>
 </div>

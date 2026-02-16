@@ -196,10 +196,7 @@ test('owners can delete proposals from the list page', function (): void {
 
     Livewire::actingAs($user)
         ->test(Index::class)
-        ->call('confirmDelete', $proposal->id)
-        ->assertSet('deletingProposalId', $proposal->id)
-        ->call('delete')
-        ->assertSet('deletingProposalId', null);
+        ->call('delete', $proposal->id);
 
     $this->assertDatabaseMissing('proposals', ['id' => $proposal->id]);
 });

@@ -216,8 +216,7 @@ test('campaigns tab shows empty state then supports campaign create edit unlink 
         ->call('saveCampaign')
         ->assertSee('Spring Launch Updated')
         ->assertSee('Proposal: Not linked')
-        ->call('confirmDeleteCampaign', $campaign->id)
-        ->call('deleteCampaign');
+        ->call('deleteCampaign', $campaign->id);
 
     $this->assertDatabaseMissing('campaigns', [
         'id' => $campaign->id,

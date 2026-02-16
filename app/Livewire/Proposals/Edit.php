@@ -24,8 +24,6 @@ class Edit extends Component
 
     public bool $previewMode = false;
 
-    public bool $confirmingDelete = false;
-
     public int $currentStep = 1;
 
     public array $campaigns = [];
@@ -153,18 +151,6 @@ class Edit extends Component
         session()->flash('status', 'Proposal updated.');
 
         return $this->redirectRoute('proposals.index', navigate: true);
-    }
-
-    public function confirmDelete(): void
-    {
-        $this->authorize('delete', $this->proposal);
-
-        $this->confirmingDelete = true;
-    }
-
-    public function cancelDelete(): void
-    {
-        $this->confirmingDelete = false;
     }
 
     public function delete()
