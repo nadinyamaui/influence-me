@@ -33,7 +33,7 @@ class Index extends Component
 
     public function updatedType(): void
     {
-        if (! in_array($this->type, array_merge(['all'], $this->filterTypes()), true)) {
+        if (! in_array($this->type, ClientType::filters(), true)) {
             $this->type = 'all';
         }
 
@@ -78,18 +78,10 @@ class Index extends Component
             });
         }
 
-        if (in_array($this->type, $this->filterTypes(), true)) {
+        if (in_array($this->type, ClientType::values(), true)) {
             $query->where('type', $this->type);
         }
 
         return $query->paginate(10);
-    }
-
-    private function filterTypes(): array
-    {
-        return [
-            ClientType::Brand->value,
-            ClientType::Individual->value,
-        ];
     }
 }

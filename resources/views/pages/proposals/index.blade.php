@@ -1,5 +1,6 @@
 @php
     use App\Enums\ProposalStatus;
+    use Illuminate\Support\Str;
 @endphp
 
 <div class="flex h-full w-full flex-1 flex-col gap-6">
@@ -29,12 +30,9 @@
     <section class="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-700 dark:bg-zinc-900">
         <div class="grid gap-4 md:grid-cols-3">
             <flux:select wire:model.live="status" :label="__('Status')">
-                <option value="all">All</option>
-                <option value="{{ ProposalStatus::Draft->value }}">Draft</option>
-                <option value="{{ ProposalStatus::Sent->value }}">Sent</option>
-                <option value="{{ ProposalStatus::Approved->value }}">Approved</option>
-                <option value="{{ ProposalStatus::Rejected->value }}">Rejected</option>
-                <option value="{{ ProposalStatus::Revised->value }}">Revised</option>
+                @foreach (ProposalStatus::filters() as $filterStatus)
+                    <option value="{{ $filterStatus }}">{{ Str::of($filterStatus)->headline() }}</option>
+                @endforeach
             </flux:select>
 
             <flux:select wire:model.live="client" :label="__('Client')">

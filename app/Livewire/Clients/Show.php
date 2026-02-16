@@ -236,10 +236,7 @@ class Show extends Component
     private function summary(): array
     {
         $pendingInvoiceQuery = $this->client->invoices()
-            ->whereIn('status', [
-                InvoiceStatus::Sent,
-                InvoiceStatus::Overdue,
-            ]);
+            ->whereIn('status', InvoiceStatus::pendingValues());
 
         $linkedMediaQuery = $this->linkedMediaQuery();
 

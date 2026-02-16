@@ -1,5 +1,6 @@
 @php
     use App\Enums\ClientType;
+    use Illuminate\Support\Str;
 @endphp
 
 <div class="flex h-full w-full flex-1 flex-col gap-6">
@@ -35,9 +36,9 @@
             />
 
             <flux:select wire:model.live="type" :label="__('Type')">
-                <option value="all">All</option>
-                <option value="{{ ClientType::Brand->value }}">Brand</option>
-                <option value="{{ ClientType::Individual->value }}">Individual</option>
+                @foreach (ClientType::filters() as $filterType)
+                    <option value="{{ $filterType }}">{{ Str::of($filterType)->headline() }}</option>
+                @endforeach
             </flux:select>
         </div>
     </section>

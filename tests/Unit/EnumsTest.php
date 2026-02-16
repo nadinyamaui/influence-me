@@ -63,6 +63,17 @@ it('defines all client type enum cases', function (): void {
         ->and(ClientType::Individual->value)->toBe('individual');
 });
 
+it('provides client type values and filters', function (): void {
+    expect(ClientType::values())->toBe([
+        'brand',
+        'individual',
+    ])->and(ClientType::filters())->toBe([
+        'all',
+        'brand',
+        'individual',
+    ]);
+});
+
 it('defines all proposal status enum cases', function (): void {
     expect(ProposalStatus::cases())->toHaveCount(5)
         ->and(ProposalStatus::Draft->value)->toBe('draft')
@@ -72,6 +83,38 @@ it('defines all proposal status enum cases', function (): void {
         ->and(ProposalStatus::Revised->value)->toBe('revised');
 });
 
+it('provides proposal status values and filters', function (): void {
+    expect(ProposalStatus::values())->toBe([
+        'draft',
+        'sent',
+        'approved',
+        'rejected',
+        'revised',
+    ])->and(ProposalStatus::filters())->toBe([
+        'all',
+        'draft',
+        'sent',
+        'approved',
+        'rejected',
+        'revised',
+    ]);
+});
+
+it('provides client proposal status values and filters', function (): void {
+    expect(ProposalStatus::clientViewableValues())->toBe([
+        'sent',
+        'approved',
+        'rejected',
+        'revised',
+    ])->and(ProposalStatus::clientFilters())->toBe([
+        'all',
+        'sent',
+        'approved',
+        'rejected',
+        'revised',
+    ]);
+});
+
 it('defines all invoice status enum cases', function (): void {
     expect(InvoiceStatus::cases())->toHaveCount(5)
         ->and(InvoiceStatus::Draft->value)->toBe('draft')
@@ -79,6 +122,13 @@ it('defines all invoice status enum cases', function (): void {
         ->and(InvoiceStatus::Paid->value)->toBe('paid')
         ->and(InvoiceStatus::Overdue->value)->toBe('overdue')
         ->and(InvoiceStatus::Cancelled->value)->toBe('cancelled');
+});
+
+it('provides pending invoice statuses', function (): void {
+    expect(InvoiceStatus::pendingValues())->toBe([
+        'sent',
+        'overdue',
+    ]);
 });
 
 it('defines all scheduled post status enum cases', function (): void {
