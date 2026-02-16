@@ -44,7 +44,7 @@ class ProposalSent extends Mailable
     public function content(): Content
     {
         return new Content(
-            view: 'mail.proposal-sent',
+            markdown: 'mail.proposal-sent',
             with: [
                 'influencerName' => $this->proposal->user?->name ?? 'Your influencer',
                 'proposalTitle' => $this->proposal->title,

@@ -1,18 +1,17 @@
-<!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-    <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #111827;">
-        <p>Hello,</p>
+<x-mail::message>
+# Hello,
 
-        <p>{{ $influencerName }} invited you to the Influence Me client portal.</p>
+{{ $influencerName }} invited you to the Influence Me client portal.
 
-        <p>
-            Login URL: <a href="{{ $loginUrl }}">{{ $loginUrl }}</a>
-        </p>
+<x-mail::panel>
+Login URL: {{ $loginUrl }}
 
-        <p>
-            Temporary Password: <strong>{{ $temporaryPassword }}</strong>
-        </p>
+Temporary Password: **{{ $temporaryPassword }}**
+</x-mail::panel>
 
-        <p>Log in with this password and change it as soon as possible.</p>
-    </body>
-</html>
+Log in with this password and change it as soon as possible.
+
+<x-mail::button :url="$loginUrl">
+Go to Client Portal
+</x-mail::button>
+</x-mail::message>

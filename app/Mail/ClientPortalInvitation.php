@@ -29,7 +29,7 @@ class ClientPortalInvitation extends Mailable
     public function content(): Content
     {
         return new Content(
-            view: 'mail.client-portal-invitation',
+            markdown: 'mail.client-portal-invitation',
         );
     }
 }

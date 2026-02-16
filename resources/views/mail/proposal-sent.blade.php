@@ -1,29 +1,17 @@
-<!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-    <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #111827;">
-        <p>Hello,</p>
+<x-mail::message>
+# Hello,
 
-        <p>{{ $influencerName }} has sent you a new proposal.</p>
+{{ $influencerName }} has sent you a new proposal.
 
-        <p>
-            <strong>Proposal title:</strong> {{ $proposalTitle }}
-        </p>
+**Proposal title:** {{ $proposalTitle }}
 
-        <p>
-            <strong>Preview:</strong> {{ $proposalPreview }}
-        </p>
+**Preview:** {{ $proposalPreview }}
 
-        @if ($hasPortalAccess)
-            <p>
-                <a
-                    href="{{ $portalUrl }}"
-                    style="display: inline-block; border-radius: 6px; background: #1d4ed8; color: #ffffff; text-decoration: none; padding: 10px 16px;"
-                >
-                    View Proposal
-                </a>
-            </p>
-        @else
-            <p>Your influencer has sent you a proposal.</p>
-        @endif
-    </body>
-</html>
+@if ($hasPortalAccess)
+<x-mail::button :url="$portalUrl">
+View Proposal
+</x-mail::button>
+@else
+Your influencer has sent you a proposal.
+@endif
+</x-mail::message>
