@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\User;
+use App\Services\Auth\FacebookSocialiteLoginService;
 use Laravel\Fortify\Features;
 
 test('two factor challenge redirects to login when challenge session is missing', function () {
@@ -23,10 +24,24 @@ test('two factor challenge can be rendered for oauth user pending challenge', fu
         'socialite_user_id' => '1234567890123',
     ]);
 
-    $response = $this->withSession([
-        'login.id' => $oauthUser->id,
-        'login.remember' => false,
-    ])->get(route('two-factor.login'));
+    $service = \Mockery::mock(FacebookSocialiteLoginService::class);
+    $service->shouldReceive('createUserAndAccounts')
+        ->once()
+        ->andReturnUsing(function () use ($oauthUser) {
+            session([
+                'login.id' => $oauthUser->id,
+                'login.remember' => false,
+            ]);
+            auth()->logout();
+
+            return $oauthUser;
+        });
+    app()->instance(FacebookSocialiteLoginService::class, $service);
+
+    $this->get(route('auth.facebook.callback'))
+        ->assertRedirect(route('dashboard', absolute: false));
+
+    $response = $this->get(route('two-factor.login'));
 
     $response->assertOk();
     $response->assertSee('Authentication Code');

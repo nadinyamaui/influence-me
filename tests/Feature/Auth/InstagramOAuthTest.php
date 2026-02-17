@@ -250,6 +250,28 @@ it('uses exchanged long-lived token to fetch instagram accounts', function (): v
 it('adds additional instagram account for authenticated user', function (): void {
     $user = User::factory()->create();
 
+    Socialite::shouldReceive('driver')
+        ->once()
+        ->with('facebook')
+        ->andReturnSelf();
+    Socialite::shouldReceive('scopes')
+        ->once()
+        ->with([
+            'instagram_basic',
+            'instagram_manage_insights',
+            'pages_show_list',
+            'pages_read_engagement',
+        ])
+        ->andReturnSelf();
+    Socialite::shouldReceive('redirect')
+        ->once()
+        ->andReturn(redirect('https://www.facebook.com/v18.0/dialog/oauth'));
+
+    $entryResponse = $this->actingAs($user)->get(route('auth.facebook.add'));
+
+    $entryResponse->assertRedirect('https://www.facebook.com/v18.0/dialog/oauth');
+    $entryResponse->assertSessionHas('facebook_auth_intent', 'add_account');
+
     $service = \Mockery::mock(FacebookSocialiteLoginService::class);
     $service->shouldReceive('createInstagramAccountsForLoggedUser')
         ->once()
@@ -257,9 +279,7 @@ it('adds additional instagram account for authenticated user', function (): void
     $service->shouldNotReceive('createUserAndAccounts');
     app()->instance(FacebookSocialiteLoginService::class, $service);
 
-    $response = $this->actingAs($user)
-        ->withSession(['facebook_auth_intent' => 'add_account'])
-        ->get(route('auth.facebook.callback'));
+    $response = $this->actingAs($user)->get(route('auth.facebook.callback'));
 
     $response->assertRedirect(route('instagram-accounts.index'));
     $response->assertSessionHas('status', 'Instagram accounts connected successfully.');
