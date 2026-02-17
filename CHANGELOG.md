@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
+- RFC 062: added query-layer content-type aggregation in `app/Builders/InstagramMediaBuilder.php` via `contentTypeBreakdown()` to return per-type counts plus average engagement/reach with influencer ownership, account, and period scopes applied upstream.
+- RFC 062: extended analytics state in `app/Livewire/Analytics/Index.php` with typed breakdown chart payloads and summary integration, and added enum UI metadata in `app/Enums/MediaType.php` (`pluralLabel()` and `chartColor()`) to keep content-type presentation logic centralized.
+- RFC 062: replaced the analytics content-type placeholder in `resources/views/pages/analytics/index.blade.php` with a Chart.js + Alpine doughnut chart (Posts/Reels/Stories color mapping), center total, legend counts/percentages, per-type average engagement/reach stats, and empty-state handling.
+- RFC 062: added feature coverage in `tests/Feature/Analytics/AnalyticsDashboardOverviewTest.php` for breakdown calculations and period/account filter responsiveness, and expanded enum metadata coverage in `tests/Unit/EnumsTest.php`.
 - RFC 061: added best-performing content sorting enum `app/Enums/AnalyticsTopContentSort.php` and query-layer ranking helper `topPerforming(...)` in `app/Builders/InstagramMediaBuilder.php` to support engagement/reach ranking with deterministic ordering.
 - RFC 061: extended analytics page state/data in `app/Livewire/Analytics/Index.php` with top-content sort toggling and a filtered/scoped top 5 media query honoring influencer ownership, selected period, and selected account.
 - RFC 061: replaced the analytics placeholder card in `resources/views/pages/analytics/index.blade.php` with a full "Best Performing Content" section including sort toggle controls, media thumbnails, caption previews, media-type badges, publish date, metrics, and content detail links.

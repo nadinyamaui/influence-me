@@ -168,4 +168,33 @@ class InstagramMediaBuilder extends Builder
             })
             ->values();
     }
+
+    public function contentTypeBreakdown(): Collection
+    {
+        $rows = $this->selectRaw('media_type, COUNT(*) as total_count, AVG(engagement_rate) as average_engagement_rate, AVG(reach) as average_reach')
+            ->groupBy('media_type')
+            ->get();
+
+        $aggregates = $rows->mapWithKeys(function ($row): array {
+            $mediaType = $row->media_type instanceof MediaType
+                ? $row->media_type
+                : MediaType::from((string) $row->media_type);
+
+            return [
+                $mediaType->value => [
+                    'count' => (int) $row->total_count,
+                    'average_engagement_rate' => round((float) $row->average_engagement_rate, 2),
+                    'average_reach' => (int) round((float) $row->average_reach),
+                ],
+            ];
+        });
+
+        return collect(MediaType::cases())->mapWithKeys(fn (MediaType $mediaType): array => [
+            $mediaType->value => $aggregates->get($mediaType->value, [
+                'count' => 0,
+                'average_engagement_rate' => 0.0,
+                'average_reach' => 0,
+            ]),
+        ]);
+    }
 }
