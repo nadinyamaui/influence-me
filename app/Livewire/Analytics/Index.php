@@ -4,7 +4,9 @@ namespace App\Livewire\Analytics;
 
 use App\Enums\AnalyticsPeriod;
 use App\Enums\AnalyticsTopContentSort;
+use App\Enums\DemographicType;
 use App\Enums\MediaType;
+use App\Models\AudienceDemographic;
 use App\Models\FollowerSnapshot;
 use App\Models\InstagramAccount;
 use App\Models\InstagramMedia;
@@ -93,6 +95,7 @@ class Index extends Component
         $engagementTrendValues = $engagementTrendPoints->pluck('value')->all();
         $contentTypeBreakdown = $this->contentTypeBreakdownChart($contentTypeStats, $totalPosts);
         $chart = $this->audienceGrowthChart($period);
+        $demographics = $this->audienceDemographics();
         $topContent = InstagramMedia::query()
             ->forUser((int) Auth::id())
             ->filterByAccount($this->accountId)
@@ -138,6 +141,7 @@ class Index extends Component
                 'average_line' => array_fill(0, count($engagementTrendLabels), $averageEngagementRate),
             ],
             'contentTypeBreakdown' => $contentTypeBreakdown,
+            'audienceDemographics' => $demographics,
         ])->layout('layouts.app', [
             'title' => __('Analytics'),
         ]);
@@ -235,5 +239,103 @@ class Index extends Component
         }
 
         return number_format($value);
+    }
+
+    private function audienceDemographics(): array
+    {
+        $demographics = AudienceDemographic::query()
+            ->forUser((int) Auth::id())
+            ->filterByAccount($this->accountId)
+            ->get(['instagram_account_id', 'type', 'dimension', 'value'])
+            ->groupBy(fn (AudienceDemographic $item): string => $item->type->value);
+        $accountWeights = InstagramAccount::query()
+            ->forUser((int) Auth::id())
+            ->filterByAccount($this->accountId)
+            ->pluck('followers_count', 'id')
+            ->mapWithKeys(fn ($followersCount, $id): array => [(int) $id => max((int) $followersCount, 1)]);
+
+        $ageOrder = collect(['13-17', '18-24', '25-34', '35-44', '45-54', '55-64', '65+']);
+
+        $ageRows = $demographics->get(DemographicType::Age->value, collect());
+        $ageLookup = $this->weightedDemographicValues($ageRows, $accountWeights);
+        $ageLabels = $ageOrder->all();
+        $ageValues = $ageOrder
+            ->map(fn (string $label): float => (float) ($ageLookup->get($label) ?? 0.0))
+            ->all();
+
+        $genderRows = $demographics->get(DemographicType::Gender->value, collect());
+        $genderKeys = collect(['Male', 'Female', 'Other']);
+        $genderLookup = $this->weightedDemographicValues($genderRows, $accountWeights);
+        $genderLabels = $genderKeys->all();
+        $genderValues = $genderKeys
+            ->map(fn (string $label): float => (float) ($genderLookup->get($label) ?? 0.0))
+            ->all();
+        $genderTotal = round(array_sum($genderValues), 2);
+
+        $cityRows = $demographics->get(DemographicType::City->value, collect());
+        $city = $this->topDemographicRows($cityRows, $accountWeights);
+
+        $countryRows = $demographics->get(DemographicType::Country->value, collect());
+        $country = $this->topDemographicRows($countryRows, $accountWeights);
+
+        return [
+            'has_data' => $ageRows->isNotEmpty() || $genderRows->isNotEmpty() || $cityRows->isNotEmpty() || $countryRows->isNotEmpty(),
+            'age' => [
+                'labels' => $ageLabels,
+                'values' => $ageValues,
+            ],
+            'gender' => [
+                'labels' => $genderLabels,
+                'values' => $genderValues,
+                'colors' => ['#3b82f6', '#ec4899', '#9ca3af'],
+                'total' => $genderTotal,
+            ],
+            'city' => $city,
+            'country' => $country,
+        ];
+    }
+
+    private function topDemographicRows(Collection $rows, Collection $accountWeights): array
+    {
+        $grouped = $this->weightedDemographicValues($rows, $accountWeights)
+            ->sortDesc()
+            ->take(10);
+
+        return [
+            'labels' => $grouped->keys()->values()->all(),
+            'values' => $grouped->values()->all(),
+        ];
+    }
+
+    private function weightedDemographicValues(Collection $rows, Collection $accountWeights): Collection
+    {
+        $typeAccountIds = $rows->pluck('instagram_account_id')
+            ->map(fn ($accountId): int => (int) $accountId)
+            ->unique()
+            ->values()
+            ->all();
+        $scopedWeights = $accountWeights->only($typeAccountIds);
+
+        if ($scopedWeights->isEmpty()) {
+            $scopedWeights = $accountWeights;
+        }
+
+        return $rows
+            ->groupBy('dimension')
+            ->map(function (Collection $dimensionRows) use ($scopedWeights): float {
+                $perAccount = $dimensionRows
+                    ->groupBy('instagram_account_id')
+                    ->map(fn (Collection $accountRows): float => (float) $accountRows->sum(fn (AudienceDemographic $item): float => (float) $item->value));
+                $weightedSum = 0.0;
+                $totalWeight = 0;
+
+                foreach ($scopedWeights as $accountId => $weight) {
+                    $value = (float) ($perAccount->get((int) $accountId) ?? 0.0);
+                    $weightedSum += $value * (int) $weight;
+                    $totalWeight += $weight;
+                }
+
+                return $totalWeight > 0 ? round($weightedSum / $totalWeight, 2) : 0.0;
+            });
     }
 }
