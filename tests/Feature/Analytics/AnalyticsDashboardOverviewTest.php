@@ -2,6 +2,7 @@
 
 use App\Enums\MediaType;
 use App\Livewire\Analytics\Index;
+use App\Models\FollowerSnapshot;
 use App\Models\InstagramAccount;
 use App\Models\InstagramMedia;
 use App\Models\User;
@@ -79,6 +80,31 @@ test('analytics overview cards calculate metrics and filters in query layer', fu
         'reach' => 900000,
     ]);
 
+    FollowerSnapshot::factory()->for($primaryAccount)->create([
+        'followers_count' => 150000,
+        'recorded_at' => now()->subDays(20),
+    ]);
+
+    FollowerSnapshot::factory()->for($secondaryAccount)->create([
+        'followers_count' => 50000,
+        'recorded_at' => now()->subDays(20),
+    ]);
+
+    FollowerSnapshot::factory()->for($primaryAccount)->create([
+        'followers_count' => 151200,
+        'recorded_at' => now()->subDays(5),
+    ]);
+
+    FollowerSnapshot::factory()->for($secondaryAccount)->create([
+        'followers_count' => 50200,
+        'recorded_at' => now()->subDays(5),
+    ]);
+
+    FollowerSnapshot::factory()->for($outsiderAccount)->create([
+        'followers_count' => 999999,
+        'recorded_at' => now()->subDays(5),
+    ]);
+
     Livewire::actingAs($user)
         ->test(Index::class)
         ->assertSee('200,000')
@@ -88,12 +114,17 @@ test('analytics overview cards calculate metrics and filters in query layer', fu
         ->assertSee('1 stories')
         ->assertSee('4.33%')
         ->assertSee('4.0K')
+        ->assertViewHas('chart', fn (array $chart): bool => $chart['labels'] === [
+            now()->subDays(20)->toDateString(),
+            now()->subDays(5)->toDateString(),
+        ] && $chart['data'] === [200000, 201400])
         ->set('period', '7_days')
         ->assertSee('1 posts')
         ->assertSee('0 reels')
         ->assertSee('0 stories')
         ->assertSee('4.50%')
         ->assertSee('1.2K')
+        ->assertViewHas('chart', fn (array $chart): bool => $chart['labels'] === [now()->subDays(5)->toDateString()] && $chart['data'] === [201400])
         ->set('period', '90_days')
         ->set('accountId', (string) $secondaryAccount->id)
         ->assertSee('50,000')
@@ -103,6 +134,10 @@ test('analytics overview cards calculate metrics and filters in query layer', fu
         ->assertSee('1 stories')
         ->assertSee('5.50%')
         ->assertSee('10.4K')
+        ->assertViewHas('chart', fn (array $chart): bool => $chart['labels'] === [
+            now()->subDays(20)->toDateString(),
+            now()->subDays(5)->toDateString(),
+        ] && $chart['data'] === [50000, 50200])
         ->assertDontSee('999,999');
 });
 

@@ -47,4 +47,9 @@ class InstagramAccount extends Model
     {
         return $this->hasMany(AudienceDemographic::class);
     }
+
+    public function followerSnapshots(): HasMany
+    {
+        return $this->hasMany(FollowerSnapshot::class);
+    }
 }
