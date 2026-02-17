@@ -87,9 +87,11 @@ class Index extends Component
             : 0.0;
 
         $followersChange = $this->followersChange($period);
+        $contentTypeStats = (clone $mediaQuery)->contentTypeBreakdown();
         $engagementTrendPoints = (clone $mediaQuery)->engagementTrend($period);
         $engagementTrendLabels = $engagementTrendPoints->pluck('label')->all();
         $engagementTrendValues = $engagementTrendPoints->pluck('value')->all();
+        $contentTypeBreakdown = $this->contentTypeBreakdownChart($contentTypeStats, $totalPosts);
         $chart = $this->audienceGrowthChart($period);
         $topContent = InstagramMedia::query()
             ->forUser((int) Auth::id())
@@ -119,7 +121,7 @@ class Index extends Component
                 'total_followers' => $totalFollowers,
                 'followers_change' => $followersChange,
                 'total_posts' => $totalPosts,
-                'post_breakdown' => $this->postBreakdown($media),
+                'post_breakdown' => $this->postBreakdown($contentTypeStats),
                 'average_engagement_rate' => $averageEngagementRate,
                 'total_reach' => $totalReach,
             ],
@@ -135,17 +137,51 @@ class Index extends Component
                 'average' => $averageEngagementRate,
                 'average_line' => array_fill(0, count($engagementTrendLabels), $averageEngagementRate),
             ],
+            'contentTypeBreakdown' => $contentTypeBreakdown,
         ])->layout('layouts.app', [
             'title' => __('Analytics'),
         ]);
     }
 
-    private function postBreakdown(Collection $media): array
+    private function postBreakdown(Collection $contentTypeStats): array
     {
         return [
-            'posts' => $media->where('media_type', MediaType::Post)->count(),
-            'reels' => $media->where('media_type', MediaType::Reel)->count(),
-            'stories' => $media->where('media_type', MediaType::Story)->count(),
+            'posts' => (int) ($contentTypeStats->get(MediaType::Post->value)['count'] ?? 0),
+            'reels' => (int) ($contentTypeStats->get(MediaType::Reel->value)['count'] ?? 0),
+            'stories' => (int) ($contentTypeStats->get(MediaType::Story->value)['count'] ?? 0),
+        ];
+    }
+
+    private function contentTypeBreakdownChart(Collection $contentTypeStats, int $totalPosts): array
+    {
+        $items = collect(MediaType::cases())
+            ->map(function (MediaType $mediaType) use ($contentTypeStats, $totalPosts): array {
+                $stats = $contentTypeStats->get($mediaType->value, [
+                    'count' => 0,
+                    'average_engagement_rate' => 0.0,
+                    'average_reach' => 0,
+                ]);
+                $count = (int) ($stats['count'] ?? 0);
+                $percentage = $totalPosts > 0 ? round(($count / $totalPosts) * 100, 1) : 0.0;
+
+                return [
+                    'key' => $mediaType->value,
+                    'label' => $mediaType->pluralLabel(),
+                    'count' => $count,
+                    'percentage' => $percentage,
+                    'average_engagement_rate' => round((float) ($stats['average_engagement_rate'] ?? 0), 2),
+                    'average_reach' => (int) ($stats['average_reach'] ?? 0),
+                    'color' => $mediaType->chartColor(),
+                ];
+            })
+            ->values();
+
+        return [
+            'labels' => $items->pluck('label')->all(),
+            'values' => $items->pluck('count')->all(),
+            'colors' => $items->pluck('color')->all(),
+            'total' => $totalPosts,
+            'items' => $items->all(),
         ];
     }
 

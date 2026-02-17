@@ -239,11 +239,17 @@ it('defines analytics top content sort options and default', function (): void {
         ]);
 });
 
-it('provides media type labels and badge classes', function (): void {
+it('provides media type labels and ui metadata', function (): void {
     expect(MediaType::Post->label())->toBe('Post')
         ->and(MediaType::Reel->label())->toBe('Reel')
         ->and(MediaType::Story->label())->toBe('Story')
+        ->and(MediaType::Post->pluralLabel())->toBe('Posts')
+        ->and(MediaType::Reel->pluralLabel())->toBe('Reels')
+        ->and(MediaType::Story->pluralLabel())->toBe('Stories')
         ->and(MediaType::Post->badgeClasses())->toContain('bg-sky-100')
         ->and(MediaType::Reel->badgeClasses())->toContain('bg-violet-100')
-        ->and(MediaType::Story->badgeClasses())->toContain('bg-amber-100');
+        ->and(MediaType::Story->badgeClasses())->toContain('bg-amber-100')
+        ->and(MediaType::Post->chartColor())->toBe('#3b82f6')
+        ->and(MediaType::Reel->chartColor())->toBe('#8b5cf6')
+        ->and(MediaType::Story->chartColor())->toBe('#f59e0b');
 });

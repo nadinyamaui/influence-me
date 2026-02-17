@@ -155,8 +155,51 @@
             @endif
         </article>
 
-        <article class="min-h-56 rounded-2xl border border-dashed border-zinc-300 bg-zinc-50 p-5 dark:border-zinc-700 dark:bg-zinc-900/40">
-            <h2 class="text-sm font-semibold uppercase tracking-wide text-zinc-600 dark:text-zinc-300">Content Type Breakdown</h2>
+        <article class="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-700 dark:bg-zinc-900 lg:col-span-2">
+            <div class="flex items-start justify-between gap-3">
+                <div>
+                    <h2 class="text-sm font-semibold uppercase tracking-wide text-zinc-600 dark:text-zinc-300">Content Type Breakdown</h2>
+                    <p class="mt-1 text-xs text-zinc-500 dark:text-zinc-400">Posts, reels, and stories distribution for the selected filters.</p>
+                </div>
+                <p class="text-xs font-medium text-zinc-700 dark:text-zinc-300">{{ number_format($contentTypeBreakdown['total']) }} total</p>
+            </div>
+
+            @if ($contentTypeBreakdown['total'] > 0)
+                <div class="mt-4 grid gap-6 lg:grid-cols-[minmax(0,20rem)_minmax(0,1fr)]">
+                    <div
+                        class="mx-auto h-72 w-full max-w-xs"
+                        wire:key="content-type-breakdown-{{ md5(json_encode([$period, $accountId, $contentTypeBreakdown['values']])) }}"
+                        x-data="contentTypeBreakdownChart(@js($contentTypeBreakdown))"
+                        x-init="init()"
+                    >
+                        <canvas x-ref="canvas" role="img" aria-label="Content type breakdown chart"></canvas>
+                    </div>
+
+                    <div class="space-y-3">
+                        @foreach ($contentTypeBreakdown['items'] as $item)
+                            <div class="rounded-xl border border-zinc-200 p-3 dark:border-zinc-700">
+                                <div class="flex flex-wrap items-center justify-between gap-3">
+                                    <div class="flex items-center gap-2">
+                                        <span class="h-2.5 w-2.5 rounded-full" style="background-color: {{ $item['color'] }}"></span>
+                                        <p class="text-sm font-medium text-zinc-800 dark:text-zinc-200">{{ $item['label'] }}</p>
+                                    </div>
+                                    <p class="text-xs text-zinc-600 dark:text-zinc-300">
+                                        {{ number_format($item['count']) }} ({{ number_format($item['percentage'], 1) }}%)
+                                    </p>
+                                </div>
+                                <div class="mt-2 grid gap-2 text-xs text-zinc-600 dark:text-zinc-300 sm:grid-cols-2">
+                                    <p>Avg engagement: {{ number_format((float) $item['average_engagement_rate'], 2) }}%</p>
+                                    <p>Avg reach: {{ number_format((int) $item['average_reach']) }}</p>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+            @else
+                <div class="mt-4 flex h-64 items-center justify-center rounded-xl border border-dashed border-zinc-300 bg-zinc-50 px-4 text-sm text-zinc-500 dark:border-zinc-700 dark:bg-zinc-900/40 dark:text-zinc-400">
+                    No content data is available for this period.
+                </div>
+            @endif
         </article>
     </section>
 </div>
@@ -209,6 +252,75 @@
                             y: {
                                 ticks: {
                                     callback: (value) => `${value}%`,
+                                },
+                            },
+                        },
+                    },
+                });
+            },
+        });
+    }
+
+    if (! window.contentTypeBreakdownChart) {
+        window.contentTypeBreakdownChart = (series) => ({
+            chart: null,
+            init() {
+                if (! window.Chart) {
+                    return;
+                }
+
+                this.chart = new window.Chart(this.$refs.canvas, {
+                    type: 'doughnut',
+                    data: {
+                        labels: series.labels,
+                        datasets: [
+                            {
+                                data: series.values,
+                                backgroundColor: series.colors,
+                                borderWidth: 0,
+                                hoverOffset: 6,
+                            },
+                        ],
+                    },
+                    plugins: [{
+                        id: 'center-total',
+                        afterDraw: (chart) => {
+                            const { ctx } = chart;
+                            const x = chart.getDatasetMeta(0).data[0]?.x;
+                            const y = chart.getDatasetMeta(0).data[0]?.y;
+
+                            if (x === undefined || y === undefined) {
+                                return;
+                            }
+
+                            ctx.save();
+                            ctx.textAlign = 'center';
+                            ctx.textBaseline = 'middle';
+                            ctx.fillStyle = '#71717a';
+                            ctx.font = '500 12px system-ui, sans-serif';
+                            ctx.fillText('Total', x, y - 10);
+                            ctx.fillStyle = '#18181b';
+                            ctx.font = '700 20px system-ui, sans-serif';
+                            ctx.fillText(`${series.total}`, x, y + 10);
+                            ctx.restore();
+                        },
+                    }],
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: '70%',
+                        plugins: {
+                            legend: {
+                                display: false,
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: (context) => {
+                                        const total = series.total || 0;
+                                        const count = context.raw || 0;
+                                        const percentage = total > 0 ? ((count / total) * 100).toFixed(1) : '0.0';
+                                        return `${context.label}: ${count} (${percentage}%)`;
+                                    },
                                 },
                             },
                         },

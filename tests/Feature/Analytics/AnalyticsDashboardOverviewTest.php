@@ -224,6 +224,97 @@ test('best performing content section sorts and scopes top media', function (): 
         ]);
 });
 
+test('content type breakdown calculates counts percentages and per-type averages', function (): void {
+    $user = User::factory()->create();
+    $otherUser = User::factory()->create();
+
+    $primaryAccount = InstagramAccount::factory()->for($user)->create();
+    $secondaryAccount = InstagramAccount::factory()->for($user)->create();
+    $outsiderAccount = InstagramAccount::factory()->for($otherUser)->create();
+
+    InstagramMedia::factory()->for($primaryAccount)->create([
+        'media_type' => MediaType::Post,
+        'published_at' => now()->subDays(3),
+        'engagement_rate' => 4.00,
+        'reach' => 1000,
+    ]);
+
+    InstagramMedia::factory()->for($primaryAccount)->create([
+        'media_type' => MediaType::Post,
+        'published_at' => now()->subDays(5),
+        'engagement_rate' => 6.00,
+        'reach' => 3000,
+    ]);
+
+    InstagramMedia::factory()->for($primaryAccount)->create([
+        'media_type' => MediaType::Reel,
+        'published_at' => now()->subDays(2),
+        'engagement_rate' => 10.00,
+        'reach' => 5000,
+    ]);
+
+    InstagramMedia::factory()->for($primaryAccount)->create([
+        'media_type' => MediaType::Story,
+        'published_at' => now()->subDays(1),
+        'engagement_rate' => 2.00,
+        'reach' => 800,
+    ]);
+
+    InstagramMedia::factory()->for($secondaryAccount)->create([
+        'media_type' => MediaType::Reel,
+        'published_at' => now()->subDays(10),
+        'engagement_rate' => 8.00,
+        'reach' => 2000,
+    ]);
+
+    InstagramMedia::factory()->for($primaryAccount)->create([
+        'media_type' => MediaType::Story,
+        'published_at' => now()->subDays(40),
+        'engagement_rate' => 40.00,
+        'reach' => 9999,
+    ]);
+
+    InstagramMedia::factory()->for($outsiderAccount)->create([
+        'media_type' => MediaType::Post,
+        'published_at' => now()->subDay(),
+        'engagement_rate' => 99.00,
+        'reach' => 999999,
+    ]);
+
+    Livewire::actingAs($user)
+        ->test(Index::class)
+        ->set('period', '30_days')
+        ->assertViewHas('contentTypeBreakdown.total', 5)
+        ->assertViewHas('contentTypeBreakdown.values', [2, 2, 1])
+        ->assertViewHas('contentTypeBreakdown.items', function (array $items): bool {
+            $post = collect($items)->firstWhere('key', MediaType::Post->value);
+            $reel = collect($items)->firstWhere('key', MediaType::Reel->value);
+            $story = collect($items)->firstWhere('key', MediaType::Story->value);
+
+            return $post !== null
+                && $reel !== null
+                && $story !== null
+                && $post['count'] === 2
+                && $reel['count'] === 2
+                && $story['count'] === 1
+                && $post['percentage'] === 40.0
+                && $reel['percentage'] === 40.0
+                && $story['percentage'] === 20.0
+                && $post['average_engagement_rate'] === 5.0
+                && $reel['average_engagement_rate'] === 9.0
+                && $story['average_engagement_rate'] === 2.0
+                && $post['average_reach'] === 2000
+                && $reel['average_reach'] === 3500
+                && $story['average_reach'] === 800;
+        })
+        ->set('period', '7_days')
+        ->assertViewHas('contentTypeBreakdown.total', 4)
+        ->assertViewHas('contentTypeBreakdown.values', [2, 1, 1])
+        ->set('accountId', (string) $secondaryAccount->id)
+        ->assertViewHas('contentTypeBreakdown.total', 0)
+        ->assertViewHas('contentTypeBreakdown.values', [0, 0, 0]);
+});
+
 test('engagement trend chart data aggregates by period granularity and account filter', function (): void {
     CarbonImmutable::setTestNow(CarbonImmutable::parse('2026-02-17 12:00:00'));
 
