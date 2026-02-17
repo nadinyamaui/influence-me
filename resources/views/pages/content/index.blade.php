@@ -209,8 +209,10 @@
                                         ↑ {{ $likesComparison['deltaPercent'] }}% above average
                                     @elseif ($likesComparison['direction'] === 'down')
                                         ↓ {{ $likesComparison['deltaPercent'] }}% below average
-                                    @else
+                                    @elseif ($likesComparison['hasAverage'])
                                         - At average
+                                    @else
+                                        - No 90-day average
                                     @endif
                                 </p>
                             @endif
@@ -229,8 +231,10 @@
                                         ↑ {{ $commentsComparison['deltaPercent'] }}% above average
                                     @elseif ($commentsComparison['direction'] === 'down')
                                         ↓ {{ $commentsComparison['deltaPercent'] }}% below average
-                                    @else
+                                    @elseif ($commentsComparison['hasAverage'])
                                         - At average
+                                    @else
+                                        - No 90-day average
                                     @endif
                                 </p>
                             @endif
@@ -251,8 +255,10 @@
                                         ↑ {{ $reachComparison['deltaPercent'] }}% above average
                                     @elseif ($reachComparison['direction'] === 'down')
                                         ↓ {{ $reachComparison['deltaPercent'] }}% below average
-                                    @else
+                                    @elseif ($reachComparison['hasAverage'])
                                         - At average
+                                    @else
+                                        - No 90-day average
                                     @endif
                                 </p>
                             @endif
@@ -272,8 +278,10 @@
                                         ↑ {{ $engagementComparison['deltaPercent'] }}% above average
                                     @elseif ($engagementComparison['direction'] === 'down')
                                         ↓ {{ $engagementComparison['deltaPercent'] }}% below average
-                                    @else
+                                    @elseif ($engagementComparison['hasAverage'])
                                         - At average
+                                    @else
+                                        - No 90-day average
                                     @endif
                                     <span class="text-zinc-500 dark:text-zinc-300">(Account avg: {{ number_format((float) $engagementComparison['average'], 2) }}%)</span>
                                 </p>

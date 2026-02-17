@@ -517,6 +517,7 @@ class Index extends Component
             return [
                 'value' => $value,
                 'average' => $average,
+                'hasAverage' => false,
                 'direction' => 'flat',
                 'deltaPercent' => 0,
             ];
@@ -534,6 +535,7 @@ class Index extends Component
         return [
             'value' => $value,
             'average' => $average,
+            'hasAverage' => true,
             'direction' => $direction,
             'deltaPercent' => (int) abs($deltaPercent),
         ];
