@@ -3,6 +3,7 @@
 namespace App\Builders;
 
 use App\Enums\AnalyticsPeriod;
+use App\Enums\AnalyticsTopContentSort;
 use App\Enums\MediaType;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -124,5 +125,12 @@ class InstagramMediaBuilder extends Builder
         }
 
         return $this->where('published_at', '>=', $periodStart);
+    }
+
+    public function topPerforming(AnalyticsTopContentSort $sort): self
+    {
+        return $this->orderByDesc($sort->metricColumn())
+            ->orderByDesc('engagement_rate')
+            ->orderByDesc('id');
     }
 }

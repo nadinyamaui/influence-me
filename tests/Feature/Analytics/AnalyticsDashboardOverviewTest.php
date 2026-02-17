@@ -139,3 +139,86 @@ test('analytics overview cards calculate metrics and filters in query layer', fu
         ] && $chart['data'] === [50000, 50200])
         ->assertDontSee('999,999');
 });
+
+test('best performing content section sorts and scopes top media', function (): void {
+    $user = User::factory()->create();
+    $otherUser = User::factory()->create();
+
+    $primaryAccount = InstagramAccount::factory()->for($user)->create();
+    $secondaryAccount = InstagramAccount::factory()->for($user)->create();
+    $outsiderAccount = InstagramAccount::factory()->for($otherUser)->create();
+
+    $engagementFirst = InstagramMedia::factory()->for($primaryAccount)->create([
+        'caption' => 'Primary engagement first',
+        'published_at' => now()->subDays(2),
+        'engagement_rate' => 9.80,
+        'reach' => 900,
+        'like_count' => 120,
+    ]);
+
+    $engagementSecond = InstagramMedia::factory()->for($primaryAccount)->create([
+        'caption' => 'Primary engagement second',
+        'published_at' => now()->subDays(3),
+        'engagement_rate' => 7.30,
+        'reach' => 1400,
+        'like_count' => 90,
+    ]);
+
+    $reachFirst = InstagramMedia::factory()->for($primaryAccount)->create([
+        'caption' => 'Primary reach first',
+        'published_at' => now()->subDays(4),
+        'engagement_rate' => 2.20,
+        'reach' => 8000,
+        'like_count' => 50,
+    ]);
+
+    $secondaryMedia = InstagramMedia::factory()->for($secondaryAccount)->create([
+        'caption' => 'Secondary media record',
+        'published_at' => now()->subDays(4),
+        'engagement_rate' => 8.40,
+        'reach' => 6200,
+        'like_count' => 75,
+    ]);
+
+    InstagramMedia::factory()->for($primaryAccount)->create([
+        'caption' => 'Outside selected period',
+        'published_at' => now()->subDays(40),
+        'engagement_rate' => 99.00,
+        'reach' => 99999,
+    ]);
+
+    InstagramMedia::factory()->for($outsiderAccount)->create([
+        'caption' => 'Outsider media record',
+        'published_at' => now()->subDays(2),
+        'engagement_rate' => 100.00,
+        'reach' => 150000,
+    ]);
+
+    Livewire::actingAs($user)
+        ->test(Index::class)
+        ->set('period', '30_days')
+        ->assertViewHas('topContent', fn ($topContent): bool => $topContent->pluck('id')->all() === [
+            $engagementFirst->id,
+            $secondaryMedia->id,
+            $engagementSecond->id,
+            $reachFirst->id,
+        ])
+        ->assertSee('Top by Engagement')
+        ->assertSee('Top by Reach')
+        ->assertSee('href="'.route('content.index', ['media' => $engagementFirst->id]).'"', false)
+        ->set('topContentSort', 'reach')
+        ->assertViewHas('topContent', fn ($topContent): bool => $topContent->pluck('id')->all() === [
+            $reachFirst->id,
+            $secondaryMedia->id,
+            $engagementSecond->id,
+            $engagementFirst->id,
+        ])
+        ->set('accountId', (string) $secondaryAccount->id)
+        ->assertViewHas('topContent', fn ($topContent): bool => $topContent->pluck('id')->all() === [
+            $secondaryMedia->id,
+        ])
+        ->set('period', '7_days')
+        ->assertViewHas('topContent', fn ($topContent): bool => $topContent->pluck('id')->all() === [
+            $secondaryMedia->id,
+        ]);
+});

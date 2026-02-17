@@ -67,4 +67,22 @@ enum MediaType: string
             ],
         };
     }
+
+    public function label(): string
+    {
+        return match ($this) {
+            self::Post => 'Post',
+            self::Reel => 'Reel',
+            self::Story => 'Story',
+        };
+    }
+
+    public function badgeClasses(): string
+    {
+        return match ($this) {
+            self::Post => 'bg-sky-100 text-sky-700 dark:bg-sky-500/20 dark:text-sky-200',
+            self::Reel => 'bg-violet-100 text-violet-700 dark:bg-violet-500/20 dark:text-violet-200',
+            self::Story => 'bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-200',
+        };
+    }
 }

@@ -2,6 +2,7 @@
 
 use App\Enums\AccountType;
 use App\Enums\AnalyticsPeriod;
+use App\Enums\AnalyticsTopContentSort;
 use App\Enums\ClientType;
 use App\Enums\DemographicType;
 use App\Enums\InvoiceStatus;
@@ -224,4 +225,25 @@ it('defines analytics period options and default', function (): void {
             '90_days' => '90 Days',
             'all' => 'All Time',
         ]);
+});
+
+it('defines analytics top content sort options and default', function (): void {
+    expect(AnalyticsTopContentSort::default())->toBe(AnalyticsTopContentSort::Engagement)
+        ->and(AnalyticsTopContentSort::values())->toBe([
+            'engagement',
+            'reach',
+        ])
+        ->and(AnalyticsTopContentSort::options())->toBe([
+            'engagement' => 'Top by Engagement',
+            'reach' => 'Top by Reach',
+        ]);
+});
+
+it('provides media type labels and badge classes', function (): void {
+    expect(MediaType::Post->label())->toBe('Post')
+        ->and(MediaType::Reel->label())->toBe('Reel')
+        ->and(MediaType::Story->label())->toBe('Story')
+        ->and(MediaType::Post->badgeClasses())->toContain('bg-sky-100')
+        ->and(MediaType::Reel->badgeClasses())->toContain('bg-violet-100')
+        ->and(MediaType::Story->badgeClasses())->toContain('bg-amber-100');
 });
