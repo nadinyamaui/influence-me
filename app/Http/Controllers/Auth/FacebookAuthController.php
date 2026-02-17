@@ -4,9 +4,12 @@ namespace App\Http\Controllers\Auth;
 
 use App\Exceptions\Auth\SocialAuthenticationException;
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use App\Services\Auth\FacebookSocialiteLoginService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Laravel\Fortify\Events\TwoFactorAuthenticationChallenged;
+use Laravel\Fortify\Features;
 use Throwable;
 
 class FacebookAuthController extends Controller
@@ -43,7 +46,20 @@ class FacebookAuthController extends Controller
                     ->with('status', 'Instagram accounts connected successfully.');
             }
 
-            $this->loginService->createUserAndAccounts();
+            $user = $this->loginService->createUserAndAccounts();
+
+            if ($this->requiresTwoFactorChallenge($user)) {
+                auth()->guard('web')->logout();
+
+                $request->session()->put([
+                    'login.id' => $user->getKey(),
+                    'login.remember' => false,
+                ]);
+
+                TwoFactorAuthenticationChallenged::dispatch($user);
+
+                return redirect()->route('two-factor.login');
+            }
 
             return redirect()->intended(route('dashboard', absolute: false));
         } catch (SocialAuthenticationException $exception) {
@@ -71,5 +87,11 @@ class FacebookAuthController extends Controller
                 ->route('login')
                 ->withErrors(['oauth' => 'Unable to complete Facebook sign in. Please try again.']);
         }
+    }
+
+    private function requiresTwoFactorChallenge(User $user): bool
+    {
+        return Features::canManageTwoFactorAuthentication()
+            && $user->hasEnabledTwoFactorAuthentication();
     }
 }

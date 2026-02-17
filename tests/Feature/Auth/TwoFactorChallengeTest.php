@@ -28,18 +28,18 @@ test('two factor challenge can be rendered for oauth user pending challenge', fu
     $service->shouldReceive('createUserAndAccounts')
         ->once()
         ->andReturnUsing(function () use ($oauthUser) {
-            session([
-                'login.id' => $oauthUser->id,
-                'login.remember' => false,
-            ]);
-            auth()->logout();
+            auth()->login($oauthUser);
 
             return $oauthUser;
         });
     app()->instance(FacebookSocialiteLoginService::class, $service);
 
     $this->get(route('auth.facebook.callback'))
-        ->assertRedirect(route('dashboard', absolute: false));
+        ->assertRedirect(route('two-factor.login'))
+        ->assertSessionHas('login.id', $oauthUser->id)
+        ->assertSessionHas('login.remember', false);
+
+    $this->assertGuest();
 
     $response = $this->get(route('two-factor.login'));
 
