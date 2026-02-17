@@ -4,6 +4,7 @@ namespace App\Livewire\Analytics;
 
 use App\Enums\AnalyticsPeriod;
 use App\Enums\MediaType;
+use App\Models\FollowerSnapshot;
 use App\Models\InstagramAccount;
 use App\Models\InstagramMedia;
 use Illuminate\Support\Collection;
@@ -74,10 +75,12 @@ class Index extends Component
             : 0.0;
 
         $followersChange = $this->followersChange($period);
+        $chart = $this->audienceGrowthChart($period);
 
         return view('pages.analytics.index', [
             'accounts' => $accounts,
             'periodOptions' => AnalyticsPeriod::options(),
+            'chart' => $chart,
             'summary' => [
                 'total_followers' => $totalFollowers,
                 'followers_change' => $followersChange,
@@ -113,6 +116,23 @@ class Index extends Component
         }
 
         return null;
+    }
+
+    private function audienceGrowthChart(AnalyticsPeriod $period): array
+    {
+        $points = FollowerSnapshot::query()
+            ->forUser((int) Auth::id())
+            ->filterByAccount($this->accountId)
+            ->forAnalyticsPeriod($period)
+            ->orderedByRecordedAt()
+            ->get(['followers_count', 'recorded_at'])
+            ->groupBy(fn (FollowerSnapshot $snapshot): string => $snapshot->recorded_at->toDateString())
+            ->map(fn (Collection $daySnapshots): int => (int) $daySnapshots->sum('followers_count'));
+
+        return [
+            'labels' => $points->keys()->values()->all(),
+            'data' => $points->values()->all(),
+        ];
     }
 
     private function formatFollowersChange(?int $followersChange): string

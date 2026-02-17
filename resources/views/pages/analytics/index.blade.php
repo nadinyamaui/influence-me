@@ -63,8 +63,20 @@
     </section>
 
     <section class="grid gap-4 lg:grid-cols-2">
-        <article class="min-h-56 rounded-2xl border border-dashed border-zinc-300 bg-zinc-50 p-5 dark:border-zinc-700 dark:bg-zinc-900/40">
+        <article class="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-700 dark:bg-zinc-900">
             <h2 class="text-sm font-semibold uppercase tracking-wide text-zinc-600 dark:text-zinc-300">Audience Growth Chart</h2>
+            @if (count($chart['labels']) === 0)
+                <p class="mt-4 text-sm text-zinc-600 dark:text-zinc-300">No follower snapshots yet. Daily snapshots will populate this chart.</p>
+            @else
+                <div
+                    wire:key="audience-growth-{{ $period }}-{{ $accountId }}"
+                    class="mt-4 h-64"
+                    x-data="audienceGrowthChart(@js($chart['labels']), @js($chart['data']))"
+                    x-init="init()"
+                >
+                    <canvas x-ref="canvas" role="img" aria-label="Audience growth followers over time"></canvas>
+                </div>
+            @endif
         </article>
 
         <article class="min-h-56 rounded-2xl border border-dashed border-zinc-300 bg-zinc-50 p-5 dark:border-zinc-700 dark:bg-zinc-900/40">

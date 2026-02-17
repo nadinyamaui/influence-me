@@ -1,5 +1,6 @@
 <?php
 
+use App\Jobs\RecordFollowerSnapshot;
 use App\Jobs\RefreshInstagramToken;
 use App\Jobs\SyncAllInstagramData;
 use App\Jobs\SyncInstagramProfile;
@@ -36,3 +37,9 @@ Schedule::call(function (): void {
             RefreshInstagramToken::dispatch($account);
         });
 })->daily()->name('refresh-instagram-tokens');
+
+Schedule::call(function (): void {
+    InstagramAccount::query()->each(function (InstagramAccount $account): void {
+        RecordFollowerSnapshot::dispatch($account);
+    });
+})->daily()->name('record-follower-snapshots');
