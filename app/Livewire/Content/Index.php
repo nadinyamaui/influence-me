@@ -154,7 +154,7 @@ class Index extends Component
 
     public function render()
     {
-        $selectedMedia = $this->selectedMedia();
+        $selectedMedia = $this->showDetailModal ? $this->selectedMedia() : null;
 
         return view('pages.content.index', [
             'availableClients' => User::availableClients(),
