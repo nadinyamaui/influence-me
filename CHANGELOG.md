@@ -5,6 +5,9 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
+- RFC 067: replaced legacy email/password auth feature coverage with OAuth-focused tests by removing `tests/Feature/Auth/AuthenticationTest.php`, `tests/Feature/Auth/RegistrationTest.php`, `tests/Feature/Auth/PasswordResetTest.php`, `tests/Feature/Auth/EmailVerificationTest.php`, and `tests/Feature/Auth/PasswordConfirmationTest.php`.
+- RFC 067: added `tests/Feature/Auth/InstagramOAuthTest.php` covering provider redirect, callback handling for new and returning users, denied-permission errors, long-lived token exchange usage, add-account callback intent flow, and OAuth logout.
+- RFC 067: updated `tests/Feature/Auth/TwoFactorChallengeTest.php` to validate challenge rendering for OAuth users via Fortify challenge session state and removed password-only settings coverage in `tests/Feature/Settings/PasswordUpdateTest.php`.
 - RFC 066: added client-portal analytics route wiring in `routes/portal.php`, new Livewire page `app/Livewire/Portal/Analytics/Index.php`, and portal sidebar navigation update in `resources/views/layouts/portal/sidebar.blade.php`.
 - RFC 066: implemented client-scoped audience demographics aggregation in `app/Services/Clients/ClientAudienceDemographicsService.php` and added `resources/views/pages/portal/analytics/index.blade.php` with campaign summary cards, engagement trend chart, campaign breakdown table, and demographics visualizations/empty states.
 - RFC 066: added feature coverage in `tests/Feature/Portal/PortalAnalyticsTest.php` for auth guard protection, strict client data scoping, and no-linked-content empty state; updated `tests/Feature/Portal/PortalLayoutTest.php` to assert analytics navigation wiring.
