@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
+- RFC 059: added follower snapshot persistence with `app/Models/FollowerSnapshot.php`, `app/Builders/FollowerSnapshotBuilder.php`, `database/migrations/2026_02_17_092134_create_follower_snapshots_table.php`, and `database/factories/FollowerSnapshotFactory.php`, plus `InstagramAccount::followerSnapshots()` relationship support in `app/Models/InstagramAccount.php`.
+- RFC 059: implemented `App\Jobs\RecordFollowerSnapshot` and daily scheduler wiring in `routes/console.php` (`record-follower-snapshots`) to capture follower counts per connected Instagram account for analytics trend history.
+- RFC 059: replaced the analytics audience-growth placeholder with a Chart.js line chart in `resources/views/pages/analytics/index.blade.php`, importing Chart.js and chart bootstrap logic in `resources/js/app.js`, with chart data prepared in `app/Livewire/Analytics/Index.php` and scoped to selected period/account filters.
+- RFC 059: added feature coverage for chart data preparation/filter behavior in `tests/Feature/Analytics/AnalyticsDashboardOverviewTest.php`, snapshot job behavior in `tests/Feature/Jobs/RecordFollowerSnapshotTest.php`, and scheduler registration/dispatch in `tests/Feature/Console/InstagramSyncSchedulingTest.php`.
 - RFC 058: added authenticated influencer analytics overview route `analytics.index` in `routes/web.php` backed by new Livewire page `app/Livewire/Analytics/Index.php` and view `resources/views/pages/analytics/index.blade.php`.
 - RFC 058: implemented analytics period filtering via new enum `app/Enums/AnalyticsPeriod.php` and query-layer aggregation helpers in `app/Builders/InstagramMediaBuilder.php` and `app/Builders/InstagramAccountBuilder.php` for scoped account/period metrics.
 - RFC 058: added analytics overview cards (total followers, total posts with post/reel/story breakdown, average engagement rate, total reach with compact formatting), account filtering, period selector controls, and chart placeholder sections on `/analytics`.
