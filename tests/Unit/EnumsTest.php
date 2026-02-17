@@ -3,10 +3,13 @@
 use App\Enums\AccountType;
 use App\Enums\AnalyticsPeriod;
 use App\Enums\AnalyticsTopContentSort;
+use App\Enums\BillingUnitType;
+use App\Enums\CatalogSourceType;
 use App\Enums\ClientType;
 use App\Enums\DemographicType;
 use App\Enums\InvoiceStatus;
 use App\Enums\MediaType;
+use App\Enums\PlatformType;
 use App\Enums\ProposalStatus;
 use App\Enums\ScheduledPostStatus;
 use App\Enums\SyncStatus;
@@ -252,4 +255,43 @@ it('provides media type labels and ui metadata', function (): void {
         ->and(MediaType::Post->chartColor())->toBe('#3b82f6')
         ->and(MediaType::Reel->chartColor())->toBe('#8b5cf6')
         ->and(MediaType::Story->chartColor())->toBe('#f59e0b');
+});
+
+it('defines all platform type enum cases and labels', function (): void {
+    expect(PlatformType::cases())->toHaveCount(2)
+        ->and(PlatformType::Instagram->value)->toBe('instagram')
+        ->and(PlatformType::TikTok->value)->toBe('tiktok')
+        ->and(PlatformType::values())->toBe([
+            'instagram',
+            'tiktok',
+        ])
+        ->and(PlatformType::Instagram->label())->toBe('Instagram')
+        ->and(PlatformType::TikTok->label())->toBe('TikTok');
+});
+
+it('defines all catalog source type enum cases and labels', function (): void {
+    expect(CatalogSourceType::cases())->toHaveCount(3)
+        ->and(CatalogSourceType::Product->value)->toBe('product')
+        ->and(CatalogSourceType::Plan->value)->toBe('plan')
+        ->and(CatalogSourceType::Custom->value)->toBe('custom')
+        ->and(CatalogSourceType::values())->toBe([
+            'product',
+            'plan',
+            'custom',
+        ])
+        ->and(CatalogSourceType::Product->label())->toBe('Product')
+        ->and(CatalogSourceType::Plan->label())->toBe('Plan')
+        ->and(CatalogSourceType::Custom->label())->toBe('Custom');
+});
+
+it('defines all billing unit type enum cases and labels', function (): void {
+    expect(BillingUnitType::cases())->toHaveCount(2)
+        ->and(BillingUnitType::Deliverable->value)->toBe('deliverable')
+        ->and(BillingUnitType::Package->value)->toBe('package')
+        ->and(BillingUnitType::values())->toBe([
+            'deliverable',
+            'package',
+        ])
+        ->and(BillingUnitType::Deliverable->label())->toBe('Deliverable')
+        ->and(BillingUnitType::Package->label())->toBe('Package');
 });

@@ -3,19 +3,27 @@
 use App\Enums\InvoiceStatus;
 use App\Enums\ProposalStatus;
 use App\Models\Campaign;
+use App\Models\CatalogPlan;
+use App\Models\CatalogPlanItem;
+use App\Models\CatalogProduct;
 use App\Models\Client;
 use App\Models\ClientUser;
 use App\Models\InstagramAccount;
 use App\Models\InstagramMedia;
 use App\Models\Invoice;
 use App\Models\Proposal;
+use App\Models\ProposalLineItem;
 use App\Models\ScheduledPost;
 use App\Models\User;
+use App\Policies\CatalogPlanItemPolicy;
+use App\Policies\CatalogPlanPolicy;
+use App\Policies\CatalogProductPolicy;
 use App\Policies\CampaignPolicy;
 use App\Policies\ClientPolicy;
 use App\Policies\InstagramAccountPolicy;
 use App\Policies\InstagramMediaPolicy;
 use App\Policies\InvoicePolicy;
+use App\Policies\ProposalLineItemPolicy;
 use App\Policies\ProposalPolicy;
 use App\Policies\ScheduledPostPolicy;
 use Illuminate\Support\Facades\Gate;
@@ -25,11 +33,69 @@ use Illuminate\Support\Str;
 it('auto-discovers all RFC 012 policies', function (): void {
     expect(Gate::getPolicyFor(InstagramAccount::class))->toBeInstanceOf(InstagramAccountPolicy::class)
         ->and(Gate::getPolicyFor(Campaign::class))->toBeInstanceOf(CampaignPolicy::class)
+        ->and(Gate::getPolicyFor(CatalogProduct::class))->toBeInstanceOf(CatalogProductPolicy::class)
+        ->and(Gate::getPolicyFor(CatalogPlan::class))->toBeInstanceOf(CatalogPlanPolicy::class)
+        ->and(Gate::getPolicyFor(CatalogPlanItem::class))->toBeInstanceOf(CatalogPlanItemPolicy::class)
         ->and(Gate::getPolicyFor(Client::class))->toBeInstanceOf(ClientPolicy::class)
         ->and(Gate::getPolicyFor(Proposal::class))->toBeInstanceOf(ProposalPolicy::class)
+        ->and(Gate::getPolicyFor(ProposalLineItem::class))->toBeInstanceOf(ProposalLineItemPolicy::class)
         ->and(Gate::getPolicyFor(Invoice::class))->toBeInstanceOf(InvoicePolicy::class)
         ->and(Gate::getPolicyFor(ScheduledPost::class))->toBeInstanceOf(ScheduledPostPolicy::class)
         ->and(Gate::getPolicyFor(InstagramMedia::class))->toBeInstanceOf(InstagramMediaPolicy::class);
+});
+
+it('applies pricing catalog and proposal line item policy rules', function (): void {
+    $owner = User::factory()->create();
+    $outsider = User::factory()->create();
+
+    $catalogProduct = CatalogProduct::factory()->for($owner)->create();
+    $catalogPlan = CatalogPlan::factory()->for($owner)->create();
+    $catalogPlanItem = CatalogPlanItem::factory()
+        ->for($catalogPlan)
+        ->for($catalogProduct)
+        ->create();
+
+    $client = Client::factory()->for($owner)->create();
+    $proposal = Proposal::factory()->for($owner)->for($client)->create();
+    $proposalLineItem = ProposalLineItem::factory()->for($proposal)->create();
+
+    $matchingClientUser = ClientUser::factory()->for($client)->create();
+
+    $ownerGate = Gate::forUser($owner);
+    $outsiderGate = Gate::forUser($outsider);
+    $clientUserGate = Gate::forUser($matchingClientUser);
+
+    expect($ownerGate->allows('viewAny', CatalogProduct::class))->toBeTrue()
+        ->and($ownerGate->allows('create', CatalogProduct::class))->toBeTrue()
+        ->and($ownerGate->allows('view', $catalogProduct))->toBeTrue()
+        ->and($ownerGate->allows('update', $catalogProduct))->toBeTrue()
+        ->and($ownerGate->allows('delete', $catalogProduct))->toBeTrue()
+        ->and($outsiderGate->allows('view', $catalogProduct))->toBeFalse()
+        ->and($outsiderGate->allows('update', $catalogProduct))->toBeFalse()
+        ->and($outsiderGate->allows('delete', $catalogProduct))->toBeFalse()
+        ->and($clientUserGate->allows('viewAny', CatalogProduct::class))->toBeFalse()
+        ->and($clientUserGate->allows('create', CatalogProduct::class))->toBeFalse()
+        ->and($clientUserGate->allows('view', $catalogProduct))->toBeFalse()
+        ->and($ownerGate->allows('viewAny', CatalogPlan::class))->toBeTrue()
+        ->and($ownerGate->allows('create', CatalogPlan::class))->toBeTrue()
+        ->and($ownerGate->allows('view', $catalogPlan))->toBeTrue()
+        ->and($ownerGate->allows('update', $catalogPlan))->toBeTrue()
+        ->and($ownerGate->allows('delete', $catalogPlan))->toBeTrue()
+        ->and($outsiderGate->allows('view', $catalogPlan))->toBeFalse()
+        ->and($ownerGate->allows('viewAny', CatalogPlanItem::class))->toBeTrue()
+        ->and($ownerGate->allows('create', CatalogPlanItem::class))->toBeTrue()
+        ->and($ownerGate->allows('view', $catalogPlanItem))->toBeTrue()
+        ->and($ownerGate->allows('update', $catalogPlanItem))->toBeTrue()
+        ->and($ownerGate->allows('delete', $catalogPlanItem))->toBeTrue()
+        ->and($outsiderGate->allows('view', $catalogPlanItem))->toBeFalse()
+        ->and($clientUserGate->allows('view', $catalogPlanItem))->toBeFalse()
+        ->and($ownerGate->allows('viewAny', ProposalLineItem::class))->toBeTrue()
+        ->and($ownerGate->allows('create', ProposalLineItem::class))->toBeTrue()
+        ->and($ownerGate->allows('view', $proposalLineItem))->toBeTrue()
+        ->and($ownerGate->allows('update', $proposalLineItem))->toBeTrue()
+        ->and($ownerGate->allows('delete', $proposalLineItem))->toBeTrue()
+        ->and($outsiderGate->allows('view', $proposalLineItem))->toBeFalse()
+        ->and($clientUserGate->allows('view', $proposalLineItem))->toBeFalse();
 });
 
 it('applies instagram account policy rules', function (): void {

@@ -43,4 +43,9 @@ class Proposal extends Model
     {
         return $this->hasMany(Campaign::class);
     }
+
+    public function lineItems(): HasMany
+    {
+        return $this->hasMany(ProposalLineItem::class);
+    }
 }
