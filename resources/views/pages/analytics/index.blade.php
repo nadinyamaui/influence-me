@@ -79,8 +79,29 @@
             @endif
         </article>
 
-        <article class="min-h-56 rounded-2xl border border-dashed border-zinc-300 bg-zinc-50 p-5 dark:border-zinc-700 dark:bg-zinc-900/40">
-            <h2 class="text-sm font-semibold uppercase tracking-wide text-zinc-600 dark:text-zinc-300">Engagement Trend Chart</h2>
+        <article class="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-700 dark:bg-zinc-900">
+            <div class="flex items-start justify-between gap-3">
+                <div>
+                    <h2 class="text-sm font-semibold uppercase tracking-wide text-zinc-600 dark:text-zinc-300">Engagement Trend Chart</h2>
+                    <p class="mt-1 text-xs text-zinc-500 dark:text-zinc-400">Average engagement rate over time with overall average reference.</p>
+                </div>
+                <p class="text-xs font-medium text-emerald-700 dark:text-emerald-300">Average {{ number_format((float) $engagementTrend['average'], 2) }}%</p>
+            </div>
+
+            @if (count($engagementTrend['labels']) > 0)
+                <div
+                    class="mt-4 h-64"
+                    wire:key="engagement-trend-{{ md5(json_encode([$period, $accountId, $engagementTrend['labels'], $engagementTrend['values']])) }}"
+                    x-data="engagementTrendChart(@js($engagementTrend))"
+                    x-init="init()"
+                >
+                    <canvas x-ref="canvas" role="img" aria-label="Engagement trend chart"></canvas>
+                </div>
+            @else
+                <div class="mt-4 flex h-64 items-center justify-center rounded-xl border border-dashed border-zinc-300 bg-zinc-50 px-4 text-sm text-zinc-500 dark:border-zinc-700 dark:bg-zinc-900/40 dark:text-zinc-400">
+                    No engagement data is available for this period.
+                </div>
+            @endif
         </article>
 
         <article class="min-h-56 rounded-2xl border border-dashed border-zinc-300 bg-zinc-50 p-5 dark:border-zinc-700 dark:bg-zinc-900/40">
@@ -92,3 +113,61 @@
         </article>
     </section>
 </div>
+
+<script>
+    if (! window.engagementTrendChart) {
+        window.engagementTrendChart = (series) => ({
+            chart: null,
+            init() {
+                if (! window.Chart) {
+                    return;
+                }
+
+                this.chart = new window.Chart(this.$refs.canvas, {
+                    type: 'line',
+                    data: {
+                        labels: series.labels,
+                        datasets: [
+                            {
+                                label: 'Engagement Rate',
+                                data: series.values,
+                                borderColor: '#10b981',
+                                backgroundColor: 'rgba(16, 185, 129, 0.18)',
+                                borderWidth: 2,
+                                pointRadius: 3,
+                                tension: 0.3,
+                                fill: true,
+                            },
+                            {
+                                label: 'Overall Average',
+                                data: series.average_line,
+                                borderColor: '#0f766e',
+                                borderDash: [6, 6],
+                                borderWidth: 1.5,
+                                pointRadius: 0,
+                                tension: 0,
+                                fill: false,
+                            },
+                        ],
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: true,
+                            },
+                        },
+                        scales: {
+                            y: {
+                                ticks: {
+                                    callback: (value) => `${value}%`,
+                                },
+                            },
+                        },
+                    },
+                });
+            },
+        });
+    }
+</script>

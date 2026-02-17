@@ -75,6 +75,9 @@ class Index extends Component
             : 0.0;
 
         $followersChange = $this->followersChange($period);
+        $engagementTrendPoints = (clone $mediaQuery)->engagementTrend($period);
+        $engagementTrendLabels = $engagementTrendPoints->pluck('label')->all();
+        $engagementTrendValues = $engagementTrendPoints->pluck('value')->all();
         $chart = $this->audienceGrowthChart($period);
 
         return view('pages.analytics.index', [
@@ -94,6 +97,12 @@ class Index extends Component
                 'total_reach' => $this->formatCompactNumber($totalReach),
                 'average_engagement_rate' => number_format($averageEngagementRate, 2).'%',
                 'followers_change' => $this->formatFollowersChange($followersChange),
+            ],
+            'engagementTrend' => [
+                'labels' => $engagementTrendLabels,
+                'values' => $engagementTrendValues,
+                'average' => $averageEngagementRate,
+                'average_line' => array_fill(0, count($engagementTrendLabels), $averageEngagementRate),
             ],
         ])->layout('layouts.app', [
             'title' => __('Analytics'),

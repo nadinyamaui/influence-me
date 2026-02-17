@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
+- RFC 060: implemented engagement trend chart aggregation in `app/Builders/InstagramMediaBuilder.php` and wired analytics chart data in `app/Livewire/Analytics/Index.php` with period-aware day/week/month bucketing plus overall average reference-line data.
+- RFC 060: replaced the `/analytics` engagement placeholder with a rendered Chart.js + Alpine line chart in `resources/views/pages/analytics/index.blade.php`, including filtered empty-state handling and average-rate display.
+- RFC 060: added Chart.js frontend integration in `resources/js/app.js` and `package.json` (`chart.js` dependency with updated `yarn.lock`).
+- RFC 060: expanded feature coverage in `tests/Feature/Analytics/AnalyticsDashboardOverviewTest.php` to verify engagement trend aggregation across 30-day (daily), 90-day (weekly), and all-time (monthly) windows with account scoping.
 - RFC 059: added follower snapshot persistence with `app/Models/FollowerSnapshot.php`, `app/Builders/FollowerSnapshotBuilder.php`, `database/migrations/2026_02_17_092134_create_follower_snapshots_table.php`, and `database/factories/FollowerSnapshotFactory.php`, plus `InstagramAccount::followerSnapshots()` relationship support in `app/Models/InstagramAccount.php`.
 - RFC 059: implemented `App\Jobs\RecordFollowerSnapshot` and daily scheduler wiring in `routes/console.php` (`record-follower-snapshots`) to capture follower counts per connected Instagram account for analytics trend history.
 - RFC 059: replaced the analytics audience-growth placeholder with a Chart.js line chart in `resources/views/pages/analytics/index.blade.php`, importing Chart.js and chart bootstrap logic in `resources/js/app.js`, with chart data prepared in `app/Livewire/Analytics/Index.php` and scoped to selected period/account filters.
