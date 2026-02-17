@@ -189,13 +189,96 @@
                     </div>
 
                     <div class="grid grid-cols-2 gap-2 text-sm">
-                        <div class="rounded-lg bg-zinc-50 p-3 dark:bg-zinc-800/60"><p class="text-zinc-500 dark:text-zinc-300">Likes</p><p class="mt-1 font-semibold text-zinc-900 dark:text-zinc-100">{{ number_format($selectedMedia->like_count) }}</p></div>
-                        <div class="rounded-lg bg-zinc-50 p-3 dark:bg-zinc-800/60"><p class="text-zinc-500 dark:text-zinc-300">Comments</p><p class="mt-1 font-semibold text-zinc-900 dark:text-zinc-100">{{ number_format($selectedMedia->comments_count) }}</p></div>
+                        @php
+                            $likesComparison = $selectedMediaComparisons['likes'] ?? null;
+                            $commentsComparison = $selectedMediaComparisons['comments'] ?? null;
+                            $reachComparison = $selectedMediaComparisons['reach'] ?? null;
+                            $engagementComparison = $selectedMediaComparisons['engagement_rate'] ?? null;
+                        @endphp
+                        <div class="rounded-lg bg-zinc-50 p-3 dark:bg-zinc-800/60">
+                            <p class="text-zinc-500 dark:text-zinc-300">Likes</p>
+                            <p class="mt-1 font-semibold text-zinc-900 dark:text-zinc-100">{{ number_format($selectedMedia->like_count) }}</p>
+                            @if ($likesComparison !== null)
+                                <p @class([
+                                    'mt-1 text-xs font-medium',
+                                    'text-emerald-700 dark:text-emerald-300' => $likesComparison['direction'] === 'up',
+                                    'text-rose-700 dark:text-rose-300' => $likesComparison['direction'] === 'down',
+                                    'text-zinc-500 dark:text-zinc-300' => $likesComparison['direction'] === 'flat',
+                                ])>
+                                    @if ($likesComparison['direction'] === 'up')
+                                        ↑ {{ $likesComparison['deltaPercent'] }}% above average
+                                    @elseif ($likesComparison['direction'] === 'down')
+                                        ↓ {{ $likesComparison['deltaPercent'] }}% below average
+                                    @else
+                                        - At average
+                                    @endif
+                                </p>
+                            @endif
+                        </div>
+                        <div class="rounded-lg bg-zinc-50 p-3 dark:bg-zinc-800/60">
+                            <p class="text-zinc-500 dark:text-zinc-300">Comments</p>
+                            <p class="mt-1 font-semibold text-zinc-900 dark:text-zinc-100">{{ number_format($selectedMedia->comments_count) }}</p>
+                            @if ($commentsComparison !== null)
+                                <p @class([
+                                    'mt-1 text-xs font-medium',
+                                    'text-emerald-700 dark:text-emerald-300' => $commentsComparison['direction'] === 'up',
+                                    'text-rose-700 dark:text-rose-300' => $commentsComparison['direction'] === 'down',
+                                    'text-zinc-500 dark:text-zinc-300' => $commentsComparison['direction'] === 'flat',
+                                ])>
+                                    @if ($commentsComparison['direction'] === 'up')
+                                        ↑ {{ $commentsComparison['deltaPercent'] }}% above average
+                                    @elseif ($commentsComparison['direction'] === 'down')
+                                        ↓ {{ $commentsComparison['deltaPercent'] }}% below average
+                                    @else
+                                        - At average
+                                    @endif
+                                </p>
+                            @endif
+                        </div>
                         <div class="rounded-lg bg-zinc-50 p-3 dark:bg-zinc-800/60"><p class="text-zinc-500 dark:text-zinc-300">Saved</p><p class="mt-1 font-semibold text-zinc-900 dark:text-zinc-100">{{ number_format($selectedMedia->saved_count) }}</p></div>
                         <div class="rounded-lg bg-zinc-50 p-3 dark:bg-zinc-800/60"><p class="text-zinc-500 dark:text-zinc-300">Shares</p><p class="mt-1 font-semibold text-zinc-900 dark:text-zinc-100">{{ number_format($selectedMedia->shares_count) }}</p></div>
-                        <div class="rounded-lg bg-zinc-50 p-3 dark:bg-zinc-800/60"><p class="text-zinc-500 dark:text-zinc-300">Reach</p><p class="mt-1 font-semibold text-zinc-900 dark:text-zinc-100">{{ number_format($selectedMedia->reach) }}</p></div>
+                        <div class="rounded-lg bg-zinc-50 p-3 dark:bg-zinc-800/60">
+                            <p class="text-zinc-500 dark:text-zinc-300">Reach</p>
+                            <p class="mt-1 font-semibold text-zinc-900 dark:text-zinc-100">{{ number_format($selectedMedia->reach) }}</p>
+                            @if ($reachComparison !== null)
+                                <p @class([
+                                    'mt-1 text-xs font-medium',
+                                    'text-emerald-700 dark:text-emerald-300' => $reachComparison['direction'] === 'up',
+                                    'text-rose-700 dark:text-rose-300' => $reachComparison['direction'] === 'down',
+                                    'text-zinc-500 dark:text-zinc-300' => $reachComparison['direction'] === 'flat',
+                                ])>
+                                    @if ($reachComparison['direction'] === 'up')
+                                        ↑ {{ $reachComparison['deltaPercent'] }}% above average
+                                    @elseif ($reachComparison['direction'] === 'down')
+                                        ↓ {{ $reachComparison['deltaPercent'] }}% below average
+                                    @else
+                                        - At average
+                                    @endif
+                                </p>
+                            @endif
+                        </div>
                         <div class="rounded-lg bg-zinc-50 p-3 dark:bg-zinc-800/60"><p class="text-zinc-500 dark:text-zinc-300">Impressions</p><p class="mt-1 font-semibold text-zinc-900 dark:text-zinc-100">{{ number_format($selectedMedia->impressions) }}</p></div>
-                        <div class="rounded-lg bg-zinc-50 p-3 dark:bg-zinc-800/60"><p class="text-zinc-500 dark:text-zinc-300">Engagement Rate</p><p class="mt-1 font-semibold text-zinc-900 dark:text-zinc-100">{{ number_format((float) $selectedMedia->engagement_rate, 2) }}%</p></div>
+                        <div class="rounded-lg bg-zinc-50 p-3 dark:bg-zinc-800/60">
+                            <p class="text-zinc-500 dark:text-zinc-300">Engagement Rate</p>
+                            <p class="mt-1 font-semibold text-zinc-900 dark:text-zinc-100">{{ number_format((float) $selectedMedia->engagement_rate, 2) }}%</p>
+                            @if ($engagementComparison !== null)
+                                <p @class([
+                                    'mt-1 text-xs font-medium',
+                                    'text-emerald-700 dark:text-emerald-300' => $engagementComparison['direction'] === 'up',
+                                    'text-rose-700 dark:text-rose-300' => $engagementComparison['direction'] === 'down',
+                                    'text-zinc-500 dark:text-zinc-300' => $engagementComparison['direction'] === 'flat',
+                                ])>
+                                    @if ($engagementComparison['direction'] === 'up')
+                                        ↑ {{ $engagementComparison['deltaPercent'] }}% above average
+                                    @elseif ($engagementComparison['direction'] === 'down')
+                                        ↓ {{ $engagementComparison['deltaPercent'] }}% below average
+                                    @else
+                                        - At average
+                                    @endif
+                                    <span class="text-zinc-500 dark:text-zinc-300">(Account avg: {{ number_format((float) $engagementComparison['average'], 2) }}%)</span>
+                                </p>
+                            @endif
+                        </div>
                     </div>
 
                     <dl class="grid gap-2 rounded-xl border border-zinc-200 bg-zinc-50 p-3 text-sm dark:border-zinc-700 dark:bg-zinc-800/60">
@@ -227,6 +310,9 @@
                                                 {{ $campaign->client->name }}
                                             </a>
                                             <p class="text-zinc-500 dark:text-zinc-300">{{ $campaign->name }}</p>
+                                            <p class="text-xs text-zinc-500 dark:text-zinc-300">
+                                                Part of campaign with {{ max(0, ((int) $campaign->instagram_media_count) - 1) }} other {{ Str::plural('post', max(0, ((int) $campaign->instagram_media_count) - 1)) }}
+                                            </p>
                                         </div>
                                         <flux:button
                                             type="button"

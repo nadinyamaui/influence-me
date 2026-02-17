@@ -5,7 +5,6 @@ namespace App\Livewire\Content;
 use App\Enums\MediaType;
 use App\Livewire\Forms\CampaignForm;
 use App\Models\Campaign;
-use App\Models\Client;
 use App\Models\InstagramMedia;
 use App\Models\User;
 use App\Services\Content\ContentClientLinkService;
@@ -155,12 +154,15 @@ class Index extends Component
 
     public function render()
     {
+        $selectedMedia = $this->selectedMedia();
+
         return view('pages.content.index', [
             'availableClients' => User::availableClients(),
             'accounts' => User::accounts(),
             'media' => $this->media(),
             'mediaTypeFilters' => MediaType::filters(),
-            'selectedMedia' => $this->selectedMedia(),
+            'selectedMedia' => $selectedMedia,
+            'selectedMediaComparisons' => $this->selectedMediaComparisons($selectedMedia),
             'sortOptions' => $this->sortOptions(),
             'linkCampaigns' => $this->linkCampaignOptions(),
         ])->layout('layouts.app', [
@@ -490,5 +492,50 @@ class Index extends Component
         $this->campaignForm->clear(clearProposal: false);
         $this->linkNotes = '';
         $this->resetErrorBag(['linkClientId', 'linkCampaignId', 'campaignForm.name', 'campaignForm.description', 'linkNotes']);
+    }
+
+    private function selectedMediaComparisons(?InstagramMedia $media): array
+    {
+        if ($media === null) {
+            return [];
+        }
+
+        $averages = InstagramMedia::query()
+            ->accountAverageMetricsForRecentDays((int) $media->instagram_account_id, 90);
+
+        return [
+            'likes' => $this->comparisonMetric((float) $media->like_count, (float) ($averages['likes'] ?? 0)),
+            'comments' => $this->comparisonMetric((float) $media->comments_count, (float) ($averages['comments'] ?? 0)),
+            'reach' => $this->comparisonMetric((float) $media->reach, (float) ($averages['reach'] ?? 0)),
+            'engagement_rate' => $this->comparisonMetric((float) $media->engagement_rate, (float) ($averages['engagement_rate'] ?? 0)),
+        ];
+    }
+
+    private function comparisonMetric(float $value, float $average): array
+    {
+        if ($average <= 0.0) {
+            return [
+                'value' => $value,
+                'average' => $average,
+                'direction' => 'flat',
+                'deltaPercent' => 0,
+            ];
+        }
+
+        $deltaPercent = round((($value - $average) / $average) * 100);
+        $direction = 'flat';
+
+        if ($deltaPercent > 0) {
+            $direction = 'up';
+        } elseif ($deltaPercent < 0) {
+            $direction = 'down';
+        }
+
+        return [
+            'value' => $value,
+            'average' => $average,
+            'direction' => $direction,
+            'deltaPercent' => (int) abs($deltaPercent),
+        ];
     }
 }
