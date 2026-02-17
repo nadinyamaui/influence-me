@@ -31,6 +31,7 @@ test('authenticated client users can view the portal dashboard layout', function
         ->assertSee('Avery Client')
         ->assertSee('href="'.route('portal.dashboard').'"', false)
         ->assertSee('href="'.route('portal.proposals.index').'"', false)
+        ->assertSee('href="'.route('portal.analytics.index').'"', false)
         ->assertSee('action="'.route('portal.logout').'"', false);
 });
 
