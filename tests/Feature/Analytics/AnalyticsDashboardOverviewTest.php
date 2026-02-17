@@ -5,6 +5,7 @@ use App\Livewire\Analytics\Index;
 use App\Models\InstagramAccount;
 use App\Models\InstagramMedia;
 use App\Models\User;
+use Carbon\CarbonImmutable;
 use Livewire\Livewire;
 
 test('guests are redirected to login from analytics page', function (): void {
@@ -103,4 +104,77 @@ test('analytics overview cards calculate metrics and filters in query layer', fu
         ->assertSee('5.50%')
         ->assertSee('10.4K')
         ->assertDontSee('999,999');
+});
+
+test('engagement trend chart data aggregates by period granularity and account filter', function (): void {
+    CarbonImmutable::setTestNow(CarbonImmutable::parse('2026-02-17 12:00:00'));
+
+    $user = User::factory()->create();
+    $otherUser = User::factory()->create();
+
+    $primaryAccount = InstagramAccount::factory()->for($user)->create([
+        'followers_count' => 120000,
+        'username' => 'trend-main',
+    ]);
+
+    $secondaryAccount = InstagramAccount::factory()->for($user)->create([
+        'followers_count' => 35000,
+        'username' => 'trend-alt',
+    ]);
+
+    $outsiderAccount = InstagramAccount::factory()->for($otherUser)->create([
+        'followers_count' => 888888,
+    ]);
+
+    InstagramMedia::factory()->for($primaryAccount)->create([
+        'published_at' => '2026-02-15 10:00:00',
+        'engagement_rate' => 4.00,
+    ]);
+
+    InstagramMedia::factory()->for($primaryAccount)->create([
+        'published_at' => '2026-02-15 18:00:00',
+        'engagement_rate' => 8.00,
+    ]);
+
+    InstagramMedia::factory()->for($primaryAccount)->create([
+        'published_at' => '2026-01-30 15:00:00',
+        'engagement_rate' => 10.00,
+    ]);
+
+    InstagramMedia::factory()->for($primaryAccount)->create([
+        'published_at' => '2026-01-28 09:00:00',
+        'engagement_rate' => 14.00,
+    ]);
+
+    InstagramMedia::factory()->for($primaryAccount)->create([
+        'published_at' => '2025-12-05 09:00:00',
+        'engagement_rate' => 20.00,
+    ]);
+
+    InstagramMedia::factory()->for($primaryAccount)->create([
+        'published_at' => '2025-12-26 09:00:00',
+        'engagement_rate' => 22.00,
+    ]);
+
+    InstagramMedia::factory()->for($secondaryAccount)->create([
+        'published_at' => '2026-02-15 12:00:00',
+        'engagement_rate' => 99.00,
+    ]);
+
+    InstagramMedia::factory()->for($outsiderAccount)->create([
+        'published_at' => '2026-02-15 12:00:00',
+        'engagement_rate' => 77.00,
+    ]);
+
+    Livewire::actingAs($user)
+        ->test(Index::class)
+        ->set('accountId', (string) $primaryAccount->id)
+        ->assertViewHas('engagementTrend.values', [14.0, 10.0, 6.0])
+        ->assertViewHas('engagementTrend.average', 9.0)
+        ->set('period', '90_days')
+        ->assertViewHas('engagementTrend.values', [20.0, 22.0, 12.0, 6.0])
+        ->set('period', 'all')
+        ->assertViewHas('engagementTrend.values', [21.0, 12.0, 6.0]);
+
+    CarbonImmutable::setTestNow();
 });

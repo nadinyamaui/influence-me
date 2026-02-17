@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
+- RFC 060: implemented engagement trend chart aggregation in `app/Builders/InstagramMediaBuilder.php` and wired analytics chart data in `app/Livewire/Analytics/Index.php` with period-aware day/week/month bucketing plus overall average reference-line data.
+- RFC 060: replaced the `/analytics` engagement placeholder with a rendered Chart.js + Alpine line chart in `resources/views/pages/analytics/index.blade.php`, including filtered empty-state handling and average-rate display.
+- RFC 060: added Chart.js frontend integration in `resources/js/app.js` and `package.json` (`chart.js` dependency with updated `yarn.lock`).
+- RFC 060: expanded feature coverage in `tests/Feature/Analytics/AnalyticsDashboardOverviewTest.php` to verify engagement trend aggregation across 30-day (daily), 90-day (weekly), and all-time (monthly) windows with account scoping.
 - RFC 058: added authenticated influencer analytics overview route `analytics.index` in `routes/web.php` backed by new Livewire page `app/Livewire/Analytics/Index.php` and view `resources/views/pages/analytics/index.blade.php`.
 - RFC 058: implemented analytics period filtering via new enum `app/Enums/AnalyticsPeriod.php` and query-layer aggregation helpers in `app/Builders/InstagramMediaBuilder.php` and `app/Builders/InstagramAccountBuilder.php` for scoped account/period metrics.
 - RFC 058: added analytics overview cards (total followers, total posts with post/reel/story breakdown, average engagement rate, total reach with compact formatting), account filtering, period selector controls, and chart placeholder sections on `/analytics`.

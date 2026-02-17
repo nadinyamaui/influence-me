@@ -4,7 +4,10 @@ namespace App\Builders;
 
 use App\Enums\AnalyticsPeriod;
 use App\Enums\MediaType;
+use Carbon\CarbonImmutable;
+use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Collection;
 
 class InstagramMediaBuilder extends Builder
 {
@@ -124,5 +127,37 @@ class InstagramMediaBuilder extends Builder
         }
 
         return $this->where('published_at', '>=', $periodStart);
+    }
+
+    public function engagementTrend(AnalyticsPeriod $period): Collection
+    {
+        $granularity = match ($period) {
+            AnalyticsPeriod::SevenDays, AnalyticsPeriod::ThirtyDays => 'day',
+            AnalyticsPeriod::NinetyDays => 'week',
+            AnalyticsPeriod::AllTime => 'month',
+        };
+
+        return $this->get(['published_at', 'engagement_rate'])
+            ->groupBy(function ($media) use ($granularity): string {
+                $publishedAt = CarbonImmutable::parse($media->published_at);
+
+                return match ($granularity) {
+                    'day' => $publishedAt->startOfDay()->toDateString(),
+                    'week' => $publishedAt->startOfWeek(CarbonInterface::MONDAY)->toDateString(),
+                    'month' => $publishedAt->startOfMonth()->toDateString(),
+                };
+            })
+            ->sortKeys()
+            ->map(function (Collection $bucket, string $date): array {
+                $average = round((float) $bucket->avg(fn ($media): float => (float) $media->engagement_rate), 2);
+                $label = CarbonImmutable::parse($date)->isoFormat('MMM D, YYYY');
+
+                return [
+                    'date' => $date,
+                    'label' => $label,
+                    'value' => $average,
+                ];
+            })
+            ->values();
     }
 }
