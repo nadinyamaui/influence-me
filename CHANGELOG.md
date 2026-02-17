@@ -5,6 +5,9 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
+- RFC 063: enhanced content detail analytics in `app/Livewire/Content/Index.php` and `app/Builders/InstagramMediaBuilder.php` with 90-day account-average metric aggregation and per-metric comparison payloads for likes, comments, reach, and engagement rate.
+- RFC 063: updated `resources/views/pages/content/index.blade.php` to display per-post performance comparisons with clear up/down/flat indicators and campaign context messaging (`client`, `campaign`, and "part of campaign with X other posts") in the detail modal.
+- RFC 063: expanded `tests/Feature/Content/ContentGalleryPageTest.php` with feature coverage validating 90-day comparison calculations, exclusion of out-of-window posts from averages, and campaign context rendering.
 - RFC 062: added query-layer content-type aggregation in `app/Builders/InstagramMediaBuilder.php` via `contentTypeBreakdown()` to return per-type counts plus average engagement/reach with influencer ownership, account, and period scopes applied upstream.
 - RFC 062: extended analytics state in `app/Livewire/Analytics/Index.php` with typed breakdown chart payloads and summary integration, and added enum UI metadata in `app/Enums/MediaType.php` (`pluralLabel()` and `chartColor()`) to keep content-type presentation logic centralized.
 - RFC 062: replaced the analytics content-type placeholder in `resources/views/pages/analytics/index.blade.php` with a Chart.js + Alpine doughnut chart (Posts/Reels/Stories color mapping), center total, legend counts/percentages, per-type average engagement/reach stats, and empty-state handling.

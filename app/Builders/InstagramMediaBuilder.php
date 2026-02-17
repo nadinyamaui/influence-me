@@ -115,8 +115,29 @@ class InstagramMediaBuilder extends Builder
             'campaigns' => fn ($builder) => $builder
                 ->whereHas('client', fn (Builder $clientBuilder): Builder => $clientBuilder->where('user_id', $userId))
                 ->with('client')
+                ->withCount('instagramMedia')
                 ->orderBy('name'),
         ]);
+    }
+
+    public function accountAverageMetricsForRecentDays(int $instagramAccountId, int $days = 90): array
+    {
+        $averages = $this->where('instagram_account_id', $instagramAccountId)
+            ->where('published_at', '>=', now()->subDays($days))
+            ->selectRaw('
+                AVG(like_count) as avg_likes,
+                AVG(comments_count) as avg_comments,
+                AVG(reach) as avg_reach,
+                AVG(engagement_rate) as avg_engagement
+            ')
+            ->first();
+
+        return [
+            'likes' => round((float) ($averages?->getAttribute('avg_likes') ?? 0), 2),
+            'comments' => round((float) ($averages?->getAttribute('avg_comments') ?? 0), 2),
+            'reach' => round((float) ($averages?->getAttribute('avg_reach') ?? 0), 2),
+            'engagement_rate' => round((float) ($averages?->getAttribute('avg_engagement') ?? 0), 2),
+        ];
     }
 
     public function forAnalyticsPeriod(AnalyticsPeriod $period): self

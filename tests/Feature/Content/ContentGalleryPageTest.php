@@ -181,6 +181,58 @@ test('content detail modal can open from media query parameter', function (): vo
         ->assertSee('Deep link content caption');
 });
 
+test('content detail modal shows 90-day account average comparisons and campaign context', function (): void {
+    $user = User::factory()->create();
+    $account = InstagramAccount::factory()->for($user)->create([
+        'username' => 'analyticsmodal',
+    ]);
+    $client = Client::factory()->for($user)->create([
+        'name' => 'Comparison Client',
+    ]);
+    $campaign = Campaign::factory()->for($client)->create([
+        'name' => 'Comparison Campaign',
+    ]);
+
+    $selectedMedia = InstagramMedia::factory()->for($account)->create([
+        'caption' => 'Selected comparison media',
+        'published_at' => now()->subDays(5),
+        'like_count' => 150,
+        'comments_count' => 15,
+        'reach' => 1500,
+        'engagement_rate' => 6.00,
+    ]);
+
+    $recentMedia = InstagramMedia::factory()->for($account)->create([
+        'published_at' => now()->subDays(12),
+        'like_count' => 100,
+        'comments_count' => 10,
+        'reach' => 1000,
+        'engagement_rate' => 4.00,
+    ]);
+
+    $oldOutlierMedia = InstagramMedia::factory()->for($account)->create([
+        'published_at' => now()->subDays(120),
+        'like_count' => 1000,
+        'comments_count' => 100,
+        'reach' => 10000,
+        'engagement_rate' => 40.00,
+    ]);
+
+    $campaign->instagramMedia()->attach($selectedMedia->id);
+    $campaign->instagramMedia()->attach($recentMedia->id);
+    $campaign->instagramMedia()->attach($oldOutlierMedia->id);
+
+    Livewire::actingAs($user)
+        ->test(Index::class)
+        ->call('openDetailModal', $selectedMedia->id)
+        ->assertSee('↑ 20% above average')
+        ->assertSee('Account avg: 5.00%')
+        ->assertSee('Comparison Client')
+        ->assertSee('Comparison Campaign')
+        ->assertSee('Part of campaign with 2 other posts')
+        ->assertSee('href="'.route('clients.show', $client).'"', false);
+});
+
 test('content detail media query ignores media outside authenticated ownership', function (): void {
     $user = User::factory()->create();
     $otherUser = User::factory()->create();
