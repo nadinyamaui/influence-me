@@ -39,7 +39,7 @@
                         {{ __('Invoices') }}
                     </flux:sidebar.item>
 
-                    <flux:sidebar.item icon="chart-bar" href="#">
+                    <flux:sidebar.item icon="chart-bar" :href="route('portal.analytics.index')" :current="request()->routeIs('portal.analytics.index')" wire:navigate>
                         {{ __('Analytics') }}
                     </flux:sidebar.item>
                 </flux:sidebar.group>

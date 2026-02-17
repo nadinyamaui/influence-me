@@ -5,6 +5,9 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
+- RFC 066: added client-portal analytics route wiring in `routes/portal.php`, new Livewire page `app/Livewire/Portal/Analytics/Index.php`, and portal sidebar navigation update in `resources/views/layouts/portal/sidebar.blade.php`.
+- RFC 066: implemented client-scoped audience demographics aggregation in `app/Services/Clients/ClientAudienceDemographicsService.php` and added `resources/views/pages/portal/analytics/index.blade.php` with campaign summary cards, engagement trend chart, campaign breakdown table, and demographics visualizations/empty states.
+- RFC 066: added feature coverage in `tests/Feature/Portal/PortalAnalyticsTest.php` for auth guard protection, strict client data scoping, and no-linked-content empty state; updated `tests/Feature/Portal/PortalLayoutTest.php` to assert analytics navigation wiring.
 - RFC 065: expanded audience demographics query composition in `app/Builders/AudienceDemographicBuilder.php` with reusable influencer ownership/account filters and typed demographic helpers for analytics data loading.
 - RFC 065: extended `app/Livewire/Analytics/Index.php` to prepare audience demographics datasets (age distribution, gender totals, top cities, top countries), apply account scoping, and expose RFC-compliant empty-state readiness.
 - RFC 065: added an "Audience Demographics" analytics section in `resources/views/pages/analytics/index.blade.php` with a 2x2 chart grid (age bar, gender doughnut with center label, top cities horizontal bars, top countries horizontal bars) and required sync/follower-threshold empty-state messaging.
