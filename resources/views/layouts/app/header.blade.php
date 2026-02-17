@@ -16,7 +16,7 @@
                 <flux:navbar.item icon="photo" href="#">
                     {{ __('Content') }}
                 </flux:navbar.item>
-                <flux:navbar.item icon="chart-bar" href="#">
+                <flux:navbar.item icon="chart-bar" :href="route('analytics.index')" :current="request()->routeIs('analytics.index')" wire:navigate>
                     {{ __('Analytics') }}
                 </flux:navbar.item>
                 <flux:navbar.item icon="users" href="#">
@@ -53,7 +53,7 @@
                     <flux:sidebar.item icon="photo" href="#">
                         {{ __('Content') }}
                     </flux:sidebar.item>
-                    <flux:sidebar.item icon="chart-bar" href="#">
+                    <flux:sidebar.item icon="chart-bar" :href="route('analytics.index')" :current="request()->routeIs('analytics.index')" wire:navigate>
                         {{ __('Analytics') }}
                     </flux:sidebar.item>
                 </flux:sidebar.group>
