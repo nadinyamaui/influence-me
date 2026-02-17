@@ -26,11 +26,26 @@ class RecordFollowerSnapshot implements ShouldQueue
 
     public function handle(): void
     {
-        FollowerSnapshot::query()->updateOrCreate([
+        $recordedAt = now()->toDateString();
+        $followersCount = max((int) $this->account->followers_count, 0);
+
+        $snapshot = FollowerSnapshot::query()
+            ->where('instagram_account_id', $this->account->id)
+            ->whereDate('recorded_at', $recordedAt)
+            ->first();
+
+        if ($snapshot !== null) {
+            $snapshot->update([
+                'followers_count' => $followersCount,
+            ]);
+
+            return;
+        }
+
+        FollowerSnapshot::query()->create([
             'instagram_account_id' => $this->account->id,
-            'recorded_at' => now(),
-        ], [
-            'followers_count' => max((int) $this->account->followers_count, 0),
+            'recorded_at' => $recordedAt,
+            'followers_count' => $followersCount,
         ]);
     }
 }

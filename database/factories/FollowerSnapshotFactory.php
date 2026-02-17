@@ -15,7 +15,7 @@ class FollowerSnapshotFactory extends Factory
         return [
             'instagram_account_id' => InstagramAccount::factory(),
             'followers_count' => fake()->numberBetween(100, 500000),
-            'recorded_at' => now()->subDays(fake()->numberBetween(0, 120)),
+            'recorded_at' => now()->subDays(fake()->numberBetween(0, 120))->toDateString(),
         ];
     }
 }

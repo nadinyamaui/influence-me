@@ -12,7 +12,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('instagram_account_id')->constrained()->cascadeOnDelete();
             $table->unsignedInteger('followers_count');
-            $table->timestamp('recorded_at');
+            $table->date('recorded_at');
             $table->timestamps();
 
             $table->unique(['instagram_account_id', 'recorded_at']);

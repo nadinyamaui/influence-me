@@ -29,7 +29,7 @@ class FollowerSnapshotBuilder extends Builder
             return $this;
         }
 
-        return $this->where('recorded_at', '>=', $periodStart);
+        return $this->whereDate('recorded_at', '>=', $periodStart->toDateString());
     }
 
     public function orderedByRecordedAt(): self
