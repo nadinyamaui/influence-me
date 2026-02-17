@@ -19,17 +19,18 @@ class RecordFollowerSnapshot implements ShouldQueue
 
     public array $backoff = [60, 300, 900];
 
-    public function __construct(public InstagramAccount $account)
+    public function __construct(public InstagramAccount $account, public string $snapshotDate)
     {
         $this->onQueue('instagram-sync');
     }
 
     public function handle(): void
     {
-        FollowerSnapshot::query()->create([
+        FollowerSnapshot::query()->updateOrCreate([
             'instagram_account_id' => $this->account->id,
+            'recorded_at' => $this->snapshotDate.' 00:00:00',
+        ], [
             'followers_count' => max((int) $this->account->followers_count, 0),
-            'recorded_at' => now(),
         ]);
     }
 }

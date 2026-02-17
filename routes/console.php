@@ -39,7 +39,9 @@ Schedule::call(function (): void {
 })->daily()->name('refresh-instagram-tokens');
 
 Schedule::call(function (): void {
-    InstagramAccount::query()->each(function (InstagramAccount $account): void {
-        RecordFollowerSnapshot::dispatch($account);
+    $snapshotDate = now()->toDateString();
+
+    InstagramAccount::query()->each(function (InstagramAccount $account) use ($snapshotDate): void {
+        RecordFollowerSnapshot::dispatch($account, $snapshotDate);
     });
 })->daily()->name('record-follower-snapshots');

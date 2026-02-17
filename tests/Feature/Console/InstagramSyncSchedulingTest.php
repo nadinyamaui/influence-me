@@ -4,6 +4,7 @@ use App\Jobs\RecordFollowerSnapshot;
 use App\Jobs\RefreshInstagramToken;
 use App\Models\InstagramAccount;
 use Illuminate\Console\Scheduling\Schedule;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Bus;
 
 it('registers RFC 027 instagram scheduler tasks with expected cadence', function (): void {
@@ -59,6 +60,7 @@ it('dispatches token refresh only for accounts expiring within the next seven da
 
 it('dispatches follower snapshots for each instagram account', function (): void {
     Bus::fake();
+    Carbon::setTestNow('2026-02-17 00:05:00');
 
     $firstAccount = InstagramAccount::factory()->create();
     $secondAccount = InstagramAccount::factory()->create();
@@ -71,10 +73,14 @@ it('dispatches follower snapshots for each instagram account', function (): void
     $followerSnapshotEvent->run(app());
 
     Bus::assertDispatched(RecordFollowerSnapshot::class, function (RecordFollowerSnapshot $job) use ($firstAccount): bool {
-        return $job->account->is($firstAccount);
+        return $job->account->is($firstAccount)
+            && $job->snapshotDate === '2026-02-17';
     });
 
     Bus::assertDispatched(RecordFollowerSnapshot::class, function (RecordFollowerSnapshot $job) use ($secondAccount): bool {
-        return $job->account->is($secondAccount);
+        return $job->account->is($secondAccount)
+            && $job->snapshotDate === '2026-02-17';
     });
+
+    Carbon::setTestNow();
 });

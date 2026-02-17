@@ -15,7 +15,7 @@ return new class extends Migration
             $table->timestamp('recorded_at');
             $table->timestamps();
 
-            $table->index(['instagram_account_id', 'recorded_at']);
+            $table->unique(['instagram_account_id', 'recorded_at']);
         });
     }
 
