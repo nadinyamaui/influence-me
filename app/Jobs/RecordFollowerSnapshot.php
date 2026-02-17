@@ -28,7 +28,7 @@ class RecordFollowerSnapshot implements ShouldQueue
     {
         FollowerSnapshot::query()->updateOrCreate([
             'instagram_account_id' => $this->account->id,
-            'recorded_at' => $this->snapshotDate.' 00:00:00',
+            'recorded_at' => now(),
         ], [
             'followers_count' => max((int) $this->account->followers_count, 0),
         ]);
