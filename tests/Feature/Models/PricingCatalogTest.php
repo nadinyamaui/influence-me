@@ -59,6 +59,12 @@ it('defines catalog plan and plan item relationships', function (): void {
         ->and($planItem->catalogProduct->id)->toBe($product->id);
 });
 
+it('creates default plan items with plan and product owned by same influencer', function (): void {
+    $planItem = CatalogPlanItem::factory()->create();
+
+    expect($planItem->catalogPlan->user_id)->toBe($planItem->catalogProduct->user_id);
+});
+
 it('creates proposal line items with enum casts and proposal relationship', function (): void {
     $proposal = Proposal::factory()->create();
 

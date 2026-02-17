@@ -184,3 +184,41 @@ it('blocks creating line items on another influencers proposal', function (): vo
         'sort_order' => 1,
     ], $proposal->id))->toThrow(ModelNotFoundException::class);
 });
+
+it('blocks creating line items with cross-tenant catalog sources', function (): void {
+    $owner = User::factory()->create();
+    $outsider = User::factory()->create();
+
+    $client = Client::factory()->for($owner)->create();
+    $proposal = Proposal::factory()->for($owner)->for($client)->create();
+    $outsiderProduct = CatalogProduct::factory()->for($outsider)->create();
+    $outsiderPlan = CatalogPlan::factory()->for($outsider)->create();
+
+    actingAs($owner);
+
+    expect(fn (): ProposalLineItem => ProposalLineItem::query()->createForProposal([
+        'source_type' => CatalogSourceType::Product,
+        'source_id' => $outsiderProduct->id,
+        'name_snapshot' => 'Unauthorized Product',
+        'description_snapshot' => null,
+        'platform_snapshot' => null,
+        'media_type_snapshot' => null,
+        'quantity' => 1,
+        'unit_price' => 10,
+        'line_total' => 10,
+        'sort_order' => 1,
+    ], $proposal->id))->toThrow(ModelNotFoundException::class);
+
+    expect(fn (): ProposalLineItem => ProposalLineItem::query()->createForProposal([
+        'source_type' => CatalogSourceType::Plan,
+        'source_id' => $outsiderPlan->id,
+        'name_snapshot' => 'Unauthorized Plan',
+        'description_snapshot' => null,
+        'platform_snapshot' => null,
+        'media_type_snapshot' => null,
+        'quantity' => 1,
+        'unit_price' => 10,
+        'line_total' => 10,
+        'sort_order' => 1,
+    ], $proposal->id))->toThrow(ModelNotFoundException::class);
+});
