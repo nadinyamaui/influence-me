@@ -56,9 +56,9 @@ Ensure comprehensive feature test coverage for every Livewire page and workflow 
 - Use `RefreshDatabase` trait
 
 ## Acceptance Criteria
-- [ ] Every Livewire page has at least one feature test
-- [ ] Authorization tested for every protected action
-- [ ] Validation tested for every form
-- [ ] Edge cases covered (empty states, limits)
-- [ ] `php artisan test` passes with zero failures
-- [ ] Test suite runs in under 60 seconds
+- [x] Every Livewire page has at least one feature test
+- [x] Authorization tested for every protected action
+- [x] Validation tested for every form
+- [x] Edge cases covered (empty states, limits)
+- [x] `php artisan test` passes with zero failures
+- [x] Test suite runs in under 60 seconds
