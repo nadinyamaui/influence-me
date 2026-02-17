@@ -104,8 +104,55 @@
             @endif
         </article>
 
-        <article class="min-h-56 rounded-2xl border border-dashed border-zinc-300 bg-zinc-50 p-5 dark:border-zinc-700 dark:bg-zinc-900/40">
-            <h2 class="text-sm font-semibold uppercase tracking-wide text-zinc-600 dark:text-zinc-300">Best Performing Content</h2>
+        <article class="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-700 dark:bg-zinc-900 lg:col-span-2">
+            <div class="flex flex-wrap items-center justify-between gap-3">
+                <h2 class="text-sm font-semibold uppercase tracking-wide text-zinc-600 dark:text-zinc-300">Best Performing Content</h2>
+                <div class="rounded-xl border border-zinc-200 bg-white p-1 shadow-sm dark:border-zinc-700 dark:bg-zinc-900">
+                    @foreach ($topContentSortOptions as $value => $label)
+                        <flux:button
+                            type="button"
+                            size="sm"
+                            wire:click="$set('topContentSort', '{{ $value }}')"
+                            :variant="$topContentSort === $value ? 'primary' : 'ghost'"
+                        >
+                            {{ $label }}
+                        </flux:button>
+                    @endforeach
+                </div>
+            </div>
+
+            @if ($topContent->isEmpty())
+                <p class="mt-4 text-sm text-zinc-600 dark:text-zinc-300">No posts found for the selected filters.</p>
+            @else
+                <div class="mt-4 space-y-3">
+                    @foreach ($topContent as $item)
+                        <a
+                            href="{{ route('content.index', ['media' => $item->id]) }}"
+                            class="block rounded-xl border border-zinc-200 p-3 transition hover:border-zinc-300 hover:bg-zinc-50 dark:border-zinc-700 dark:hover:border-zinc-600 dark:hover:bg-zinc-800/60"
+                        >
+                            <div class="flex flex-col gap-3 sm:flex-row sm:items-start">
+                                <img
+                                    src="{{ $item->thumbnail_url ?: $item->media_url }}"
+                                    alt="Media thumbnail"
+                                    class="h-20 w-20 shrink-0 rounded-lg object-cover"
+                                >
+                                <div class="min-w-0 flex-1">
+                                    <div class="flex flex-wrap items-center gap-2">
+                                        <span class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium {{ $item->media_type->badgeClasses() }}">{{ $item->media_type->label() }}</span>
+                                        <span class="text-xs text-zinc-500 dark:text-zinc-400">{{ $item->published_at?->format('M j, Y') ?? 'Unknown date' }}</span>
+                                    </div>
+                                    <p class="mt-1 truncate text-sm text-zinc-700 dark:text-zinc-200">{{ \Illuminate\Support\Str::limit($item->caption ?? 'No caption', 60) }}</p>
+                                    <div class="mt-2 flex flex-wrap gap-4 text-xs text-zinc-600 dark:text-zinc-300">
+                                        <span>{{ number_format((float) $item->engagement_rate, 2) }}% engagement</span>
+                                        <span>{{ number_format((int) $item->like_count) }} likes</span>
+                                        <span>{{ number_format((int) $item->reach) }} reach</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                    @endforeach
+                </div>
+            @endif
         </article>
 
         <article class="min-h-56 rounded-2xl border border-dashed border-zinc-300 bg-zinc-50 p-5 dark:border-zinc-700 dark:bg-zinc-900/40">

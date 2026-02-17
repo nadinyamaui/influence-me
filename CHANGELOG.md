@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
+- RFC 061: added best-performing content sorting enum `app/Enums/AnalyticsTopContentSort.php` and query-layer ranking helper `topPerforming(...)` in `app/Builders/InstagramMediaBuilder.php` to support engagement/reach ranking with deterministic ordering.
+- RFC 061: extended analytics page state/data in `app/Livewire/Analytics/Index.php` with top-content sort toggling and a filtered/scoped top 5 media query honoring influencer ownership, selected period, and selected account.
+- RFC 061: replaced the analytics placeholder card in `resources/views/pages/analytics/index.blade.php` with a full "Best Performing Content" section including sort toggle controls, media thumbnails, caption previews, media-type badges, publish date, metrics, and content detail links.
+- RFC 061: added coverage in `tests/Feature/Analytics/AnalyticsDashboardOverviewTest.php` for ordering, sort switching, period/account scoping, and detail link rendering; expanded `tests/Unit/EnumsTest.php` for analytics top-content sort and media badge/label enum metadata.
 - RFC 060: implemented engagement trend chart aggregation in `app/Builders/InstagramMediaBuilder.php` and wired analytics chart data in `app/Livewire/Analytics/Index.php` with period-aware day/week/month bucketing plus overall average reference-line data.
 - RFC 060: replaced the `/analytics` engagement placeholder with a rendered Chart.js + Alpine line chart in `resources/views/pages/analytics/index.blade.php`, including filtered empty-state handling and average-rate display.
 - RFC 060: added Chart.js frontend integration in `resources/js/app.js` and `package.json` (`chart.js` dependency with updated `yarn.lock`).

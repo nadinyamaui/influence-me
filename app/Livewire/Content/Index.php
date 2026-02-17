@@ -58,6 +58,27 @@ class Index extends Component
 
     public string $linkNotes = '';
 
+    public function mount(): void
+    {
+        $mediaId = request()->integer('media');
+
+        if ($mediaId <= 0) {
+            return;
+        }
+
+        $media = InstagramMedia::query()
+            ->whereKey($mediaId)
+            ->forUser((int) Auth::id())
+            ->first();
+
+        if ($media === null) {
+            return;
+        }
+
+        $this->selectedMediaId = $media->id;
+        $this->showDetailModal = true;
+    }
+
     public function updatedMediaType(string $value): void
     {
         if (! in_array($value, MediaType::filters(), true)) {

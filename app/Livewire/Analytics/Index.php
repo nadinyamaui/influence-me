@@ -3,6 +3,7 @@
 namespace App\Livewire\Analytics;
 
 use App\Enums\AnalyticsPeriod;
+use App\Enums\AnalyticsTopContentSort;
 use App\Enums\MediaType;
 use App\Models\FollowerSnapshot;
 use App\Models\InstagramAccount;
@@ -17,9 +18,12 @@ class Index extends Component
 
     public string $accountId = 'all';
 
+    public string $topContentSort = 'engagement';
+
     public function mount(): void
     {
         $this->period = AnalyticsPeriod::default()->value;
+        $this->topContentSort = AnalyticsTopContentSort::default()->value;
     }
 
     public function updatedPeriod(string $value): void
@@ -41,9 +45,17 @@ class Index extends Component
         }
     }
 
+    public function updatedTopContentSort(string $value): void
+    {
+        if (! in_array($value, AnalyticsTopContentSort::values(), true)) {
+            $this->topContentSort = AnalyticsTopContentSort::default()->value;
+        }
+    }
+
     public function render()
     {
         $period = AnalyticsPeriod::tryFrom($this->period) ?? AnalyticsPeriod::default();
+        $topContentSort = AnalyticsTopContentSort::tryFrom($this->topContentSort) ?? AnalyticsTopContentSort::default();
 
         $accounts = Auth::user()?->instagramAccounts()
             ->orderBy('username')
@@ -79,11 +91,30 @@ class Index extends Component
         $engagementTrendLabels = $engagementTrendPoints->pluck('label')->all();
         $engagementTrendValues = $engagementTrendPoints->pluck('value')->all();
         $chart = $this->audienceGrowthChart($period);
+        $topContent = InstagramMedia::query()
+            ->forUser((int) Auth::id())
+            ->filterByAccount($this->accountId)
+            ->forAnalyticsPeriod($period)
+            ->topPerforming($topContentSort)
+            ->take(5)
+            ->get([
+                'id',
+                'media_type',
+                'caption',
+                'thumbnail_url',
+                'media_url',
+                'published_at',
+                'engagement_rate',
+                'like_count',
+                'reach',
+            ]);
 
         return view('pages.analytics.index', [
             'accounts' => $accounts,
             'periodOptions' => AnalyticsPeriod::options(),
+            'topContentSortOptions' => AnalyticsTopContentSort::options(),
             'chart' => $chart,
+            'topContent' => $topContent,
             'summary' => [
                 'total_followers' => $totalFollowers,
                 'followers_change' => $followersChange,
