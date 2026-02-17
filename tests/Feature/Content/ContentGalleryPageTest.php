@@ -165,6 +165,39 @@ test('content detail modal displays metrics caption permalink and linked clients
         ->assertSet('showDetailModal', false);
 });
 
+test('content detail modal can open from media query parameter', function (): void {
+    $user = User::factory()->create();
+    $account = InstagramAccount::factory()->for($user)->create();
+    $media = InstagramMedia::factory()->for($account)->create([
+        'caption' => 'Deep link content caption',
+    ]);
+
+    Livewire::withQueryParams(['media' => (string) $media->id])
+        ->actingAs($user)
+        ->test(Index::class)
+        ->assertSet('selectedMediaId', $media->id)
+        ->assertSet('showDetailModal', true)
+        ->assertSee('Content Details')
+        ->assertSee('Deep link content caption');
+});
+
+test('content detail media query ignores media outside authenticated ownership', function (): void {
+    $user = User::factory()->create();
+    $otherUser = User::factory()->create();
+
+    $otherAccount = InstagramAccount::factory()->for($otherUser)->create();
+    $otherMedia = InstagramMedia::factory()->for($otherAccount)->create([
+        'caption' => 'Outsider deep link content',
+    ]);
+
+    Livewire::withQueryParams(['media' => (string) $otherMedia->id])
+        ->actingAs($user)
+        ->test(Index::class)
+        ->assertSet('selectedMediaId', null)
+        ->assertSet('showDetailModal', false)
+        ->assertDontSee('Outsider deep link content');
+});
+
 test('single media cannot be linked to the same campaign twice', function (): void {
     $user = User::factory()->create();
     $account = InstagramAccount::factory()->for($user)->create();
