@@ -9,6 +9,7 @@ use App\Models\CatalogProduct;
 use App\Models\Proposal;
 use App\Models\ProposalLineItem;
 use App\Models\User;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 it('scopes catalog products to owner and applies filters', function (): void {
     $owner = User::factory()->create();
@@ -86,6 +87,20 @@ it('scopes and creates catalog plan items', function (): void {
     expect($items)->toHaveCount(1)
         ->and($items->first()->catalog_plan_id)->toBe($plan->id)
         ->and($items->first()->catalog_product_id)->toBe($product->id);
+});
+
+it('blocks creating plan items with products from another influencer', function (): void {
+    $owner = User::factory()->create();
+    $outsider = User::factory()->create();
+
+    $plan = CatalogPlan::factory()->for($owner)->create();
+    $outsiderProduct = CatalogProduct::factory()->for($outsider)->create();
+
+    expect(fn (): CatalogPlanItem => CatalogPlanItem::query()->createForPlan([
+        'catalog_product_id' => $outsiderProduct->id,
+        'quantity' => 1,
+        'unit_price_override' => null,
+    ], $plan->id))->toThrow(ModelNotFoundException::class);
 });
 
 it('scopes and orders proposal line items with builder helpers', function (): void {
