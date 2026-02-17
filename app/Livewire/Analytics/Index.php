@@ -115,40 +115,7 @@ class Index extends Component
             return null;
         }
 
-        $currentTotal = (int) FollowerSnapshot::query()
-            ->forUser((int) Auth::id())
-            ->filterByAccount($this->accountId)
-            ->forAnalyticsPeriod($period)
-            ->orderedByRecordedAt()
-            ->get()
-            ->groupBy(fn (FollowerSnapshot $snapshot): string => $snapshot->recorded_at->toDateString())
-            ->map(fn (Collection $daySnapshots): int => (int) $daySnapshots->sum('followers_count'))
-            ->last();
-
-        if ($currentTotal === 0) {
-            return null;
-        }
-
-        $previousPeriod = $this->previousPeriod($period);
-        if ($previousPeriod === null) {
-            return null;
-        }
-
-        $previousTotal = (int) FollowerSnapshot::query()
-            ->forUser((int) Auth::id())
-            ->filterByAccount($this->accountId)
-            ->forAnalyticsPeriod($previousPeriod)
-            ->orderedByRecordedAt()
-            ->get()
-            ->groupBy(fn (FollowerSnapshot $snapshot): string => $snapshot->recorded_at->toDateString())
-            ->map(fn (Collection $daySnapshots): int => (int) $daySnapshots->sum('followers_count'))
-            ->last();
-
-        if ($previousTotal === 0) {
-            return null;
-        }
-
-        return $currentTotal - $previousTotal;
+        return null;
     }
 
     private function audienceGrowthChart(AnalyticsPeriod $period): array
@@ -166,15 +133,6 @@ class Index extends Component
             'labels' => $points->keys()->values()->all(),
             'data' => $points->values()->all(),
         ];
-    }
-
-    private function previousPeriod(AnalyticsPeriod $period): ?AnalyticsPeriod
-    {
-        return match ($period) {
-            AnalyticsPeriod::SevenDays => AnalyticsPeriod::ThirtyDays,
-            AnalyticsPeriod::ThirtyDays => AnalyticsPeriod::NinetyDays,
-            AnalyticsPeriod::NinetyDays, AnalyticsPeriod::AllTime => null,
-        };
     }
 
     private function formatFollowersChange(?int $followersChange): string
