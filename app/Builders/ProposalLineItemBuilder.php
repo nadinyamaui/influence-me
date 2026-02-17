@@ -2,6 +2,7 @@
 
 namespace App\Builders;
 
+use App\Models\Proposal;
 use App\Models\ProposalLineItem;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -18,8 +19,15 @@ class ProposalLineItemBuilder extends Builder
             ->orderBy('id');
     }
 
-    public function createForProposal(array $attributes, int $proposalId): ProposalLineItem
+    public function createForProposal(array $attributes, int $proposalId, ?int $userId = null): ProposalLineItem
     {
+        $userId ??= auth()->id();
+
+        Proposal::query()
+            ->whereKey($proposalId)
+            ->where('user_id', $userId)
+            ->firstOrFail();
+
         return $this->create(array_merge($attributes, [
             'proposal_id' => $proposalId,
         ]));

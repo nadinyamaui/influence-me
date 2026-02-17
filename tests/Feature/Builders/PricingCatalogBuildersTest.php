@@ -6,10 +6,12 @@ use App\Enums\PlatformType;
 use App\Models\CatalogPlan;
 use App\Models\CatalogPlanItem;
 use App\Models\CatalogProduct;
+use App\Models\Client;
 use App\Models\Proposal;
 use App\Models\ProposalLineItem;
 use App\Models\User;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use function Pest\Laravel\actingAs;
 
 it('scopes catalog products to owner and applies filters', function (): void {
     $owner = User::factory()->create();
@@ -75,6 +77,7 @@ it('creates catalog product and plan records with scoped builder helpers', funct
 it('scopes and creates catalog plan items', function (): void {
     $plan = CatalogPlan::factory()->create();
     $product = CatalogProduct::factory()->for($plan->user)->create();
+    actingAs($plan->user);
 
     CatalogPlanItem::query()->createForPlan([
         'catalog_product_id' => $product->id,
@@ -95,6 +98,7 @@ it('blocks creating plan items with products from another influencer', function 
 
     $plan = CatalogPlan::factory()->for($owner)->create();
     $outsiderProduct = CatalogProduct::factory()->for($outsider)->create();
+    actingAs($owner);
 
     expect(fn (): CatalogPlanItem => CatalogPlanItem::query()->createForPlan([
         'catalog_product_id' => $outsiderProduct->id,
@@ -103,8 +107,25 @@ it('blocks creating plan items with products from another influencer', function 
     ], $plan->id))->toThrow(ModelNotFoundException::class);
 });
 
+it('blocks creating plan items on another influencers plan', function (): void {
+    $owner = User::factory()->create();
+    $outsider = User::factory()->create();
+
+    $ownerPlan = CatalogPlan::factory()->for($owner)->create();
+    $ownerProduct = CatalogProduct::factory()->for($owner)->create();
+
+    actingAs($outsider);
+
+    expect(fn (): CatalogPlanItem => CatalogPlanItem::query()->createForPlan([
+        'catalog_product_id' => $ownerProduct->id,
+        'quantity' => 1,
+        'unit_price_override' => null,
+    ], $ownerPlan->id))->toThrow(ModelNotFoundException::class);
+});
+
 it('scopes and orders proposal line items with builder helpers', function (): void {
     $proposal = Proposal::factory()->create();
+    actingAs($proposal->user);
 
     ProposalLineItem::query()->createForProposal([
         'source_type' => CatalogSourceType::Custom,
@@ -139,4 +160,27 @@ it('scopes and orders proposal line items with builder helpers', function (): vo
         ->all();
 
     expect($ordered)->toBe(['B', 'A']);
+});
+
+it('blocks creating line items on another influencers proposal', function (): void {
+    $owner = User::factory()->create();
+    $outsider = User::factory()->create();
+
+    $client = Client::factory()->for($owner)->create();
+    $proposal = Proposal::factory()->for($owner)->for($client)->create();
+
+    actingAs($outsider);
+
+    expect(fn (): ProposalLineItem => ProposalLineItem::query()->createForProposal([
+        'source_type' => CatalogSourceType::Custom,
+        'source_id' => null,
+        'name_snapshot' => 'Unauthorized',
+        'description_snapshot' => null,
+        'platform_snapshot' => null,
+        'media_type_snapshot' => null,
+        'quantity' => 1,
+        'unit_price' => 10,
+        'line_total' => 10,
+        'sort_order' => 1,
+    ], $proposal->id))->toThrow(ModelNotFoundException::class);
 });

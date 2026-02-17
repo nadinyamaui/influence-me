@@ -14,10 +14,13 @@ class CatalogPlanItemBuilder extends Builder
         return $this->where('catalog_plan_id', $catalogPlanId);
     }
 
-    public function createForPlan(array $attributes, int $catalogPlanId): CatalogPlanItem
+    public function createForPlan(array $attributes, int $catalogPlanId, ?int $userId = null): CatalogPlanItem
     {
+        $userId ??= auth()->id();
+
         $catalogPlan = CatalogPlan::query()
             ->select(['id', 'user_id'])
+            ->where('user_id', $userId)
             ->findOrFail($catalogPlanId);
 
         $catalogProductId = $attributes['catalog_product_id'] ?? null;
