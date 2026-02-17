@@ -202,6 +202,81 @@
             @endif
         </article>
     </section>
+
+    <section class="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-700 dark:bg-zinc-900">
+        <div>
+            <h2 class="text-sm font-semibold uppercase tracking-wide text-zinc-600 dark:text-zinc-300">Audience Demographics</h2>
+            <p class="mt-1 text-xs text-zinc-500 dark:text-zinc-400">Age, gender, city, and country audience distribution for the selected account filter.</p>
+        </div>
+
+        @if (! $audienceDemographics['has_data'])
+            <div class="mt-4 flex h-56 items-center justify-center rounded-xl border border-dashed border-zinc-300 bg-zinc-50 px-4 text-center text-sm text-zinc-500 dark:border-zinc-700 dark:bg-zinc-900/40 dark:text-zinc-400">
+                Audience demographics data is not available yet. Run a sync to fetch data. Note: Requires 100+ followers.
+            </div>
+        @else
+            <div class="mt-4 grid gap-4 lg:grid-cols-2">
+                <article class="rounded-xl border border-zinc-200 p-4 dark:border-zinc-700">
+                    <h3 class="text-xs font-semibold uppercase tracking-wide text-zinc-600 dark:text-zinc-300">Age Distribution</h3>
+                    <div
+                        class="mt-3 h-64"
+                        wire:key="demographics-age-{{ md5(json_encode([$accountId, $audienceDemographics['age']])) }}"
+                        x-data="audienceAgeChart(@js($audienceDemographics['age']))"
+                        x-init="init()"
+                    >
+                        <canvas x-ref="canvas" role="img" aria-label="Audience age distribution chart"></canvas>
+                    </div>
+                </article>
+
+                <article class="rounded-xl border border-zinc-200 p-4 dark:border-zinc-700">
+                    <h3 class="text-xs font-semibold uppercase tracking-wide text-zinc-600 dark:text-zinc-300">Gender Breakdown</h3>
+                    <div
+                        class="mt-3 h-64"
+                        wire:key="demographics-gender-{{ md5(json_encode([$accountId, $audienceDemographics['gender']])) }}"
+                        x-data="audienceGenderChart(@js($audienceDemographics['gender']))"
+                        x-init="init()"
+                    >
+                        <canvas x-ref="canvas" role="img" aria-label="Audience gender breakdown chart"></canvas>
+                    </div>
+                </article>
+
+                <article class="rounded-xl border border-zinc-200 p-4 dark:border-zinc-700">
+                    <h3 class="text-xs font-semibold uppercase tracking-wide text-zinc-600 dark:text-zinc-300">Top Cities</h3>
+                    @if (count($audienceDemographics['city']['labels']) === 0)
+                        <div class="mt-3 flex h-64 items-center justify-center rounded-lg border border-dashed border-zinc-300 bg-zinc-50 px-4 text-center text-sm text-zinc-500 dark:border-zinc-700 dark:bg-zinc-900/40 dark:text-zinc-400">
+                            No city demographic data is available yet.
+                        </div>
+                    @else
+                        <div
+                            class="mt-3 h-64"
+                            wire:key="demographics-city-{{ md5(json_encode([$accountId, $audienceDemographics['city']])) }}"
+                            x-data="audienceHorizontalBarChart(@js($audienceDemographics['city']), 'Top Cities', '#0ea5e9')"
+                            x-init="init()"
+                        >
+                            <canvas x-ref="canvas" role="img" aria-label="Top cities audience chart"></canvas>
+                        </div>
+                    @endif
+                </article>
+
+                <article class="rounded-xl border border-zinc-200 p-4 dark:border-zinc-700">
+                    <h3 class="text-xs font-semibold uppercase tracking-wide text-zinc-600 dark:text-zinc-300">Top Countries</h3>
+                    @if (count($audienceDemographics['country']['labels']) === 0)
+                        <div class="mt-3 flex h-64 items-center justify-center rounded-lg border border-dashed border-zinc-300 bg-zinc-50 px-4 text-center text-sm text-zinc-500 dark:border-zinc-700 dark:bg-zinc-900/40 dark:text-zinc-400">
+                            No country demographic data is available yet.
+                        </div>
+                    @else
+                        <div
+                            class="mt-3 h-64"
+                            wire:key="demographics-country-{{ md5(json_encode([$accountId, $audienceDemographics['country']])) }}"
+                            x-data="audienceHorizontalBarChart(@js($audienceDemographics['country']), 'Top Countries', '#10b981')"
+                            x-init="init()"
+                        >
+                            <canvas x-ref="canvas" role="img" aria-label="Top countries audience chart"></canvas>
+                        </div>
+                    @endif
+                </article>
+            </div>
+        @endif
+    </section>
 </div>
 
 <script>
@@ -321,6 +396,164 @@
                                         const percentage = total > 0 ? ((count / total) * 100).toFixed(1) : '0.0';
                                         return `${context.label}: ${count} (${percentage}%)`;
                                     },
+                                },
+                            },
+                        },
+                    },
+                });
+            },
+        });
+    }
+
+    if (! window.audienceAgeChart) {
+        window.audienceAgeChart = (series) => ({
+            chart: null,
+            init() {
+                if (! window.Chart) {
+                    return;
+                }
+
+                this.chart = new window.Chart(this.$refs.canvas, {
+                    type: 'bar',
+                    data: {
+                        labels: series.labels,
+                        datasets: [
+                            {
+                                label: 'Audience %',
+                                data: series.values,
+                                backgroundColor: '#6366f1',
+                                borderRadius: 6,
+                                maxBarThickness: 36,
+                            },
+                        ],
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false,
+                            },
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: (value) => `${value}%`,
+                                },
+                            },
+                        },
+                    },
+                });
+            },
+        });
+    }
+
+    if (! window.audienceGenderChart) {
+        window.audienceGenderChart = (series) => ({
+            chart: null,
+            init() {
+                if (! window.Chart) {
+                    return;
+                }
+
+                this.chart = new window.Chart(this.$refs.canvas, {
+                    type: 'doughnut',
+                    data: {
+                        labels: series.labels,
+                        datasets: [
+                            {
+                                data: series.values,
+                                backgroundColor: series.colors,
+                                borderWidth: 0,
+                                hoverOffset: 6,
+                            },
+                        ],
+                    },
+                    plugins: [{
+                        id: 'center-total',
+                        afterDraw: (chart) => {
+                            const { ctx } = chart;
+                            const x = chart.getDatasetMeta(0).data[0]?.x;
+                            const y = chart.getDatasetMeta(0).data[0]?.y;
+
+                            if (x === undefined || y === undefined) {
+                                return;
+                            }
+
+                            ctx.save();
+                            ctx.textAlign = 'center';
+                            ctx.textBaseline = 'middle';
+                            ctx.fillStyle = '#71717a';
+                            ctx.font = '500 12px system-ui, sans-serif';
+                            ctx.fillText('Audience', x, y - 10);
+                            ctx.fillStyle = '#18181b';
+                            ctx.font = '700 18px system-ui, sans-serif';
+                            ctx.fillText(`${series.total}%`, x, y + 10);
+                            ctx.restore();
+                        },
+                    }],
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: '70%',
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: (context) => `${context.label}: ${context.raw}%`,
+                                },
+                            },
+                        },
+                    },
+                });
+            },
+        });
+    }
+
+    if (! window.audienceHorizontalBarChart) {
+        window.audienceHorizontalBarChart = (series, label, color) => ({
+            chart: null,
+            init() {
+                if (! window.Chart) {
+                    return;
+                }
+
+                this.chart = new window.Chart(this.$refs.canvas, {
+                    type: 'bar',
+                    data: {
+                        labels: series.labels,
+                        datasets: [
+                            {
+                                label,
+                                data: series.values,
+                                backgroundColor: color,
+                                borderRadius: 6,
+                                maxBarThickness: 20,
+                            },
+                        ],
+                    },
+                    options: {
+                        indexAxis: 'y',
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false,
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: (context) => `${context.raw}%`,
+                                },
+                            },
+                        },
+                        scales: {
+                            x: {
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: (value) => `${value}%`,
                                 },
                             },
                         },

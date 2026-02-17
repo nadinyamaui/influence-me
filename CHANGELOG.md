@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
+- RFC 065: expanded audience demographics query composition in `app/Builders/AudienceDemographicBuilder.php` with reusable influencer ownership/account filters and typed demographic helpers for analytics data loading.
+- RFC 065: extended `app/Livewire/Analytics/Index.php` to prepare audience demographics datasets (age distribution, gender totals, top cities, top countries), apply account scoping, and expose RFC-compliant empty-state readiness.
+- RFC 065: added an "Audience Demographics" analytics section in `resources/views/pages/analytics/index.blade.php` with a 2x2 chart grid (age bar, gender doughnut with center label, top cities horizontal bars, top countries horizontal bars) and required sync/follower-threshold empty-state messaging.
+- RFC 065: expanded `tests/Feature/Analytics/AnalyticsDashboardOverviewTest.php` with feature coverage for demographics dataset rendering, top-10 truncation, account-filter behavior, ownership scoping, and empty-state visibility.
 - RFC 064: added client analytics aggregation service `app/Services/Clients/ClientAnalyticsService.php` to compute linked-content summary metrics, per-post engagement trend series, campaign-level breakdown rows, and client-vs-account engagement comparisons for client detail analytics.
 - RFC 064: extended query-layer helpers in `app/Builders/InstagramMediaBuilder.php` and `app/Builders/CampaignBuilder.php` to support scoped analytics data loading and reusable metric-focused relation queries.
 - RFC 064: replaced the client detail analytics placeholder in `resources/views/pages/clients/show.blade.php` and `app/Livewire/Clients/Show.php` with live analytics UI (summary cards, Chart.js performance-over-time line chart, campaign breakdown table, comparison bars, and empty state) on `/clients/{client}`.

@@ -1,7 +1,9 @@
 <?php
 
 use App\Enums\MediaType;
+use App\Enums\DemographicType;
 use App\Livewire\Analytics\Index;
+use App\Models\AudienceDemographic;
 use App\Models\FollowerSnapshot;
 use App\Models\InstagramAccount;
 use App\Models\InstagramMedia;
@@ -386,4 +388,124 @@ test('engagement trend chart data aggregates by period granularity and account f
         ->assertViewHas('engagementTrend.values', [21.0, 12.0, 6.0]);
 
     CarbonImmutable::setTestNow();
+});
+
+test('audience demographics chart datasets render with account filtering and empty states', function (): void {
+    $user = User::factory()->create();
+    $otherUser = User::factory()->create();
+
+    $primaryAccount = InstagramAccount::factory()->for($user)->create([
+        'username' => 'demo-main',
+    ]);
+
+    $secondaryAccount = InstagramAccount::factory()->for($user)->create([
+        'username' => 'demo-alt',
+    ]);
+
+    $outsiderAccount = InstagramAccount::factory()->for($otherUser)->create();
+
+    $primaryAge = [
+        '13-17' => 5.00,
+        '18-24' => 35.00,
+        '25-34' => 40.00,
+        '35-44' => 15.00,
+        '45-54' => 5.00,
+        '55-64' => 0.00,
+        '65+' => 0.00,
+    ];
+
+    foreach ($primaryAge as $dimension => $value) {
+        AudienceDemographic::factory()->for($primaryAccount)->create([
+            'type' => DemographicType::Age,
+            'dimension' => $dimension,
+            'value' => $value,
+        ]);
+    }
+
+    foreach (['Male' => 30.00, 'Female' => 65.00, 'Other' => 5.00] as $dimension => $value) {
+        AudienceDemographic::factory()->for($primaryAccount)->create([
+            'type' => DemographicType::Gender,
+            'dimension' => $dimension,
+            'value' => $value,
+        ]);
+    }
+
+    foreach ([
+        'Los Angeles' => 20.00,
+        'New York' => 18.00,
+        'Miami' => 14.00,
+        'San Diego' => 11.00,
+        'Austin' => 8.00,
+        'Seattle' => 7.00,
+        'Chicago' => 6.00,
+        'Denver' => 5.00,
+        'Boston' => 4.00,
+        'Atlanta' => 3.00,
+        'Phoenix' => 2.00,
+    ] as $dimension => $value) {
+        AudienceDemographic::factory()->for($primaryAccount)->create([
+            'type' => DemographicType::City,
+            'dimension' => $dimension,
+            'value' => $value,
+        ]);
+    }
+
+    foreach ([
+        'United States' => 80.00,
+        'Canada' => 8.00,
+        'United Kingdom' => 4.00,
+        'Australia' => 3.00,
+        'Germany' => 2.00,
+        'France' => 1.50,
+        'Italy' => 0.50,
+        'Brazil' => 0.40,
+        'Japan' => 0.30,
+        'Mexico' => 0.20,
+        'India' => 0.10,
+    ] as $dimension => $value) {
+        AudienceDemographic::factory()->for($primaryAccount)->create([
+            'type' => DemographicType::Country,
+            'dimension' => $dimension,
+            'value' => $value,
+        ]);
+    }
+
+    AudienceDemographic::factory()->for($secondaryAccount)->create([
+        'type' => DemographicType::Gender,
+        'dimension' => 'Male',
+        'value' => 95.00,
+    ]);
+
+    AudienceDemographic::factory()->for($outsiderAccount)->create([
+        'type' => DemographicType::Gender,
+        'dimension' => 'Male',
+        'value' => 100.00,
+    ]);
+
+    Livewire::actingAs($user)
+        ->test(Index::class)
+        ->assertSee('Audience Demographics')
+        ->assertViewHas('audienceDemographics.has_data', true)
+        ->assertViewHas('audienceDemographics.age.labels', ['13-17', '18-24', '25-34', '35-44', '45-54', '55-64', '65+'])
+        ->assertViewHas('audienceDemographics.age.values', [5.0, 35.0, 40.0, 15.0, 5.0, 0.0, 0.0])
+        ->assertViewHas('audienceDemographics.gender.values', [125.0, 65.0, 5.0])
+        ->assertViewHas('audienceDemographics.city.labels', ['Los Angeles', 'New York', 'Miami', 'San Diego', 'Austin', 'Seattle', 'Chicago', 'Denver', 'Boston', 'Atlanta'])
+        ->assertViewHas('audienceDemographics.country.labels', ['United States', 'Canada', 'United Kingdom', 'Australia', 'Germany', 'France', 'Italy', 'Brazil', 'Japan', 'Mexico'])
+        ->assertDontSee('India')
+        ->assertDontSee('Audience demographics data is not available yet.')
+        ->set('accountId', (string) $primaryAccount->id)
+        ->assertViewHas('audienceDemographics.gender.values', [30.0, 65.0, 5.0])
+        ->set('accountId', (string) $secondaryAccount->id)
+        ->assertViewHas('audienceDemographics.age.values', [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
+        ->assertViewHas('audienceDemographics.gender.values', [95.0, 0.0, 0.0])
+        ->set('accountId', 'all')
+        ->set('period', '90_days')
+        ->assertDontSee('100.00');
+
+    $emptyUser = User::factory()->create();
+
+    Livewire::actingAs($emptyUser)
+        ->test(Index::class)
+        ->assertSee('Audience demographics data is not available yet. Run a sync to fetch data. Note: Requires 100+ followers.')
+        ->assertViewHas('audienceDemographics.has_data', false);
 });
