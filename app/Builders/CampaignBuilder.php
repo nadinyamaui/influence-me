@@ -32,4 +32,15 @@ class CampaignBuilder extends Builder
             'instagramMedia' => fn ($builder) => $builder->orderByDesc('published_at'),
         ]);
     }
+
+    public function withInstagramMediaAnalyticsMetrics(): self
+    {
+        return $this->with([
+            'instagramMedia' => fn ($builder) => $builder->select([
+                'instagram_media.id',
+                'instagram_media.reach',
+                'instagram_media.engagement_rate',
+            ]),
+        ]);
+    }
 }

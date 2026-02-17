@@ -259,9 +259,108 @@
         @endif
 
         @if ($activeTab === 'analytics')
-            <div class="mt-5 rounded-xl border border-dashed border-zinc-300 p-6 text-sm text-zinc-600 dark:border-zinc-700 dark:text-zinc-300">
-                Analytics tab coming soon.
-            </div>
+            @if (! $clientAnalytics['has_linked_content'])
+                <div class="mt-5 rounded-xl border border-dashed border-zinc-300 p-6 text-sm text-zinc-600 dark:border-zinc-700 dark:text-zinc-300">
+                    No linked content available yet. Link campaign content to unlock client analytics.
+                </div>
+            @else
+                <div class="mt-5 space-y-5">
+                    <div class="grid gap-4 md:grid-cols-2">
+                        <article class="rounded-xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-700 dark:bg-zinc-800/60">
+                            <p class="text-xs uppercase tracking-wide text-zinc-500 dark:text-zinc-300">Total Linked Posts</p>
+                            <p class="mt-2 text-2xl font-semibold text-zinc-900 dark:text-zinc-100">{{ number_format($clientAnalytics['summary']['total_linked_posts']) }}</p>
+                        </article>
+                        <article class="rounded-xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-700 dark:bg-zinc-800/60">
+                            <p class="text-xs uppercase tracking-wide text-zinc-500 dark:text-zinc-300">Total Reach</p>
+                            <p class="mt-2 text-2xl font-semibold text-zinc-900 dark:text-zinc-100">{{ number_format($clientAnalytics['summary']['total_reach']) }}</p>
+                        </article>
+                        <article class="rounded-xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-700 dark:bg-zinc-800/60">
+                            <p class="text-xs uppercase tracking-wide text-zinc-500 dark:text-zinc-300">Total Impressions</p>
+                            <p class="mt-2 text-2xl font-semibold text-zinc-900 dark:text-zinc-100">{{ number_format($clientAnalytics['summary']['total_impressions']) }}</p>
+                        </article>
+                        <article class="rounded-xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-700 dark:bg-zinc-800/60">
+                            <p class="text-xs uppercase tracking-wide text-zinc-500 dark:text-zinc-300">Average Engagement Rate</p>
+                            <p class="mt-2 text-2xl font-semibold text-zinc-900 dark:text-zinc-100">{{ number_format($clientAnalytics['summary']['average_engagement_rate'], 2) }}%</p>
+                        </article>
+                    </div>
+
+                    <article class="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-700 dark:bg-zinc-900">
+                        <h3 class="text-sm font-semibold uppercase tracking-wide text-zinc-600 dark:text-zinc-300">Performance Over Time</h3>
+                        @if (count($clientAnalytics['trend']['labels']) > 0)
+                            <div
+                                class="mt-4 h-64"
+                                wire:key="client-analytics-engagement-{{ md5(json_encode($clientAnalytics['trend'])) }}"
+                                x-data="clientAnalyticsEngagementChart(@js($clientAnalytics['trend']))"
+                                x-init="init()"
+                            >
+                                <canvas x-ref="canvas" role="img" aria-label="Client engagement trend chart"></canvas>
+                            </div>
+                        @else
+                            <div class="mt-4 rounded-xl border border-dashed border-zinc-300 bg-zinc-50 px-4 py-6 text-sm text-zinc-600 dark:border-zinc-700 dark:bg-zinc-900/40 dark:text-zinc-300">
+                                No published linked posts yet, so engagement trend data is not available.
+                            </div>
+                        @endif
+                    </article>
+
+                    <article class="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-700 dark:bg-zinc-900">
+                        <div class="flex flex-wrap items-center justify-between gap-2">
+                            <h3 class="text-sm font-semibold uppercase tracking-wide text-zinc-600 dark:text-zinc-300">Campaign Breakdown</h3>
+                            <p class="text-xs text-zinc-500 dark:text-zinc-400">{{ number_format(count($clientAnalytics['campaign_breakdown'])) }} campaigns</p>
+                        </div>
+
+                        @if (count($clientAnalytics['campaign_breakdown']) === 0)
+                            <p class="mt-4 text-sm text-zinc-600 dark:text-zinc-300">No campaign-level analytics available yet.</p>
+                        @else
+                            <div class="mt-4 overflow-x-auto">
+                                <table class="min-w-full divide-y divide-zinc-200 text-sm dark:divide-zinc-700">
+                                    <thead class="bg-zinc-50 dark:bg-zinc-800/50">
+                                        <tr>
+                                            <th class="px-3 py-2 text-left font-medium text-zinc-600 dark:text-zinc-300">Campaign</th>
+                                            <th class="px-3 py-2 text-right font-medium text-zinc-600 dark:text-zinc-300">Posts</th>
+                                            <th class="px-3 py-2 text-right font-medium text-zinc-600 dark:text-zinc-300">Reach</th>
+                                            <th class="px-3 py-2 text-right font-medium text-zinc-600 dark:text-zinc-300">Avg Engagement</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-zinc-200 dark:divide-zinc-700">
+                                        @foreach ($clientAnalytics['campaign_breakdown'] as $item)
+                                            <tr wire:key="client-analytics-campaign-{{ $item['campaign_id'] }}">
+                                                <td class="px-3 py-2 text-zinc-900 dark:text-zinc-100">{{ $item['campaign_name'] }}</td>
+                                                <td class="px-3 py-2 text-right text-zinc-700 dark:text-zinc-300">{{ number_format($item['posts']) }}</td>
+                                                <td class="px-3 py-2 text-right text-zinc-700 dark:text-zinc-300">{{ number_format($item['reach']) }}</td>
+                                                <td class="px-3 py-2 text-right text-zinc-700 dark:text-zinc-300">{{ number_format($item['average_engagement_rate'], 2) }}%</td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        @endif
+                    </article>
+
+                    <article class="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-700 dark:bg-zinc-900">
+                        <h3 class="text-sm font-semibold uppercase tracking-wide text-zinc-600 dark:text-zinc-300">Comparison to Account Average</h3>
+                        <div class="mt-4 space-y-4">
+                            <div>
+                                <div class="mb-1 flex items-center justify-between gap-2 text-sm text-zinc-700 dark:text-zinc-300">
+                                    <span>Client Linked Content</span>
+                                    <span>{{ number_format($clientAnalytics['comparison']['client_average_engagement_rate'], 2) }}%</span>
+                                </div>
+                                <div class="h-2 rounded-full bg-zinc-200 dark:bg-zinc-700">
+                                    <div class="h-2 rounded-full bg-emerald-500" style="width: {{ $clientAnalytics['comparison']['client_average_percentage'] }}%"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="mb-1 flex items-center justify-between gap-2 text-sm text-zinc-700 dark:text-zinc-300">
+                                    <span>Overall Account Average</span>
+                                    <span>{{ number_format($clientAnalytics['comparison']['account_average_engagement_rate'], 2) }}%</span>
+                                </div>
+                                <div class="h-2 rounded-full bg-zinc-200 dark:bg-zinc-700">
+                                    <div class="h-2 rounded-full bg-blue-500" style="width: {{ $clientAnalytics['comparison']['account_average_percentage'] }}%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+            @endif
         @endif
     </section>
 
@@ -297,3 +396,51 @@
     </flux:modal>
 
 </div>
+
+<script>
+    if (! window.clientAnalyticsEngagementChart) {
+        window.clientAnalyticsEngagementChart = (series) => ({
+            chart: null,
+            init() {
+                if (! window.Chart) {
+                    return;
+                }
+
+                this.chart = new window.Chart(this.$refs.canvas, {
+                    type: 'line',
+                    data: {
+                        labels: series.labels,
+                        datasets: [
+                            {
+                                label: 'Engagement Rate',
+                                data: series.values,
+                                borderColor: '#10b981',
+                                backgroundColor: 'rgba(16, 185, 129, 0.18)',
+                                borderWidth: 2,
+                                pointRadius: 3,
+                                tension: 0.3,
+                                fill: true,
+                            },
+                        ],
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false,
+                            },
+                        },
+                        scales: {
+                            y: {
+                                ticks: {
+                                    callback: (value) => `${value}%`,
+                                },
+                            },
+                        },
+                    },
+                });
+            },
+        });
+    }
+</script>

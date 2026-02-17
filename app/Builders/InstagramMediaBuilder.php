@@ -32,9 +32,36 @@ class InstagramMediaBuilder extends Builder
         return $this->with('instagramAccount');
     }
 
+    public function withCampaignsForClient(int $clientId): self
+    {
+        return $this->with([
+            'campaigns' => fn ($builder) => $builder
+                ->where('campaigns.client_id', $clientId)
+                ->select('campaigns.id', 'campaigns.name'),
+        ]);
+    }
+
     public function forUser(int $userId): self
     {
         return $this->whereHas('instagramAccount', fn (Builder $builder): Builder => $builder->where('user_id', $userId));
+    }
+
+    public function forAnalyticsSummary(): self
+    {
+        return $this->select([
+            'instagram_media.id',
+            'instagram_media.instagram_account_id',
+            'instagram_media.published_at',
+            'instagram_media.reach',
+            'instagram_media.impressions',
+            'instagram_media.engagement_rate',
+        ]);
+    }
+
+    public function publishedChronologically(): self
+    {
+        return $this->orderBy('published_at')
+            ->orderBy('id');
     }
 
     public function filterByMediaType(string $mediaType): self
