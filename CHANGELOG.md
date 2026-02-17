@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
+- RFC 064: added client analytics aggregation service `app/Services/Clients/ClientAnalyticsService.php` to compute linked-content summary metrics, per-post engagement trend series, campaign-level breakdown rows, and client-vs-account engagement comparisons for client detail analytics.
+- RFC 064: extended query-layer helpers in `app/Builders/InstagramMediaBuilder.php` and `app/Builders/CampaignBuilder.php` to support scoped analytics data loading and reusable metric-focused relation queries.
+- RFC 064: replaced the client detail analytics placeholder in `resources/views/pages/clients/show.blade.php` and `app/Livewire/Clients/Show.php` with live analytics UI (summary cards, Chart.js performance-over-time line chart, campaign breakdown table, comparison bars, and empty state) on `/clients/{client}`.
+- RFC 064: expanded feature coverage in `tests/Feature/Clients/ClientDetailPageTest.php` for analytics tab aggregation accuracy, campaign breakdown rendering, trend payload generation, account-average comparison, and empty-state behavior.
 - RFC 063: enhanced content detail analytics in `app/Livewire/Content/Index.php` and `app/Builders/InstagramMediaBuilder.php` with 90-day account-average metric aggregation and per-metric comparison payloads for likes, comments, reach, and engagement rate.
 - RFC 063: updated `resources/views/pages/content/index.blade.php` to display per-post performance comparisons with clear up/down/flat indicators and campaign context messaging (`client`, `campaign`, and "part of campaign with X other posts") in the detail modal.
 - RFC 063: expanded `tests/Feature/Content/ContentGalleryPageTest.php` with feature coverage validating 90-day comparison calculations, exclusion of out-of-window posts from averages, and campaign context rendering.

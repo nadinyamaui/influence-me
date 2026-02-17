@@ -88,7 +88,10 @@ test('owner can view client detail page with summary and tabs', function (): voi
         ->set('activeTab', 'invoices')
         ->assertSee('Invoices tab coming soon.')
         ->set('activeTab', 'analytics')
-        ->assertSee('Analytics tab coming soon.');
+        ->assertSee('Total Linked Posts')
+        ->assertSee('Performance Over Time')
+        ->assertSee('Campaign Breakdown')
+        ->assertSee('Comparison to Account Average');
 });
 
 test('non-owners cannot view client detail page', function (): void {
@@ -155,6 +158,91 @@ test('content tab groups linked media by campaign entity and shows aggregate sta
 
     expect($campaignIds)->toContain($launchCampaign->id)
         ->and($campaignIds)->toContain($secondCampaign->id);
+});
+
+test('analytics tab shows aggregate metrics, campaign breakdown, trend, and account comparison', function (): void {
+    $owner = User::factory()->create();
+    $client = Client::factory()->for($owner)->create();
+    $otherClient = Client::factory()->for($owner)->create();
+    $account = InstagramAccount::factory()->for($owner)->create();
+
+    $campaignA = Campaign::factory()->for($client)->create(['name' => 'Summer Launch']);
+    $campaignB = Campaign::factory()->for($client)->create(['name' => 'Product Review']);
+
+    $mediaOne = InstagramMedia::factory()->for($account)->create([
+        'published_at' => now()->subDays(4),
+        'reach' => 1000,
+        'impressions' => 2000,
+        'engagement_rate' => 4.0,
+    ]);
+    $mediaTwo = InstagramMedia::factory()->for($account)->create([
+        'published_at' => now()->subDays(2),
+        'reach' => 1200,
+        'impressions' => 1500,
+        'engagement_rate' => 5.0,
+    ]);
+    $mediaThree = InstagramMedia::factory()->for($account)->create([
+        'published_at' => now()->subDays(1),
+        'reach' => 300,
+        'impressions' => 400,
+        'engagement_rate' => 2.0,
+    ]);
+    $unlinkedMedia = InstagramMedia::factory()->for($account)->create([
+        'published_at' => now()->subDays(6),
+        'reach' => 800,
+        'impressions' => 1100,
+        'engagement_rate' => 10.0,
+    ]);
+
+    $campaignA->instagramMedia()->attach($mediaOne->id);
+    $campaignA->instagramMedia()->attach($mediaTwo->id);
+    $campaignB->instagramMedia()->attach($mediaThree->id);
+
+    $otherCampaign = Campaign::factory()->for($otherClient)->create(['name' => 'Other Campaign']);
+    $otherCampaign->instagramMedia()->attach($unlinkedMedia->id);
+
+    Livewire::actingAs($owner)
+        ->test(Show::class, ['client' => $client])
+        ->set('activeTab', 'analytics')
+        ->assertSee('Total Linked Posts')
+        ->assertSee('3')
+        ->assertSee('2,500')
+        ->assertSee('3,900')
+        ->assertSee('3.67%')
+        ->assertSee('Performance Over Time')
+        ->assertSee('Campaign Breakdown')
+        ->assertSee('Summer Launch')
+        ->assertSee('Product Review')
+        ->assertSee('2')
+        ->assertSee('1')
+        ->assertSee('2,200')
+        ->assertSee('300')
+        ->assertSee('4.50%')
+        ->assertSee('2.00%')
+        ->assertSee('Comparison to Account Average')
+        ->assertSee('Client Linked Content')
+        ->assertSee('Overall Account Average')
+        ->assertSee('5.25%')
+        ->assertViewHas('clientAnalytics.summary.total_linked_posts', 3)
+        ->assertViewHas('clientAnalytics.summary.total_reach', 2500)
+        ->assertViewHas('clientAnalytics.summary.total_impressions', 3900)
+        ->assertViewHas('clientAnalytics.summary.average_engagement_rate', 3.67)
+        ->assertViewHas('clientAnalytics.trend.values', [4.0, 5.0, 2.0])
+        ->assertViewHas('clientAnalytics.comparison.client_average_engagement_rate', 3.67)
+        ->assertViewHas('clientAnalytics.comparison.account_average_engagement_rate', 5.25);
+});
+
+test('analytics tab shows empty state when no linked content exists', function (): void {
+    $owner = User::factory()->create();
+    $client = Client::factory()->for($owner)->create();
+
+    Livewire::actingAs($owner)
+        ->test(Show::class, ['client' => $client])
+        ->set('activeTab', 'analytics')
+        ->assertSee('No linked content available yet. Link campaign content to unlock client analytics.')
+        ->assertDontSee('Campaign Breakdown')
+        ->assertViewHas('clientAnalytics.has_linked_content', false)
+        ->assertViewHas('clientAnalytics.summary.total_linked_posts', 0);
 });
 
 test('owners can unlink linked media from client content tab', function (): void {

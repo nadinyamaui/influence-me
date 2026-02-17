@@ -9,6 +9,7 @@ use App\Models\Campaign;
 use App\Models\Client;
 use App\Models\InstagramMedia;
 use App\Models\Proposal;
+use App\Services\Clients\ClientAnalyticsService;
 use App\Services\Clients\ClientPortalAccessService;
 use App\Services\Content\ContentClientLinkService;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
@@ -32,6 +33,10 @@ class Show extends Component
 
     public bool $linkedContentLoaded = false;
 
+    public array $clientAnalyticsData = [];
+
+    public bool $clientAnalyticsLoaded = false;
+
     public bool $showCampaignModal = false;
 
     public ?int $editingCampaignId = null;
@@ -46,6 +51,8 @@ class Show extends Component
         $this->linkedContentGroups = collect();
         $this->linkedContentSummaryData = $this->emptyLinkedContentSummary();
         $this->linkedContentLoaded = false;
+        $this->clientAnalyticsData = $this->emptyClientAnalytics();
+        $this->clientAnalyticsLoaded = false;
     }
 
     public function render()
@@ -54,10 +61,15 @@ class Show extends Component
             $this->loadLinkedContent();
         }
 
+        if ($this->activeTab === 'analytics' && ! $this->clientAnalyticsLoaded) {
+            $this->loadClientAnalytics();
+        }
+
         return view('pages.clients.show', [
             'summary' => $this->summary(),
             'linkedContentGroups' => $this->linkedContentGroups ?? collect(),
             'linkedContentSummary' => $this->linkedContentSummaryData,
+            'clientAnalytics' => $this->clientAnalyticsData,
             'campaigns' => $this->campaigns(),
             'campaignProposals' => $this->campaignProposals(),
             'hasPortalAccess' => $this->client->clientUser()->exists(),
@@ -70,6 +82,10 @@ class Show extends Component
     {
         if ($value === 'content') {
             $this->loadLinkedContent();
+        }
+
+        if ($value === 'analytics') {
+            $this->loadClientAnalytics();
         }
     }
 
@@ -127,6 +143,7 @@ class Show extends Component
         $this->authorize('linkToClient', $media);
 
         $linkService->unlink(Auth::user(), $media, $this->client);
+        $this->invalidateClientAnalytics();
 
         if ($this->activeTab === 'content') {
             $this->linkedContentLoaded = false;
@@ -191,6 +208,7 @@ class Show extends Component
             session()->flash('status', 'Campaign updated.');
         }
 
+        $this->invalidateClientAnalytics();
         $this->closeCampaignModal();
     }
 
@@ -200,6 +218,7 @@ class Show extends Component
         $this->authorize('delete', $campaign);
 
         $campaign->delete();
+        $this->invalidateClientAnalytics();
 
         if ($this->activeTab === 'content') {
             $this->linkedContentLoaded = false;
@@ -230,6 +249,11 @@ class Show extends Component
             'total_impressions' => 0,
             'average_engagement_rate' => 0.0,
         ];
+    }
+
+    private function emptyClientAnalytics(): array
+    {
+        return app(ClientAnalyticsService::class)->empty();
     }
 
     private function summary(): array
@@ -319,6 +343,22 @@ class Show extends Component
         return InstagramMedia::query()
             ->forClient($this->client->id)
             ->distinctMediaRows();
+    }
+
+    private function loadClientAnalytics(): void
+    {
+        if ($this->clientAnalyticsLoaded) {
+            return;
+        }
+
+        $this->clientAnalyticsData = app(ClientAnalyticsService::class)->build($this->client);
+        $this->clientAnalyticsLoaded = true;
+    }
+
+    private function invalidateClientAnalytics(): void
+    {
+        $this->clientAnalyticsLoaded = false;
+        $this->clientAnalyticsData = $this->emptyClientAnalytics();
     }
 
     private function campaigns(): EloquentCollection
