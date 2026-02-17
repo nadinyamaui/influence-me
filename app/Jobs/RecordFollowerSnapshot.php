@@ -19,7 +19,7 @@ class RecordFollowerSnapshot implements ShouldQueue
 
     public array $backoff = [60, 300, 900];
 
-    public function __construct(public InstagramAccount $account, public string $snapshotDate)
+    public function __construct(public InstagramAccount $account)
     {
         $this->onQueue('instagram-sync');
     }

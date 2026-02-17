@@ -73,13 +73,11 @@ it('dispatches follower snapshots for each instagram account', function (): void
     $followerSnapshotEvent->run(app());
 
     Bus::assertDispatched(RecordFollowerSnapshot::class, function (RecordFollowerSnapshot $job) use ($firstAccount): bool {
-        return $job->account->is($firstAccount)
-            && $job->snapshotDate === '2026-02-17';
+        return $job->account->is($firstAccount);
     });
 
     Bus::assertDispatched(RecordFollowerSnapshot::class, function (RecordFollowerSnapshot $job) use ($secondAccount): bool {
-        return $job->account->is($secondAccount)
-            && $job->snapshotDate === '2026-02-17';
+        return $job->account->is($secondAccount);
     });
 
     Carbon::setTestNow();

@@ -10,7 +10,7 @@ it('records a follower snapshot for the instagram account', function (): void {
     ]);
     $snapshotDate = '2026-02-17';
 
-    app(RecordFollowerSnapshot::class, ['account' => $account, 'snapshotDate' => $snapshotDate])->handle();
+    app(RecordFollowerSnapshot::class, ['account' => $account])->handle();
     $snapshot = FollowerSnapshot::query()->where('instagram_account_id', $account->id)->first();
 
     expect(FollowerSnapshot::query()->where('instagram_account_id', $account->id)->count())->toBe(1)
@@ -25,11 +25,11 @@ it('updates the existing account snapshot when rerun for the same day', function
     ]);
     $snapshotDate = '2026-02-17';
 
-    app(RecordFollowerSnapshot::class, ['account' => $account, 'snapshotDate' => $snapshotDate])->handle();
+    app(RecordFollowerSnapshot::class, ['account' => $account])->handle();
 
     $account->update(['followers_count' => 1500]);
 
-    app(RecordFollowerSnapshot::class, ['account' => $account, 'snapshotDate' => $snapshotDate])->handle();
+    app(RecordFollowerSnapshot::class, ['account' => $account])->handle();
 
     expect(FollowerSnapshot::query()->where('instagram_account_id', $account->id)->count())->toBe(1)
         ->and(FollowerSnapshot::query()->where('instagram_account_id', $account->id)->value('followers_count'))->toBe(1500);
@@ -38,7 +38,7 @@ it('updates the existing account snapshot when rerun for the same day', function
 it('configures queue and retry backoff settings', function (): void {
     $account = InstagramAccount::factory()->create();
 
-    $job = new RecordFollowerSnapshot($account, '2026-02-17');
+    $job = new RecordFollowerSnapshot($account);
 
     expect($job->queue)->toBe('instagram-sync')
         ->and($job->tries)->toBe(3)
