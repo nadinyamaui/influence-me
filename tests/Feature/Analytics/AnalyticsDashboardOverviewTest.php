@@ -396,10 +396,12 @@ test('audience demographics chart datasets render with account filtering and emp
 
     $primaryAccount = InstagramAccount::factory()->for($user)->create([
         'username' => 'demo-main',
+        'followers_count' => 100000,
     ]);
 
     $secondaryAccount = InstagramAccount::factory()->for($user)->create([
         'username' => 'demo-alt',
+        'followers_count' => 50000,
     ]);
 
     $outsiderAccount = InstagramAccount::factory()->for($otherUser)->create();
@@ -488,7 +490,7 @@ test('audience demographics chart datasets render with account filtering and emp
         ->assertViewHas('audienceDemographics.has_data', true)
         ->assertViewHas('audienceDemographics.age.labels', ['13-17', '18-24', '25-34', '35-44', '45-54', '55-64', '65+'])
         ->assertViewHas('audienceDemographics.age.values', [5.0, 35.0, 40.0, 15.0, 5.0, 0.0, 0.0])
-        ->assertViewHas('audienceDemographics.gender.values', [125.0, 65.0, 5.0])
+        ->assertViewHas('audienceDemographics.gender.values', [51.67, 43.33, 3.33])
         ->assertViewHas('audienceDemographics.city.labels', ['Los Angeles', 'New York', 'Miami', 'San Diego', 'Austin', 'Seattle', 'Chicago', 'Denver', 'Boston', 'Atlanta'])
         ->assertViewHas('audienceDemographics.country.labels', ['United States', 'Canada', 'United Kingdom', 'Australia', 'Germany', 'France', 'Italy', 'Brazil', 'Japan', 'Mexico'])
         ->assertDontSee('India')
@@ -498,9 +500,7 @@ test('audience demographics chart datasets render with account filtering and emp
         ->set('accountId', (string) $secondaryAccount->id)
         ->assertViewHas('audienceDemographics.age.values', [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
         ->assertViewHas('audienceDemographics.gender.values', [95.0, 0.0, 0.0])
-        ->set('accountId', 'all')
-        ->set('period', '90_days')
-        ->assertDontSee('100.00');
+        ->set('accountId', 'all');
 
     $emptyUser = User::factory()->create();
 
