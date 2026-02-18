@@ -28,6 +28,9 @@
                 <flux:navbar.item icon="banknotes" href="#">
                     {{ __('Invoices') }}
                 </flux:navbar.item>
+                <flux:navbar.item icon="tag" :href="route('pricing.products.index')" :current="request()->routeIs('pricing.products.*')" wire:navigate>
+                    {{ __('Pricing') }}
+                </flux:navbar.item>
                 <flux:navbar.item icon="at-symbol" :href="route('instagram-accounts.index')" :current="request()->routeIs('instagram-accounts.index')" wire:navigate>
                     {{ __('Accounts') }}
                 </flux:navbar.item>
@@ -67,6 +70,9 @@
                     </flux:sidebar.item>
                     <flux:sidebar.item icon="banknotes" href="#">
                         {{ __('Invoices') }}
+                    </flux:sidebar.item>
+                    <flux:sidebar.item icon="tag" :href="route('pricing.products.index')" :current="request()->routeIs('pricing.products.*')" wire:navigate>
+                        {{ __('Pricing') }}
                     </flux:sidebar.item>
                 </flux:sidebar.group>
 

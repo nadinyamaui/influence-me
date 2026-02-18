@@ -4,6 +4,8 @@ use App\Enums\AccountType;
 use App\Enums\AnalyticsPeriod;
 use App\Enums\AnalyticsTopContentSort;
 use App\Enums\BillingUnitType;
+use App\Enums\CatalogProductSort;
+use App\Enums\CatalogProductStatusFilter;
 use App\Enums\CatalogSourceType;
 use App\Enums\ClientType;
 use App\Enums\DemographicType;
@@ -294,4 +296,38 @@ it('defines all billing unit type enum cases and labels', function (): void {
         ])
         ->and(BillingUnitType::Deliverable->label())->toBe('Deliverable')
         ->and(BillingUnitType::Package->label())->toBe('Package');
+});
+
+it('defines catalog product status filter options', function (): void {
+    expect(CatalogProductStatusFilter::default())->toBe(CatalogProductStatusFilter::Active)
+        ->and(CatalogProductStatusFilter::values())->toBe([
+            'active',
+            'archived',
+        ])
+        ->and(CatalogProductStatusFilter::options())->toBe([
+            'active' => 'Active',
+            'archived' => 'Archived',
+        ])
+        ->and(CatalogProductStatusFilter::Active->activeValue())->toBeTrue()
+        ->and(CatalogProductStatusFilter::Archived->activeValue())->toBeFalse();
+});
+
+it('defines catalog product sort options', function (): void {
+    expect(CatalogProductSort::default())->toBe(CatalogProductSort::Newest)
+        ->and(CatalogProductSort::values())->toBe([
+            'newest',
+            'oldest',
+            'name_asc',
+            'name_desc',
+            'price_asc',
+            'price_desc',
+        ])
+        ->and(CatalogProductSort::options())->toBe([
+            'newest' => 'Newest',
+            'oldest' => 'Oldest',
+            'name_asc' => 'Name (A-Z)',
+            'name_desc' => 'Name (Z-A)',
+            'price_asc' => 'Price (Low to High)',
+            'price_desc' => 'Price (High to Low)',
+        ]);
 });

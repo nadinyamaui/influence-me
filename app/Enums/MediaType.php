@@ -8,6 +8,14 @@ enum MediaType: string
     case Reel = 'reel';
     case Story = 'story';
 
+    public static function values(): array
+    {
+        return array_map(
+            static fn (MediaType $mediaType): string => $mediaType->value,
+            self::cases(),
+        );
+    }
+
     public static function filters(): array
     {
         return array_merge(

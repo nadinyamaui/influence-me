@@ -11,6 +11,7 @@ use App\Models\Proposal;
 use App\Models\ProposalLineItem;
 use App\Models\User;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+
 use function Pest\Laravel\actingAs;
 
 it('scopes catalog products to owner and applies filters', function (): void {
@@ -47,6 +48,45 @@ it('scopes catalog products to owner and applies filters', function (): void {
     expect($results)->toHaveCount(1)
         ->and($results->first()->user_id)->toBe($owner->id)
         ->and($results->first()->name)->toBe('Instagram Reel');
+});
+
+it('applies catalog product active filter and sort options', function (): void {
+    $user = User::factory()->create();
+
+    CatalogProduct::factory()->for($user)->create([
+        'name' => 'Zeta Product',
+        'is_active' => true,
+        'base_price' => 250,
+    ]);
+
+    CatalogProduct::factory()->for($user)->create([
+        'name' => 'Alpha Product',
+        'is_active' => true,
+        'base_price' => 100,
+    ]);
+
+    CatalogProduct::factory()->for($user)->create([
+        'name' => 'Archived Product',
+        'is_active' => false,
+        'base_price' => 1000,
+    ]);
+
+    $activeNames = CatalogProduct::query()
+        ->forUser($user->id)
+        ->filterByActive(true)
+        ->applySort('name_asc')
+        ->pluck('name')
+        ->all();
+
+    $archivedNames = CatalogProduct::query()
+        ->forUser($user->id)
+        ->filterByActive(false)
+        ->applySort('price_desc')
+        ->pluck('name')
+        ->all();
+
+    expect($activeNames)->toBe(['Alpha Product', 'Zeta Product'])
+        ->and($archivedNames)->toBe(['Archived Product']);
 });
 
 it('creates catalog product and plan records with scoped builder helpers', function (): void {
