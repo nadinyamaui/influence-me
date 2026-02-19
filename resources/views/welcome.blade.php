@@ -1,7 +1,5 @@
 <x-layouts.marketing title="Influence Me | The Operating System for Creators">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;600;700;800&family=DM+Serif+Display:ital@0;1&display=swap');
-
         .font-display {
             font-family: 'DM Serif Display', serif;
         }
