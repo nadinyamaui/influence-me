@@ -29,8 +29,6 @@ class DatabaseSeeder extends Seeder
                 ->toArray()
         );
 
-        if (CatalogProduct::query()->doesntExist()) {
-            $this->call(CatalogProductSeeder::class);
-        }
+        $this->call(CatalogProductSeeder::class);
     }
 }
