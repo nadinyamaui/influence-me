@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\CatalogProduct;
 use App\Models\InstagramAccount;
 use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
@@ -13,20 +14,23 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
 
-        User::factory()
-            ->has(
-                InstagramAccount::factory()
-                    ->primary()
-                    ->business()
-                    ->state([
-                        'instagram_user_id' => '17841400000000000',
-                        'username' => 'testinfluencer',
-                    ]),
-                'instagramAccounts'
-            )
-            ->create([
-                'name' => 'Test User',
-                'email' => 'test@example.com',
-            ]);
+        $user = User::query()->firstOrCreate(
+            ['email' => 'test@example.com'],
+            ['name' => 'Test User']
+        );
+
+        $user->instagramAccounts()->firstOrCreate(
+            ['instagram_user_id' => '17841400000000000'],
+            InstagramAccount::factory()
+                ->primary()
+                ->business()
+                ->state(['username' => 'testinfluencer'])
+                ->make(['user_id' => $user->id, 'instagram_user_id' => '17841400000000000'])
+                ->toArray()
+        );
+
+        if (CatalogProduct::query()->doesntExist()) {
+            $this->call(CatalogProductSeeder::class);
+        }
     }
 }
