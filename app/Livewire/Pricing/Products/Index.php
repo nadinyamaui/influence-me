@@ -9,6 +9,7 @@ use App\Models\CatalogProduct;
 use App\Services\Catalog\CatalogProductService;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -17,12 +18,16 @@ class Index extends Component
     use AuthorizesRequests;
     use WithPagination;
 
+    #[Url(as: 'q', except: '')]
     public string $search = '';
 
+    #[Url(except: 'active')]
     public string $status = 'active';
 
+    #[Url(except: 'all')]
     public string $platform = 'all';
 
+    #[Url(except: 'newest')]
     public string $sort = 'newest';
 
     public function mount(): void
@@ -62,6 +67,48 @@ class Index extends Component
         $this->resetPage();
     }
 
+    public function sortBy(string $column): void
+    {
+        [$ascending, $descending] = $this->sortPair($column);
+        if ($ascending === null || $descending === null) {
+            return;
+        }
+
+        if ($this->sort === $ascending) {
+            $this->sort = $descending;
+        } elseif ($this->sort === $descending) {
+            $this->sort = $ascending;
+        } else {
+            $this->sort = $column === 'created_at' ? $descending : $ascending;
+        }
+
+        $this->resetPage();
+    }
+
+    public function isSortedBy(string $column): bool
+    {
+        [$ascending, $descending] = $this->sortPair($column);
+        if ($ascending === null || $descending === null) {
+            return false;
+        }
+
+        return in_array($this->sort, [$ascending, $descending], true);
+    }
+
+    public function sortDirection(string $column): ?string
+    {
+        [$ascending, $descending] = $this->sortPair($column);
+        if ($ascending === null || $descending === null) {
+            return null;
+        }
+
+        return match ($this->sort) {
+            $ascending => 'asc',
+            $descending => 'desc',
+            default => null,
+        };
+    }
+
     public function archive(CatalogProductService $catalogProductService, int $productId): void
     {
         $product = $this->resolveOwnedProduct($productId);
@@ -88,7 +135,6 @@ class Index extends Component
             'products' => $this->products(),
             'statusOptions' => CatalogProductStatusFilter::options(),
             'platformOptions' => PlatformType::cases(),
-            'sortOptions' => CatalogProductSort::options(),
         ])->layout('layouts.app', [
             'title' => __('Pricing Products'),
         ]);
@@ -114,5 +160,15 @@ class Index extends Component
             ->forUser((int) auth()->id())
             ->whereKey($productId)
             ->firstOrFail();
+    }
+
+    private function sortPair(string $column): array
+    {
+        return match ($column) {
+            'name' => [CatalogProductSort::NameAsc->value, CatalogProductSort::NameDesc->value],
+            'price' => [CatalogProductSort::PriceAsc->value, CatalogProductSort::PriceDesc->value],
+            'created_at' => [CatalogProductSort::Oldest->value, CatalogProductSort::Newest->value],
+            default => [null, null],
+        };
     }
 }

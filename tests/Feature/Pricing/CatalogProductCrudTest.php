@@ -74,6 +74,40 @@ test('pricing products index supports search platform status and sort filters th
         ->assertSee('Archived Product');
 });
 
+test('pricing products table header sorting toggles direction', function (): void {
+    $user = User::factory()->create();
+
+    CatalogProduct::factory()->for($user)->create([
+        'name' => 'Banana Package',
+        'platform' => PlatformType::Instagram,
+        'is_active' => true,
+        'base_price' => 700,
+    ]);
+
+    CatalogProduct::factory()->for($user)->create([
+        'name' => 'Apple Package',
+        'platform' => PlatformType::Instagram,
+        'is_active' => true,
+        'base_price' => 200,
+    ]);
+
+    Livewire::actingAs($user)
+        ->test(ProductsIndex::class)
+        ->call('sortBy', 'name')
+        ->assertSet('sort', 'name_asc')
+        ->assertSeeInOrder(['Apple Package', 'Banana Package'])
+        ->call('sortBy', 'name')
+        ->assertSet('sort', 'name_desc')
+        ->assertSeeInOrder(['Banana Package', 'Apple Package'])
+        ->call('sortBy', 'price')
+        ->assertSet('sort', 'price_asc')
+        ->assertSeeInOrder(['Apple Package', 'Banana Package'])
+        ->call('sortBy', 'created_at')
+        ->assertSet('sort', 'newest')
+        ->call('sortBy', 'created_at')
+        ->assertSet('sort', 'oldest');
+});
+
 test('pricing products list shows empty state', function (): void {
     $user = User::factory()->create();
 
