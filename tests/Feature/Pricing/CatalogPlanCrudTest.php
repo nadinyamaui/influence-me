@@ -1,7 +1,6 @@
 <?php
 
-use App\Livewire\Pricing\Plans\Create as PlansCreate;
-use App\Livewire\Pricing\Plans\Edit as PlansEdit;
+use App\Livewire\Pricing\Plans\Form as PlansForm;
 use App\Livewire\Pricing\Plans\Index as PlansIndex;
 use App\Models\CatalogPlan;
 use App\Models\CatalogPlanItem;
@@ -91,7 +90,7 @@ test('influencer can create pricing plans with nested items', function (): void 
     $productTwo = CatalogProduct::factory()->for($user)->create(['base_price' => 700]);
 
     Livewire::actingAs($user)
-        ->test(PlansCreate::class)
+        ->test(PlansForm::class)
         ->set('name', 'Launch Bundle')
         ->set('description', 'Two-deliverable bundle')
         ->set('currency', 'usd')
@@ -145,7 +144,7 @@ test('create form validates plan composition and ownership rules', function (): 
     $outsiderProduct = CatalogProduct::factory()->for($outsider)->create();
 
     Livewire::actingAs($user)
-        ->test(PlansCreate::class)
+        ->test(PlansForm::class)
         ->set('name', '')
         ->set('currency', 'US')
         ->set('bundle_price', '-1')
@@ -167,7 +166,7 @@ test('create form validates plan composition and ownership rules', function (): 
         ]);
 
     Livewire::actingAs($user)
-        ->test(PlansCreate::class)
+        ->test(PlansForm::class)
         ->set('name', 'No Items Plan')
         ->set('items', [])
         ->call('save')
@@ -192,7 +191,7 @@ test('influencer can edit pricing plans and replace nested items', function (): 
     ]);
 
     Livewire::actingAs($user)
-        ->test(PlansEdit::class, ['plan' => $plan])
+        ->test(PlansForm::class, ['plan' => $plan])
         ->set('name', 'Updated Plan Name')
         ->set('description', 'Updated description')
         ->set('bundle_price', '1800.00')
