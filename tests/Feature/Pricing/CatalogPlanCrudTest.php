@@ -84,6 +84,15 @@ test('pricing plans list shows empty state', function (): void {
         ->assertSee('No pricing plans found for the selected filters.');
 });
 
+test('plan form hides unit override and row total columns', function (): void {
+    $user = User::factory()->create();
+
+    Livewire::actingAs($user)
+        ->test(PlansForm::class)
+        ->assertDontSee('Unit Override')
+        ->assertDontSee('Row Total');
+});
+
 test('influencer can create pricing plans with nested items', function (): void {
     $user = User::factory()->create();
     $productOne = CatalogProduct::factory()->for($user)->create(['base_price' => 450]);
@@ -105,7 +114,7 @@ test('influencer can create pricing plans with nested items', function (): void 
             [
                 'catalog_product_id' => (string) $productTwo->id,
                 'quantity' => '1',
-                'unit_price_override' => '550',
+                'unit_price_override' => '',
             ],
         ])
         ->call('save')
@@ -134,25 +143,8 @@ test('influencer can create pricing plans with nested items', function (): void 
         'catalog_plan_id' => $plan->id,
         'catalog_product_id' => $productTwo->id,
         'quantity' => '1.00',
-        'unit_price_override' => '550.00',
+        'unit_price_override' => null,
     ]);
-});
-
-test('plan row total preview updates when quantity or unit override changes', function (): void {
-    $user = User::factory()->create();
-    $product = CatalogProduct::factory()->for($user)->create([
-        'base_price' => 100,
-        'currency' => 'USD',
-    ]);
-
-    Livewire::actingAs($user)
-        ->test(PlansForm::class)
-        ->set('items.0.catalog_product_id', (string) $product->id)
-        ->assertSee('USD 100.00')
-        ->set('items.0.quantity', '2')
-        ->assertSee('USD 200.00')
-        ->set('items.0.unit_price_override', '75')
-        ->assertSee('USD 150.00');
 });
 
 test('create form validates plan composition and ownership rules', function (): void {
@@ -169,7 +161,7 @@ test('create form validates plan composition and ownership rules', function (): 
             [
                 'catalog_product_id' => (string) $outsiderProduct->id,
                 'quantity' => '0',
-                'unit_price_override' => '-1',
+                'unit_price_override' => '',
             ],
         ])
         ->call('save')
@@ -179,7 +171,6 @@ test('create form validates plan composition and ownership rules', function (): 
             'bundle_price',
             'items.0.catalog_product_id',
             'items.0.quantity',
-            'items.0.unit_price_override',
         ]);
 
     Livewire::actingAs($user)
@@ -218,7 +209,7 @@ test('influencer can edit pricing plans and replace nested items', function (): 
             [
                 'catalog_product_id' => (string) $productTwo->id,
                 'quantity' => '3',
-                'unit_price_override' => '600',
+                'unit_price_override' => '',
             ],
         ])
         ->call('save')
@@ -237,7 +228,7 @@ test('influencer can edit pricing plans and replace nested items', function (): 
         'catalog_plan_id' => $plan->id,
         'catalog_product_id' => $productTwo->id,
         'quantity' => '3.00',
-        'unit_price_override' => '600.00',
+        'unit_price_override' => null,
     ]);
 
     $this->assertDatabaseMissing('catalog_plan_items', [

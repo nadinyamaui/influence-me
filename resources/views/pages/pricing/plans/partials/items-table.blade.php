@@ -1,6 +1,5 @@
 @php
-    $productsById = $products->keyBy('id');
-    $itemsDescription = $itemsDescription ?? 'Adjust products, quantities, and optional unit overrides.';
+    $itemsDescription = $itemsDescription ?? 'Adjust products and quantities for this plan.';
     $showProductsEmptyMessage = $showProductsEmptyMessage ?? false;
     $productsEmptyMessage = $productsEmptyMessage ?? 'Add at least one active pricing product before composing a plan.';
 @endphp
@@ -31,23 +30,11 @@
                 <tr>
                     <th class="px-3 py-3 text-left font-medium text-zinc-600 dark:text-zinc-300">Product</th>
                     <th class="px-3 py-3 text-left font-medium text-zinc-600 dark:text-zinc-300">Qty</th>
-                    <th class="px-3 py-3 text-left font-medium text-zinc-600 dark:text-zinc-300">Unit Override</th>
-                    <th class="px-3 py-3 text-left font-medium text-zinc-600 dark:text-zinc-300">Row Total</th>
                     <th class="px-3 py-3 text-right font-medium text-zinc-600 dark:text-zinc-300">Actions</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-zinc-100 dark:divide-zinc-800">
                 @foreach ($items as $index => $item)
-                    @php
-                        $selectedProduct = $productsById->get((int) ($item['catalog_product_id'] ?: 0));
-                        $quantity = is_numeric($item['quantity'] ?? null) ? (float) $item['quantity'] : 0;
-                        $override = $item['unit_price_override'] ?? '';
-                        $unitPrice = $override !== '' && is_numeric($override)
-                            ? (float) $override
-                            : (float) ($selectedProduct?->base_price ?? 0);
-                        $rowTotal = $quantity > 0 ? $quantity * $unitPrice : 0;
-                    @endphp
-
                     <tr wire:key="plan-item-row-{{ $index }}" class="align-top">
                         <td class="min-w-72 px-3 py-3">
                             <flux:field>
@@ -67,18 +54,6 @@
                                 <flux:input wire:model.live.debounce.150ms="items.{{ $index }}.quantity" name="items.{{ $index }}.quantity" type="number" step="0.01" min="0.01" required />
                                 <flux:error name="items.{{ $index }}.quantity" />
                             </flux:field>
-                        </td>
-                        <td class="min-w-40 px-3 py-3">
-                            <flux:field>
-                                <flux:label class="sr-only">Unit Override</flux:label>
-                                <flux:input wire:model.live.debounce.150ms="items.{{ $index }}.unit_price_override" name="items.{{ $index }}.unit_price_override" type="number" step="0.01" min="0" placeholder="Optional" />
-                                <flux:error name="items.{{ $index }}.unit_price_override" />
-                            </flux:field>
-                        </td>
-                        <td class="px-3 py-3">
-                            <p class="mt-2 text-sm font-semibold text-zinc-900 dark:text-zinc-100">
-                                {{ strtoupper($currency) }} {{ number_format($rowTotal, 2) }}
-                            </p>
                         </td>
                         <td class="px-3 py-3">
                             <div class="flex justify-end">

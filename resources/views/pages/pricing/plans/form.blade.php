@@ -78,8 +78,8 @@
 
         @include('pages.pricing.plans.partials.items-table', [
             'itemsDescription' => $isEditing
-                ? 'Adjust products, quantities, and optional unit overrides.'
-                : 'Select active products, assign quantity, and optionally override unit pricing.',
+                ? 'Adjust products and quantities.'
+                : 'Select active products and assign quantity.',
             'showProductsEmptyMessage' => ! $isEditing,
         ])
 
