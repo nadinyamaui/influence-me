@@ -1,43 +1,122 @@
 <x-layouts.marketing title="Privacy Policy | Influence Me" body-class="bg-slate-50 text-slate-700">
-        <main class="mx-auto max-w-4xl px-6 pb-16 pt-28 sm:pb-20 sm:pt-32">
-            <div class="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm sm:p-12">
-                <div class="mb-10 border-b border-slate-100 pb-6">
-                    <a href="{{ route('home') }}" class="text-sm font-medium text-indigo-600 hover:text-indigo-500">Back to home</a>
-                    <h1 class="mt-4 text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl">Privacy Policy</h1>
-                    <p class="mt-3 text-sm text-slate-500">Last updated: {{ now()->toFormattedDateString() }}</p>
-                </div>
-
-                <div class="space-y-8 text-sm leading-7 text-slate-600 sm:text-base">
-                    <section class="space-y-3">
-                        <h2 class="text-xl font-semibold text-slate-900">1. Information We Collect</h2>
-                        <p>Influence Me collects account profile details, connected platform account identifiers, published media metadata, proposal and invoice records, and basic usage analytics required to provide the product features.</p>
-                    </section>
-
-                    <section class="space-y-3">
-                        <h2 class="text-xl font-semibold text-slate-900">2. How We Use Information</h2>
-                        <p>We use collected information to authenticate users, sync connected account data, power content and analytics dashboards, facilitate client collaboration, and process invoice workflows including Stripe-powered payments.</p>
-                    </section>
-
-                    <section class="space-y-3">
-                        <h2 class="text-xl font-semibold text-slate-900">3. Data Sharing</h2>
-                        <p>We do not sell personal data. Data is shared only with service providers needed to operate the platform, such as infrastructure hosting, Instagram and TikTok platform integrations, and Stripe for payment processing.</p>
-                    </section>
-
-                    <section class="space-y-3">
-                        <h2 class="text-xl font-semibold text-slate-900">4. Data Ownership and Access</h2>
-                        <p>Influencer users can access only their own workspace data. Client users can access only records scoped to their client organization, including proposals, invoices, and explicitly shared analytics.</p>
-                    </section>
-
-                    <section class="space-y-3">
-                        <h2 class="text-xl font-semibold text-slate-900">5. Security and Retention</h2>
-                        <p>We apply technical and organizational safeguards designed to protect data in transit and at rest. We retain data only as long as needed for product operation, legal compliance, and legitimate business requirements.</p>
-                    </section>
-
-                    <section class="space-y-3">
-                        <h2 class="text-xl font-semibold text-slate-900">6. Contact</h2>
-                        <p>For privacy questions or data requests, contact our support team at <a href="mailto:privacy@influenceme.app" class="font-medium text-indigo-600 hover:text-indigo-500">privacy@influenceme.app</a>.</p>
-                    </section>
-                </div>
+    <main class="mx-auto max-w-4xl px-6 pb-16 pt-28 sm:pb-20 sm:pt-32">
+        <div class="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm sm:p-12">
+            <div class="mb-10 border-b border-slate-100 pb-6">
+                <a href="{{ route('home') }}" class="text-sm font-medium text-indigo-600 hover:text-indigo-500">Back to home</a>
+                <h1 class="mt-4 text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl">Privacy Policy</h1>
+                <p class="mt-3 text-sm text-slate-500">Last updated: {{ now()->toFormattedDateString() }}</p>
             </div>
-        </main>
+
+            <div class="space-y-8 text-sm leading-7 text-slate-600 sm:text-base">
+                <section class="space-y-3">
+                    <h2 class="text-xl font-semibold text-slate-900">1. Scope and Controller Information</h2>
+                    <p>This Privacy Policy explains how Influence Me collects, uses, discloses, stores, and otherwise processes information when you access or use the Influence Me websites, applications, dashboards, client portal, integrations, APIs, and related services (collectively, the "Service"). Depending on your jurisdiction, Influence Me acts as a data controller for account administration, service delivery, product security, billing operations, and legal compliance activities. This policy applies to influencer users, client users, prospective customers, and authorized representatives who interact with the Service.</p>
+                    <p>By creating an account, connecting third-party platforms, sending content through workflows, or using the client portal, you acknowledge the data practices described in this Privacy Policy. If you do not agree with this policy, do not use the Service.</p>
+                </section>
+
+                <section class="space-y-3">
+                    <h2 class="text-xl font-semibold text-slate-900">2. Information We Collect</h2>
+                    <p>We collect information directly from you, automatically through use of the Service, and from connected partners you authorize. Categories of information we process may include:</p>
+                    <ul class="list-disc space-y-2 pl-6">
+                        <li><span class="font-medium text-slate-800">Account and identity data:</span> name, username, email address, password hash, profile image, timezone, account role, organization associations, and authentication metadata.</li>
+                        <li><span class="font-medium text-slate-800">Connected platform data:</span> Instagram and TikTok account identifiers, profile metadata, media objects, engagement and audience insights, demographic summaries, account sync status, token expiry metadata, and related integration logs.</li>
+                        <li><span class="font-medium text-slate-800">Content and collaboration data:</span> campaign records, content links, scheduling plans, proposal drafts and status history, revision notes, internal workspace references, and client-portal scoped data views.</li>
+                        <li><span class="font-medium text-slate-800">Financial and transaction data:</span> invoices, invoice line items, currency and pricing context, payment status, Stripe checkout references, and webhook event metadata. Full payment card numbers are processed by Stripe and not stored by Influence Me.</li>
+                        <li><span class="font-medium text-slate-800">Support and communications data:</span> service inquiries, legal and privacy requests, troubleshooting details, and correspondence records.</li>
+                        <li><span class="font-medium text-slate-800">Technical and usage data:</span> IP address, device and browser characteristics, session activity, approximate geolocation inferred from IP, referral source, and operational diagnostics used for reliability and security.</li>
+                    </ul>
+                </section>
+
+                <section class="space-y-3">
+                    <h2 class="text-xl font-semibold text-slate-900">3. Sources of Data</h2>
+                    <p>We receive information from multiple sources:</p>
+                    <ul class="list-disc space-y-2 pl-6">
+                        <li>Information you submit through registration, profile setup, billing workflows, support forms, proposal collaboration, and portal interactions.</li>
+                        <li>Information from integrations you authorize, including Instagram, TikTok, and Stripe.</li>
+                        <li>Information generated by system processes such as sync jobs, analytics summarization, account security monitoring, and audit events.</li>
+                        <li>Information from service providers supporting hosting, authentication, monitoring, messaging, and transactional operations.</li>
+                    </ul>
+                </section>
+
+                <section class="space-y-3">
+                    <h2 class="text-xl font-semibold text-slate-900">4. How We Use Information</h2>
+                    <p>We process personal information to operate and improve the Service, including to:</p>
+                    <ul class="list-disc space-y-2 pl-6">
+                        <li>Authenticate users, manage sessions, and enforce guard-specific access boundaries for influencer and client roles.</li>
+                        <li>Connect authorized social accounts and run profile, media, insights, demographics, and token refresh workflows.</li>
+                        <li>Generate and manage proposals, invoices, campaign associations, scheduling plans, and client collaboration portals.</li>
+                        <li>Process payments through Stripe, reconcile transaction outcomes, and maintain required accounting records.</li>
+                        <li>Detect fraud, abuse, security incidents, suspicious authentication behavior, and integration misuse.</li>
+                        <li>Provide service communications, product notices, policy updates, and legal or regulatory notifications.</li>
+                        <li>Perform analytics and aggregate reporting to improve product quality, reliability, and workflow performance.</li>
+                        <li>Comply with legal obligations, enforce contractual rights, and protect the safety and rights of users and third parties.</li>
+                    </ul>
+                </section>
+
+                <section class="space-y-3">
+                    <h2 class="text-xl font-semibold text-slate-900">5. Legal Bases for Processing</h2>
+                    <p>Where required by law, we rely on one or more legal bases for processing personal information: contractual necessity to provide the Service you request, legitimate interests in operating and securing the Service, compliance with legal obligations, protection of vital interests, and consent where specifically requested. If consent is the legal basis, you may withdraw consent at any time, subject to processing already performed and legal retention requirements.</p>
+                </section>
+
+                <section class="space-y-3">
+                    <h2 class="text-xl font-semibold text-slate-900">6. Cookies, Similar Technologies, and Analytics</h2>
+                    <p>We use cookies and similar technologies to maintain authenticated sessions, remember settings, secure interactions, and measure performance. Disabling certain cookies may limit core functionality, including login persistence, dashboard state, and workflow continuity. Browser or device-level controls may allow you to manage cookie preferences, but such controls may not affect all service-side storage and logging used for security and fraud prevention.</p>
+                </section>
+
+                <section class="space-y-3">
+                    <h2 class="text-xl font-semibold text-slate-900">7. Data Sharing and Disclosures</h2>
+                    <p>We do not sell personal information. We disclose information only as reasonably necessary for business operations, legal compliance, and rights protection, including with:</p>
+                    <ul class="list-disc space-y-2 pl-6">
+                        <li>Infrastructure, hosting, logging, communications, and support vendors under contractual safeguards.</li>
+                        <li>Integration providers you authorize, such as Instagram, TikTok, and Stripe, each of which has independent privacy practices.</li>
+                        <li>Professional advisors, insurers, and auditors under confidentiality obligations.</li>
+                        <li>Government authorities or counterparties where legally required or where necessary to investigate misuse, fraud, or security incidents.</li>
+                        <li>Successors in merger, financing, acquisition, reorganization, bankruptcy, or asset-transfer events, subject to applicable legal constraints.</li>
+                    </ul>
+                    <p>When client-portal collaboration is enabled, information scoped to a client relationship may be visible to authorized client users designated by the influencer workspace owner.</p>
+                </section>
+
+                <section class="space-y-3">
+                    <h2 class="text-xl font-semibold text-slate-900">8. International Data Transfers</h2>
+                    <p>The Service may operate across multiple regions. Information may be transferred to and processed in countries other than your own, including where data protection laws may differ. Where required, we implement transfer mechanisms and contractual protections intended to address cross-border processing risks.</p>
+                </section>
+
+                <section class="space-y-3">
+                    <h2 class="text-xl font-semibold text-slate-900">9. Data Retention</h2>
+                    <p>We retain information for as long as necessary to provide requested services, maintain product integrity, resolve disputes, enforce agreements, and satisfy legal, tax, accounting, and audit obligations. Retention periods vary by data type, user role, security necessity, and regulatory requirements. We may retain de-identified or aggregated information for analytics and service improvement where permitted by law.</p>
+                </section>
+
+                <section class="space-y-3">
+                    <h2 class="text-xl font-semibold text-slate-900">10. Security Measures</h2>
+                    <p>We apply administrative, technical, and organizational safeguards designed to protect information in transit and at rest, including access controls, role-based boundaries, logging, and security monitoring. No method of transmission or storage is guaranteed to be absolutely secure. You are responsible for maintaining credential confidentiality, controlling account access, and promptly notifying us of suspected unauthorized use.</p>
+                </section>
+
+                <section class="space-y-3">
+                    <h2 class="text-xl font-semibold text-slate-900">11. Your Rights and Choices</h2>
+                    <p>Subject to applicable law and verification, you may have rights to request access, correction, deletion, restriction, portability, or objection to certain processing. You may also request information about disclosures and, where applicable, designate an authorized agent. We may deny or limit requests where exemptions apply, where identity cannot be verified, or where fulfillment would infringe legal obligations or rights of others.</p>
+                    <p>To exercise privacy rights, contact us using the details below. We may request additional information to verify identity and request scope.</p>
+                </section>
+
+                <section class="space-y-3">
+                    <h2 class="text-xl font-semibold text-slate-900">12. Third-Party Services and External Policies</h2>
+                    <p>The Service integrates with or links to third-party products and services. Their data practices are governed by their own terms and policies. Influence Me is not responsible for third-party privacy, security, operational, or compliance practices, including platform changes, API limitations, account suspensions, or independent processing performed by those providers.</p>
+                </section>
+
+                <section class="space-y-3">
+                    <h2 class="text-xl font-semibold text-slate-900">13. Children's Privacy</h2>
+                    <p>The Service is intended for professional users and is not directed to children under the age required by local law to independently consent to data processing. If you believe a child has provided personal information in violation of this policy, contact us and we will take commercially reasonable steps to investigate and address the report.</p>
+                </section>
+
+                <section class="space-y-3">
+                    <h2 class="text-xl font-semibold text-slate-900">14. Policy Updates</h2>
+                    <p>We may revise this Privacy Policy from time to time to reflect changes in law, technology, service functionality, integrations, and risk controls. Updated versions become effective when posted unless a different effective date is stated. Continued use of the Service after an update constitutes acknowledgment of the revised policy.</p>
+                </section>
+
+                <section class="space-y-3">
+                    <h2 class="text-xl font-semibold text-slate-900">15. Contact</h2>
+                    <p>For privacy questions, rights requests, or data-protection concerns, contact <a href="mailto:privacy@influenceme.app" class="font-medium text-indigo-600 hover:text-indigo-500">privacy@influenceme.app</a>. We may require verification details before fulfilling sensitive requests.</p>
+                </section>
+            </div>
+        </div>
+    </main>
 </x-layouts.marketing>
