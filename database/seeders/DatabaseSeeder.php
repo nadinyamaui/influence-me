@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\CatalogProduct;
 use App\Models\InstagramAccount;
 use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
@@ -28,5 +29,9 @@ class DatabaseSeeder extends Seeder
                 'name' => 'Test User',
                 'email' => 'test@example.com',
             ]);
+
+        if (CatalogProduct::query()->doesntExist()) {
+            $this->call(CatalogProductSeeder::class);
+        }
     }
 }
