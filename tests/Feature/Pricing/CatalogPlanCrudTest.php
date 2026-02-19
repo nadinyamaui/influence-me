@@ -138,6 +138,23 @@ test('influencer can create pricing plans with nested items', function (): void 
     ]);
 });
 
+test('plan row total preview updates when quantity or unit override changes', function (): void {
+    $user = User::factory()->create();
+    $product = CatalogProduct::factory()->for($user)->create([
+        'base_price' => 100,
+        'currency' => 'USD',
+    ]);
+
+    Livewire::actingAs($user)
+        ->test(PlansForm::class)
+        ->set('items.0.catalog_product_id', (string) $product->id)
+        ->assertSee('USD 100.00')
+        ->set('items.0.quantity', '2')
+        ->assertSee('USD 200.00')
+        ->set('items.0.unit_price_override', '75')
+        ->assertSee('USD 150.00');
+});
+
 test('create form validates plan composition and ownership rules', function (): void {
     $user = User::factory()->create();
     $outsider = User::factory()->create();

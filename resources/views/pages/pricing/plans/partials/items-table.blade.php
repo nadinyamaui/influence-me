@@ -52,7 +52,7 @@
                         <td class="min-w-72 px-3 py-3">
                             <flux:field>
                                 <flux:label class="sr-only">Product</flux:label>
-                                <flux:select wire:model="items.{{ $index }}.catalog_product_id" name="items.{{ $index }}.catalog_product_id" required>
+                                <flux:select wire:model.live="items.{{ $index }}.catalog_product_id" name="items.{{ $index }}.catalog_product_id" required>
                                     <option value="">Select a product</option>
                                     @foreach ($products as $product)
                                         <option value="{{ $product->id }}">{{ $product->name }} ({{ $product->currency }} {{ number_format((float) $product->base_price, 2) }})</option>
@@ -64,14 +64,14 @@
                         <td class="min-w-32 px-3 py-3">
                             <flux:field>
                                 <flux:label class="sr-only">Qty</flux:label>
-                                <flux:input wire:model="items.{{ $index }}.quantity" name="items.{{ $index }}.quantity" type="number" step="0.01" min="0.01" required />
+                                <flux:input wire:model.live.debounce.150ms="items.{{ $index }}.quantity" name="items.{{ $index }}.quantity" type="number" step="0.01" min="0.01" required />
                                 <flux:error name="items.{{ $index }}.quantity" />
                             </flux:field>
                         </td>
                         <td class="min-w-40 px-3 py-3">
                             <flux:field>
                                 <flux:label class="sr-only">Unit Override</flux:label>
-                                <flux:input wire:model="items.{{ $index }}.unit_price_override" name="items.{{ $index }}.unit_price_override" type="number" step="0.01" min="0" placeholder="Optional" />
+                                <flux:input wire:model.live.debounce.150ms="items.{{ $index }}.unit_price_override" name="items.{{ $index }}.unit_price_override" type="number" step="0.01" min="0" placeholder="Optional" />
                                 <flux:error name="items.{{ $index }}.unit_price_override" />
                             </flux:field>
                         </td>
