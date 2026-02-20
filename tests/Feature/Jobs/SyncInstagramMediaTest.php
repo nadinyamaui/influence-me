@@ -2,7 +2,7 @@
 
 use App\Enums\MediaType;
 use App\Jobs\SyncSocialMediaMedia;
-use App\Models\InstagramMedia;
+use App\Models\SocialAccountMedia;
 use App\Models\SocialAccount;
 use App\Services\Facebook\Client as FacebookClient;
 
@@ -70,18 +70,18 @@ it('fetches paginated media and syncs records with mapped media types', function
 
     app(SyncSocialMediaMedia::class, ['account' => $account])->handle();
 
-    expect(InstagramMedia::count())->toBe(4)
-        ->and(InstagramMedia::where('instagram_media_id', 'media-1')->first()->media_type)->toBe(MediaType::Post)
-        ->and(InstagramMedia::where('instagram_media_id', 'media-2')->first()->media_type)->toBe(MediaType::Reel)
-        ->and(InstagramMedia::where('instagram_media_id', 'media-3')->first()->media_type)->toBe(MediaType::Post)
-        ->and(InstagramMedia::where('instagram_media_id', 'media-4')->first()->media_type)->toBe(MediaType::Post);
+    expect(SocialAccountMedia::count())->toBe(4)
+        ->and(SocialAccountMedia::where('instagram_media_id', 'media-1')->first()->media_type)->toBe(MediaType::Post)
+        ->and(SocialAccountMedia::where('instagram_media_id', 'media-2')->first()->media_type)->toBe(MediaType::Reel)
+        ->and(SocialAccountMedia::where('instagram_media_id', 'media-3')->first()->media_type)->toBe(MediaType::Post)
+        ->and(SocialAccountMedia::where('instagram_media_id', 'media-4')->first()->media_type)->toBe(MediaType::Post);
 
 });
 
 it('updates existing media records when rerun to keep sync idempotent', function (): void {
     $account = SocialAccount::factory()->create();
 
-    InstagramMedia::factory()->create([
+    SocialAccountMedia::factory()->create([
         'social_account_id' => $account->id,
         'instagram_media_id' => 'media-1',
         'caption' => 'Old caption',
@@ -115,9 +115,9 @@ it('updates existing media records when rerun to keep sync idempotent', function
 
     app(SyncSocialMediaMedia::class, ['account' => $account])->handle();
 
-    expect(InstagramMedia::where('instagram_media_id', 'media-1')->count())->toBe(1);
+    expect(SocialAccountMedia::where('instagram_media_id', 'media-1')->count())->toBe(1);
 
-    $media = InstagramMedia::where('instagram_media_id', 'media-1')->first();
+    $media = SocialAccountMedia::where('instagram_media_id', 'media-1')->first();
 
     expect($media->caption)->toBe('Updated caption')
         ->and($media->like_count)->toBe(99)

@@ -4,7 +4,7 @@ namespace App\Services\Content;
 
 use App\Models\Campaign;
 use App\Models\Client;
-use App\Models\InstagramMedia;
+use App\Models\SocialAccountMedia;
 use App\Models\User;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
@@ -12,7 +12,7 @@ use Illuminate\Validation\ValidationException;
 
 class ContentClientLinkService
 {
-    public function link(User $user, InstagramMedia $media, Campaign $campaign, ?string $notes): void
+    public function link(User $user, SocialAccountMedia $media, Campaign $campaign, ?string $notes): void
     {
         $this->ensureCampaignOwnership($user, $campaign);
         $this->ensureMediaOwnership($user, $media);
@@ -30,7 +30,7 @@ class ContentClientLinkService
         }
     }
 
-    public function unlink(User $user, InstagramMedia $media, Client $client): void
+    public function unlink(User $user, SocialAccountMedia $media, Client $client): void
     {
         $this->ensureClientOwnership($user, $client);
         $this->ensureMediaOwnership($user, $media);
@@ -57,7 +57,7 @@ class ContentClientLinkService
         }
     }
 
-    private function ensureMediaOwnership(User $user, InstagramMedia $media): void
+    private function ensureMediaOwnership(User $user, SocialAccountMedia $media): void
     {
         $media->loadMissing('socialAccount');
 
@@ -66,7 +66,7 @@ class ContentClientLinkService
         }
     }
 
-    private function ensureNotAlreadyLinked(Campaign $campaign, InstagramMedia $media): void
+    private function ensureNotAlreadyLinked(Campaign $campaign, SocialAccountMedia $media): void
     {
         $alreadyLinked = $campaign->instagramMedia()->whereKey($media->id)->exists();
 

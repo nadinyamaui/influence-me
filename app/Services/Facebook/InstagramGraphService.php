@@ -5,7 +5,7 @@ namespace App\Services\Facebook;
 use App\Enums\MediaType;
 use App\Exceptions\InstagramApiException;
 use App\Exceptions\InstagramTokenExpiredException;
-use App\Models\InstagramMedia;
+use App\Models\SocialAccountMedia;
 use App\Models\SocialAccount;
 use App\Services\SocialMedia\SocialMediaInterface;
 use Carbon\Carbon;
@@ -50,7 +50,7 @@ class InstagramGraphService implements SocialMediaInterface
             ->where('published_at', '>=', now()->subDays(90))
             ->where('media_type', '!=', MediaType::Story->value)
             ->chunkById(50, function ($mediaItems): void {
-                $mediaItems->each(function (InstagramMedia $media): void {
+                $mediaItems->each(function (SocialAccountMedia $media): void {
                     $insights = $this->client->getMediaInsights($media->instagram_media_id, $media->media_type);
                     $reach = (int) ($insights->get('reach') ?? 0);
                     $saved = (int) ($insights->get('saved') ?? 0);

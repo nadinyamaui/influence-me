@@ -4,13 +4,13 @@ use App\Enums\ClientType;
 use App\Enums\MediaType;
 use App\Models\Campaign;
 use App\Models\Client;
-use App\Models\InstagramMedia;
+use App\Models\SocialAccountMedia;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 it('creates valid instagram media records with factory defaults and casts', function (): void {
-    $media = InstagramMedia::factory()->create();
+    $media = SocialAccountMedia::factory()->create();
 
     expect($media->socialAccount)->not->toBeNull()
         ->and($media->instagram_media_id)->not->toBeEmpty()
@@ -20,10 +20,10 @@ it('creates valid instagram media records with factory defaults and casts', func
 });
 
 it('supports post reel story and high engagement factory states', function (): void {
-    $post = InstagramMedia::factory()->post()->create();
-    $reel = InstagramMedia::factory()->reel()->create();
-    $story = InstagramMedia::factory()->story()->create();
-    $highEngagement = InstagramMedia::factory()->highEngagement()->create();
+    $post = SocialAccountMedia::factory()->post()->create();
+    $reel = SocialAccountMedia::factory()->reel()->create();
+    $story = SocialAccountMedia::factory()->story()->create();
+    $highEngagement = SocialAccountMedia::factory()->highEngagement()->create();
 
     expect($post->media_type)->toBe(MediaType::Post)
         ->and($reel->media_type)->toBe(MediaType::Reel)
@@ -34,7 +34,7 @@ it('supports post reel story and high engagement factory states', function (): v
 });
 
 it('defines instagram account and campaigns relationships', function (): void {
-    $media = InstagramMedia::factory()->create();
+    $media = SocialAccountMedia::factory()->create();
 
     $client = Client::query()->create([
         'user_id' => User::factory()->create()->id,

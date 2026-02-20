@@ -8,7 +8,7 @@ use App\Models\CatalogPlanItem;
 use App\Models\CatalogProduct;
 use App\Models\Client;
 use App\Models\ClientUser;
-use App\Models\InstagramMedia;
+use App\Models\SocialAccountMedia;
 use App\Models\Invoice;
 use App\Models\Proposal;
 use App\Models\ProposalLineItem;
@@ -20,7 +20,7 @@ use App\Policies\CatalogPlanItemPolicy;
 use App\Policies\CatalogPlanPolicy;
 use App\Policies\CatalogProductPolicy;
 use App\Policies\ClientPolicy;
-use App\Policies\InstagramMediaPolicy;
+use App\Policies\SocialAccountMediaPolicy;
 use App\Policies\InvoicePolicy;
 use App\Policies\ProposalLineItemPolicy;
 use App\Policies\ProposalPolicy;
@@ -41,7 +41,7 @@ it('auto-discovers all RFC 012 policies', function (): void {
         ->and(Gate::getPolicyFor(ProposalLineItem::class))->toBeInstanceOf(ProposalLineItemPolicy::class)
         ->and(Gate::getPolicyFor(Invoice::class))->toBeInstanceOf(InvoicePolicy::class)
         ->and(Gate::getPolicyFor(ScheduledPost::class))->toBeInstanceOf(ScheduledPostPolicy::class)
-        ->and(Gate::getPolicyFor(InstagramMedia::class))->toBeInstanceOf(InstagramMediaPolicy::class);
+        ->and(Gate::getPolicyFor(SocialAccountMedia::class))->toBeInstanceOf(SocialAccountMediaPolicy::class);
 });
 
 it('applies pricing catalog and proposal line item policy rules', function (): void {
@@ -291,7 +291,7 @@ it('applies instagram media policy rules', function (): void {
     $outsider = User::factory()->create();
 
     $account = SocialAccount::factory()->for($owner)->create();
-    $media = InstagramMedia::factory()->for($account, 'socialAccount')->create();
+    $media = SocialAccountMedia::factory()->for($account, 'socialAccount')->create();
 
     $matchingClientUser = ClientUser::factory()->create();
 
@@ -330,7 +330,7 @@ it('returns 403 for unauthorized instagram media linking', function (): void {
     $outsider = User::factory()->create();
 
     $account = SocialAccount::factory()->for($owner)->create();
-    $media = InstagramMedia::factory()->for($account, 'socialAccount')->create();
+    $media = SocialAccountMedia::factory()->for($account, 'socialAccount')->create();
     $uri = '/_test/policies/instagram-media/'.Str::uuid();
 
     Route::middleware(['web', 'auth'])->get($uri, function () use ($media) {

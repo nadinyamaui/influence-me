@@ -6,7 +6,7 @@ use App\Jobs\SyncSocialMediaMedia;
 use App\Models\SocialAccount;
 use Illuminate\Console\Command;
 
-class RetrieveAllInstagramMedia extends Command
+class RetrieveAllSocialAccountMedia extends Command
 {
     protected $signature = 'instagram:media:retrieve-all {--queue : Queue sync jobs instead of running immediately}';
 

@@ -5,7 +5,7 @@ namespace App\Livewire\Portal;
 use App\Enums\InvoiceStatus;
 use App\Enums\ProposalStatus;
 use App\Models\Client;
-use App\Models\InstagramMedia;
+use App\Models\SocialAccountMedia;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
@@ -24,7 +24,7 @@ class Dashboard extends Component
 
         $pendingInvoiceQuery = $client->invoices()->whereIn('status', InvoiceStatus::pendingValues());
 
-        $linkedMediaQuery = InstagramMedia::query()
+        $linkedMediaQuery = SocialAccountMedia::query()
             ->whereHas('campaigns', fn (Builder $builder): Builder => $builder->where('campaigns.client_id', $client->id));
 
         return view('pages.portal.dashboard', [

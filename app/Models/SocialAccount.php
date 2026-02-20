@@ -44,7 +44,7 @@ class SocialAccount extends Model
 
     public function instagramMedia(): HasMany
     {
-        return $this->hasMany(InstagramMedia::class);
+        return $this->hasMany(SocialAccountMedia::class);
     }
 
     public function audienceDemographics(): HasMany

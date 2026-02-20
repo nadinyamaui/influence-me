@@ -2,12 +2,12 @@
 
 use App\Models\Campaign;
 use App\Models\Client;
-use App\Models\InstagramMedia;
+use App\Models\SocialAccountMedia;
 
 it('stores pivot data with timestamps when linking media to a campaign', function (): void {
     $client = Client::factory()->create();
     $campaign = Campaign::factory()->for($client)->create();
-    $media = InstagramMedia::factory()->create();
+    $media = SocialAccountMedia::factory()->create();
 
     $campaign->instagramMedia()->attach($media->id, [
         'notes' => 'Main feed feature',
@@ -24,7 +24,7 @@ it('stores pivot data with timestamps when linking media to a campaign', functio
 it('supports detaching linked media from a campaign relationship', function (): void {
     $client = Client::factory()->create();
     $campaign = Campaign::factory()->for($client)->create();
-    $media = InstagramMedia::factory()->create();
+    $media = SocialAccountMedia::factory()->create();
 
     $campaign->instagramMedia()->attach($media->id, [
         'notes' => 'Temporary campaign',
@@ -42,7 +42,7 @@ it('supports detaching linked media from a campaign relationship', function (): 
 it('supports detaching linked campaigns from a media relationship', function (): void {
     $client = Client::factory()->create();
     $campaign = Campaign::factory()->for($client)->create();
-    $media = InstagramMedia::factory()->create();
+    $media = SocialAccountMedia::factory()->create();
 
     $media->campaigns()->attach($campaign->id, [
         'notes' => 'Story sequence',

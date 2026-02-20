@@ -5,7 +5,7 @@ use App\Enums\AnalyticsTopContentSort;
 use App\Enums\MediaType;
 use App\Models\Campaign;
 use App\Models\Client;
-use App\Models\InstagramMedia;
+use App\Models\SocialAccountMedia;
 use App\Models\SocialAccount;
 use App\Models\User;
 use Carbon\CarbonImmutable;
@@ -29,47 +29,47 @@ it('scopes instagram media by user and client ownership helpers', function (): v
     $ownerCampaign = Campaign::factory()->for($ownerClient)->create(['name' => 'Owner Campaign']);
     $outsiderCampaign = Campaign::factory()->for($outsiderClient)->create(['name' => 'Outsider Campaign']);
 
-    $ownerClientMedia = InstagramMedia::factory()->for($ownerAccount)->create();
+    $ownerClientMedia = SocialAccountMedia::factory()->for($ownerAccount)->create();
     $ownerClientMedia->campaigns()->attach($ownerCampaign->id);
 
-    $withoutClientMedia = InstagramMedia::factory()->for($ownerAccount)->create();
+    $withoutClientMedia = SocialAccountMedia::factory()->for($ownerAccount)->create();
 
-    $outsiderClientMedia = InstagramMedia::factory()->for($ownerAccount)->create();
+    $outsiderClientMedia = SocialAccountMedia::factory()->for($ownerAccount)->create();
     $outsiderClientMedia->campaigns()->attach($outsiderCampaign->id);
 
-    $outsideUserMedia = InstagramMedia::factory()->for($outsiderAccount)->create();
+    $outsideUserMedia = SocialAccountMedia::factory()->for($outsiderAccount)->create();
     $outsideUserMedia->campaigns()->attach($outsiderCampaign->id);
 
-    $forClientIds = InstagramMedia::query()
+    $forClientIds = SocialAccountMedia::query()
         ->forClient($ownerClient->id)
         ->pluck('id')
         ->all();
 
-    $forClientOwnedByUserIds = InstagramMedia::query()
+    $forClientOwnedByUserIds = SocialAccountMedia::query()
         ->forUser($owner->id)
         ->forClientOwnedByUser($ownerClient->id, $owner->id)
         ->pluck('id')
         ->all();
 
-    $withoutClientsIds = InstagramMedia::query()
+    $withoutClientsIds = SocialAccountMedia::query()
         ->forUser($owner->id)
         ->withoutClientsForUser($owner->id)
         ->pluck('id')
         ->all();
 
-    $filteredWithoutClientsIds = InstagramMedia::query()
+    $filteredWithoutClientsIds = SocialAccountMedia::query()
         ->forUser($owner->id)
         ->filterByClient('without_clients', $owner->id)
         ->pluck('id')
         ->all();
 
-    $filteredOwnedClientIds = InstagramMedia::query()
+    $filteredOwnedClientIds = SocialAccountMedia::query()
         ->forUser($owner->id)
         ->filterByClient((string) $ownerClient->id, $owner->id)
         ->pluck('id')
         ->all();
 
-    $allOwnerMediaIds = InstagramMedia::query()
+    $allOwnerMediaIds = SocialAccountMedia::query()
         ->forUser($owner->id)
         ->filterByClient('all', $owner->id)
         ->pluck('id')
@@ -96,37 +96,37 @@ it('filters instagram media by media type account and date window and sorts gall
     $ownerSecondaryAccount = SocialAccount::factory()->for($owner)->create();
     $outsiderAccount = SocialAccount::factory()->for($outsider)->create();
 
-    $matchingOlder = InstagramMedia::factory()->for($ownerPrimaryAccount)->create([
+    $matchingOlder = SocialAccountMedia::factory()->for($ownerPrimaryAccount)->create([
         'media_type' => MediaType::Reel,
         'published_at' => '2026-02-11 10:00:00',
     ]);
 
-    $matchingNewer = InstagramMedia::factory()->for($ownerPrimaryAccount)->create([
+    $matchingNewer = SocialAccountMedia::factory()->for($ownerPrimaryAccount)->create([
         'media_type' => MediaType::Reel,
         'published_at' => '2026-02-14 10:00:00',
     ]);
 
-    InstagramMedia::factory()->for($ownerPrimaryAccount)->create([
+    SocialAccountMedia::factory()->for($ownerPrimaryAccount)->create([
         'media_type' => MediaType::Reel,
         'published_at' => '2026-02-16 10:00:00',
     ]);
 
-    InstagramMedia::factory()->for($ownerPrimaryAccount)->create([
+    SocialAccountMedia::factory()->for($ownerPrimaryAccount)->create([
         'media_type' => MediaType::Post,
         'published_at' => '2026-02-12 10:00:00',
     ]);
 
-    InstagramMedia::factory()->for($ownerSecondaryAccount)->create([
+    SocialAccountMedia::factory()->for($ownerSecondaryAccount)->create([
         'media_type' => MediaType::Reel,
         'published_at' => '2026-02-12 10:00:00',
     ]);
 
-    InstagramMedia::factory()->for($outsiderAccount)->create([
+    SocialAccountMedia::factory()->for($outsiderAccount)->create([
         'media_type' => MediaType::Reel,
         'published_at' => '2026-02-12 10:00:00',
     ]);
 
-    $filteredIds = InstagramMedia::query()
+    $filteredIds = SocialAccountMedia::query()
         ->forUser($owner->id)
         ->filterByMediaType(MediaType::Reel->value)
         ->filterByAccount((string) $ownerPrimaryAccount->id)
@@ -136,16 +136,16 @@ it('filters instagram media by media type account and date window and sorts gall
         ->pluck('id')
         ->all();
 
-    $ownerAllMediaCount = InstagramMedia::query()
+    $ownerAllMediaCount = SocialAccountMedia::query()
         ->forUser($owner->id)
         ->count();
 
-    $invalidTypeCount = InstagramMedia::query()
+    $invalidTypeCount = SocialAccountMedia::query()
         ->forUser($owner->id)
         ->filterByMediaType('unsupported-media-type')
         ->count();
 
-    $allAccountCount = InstagramMedia::query()
+    $allAccountCount = SocialAccountMedia::query()
         ->forUser($owner->id)
         ->filterByAccount('all')
         ->count();
@@ -159,29 +159,29 @@ it('orders instagram media newest first and chronologically with id tie breaking
     $user = User::factory()->create();
     $account = SocialAccount::factory()->for($user)->create();
 
-    $oldest = InstagramMedia::factory()->for($account)->create([
+    $oldest = SocialAccountMedia::factory()->for($account)->create([
         'published_at' => '2026-02-10 08:00:00',
     ]);
 
-    $sameDayFirst = InstagramMedia::factory()->for($account)->create([
+    $sameDayFirst = SocialAccountMedia::factory()->for($account)->create([
         'published_at' => '2026-02-11 08:00:00',
     ]);
 
-    $sameDaySecond = InstagramMedia::factory()->for($account)->create([
+    $sameDaySecond = SocialAccountMedia::factory()->for($account)->create([
         'published_at' => '2026-02-11 08:00:00',
     ]);
 
-    $newest = InstagramMedia::factory()->for($account)->create([
+    $newest = SocialAccountMedia::factory()->for($account)->create([
         'published_at' => '2026-02-12 08:00:00',
     ]);
 
-    $latestIds = InstagramMedia::query()
+    $latestIds = SocialAccountMedia::query()
         ->forUser($user->id)
         ->latestPublished()
         ->pluck('id')
         ->all();
 
-    $chronologicalIds = InstagramMedia::query()
+    $chronologicalIds = SocialAccountMedia::query()
         ->forUser($user->id)
         ->publishedChronologically()
         ->pluck('id')
@@ -205,15 +205,15 @@ it('deduplicates rows with distinct media rows helper after joins', function ():
     $campaignOne = Campaign::factory()->for($client)->create(['name' => 'Campaign One']);
     $campaignTwo = Campaign::factory()->for($client)->create(['name' => 'Campaign Two']);
 
-    $media = InstagramMedia::factory()->for($account)->create();
+    $media = SocialAccountMedia::factory()->for($account)->create();
     $media->campaigns()->attach([$campaignOne->id, $campaignTwo->id]);
 
-    $joinedCount = InstagramMedia::query()
+    $joinedCount = SocialAccountMedia::query()
         ->join('campaign_media', 'instagram_media.id', '=', 'campaign_media.instagram_media_id')
         ->where('instagram_media.id', $media->id)
         ->count();
 
-    $distinctRows = InstagramMedia::query()
+    $distinctRows = SocialAccountMedia::query()
         ->join('campaign_media', 'instagram_media.id', '=', 'campaign_media.instagram_media_id')
         ->where('instagram_media.id', $media->id)
         ->distinctMediaRows()
@@ -229,7 +229,7 @@ it('eager loads instagram account and client filtered campaigns for media record
     $outsider = User::factory()->create();
 
     $account = SocialAccount::factory()->for($owner)->create();
-    $media = InstagramMedia::factory()->for($account)->create();
+    $media = SocialAccountMedia::factory()->for($account)->create();
 
     $ownerClient = Client::factory()->for($owner)->create();
     $outsiderClient = Client::factory()->for($outsider)->create();
@@ -239,7 +239,7 @@ it('eager loads instagram account and client filtered campaigns for media record
 
     $media->campaigns()->attach([$ownerCampaign->id, $outsiderCampaign->id]);
 
-    $resolved = InstagramMedia::query()
+    $resolved = SocialAccountMedia::query()
         ->whereKey($media->id)
         ->withSocialAccount()
         ->withCampaignsForClient($ownerClient->id)
@@ -259,14 +259,14 @@ it('selects analytics summary columns for instagram media', function (): void {
     $user = User::factory()->create();
     $account = SocialAccount::factory()->for($user)->create();
 
-    $media = InstagramMedia::factory()->for($account)->create([
+    $media = SocialAccountMedia::factory()->for($account)->create([
         'reach' => 4200,
         'impressions' => 5400,
         'engagement_rate' => 4.5,
         'like_count' => 999,
     ]);
 
-    $summary = InstagramMedia::query()
+    $summary = SocialAccountMedia::query()
         ->whereKey($media->id)
         ->forAnalyticsSummary()
         ->firstOrFail();
@@ -287,8 +287,8 @@ it('loads only campaigns owned by a user with client relation and media counts o
     $outsider = User::factory()->create();
 
     $account = SocialAccount::factory()->for($owner)->create();
-    $primaryMedia = InstagramMedia::factory()->for($account)->create();
-    $secondaryMedia = InstagramMedia::factory()->for($account)->create();
+    $primaryMedia = SocialAccountMedia::factory()->for($account)->create();
+    $secondaryMedia = SocialAccountMedia::factory()->for($account)->create();
 
     $ownerClientOne = Client::factory()->for($owner)->create();
     $ownerClientTwo = Client::factory()->for($owner)->create();
@@ -301,7 +301,7 @@ it('loads only campaigns owned by a user with client relation and media counts o
     $primaryMedia->campaigns()->attach([$alphaCampaign->id, $betaCampaign->id, $outsiderCampaign->id]);
     $secondaryMedia->campaigns()->attach([$alphaCampaign->id]);
 
-    $resolved = InstagramMedia::query()
+    $resolved = SocialAccountMedia::query()
         ->whereKey($primaryMedia->id)
         ->withOwnedCampaignsForUser($owner->id)
         ->firstOrFail();
@@ -328,7 +328,7 @@ it('calculates account average metrics for recent media and defaults to zero val
     $account = SocialAccount::factory()->for($user)->create();
     $emptyAccount = SocialAccount::factory()->for($user)->create();
 
-    InstagramMedia::factory()->for($account)->create([
+    SocialAccountMedia::factory()->for($account)->create([
         'published_at' => '2026-02-10 10:00:00',
         'like_count' => 100,
         'comments_count' => 10,
@@ -336,7 +336,7 @@ it('calculates account average metrics for recent media and defaults to zero val
         'engagement_rate' => 2.5,
     ]);
 
-    InstagramMedia::factory()->for($account)->create([
+    SocialAccountMedia::factory()->for($account)->create([
         'published_at' => '2026-01-25 10:00:00',
         'like_count' => 300,
         'comments_count' => 30,
@@ -344,7 +344,7 @@ it('calculates account average metrics for recent media and defaults to zero val
         'engagement_rate' => 3.5,
     ]);
 
-    InstagramMedia::factory()->for($account)->create([
+    SocialAccountMedia::factory()->for($account)->create([
         'published_at' => '2025-09-01 10:00:00',
         'like_count' => 9999,
         'comments_count' => 999,
@@ -352,8 +352,8 @@ it('calculates account average metrics for recent media and defaults to zero val
         'engagement_rate' => 99.9,
     ]);
 
-    $averages = InstagramMedia::query()->accountAverageMetricsForRecentDays($account->id, 90);
-    $emptyAverages = InstagramMedia::query()->accountAverageMetricsForRecentDays($emptyAccount->id, 90);
+    $averages = SocialAccountMedia::query()->accountAverageMetricsForRecentDays($account->id, 90);
+    $emptyAverages = SocialAccountMedia::query()->accountAverageMetricsForRecentDays($emptyAccount->id, 90);
 
     expect($averages)->toBe([
         'likes' => 200.0,
@@ -375,38 +375,38 @@ it('filters media by analytics period and sorts top performing results', functio
     $user = User::factory()->create();
     $account = SocialAccount::factory()->for($user)->create();
 
-    InstagramMedia::factory()->for($account)->create([
+    SocialAccountMedia::factory()->for($account)->create([
         'published_at' => '2025-10-01 10:00:00',
         'reach' => 9000,
         'engagement_rate' => 30,
     ]);
 
-    $recentLowerReach = InstagramMedia::factory()->for($account)->create([
+    $recentLowerReach = SocialAccountMedia::factory()->for($account)->create([
         'published_at' => '2026-02-10 10:00:00',
         'reach' => 800,
         'engagement_rate' => 9,
     ]);
 
-    $recentHigherReachLowerEngagement = InstagramMedia::factory()->for($account)->create([
+    $recentHigherReachLowerEngagement = SocialAccountMedia::factory()->for($account)->create([
         'published_at' => '2026-02-15 10:00:00',
         'reach' => 1200,
         'engagement_rate' => 2,
     ]);
 
-    $recentHigherReachHigherEngagement = InstagramMedia::factory()->for($account)->create([
+    $recentHigherReachHigherEngagement = SocialAccountMedia::factory()->for($account)->create([
         'published_at' => '2026-02-18 10:00:00',
         'reach' => 1200,
         'engagement_rate' => 5,
     ]);
 
-    $reachSortedIds = InstagramMedia::query()
+    $reachSortedIds = SocialAccountMedia::query()
         ->forUser($user->id)
         ->forAnalyticsPeriod(AnalyticsPeriod::NinetyDays)
         ->topPerforming(AnalyticsTopContentSort::Reach)
         ->pluck('id')
         ->all();
 
-    $topEngagementId = InstagramMedia::query()
+    $topEngagementId = SocialAccountMedia::query()
         ->forUser($user->id)
         ->forAnalyticsPeriod(AnalyticsPeriod::NinetyDays)
         ->topPerforming(AnalyticsTopContentSort::Engagement)
@@ -423,22 +423,22 @@ it('builds daily engagement trend buckets for recent periods', function (): void
     $user = User::factory()->create();
     $account = SocialAccount::factory()->for($user)->create();
 
-    InstagramMedia::factory()->for($account)->create([
+    SocialAccountMedia::factory()->for($account)->create([
         'published_at' => '2026-02-10 09:00:00',
         'engagement_rate' => 2,
     ]);
 
-    InstagramMedia::factory()->for($account)->create([
+    SocialAccountMedia::factory()->for($account)->create([
         'published_at' => '2026-02-10 17:00:00',
         'engagement_rate' => 4,
     ]);
 
-    InstagramMedia::factory()->for($account)->create([
+    SocialAccountMedia::factory()->for($account)->create([
         'published_at' => '2026-02-11 11:00:00',
         'engagement_rate' => 6,
     ]);
 
-    $trend = InstagramMedia::query()
+    $trend = SocialAccountMedia::query()
         ->forUser($user->id)
         ->engagementTrend(AnalyticsPeriod::SevenDays)
         ->map(fn (array $bucket): array => [
@@ -457,27 +457,27 @@ it('builds weekly and monthly engagement trend buckets for longer periods', func
     $user = User::factory()->create();
     $account = SocialAccount::factory()->for($user)->create();
 
-    InstagramMedia::factory()->for($account)->create([
+    SocialAccountMedia::factory()->for($account)->create([
         'published_at' => '2026-02-16 09:00:00',
         'engagement_rate' => 2,
     ]);
 
-    InstagramMedia::factory()->for($account)->create([
+    SocialAccountMedia::factory()->for($account)->create([
         'published_at' => '2026-02-18 09:00:00',
         'engagement_rate' => 6,
     ]);
 
-    InstagramMedia::factory()->for($account)->create([
+    SocialAccountMedia::factory()->for($account)->create([
         'published_at' => '2026-02-24 09:00:00',
         'engagement_rate' => 10,
     ]);
 
-    InstagramMedia::factory()->for($account)->create([
+    SocialAccountMedia::factory()->for($account)->create([
         'published_at' => '2026-03-05 09:00:00',
         'engagement_rate' => 8,
     ]);
 
-    $weeklyTrend = InstagramMedia::query()
+    $weeklyTrend = SocialAccountMedia::query()
         ->forUser($user->id)
         ->engagementTrend(AnalyticsPeriod::NinetyDays)
         ->map(fn (array $bucket): array => [
@@ -486,7 +486,7 @@ it('builds weekly and monthly engagement trend buckets for longer periods', func
         ])
         ->all();
 
-    $monthlyTrend = InstagramMedia::query()
+    $monthlyTrend = SocialAccountMedia::query()
         ->forUser($user->id)
         ->engagementTrend(AnalyticsPeriod::AllTime)
         ->map(fn (array $bucket): array => [
@@ -509,25 +509,25 @@ it('builds content type breakdown including empty media type defaults', function
     $user = User::factory()->create();
     $account = SocialAccount::factory()->for($user)->create();
 
-    InstagramMedia::factory()->for($account)->create([
+    SocialAccountMedia::factory()->for($account)->create([
         'media_type' => MediaType::Post,
         'engagement_rate' => 4,
         'reach' => 100,
     ]);
 
-    InstagramMedia::factory()->for($account)->create([
+    SocialAccountMedia::factory()->for($account)->create([
         'media_type' => MediaType::Post,
         'engagement_rate' => 6,
         'reach' => 200,
     ]);
 
-    InstagramMedia::factory()->for($account)->create([
+    SocialAccountMedia::factory()->for($account)->create([
         'media_type' => MediaType::Reel,
         'engagement_rate' => 8,
         'reach' => 300,
     ]);
 
-    $breakdown = InstagramMedia::query()
+    $breakdown = SocialAccountMedia::query()
         ->forUser($user->id)
         ->contentTypeBreakdown();
 

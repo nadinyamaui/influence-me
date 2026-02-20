@@ -7,7 +7,7 @@ use App\Livewire\Clients\Show;
 use App\Models\Campaign;
 use App\Models\Client;
 use App\Models\ClientUser;
-use App\Models\InstagramMedia;
+use App\Models\SocialAccountMedia;
 use App\Models\Invoice;
 use App\Models\Proposal;
 use App\Models\SocialAccount;
@@ -36,7 +36,7 @@ test('owner can view client detail page with summary and tabs', function (): voi
     ClientUser::factory()->for($client)->create();
 
     $account = SocialAccount::factory()->for($owner)->create();
-    $media = InstagramMedia::factory()->for($account)->create();
+    $media = SocialAccountMedia::factory()->for($account)->create();
     $campaign = Campaign::factory()->for($client)->create([
         'name' => 'Uncategorized',
     ]);
@@ -111,21 +111,21 @@ test('content tab groups linked media by campaign entity and shows aggregate sta
     $client = Client::factory()->for($owner)->create();
     $account = SocialAccount::factory()->for($owner)->create();
 
-    $launchFirst = InstagramMedia::factory()->for($account)->create([
+    $launchFirst = SocialAccountMedia::factory()->for($account)->create([
         'caption' => 'Launch Post One',
         'reach' => 1000,
         'impressions' => 2100,
         'engagement_rate' => 5.5,
     ]);
 
-    $launchSecond = InstagramMedia::factory()->for($account)->create([
+    $launchSecond = SocialAccountMedia::factory()->for($account)->create([
         'caption' => 'Launch Post Two',
         'reach' => 500,
         'impressions' => 900,
         'engagement_rate' => 4.5,
     ]);
 
-    $uncategorized = InstagramMedia::factory()->for($account)->create([
+    $uncategorized = SocialAccountMedia::factory()->for($account)->create([
         'caption' => 'No Campaign Post',
         'reach' => 300,
         'impressions' => 500,
@@ -169,25 +169,25 @@ test('analytics tab shows aggregate metrics, campaign breakdown, trend, and acco
     $campaignA = Campaign::factory()->for($client)->create(['name' => 'Summer Launch']);
     $campaignB = Campaign::factory()->for($client)->create(['name' => 'Product Review']);
 
-    $mediaOne = InstagramMedia::factory()->for($account)->create([
+    $mediaOne = SocialAccountMedia::factory()->for($account)->create([
         'published_at' => now()->subDays(4),
         'reach' => 1000,
         'impressions' => 2000,
         'engagement_rate' => 4.0,
     ]);
-    $mediaTwo = InstagramMedia::factory()->for($account)->create([
+    $mediaTwo = SocialAccountMedia::factory()->for($account)->create([
         'published_at' => now()->subDays(2),
         'reach' => 1200,
         'impressions' => 1500,
         'engagement_rate' => 5.0,
     ]);
-    $mediaThree = InstagramMedia::factory()->for($account)->create([
+    $mediaThree = SocialAccountMedia::factory()->for($account)->create([
         'published_at' => now()->subDays(1),
         'reach' => 300,
         'impressions' => 400,
         'engagement_rate' => 2.0,
     ]);
-    $unlinkedMedia = InstagramMedia::factory()->for($account)->create([
+    $unlinkedMedia = SocialAccountMedia::factory()->for($account)->create([
         'published_at' => now()->subDays(6),
         'reach' => 800,
         'impressions' => 1100,
@@ -249,7 +249,7 @@ test('owners can unlink linked media from client content tab', function (): void
     $owner = User::factory()->create();
     $client = Client::factory()->for($owner)->create();
     $account = SocialAccount::factory()->for($owner)->create();
-    $media = InstagramMedia::factory()->for($account)->create();
+    $media = SocialAccountMedia::factory()->for($account)->create();
 
     $campaign = Campaign::factory()->for($client)->create([
         'name' => 'To Remove',

@@ -5,7 +5,7 @@ namespace App\Services\Clients;
 use App\Enums\DemographicType;
 use App\Models\AudienceDemographic;
 use App\Models\Client;
-use App\Models\InstagramMedia;
+use App\Models\SocialAccountMedia;
 use App\Models\SocialAccount;
 use Illuminate\Support\Collection;
 
@@ -13,7 +13,7 @@ class ClientAudienceDemographicsService
 {
     public function build(Client $client): array
     {
-        $accountIds = InstagramMedia::query()
+        $accountIds = SocialAccountMedia::query()
             ->forClient($client->id)
             ->distinctMediaRows()
             ->pluck('social_account_id')

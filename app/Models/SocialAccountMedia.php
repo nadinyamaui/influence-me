@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Builders\InstagramMediaBuilder;
+use App\Builders\SocialAccountMediaBuilder;
 use App\Enums\MediaType;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -10,15 +10,17 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
-class InstagramMedia extends Model
+class SocialAccountMedia extends Model
 {
     use HasFactory;
 
+    protected $table = 'instagram_media';
+
     protected $guarded = [];
 
-    public function newEloquentBuilder($query): InstagramMediaBuilder
+    public function newEloquentBuilder($query): SocialAccountMediaBuilder
     {
-        return new InstagramMediaBuilder($query);
+        return new SocialAccountMediaBuilder($query);
     }
 
     protected function casts(): array
@@ -37,7 +39,7 @@ class InstagramMedia extends Model
 
     public function campaigns(): BelongsToMany
     {
-        return $this->belongsToMany(Campaign::class, 'campaign_media')
+        return $this->belongsToMany(Campaign::class, 'campaign_media', 'instagram_media_id', 'campaign_id')
             ->withPivot('notes')
             ->withTimestamps();
     }

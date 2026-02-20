@@ -2,7 +2,7 @@
 
 use App\Models\Campaign;
 use App\Models\Client;
-use App\Models\InstagramMedia;
+use App\Models\SocialAccountMedia;
 use App\Models\SocialAccount;
 use App\Models\User;
 use App\Services\Content\ContentClientLinkService;
@@ -14,7 +14,7 @@ test('content client link service links a media item to a client', function (): 
     $user = User::factory()->create();
     $client = Client::factory()->for($user)->create();
     $account = SocialAccount::factory()->for($user)->create();
-    $media = InstagramMedia::factory()->for($account)->create();
+    $media = SocialAccountMedia::factory()->for($account)->create();
     $campaign = Campaign::factory()->for($client)->create([
         'name' => 'Service Campaign',
     ]);
@@ -35,8 +35,8 @@ test('content client link service batch links media items', function (): void {
     $client = Client::factory()->for($user)->create();
     $account = SocialAccount::factory()->for($user)->create();
 
-    $firstMedia = InstagramMedia::factory()->for($account)->create();
-    $secondMedia = InstagramMedia::factory()->for($account)->create();
+    $firstMedia = SocialAccountMedia::factory()->for($account)->create();
+    $secondMedia = SocialAccountMedia::factory()->for($account)->create();
     $campaign = Campaign::factory()->for($client)->create([
         'name' => 'Batch Service Campaign',
     ]);
@@ -45,7 +45,7 @@ test('content client link service batch links media items', function (): void {
 
     $service->batchLink(
         $user,
-        InstagramMedia::query()->whereKey([$firstMedia->id, $secondMedia->id])->get(),
+        SocialAccountMedia::query()->whereKey([$firstMedia->id, $secondMedia->id])->get(),
         $campaign,
         null,
     );
@@ -65,7 +65,7 @@ test('content client link service unlinks media from a client', function (): voi
     $user = User::factory()->create();
     $client = Client::factory()->for($user)->create();
     $account = SocialAccount::factory()->for($user)->create();
-    $media = InstagramMedia::factory()->for($account)->create();
+    $media = SocialAccountMedia::factory()->for($account)->create();
 
     $campaign = Campaign::factory()->for($client)->create();
     $campaign->instagramMedia()->attach($media->id);
@@ -87,7 +87,7 @@ test('content client link service enforces ownership boundaries', function (): v
     $ownerClient = Client::factory()->for($owner)->create();
     $ownerCampaign = Campaign::factory()->for($ownerClient)->create();
     $ownerAccount = SocialAccount::factory()->for($owner)->create();
-    $ownerMedia = InstagramMedia::factory()->for($ownerAccount)->create();
+    $ownerMedia = SocialAccountMedia::factory()->for($ownerAccount)->create();
 
     $service = app(ContentClientLinkService::class);
 
@@ -99,7 +99,7 @@ test('content client link service prevents duplicate campaign media links', func
     $user = User::factory()->create();
     $client = Client::factory()->for($user)->create();
     $account = SocialAccount::factory()->for($user)->create();
-    $media = InstagramMedia::factory()->for($account)->create();
+    $media = SocialAccountMedia::factory()->for($account)->create();
     $campaign = Campaign::factory()->for($client)->create();
 
     $service = app(ContentClientLinkService::class);

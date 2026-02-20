@@ -3,12 +3,12 @@
 namespace App\Policies;
 
 use App\Models\ClientUser;
-use App\Models\InstagramMedia;
+use App\Models\SocialAccountMedia;
 use App\Models\User;
 
-class InstagramMediaPolicy
+class SocialAccountMediaPolicy
 {
-    public function view(User|ClientUser $user, InstagramMedia $instagramMedia): bool
+    public function view(User|ClientUser $user, SocialAccountMedia $instagramMedia): bool
     {
         if (! $user instanceof User) {
             return false;
@@ -17,7 +17,7 @@ class InstagramMediaPolicy
         return $user->id === $instagramMedia->socialAccount->user_id;
     }
 
-    public function linkToClient(User|ClientUser $user, InstagramMedia $instagramMedia): bool
+    public function linkToClient(User|ClientUser $user, SocialAccountMedia $instagramMedia): bool
     {
         if (! $user instanceof User) {
             return false;

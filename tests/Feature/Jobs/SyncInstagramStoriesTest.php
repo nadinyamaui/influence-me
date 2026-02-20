@@ -2,7 +2,7 @@
 
 use App\Enums\MediaType;
 use App\Jobs\SyncSocialMediaStories;
-use App\Models\InstagramMedia;
+use App\Models\SocialAccountMedia;
 use App\Models\SocialAccount;
 use App\Services\Facebook\Client as FacebookClient;
 
@@ -40,15 +40,15 @@ it('fetches active stories and syncs them as story media records', function (): 
 
     app(SyncSocialMediaStories::class, ['account' => $account])->handle();
 
-    expect(InstagramMedia::count())->toBe(2)
-        ->and(InstagramMedia::where('instagram_media_id', 'story-1')->first()->media_type)->toBe(MediaType::Story)
-        ->and(InstagramMedia::where('instagram_media_id', 'story-2')->first()->media_type)->toBe(MediaType::Story);
+    expect(SocialAccountMedia::count())->toBe(2)
+        ->and(SocialAccountMedia::where('instagram_media_id', 'story-1')->first()->media_type)->toBe(MediaType::Story)
+        ->and(SocialAccountMedia::where('instagram_media_id', 'story-2')->first()->media_type)->toBe(MediaType::Story);
 });
 
 it('updates existing story records when rerun to keep sync idempotent', function (): void {
     $account = SocialAccount::factory()->create();
 
-    InstagramMedia::factory()->story()->create([
+    SocialAccountMedia::factory()->story()->create([
         'social_account_id' => $account->id,
         'instagram_media_id' => 'story-1',
         'caption' => 'Old story caption',
@@ -78,9 +78,9 @@ it('updates existing story records when rerun to keep sync idempotent', function
 
     app(SyncSocialMediaStories::class, ['account' => $account])->handle();
 
-    expect(InstagramMedia::where('instagram_media_id', 'story-1')->count())->toBe(1);
+    expect(SocialAccountMedia::where('instagram_media_id', 'story-1')->count())->toBe(1);
 
-    $story = InstagramMedia::where('instagram_media_id', 'story-1')->first();
+    $story = SocialAccountMedia::where('instagram_media_id', 'story-1')->first();
 
     expect($story->caption)->toBe('Updated story caption')
         ->and($story->media_url)->toBe('https://example.test/new-story-1.jpg')

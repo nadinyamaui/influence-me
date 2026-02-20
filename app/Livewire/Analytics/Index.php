@@ -8,7 +8,7 @@ use App\Enums\DemographicType;
 use App\Enums\MediaType;
 use App\Models\AudienceDemographic;
 use App\Models\FollowerSnapshot;
-use App\Models\InstagramMedia;
+use App\Models\SocialAccountMedia;
 use App\Models\SocialAccount;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
@@ -67,7 +67,7 @@ class Index extends Component
             ->forUser((int) Auth::id())
             ->filterByAccount($this->accountId);
 
-        $mediaQuery = InstagramMedia::query()
+        $mediaQuery = SocialAccountMedia::query()
             ->forUser((int) Auth::id())
             ->filterByAccount($this->accountId)
             ->forAnalyticsPeriod($period);
@@ -85,7 +85,7 @@ class Index extends Component
         $totalPosts = $media->count();
         $totalReach = (int) $media->sum('reach');
         $averageEngagementRate = $totalPosts > 0
-            ? round((float) $media->avg(fn (InstagramMedia $item): float => (float) $item->engagement_rate), 2)
+            ? round((float) $media->avg(fn (SocialAccountMedia $item): float => (float) $item->engagement_rate), 2)
             : 0.0;
 
         $followersChange = $this->followersChange($period);
@@ -96,7 +96,7 @@ class Index extends Component
         $contentTypeBreakdown = $this->contentTypeBreakdownChart($contentTypeStats, $totalPosts);
         $chart = $this->audienceGrowthChart($period);
         $demographics = $this->audienceDemographics();
-        $topContent = InstagramMedia::query()
+        $topContent = SocialAccountMedia::query()
             ->forUser((int) Auth::id())
             ->filterByAccount($this->accountId)
             ->forAnalyticsPeriod($period)

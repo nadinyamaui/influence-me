@@ -5,7 +5,7 @@ use App\Enums\MediaType;
 use App\Livewire\Analytics\Index;
 use App\Models\AudienceDemographic;
 use App\Models\FollowerSnapshot;
-use App\Models\InstagramMedia;
+use App\Models\SocialAccountMedia;
 use App\Models\SocialAccount;
 use App\Models\User;
 use Carbon\CarbonImmutable;
@@ -47,35 +47,35 @@ test('analytics overview cards calculate metrics and filters in query layer', fu
         'followers_count' => 999999,
     ]);
 
-    InstagramMedia::factory()->for($primaryAccount)->create([
+    SocialAccountMedia::factory()->for($primaryAccount)->create([
         'media_type' => MediaType::Post,
         'published_at' => now()->subDays(2),
         'engagement_rate' => 4.50,
         'reach' => 1200,
     ]);
 
-    InstagramMedia::factory()->for($primaryAccount)->create([
+    SocialAccountMedia::factory()->for($primaryAccount)->create([
         'media_type' => MediaType::Reel,
         'published_at' => now()->subDays(10),
         'engagement_rate' => 6.50,
         'reach' => 2400,
     ]);
 
-    InstagramMedia::factory()->for($secondaryAccount)->create([
+    SocialAccountMedia::factory()->for($secondaryAccount)->create([
         'media_type' => MediaType::Story,
         'published_at' => now()->subDays(20),
         'engagement_rate' => 2.00,
         'reach' => 400,
     ]);
 
-    InstagramMedia::factory()->for($secondaryAccount)->create([
+    SocialAccountMedia::factory()->for($secondaryAccount)->create([
         'media_type' => MediaType::Post,
         'published_at' => now()->subDays(45),
         'engagement_rate' => 9.00,
         'reach' => 10000,
     ]);
 
-    InstagramMedia::factory()->for($outsiderAccount)->create([
+    SocialAccountMedia::factory()->for($outsiderAccount)->create([
         'media_type' => MediaType::Post,
         'published_at' => now()->subDay(),
         'engagement_rate' => 99.00,
@@ -151,7 +151,7 @@ test('best performing content section sorts and scopes top media', function (): 
     $secondaryAccount = SocialAccount::factory()->for($user)->create();
     $outsiderAccount = SocialAccount::factory()->for($otherUser)->create();
 
-    $engagementFirst = InstagramMedia::factory()->for($primaryAccount)->create([
+    $engagementFirst = SocialAccountMedia::factory()->for($primaryAccount)->create([
         'caption' => 'Primary engagement first',
         'published_at' => now()->subDays(2),
         'engagement_rate' => 9.80,
@@ -159,7 +159,7 @@ test('best performing content section sorts and scopes top media', function (): 
         'like_count' => 120,
     ]);
 
-    $engagementSecond = InstagramMedia::factory()->for($primaryAccount)->create([
+    $engagementSecond = SocialAccountMedia::factory()->for($primaryAccount)->create([
         'caption' => 'Primary engagement second',
         'published_at' => now()->subDays(3),
         'engagement_rate' => 7.30,
@@ -167,7 +167,7 @@ test('best performing content section sorts and scopes top media', function (): 
         'like_count' => 90,
     ]);
 
-    $reachFirst = InstagramMedia::factory()->for($primaryAccount)->create([
+    $reachFirst = SocialAccountMedia::factory()->for($primaryAccount)->create([
         'caption' => 'Primary reach first',
         'published_at' => now()->subDays(4),
         'engagement_rate' => 2.20,
@@ -175,7 +175,7 @@ test('best performing content section sorts and scopes top media', function (): 
         'like_count' => 50,
     ]);
 
-    $secondaryMedia = InstagramMedia::factory()->for($secondaryAccount)->create([
+    $secondaryMedia = SocialAccountMedia::factory()->for($secondaryAccount)->create([
         'caption' => 'Secondary media record',
         'published_at' => now()->subDays(4),
         'engagement_rate' => 8.40,
@@ -183,14 +183,14 @@ test('best performing content section sorts and scopes top media', function (): 
         'like_count' => 75,
     ]);
 
-    InstagramMedia::factory()->for($primaryAccount)->create([
+    SocialAccountMedia::factory()->for($primaryAccount)->create([
         'caption' => 'Outside selected period',
         'published_at' => now()->subDays(40),
         'engagement_rate' => 99.00,
         'reach' => 99999,
     ]);
 
-    InstagramMedia::factory()->for($outsiderAccount)->create([
+    SocialAccountMedia::factory()->for($outsiderAccount)->create([
         'caption' => 'Outsider media record',
         'published_at' => now()->subDays(2),
         'engagement_rate' => 100.00,
@@ -234,49 +234,49 @@ test('content type breakdown calculates counts percentages and per-type averages
     $secondaryAccount = SocialAccount::factory()->for($user)->create();
     $outsiderAccount = SocialAccount::factory()->for($otherUser)->create();
 
-    InstagramMedia::factory()->for($primaryAccount)->create([
+    SocialAccountMedia::factory()->for($primaryAccount)->create([
         'media_type' => MediaType::Post,
         'published_at' => now()->subDays(3),
         'engagement_rate' => 4.00,
         'reach' => 1000,
     ]);
 
-    InstagramMedia::factory()->for($primaryAccount)->create([
+    SocialAccountMedia::factory()->for($primaryAccount)->create([
         'media_type' => MediaType::Post,
         'published_at' => now()->subDays(5),
         'engagement_rate' => 6.00,
         'reach' => 3000,
     ]);
 
-    InstagramMedia::factory()->for($primaryAccount)->create([
+    SocialAccountMedia::factory()->for($primaryAccount)->create([
         'media_type' => MediaType::Reel,
         'published_at' => now()->subDays(2),
         'engagement_rate' => 10.00,
         'reach' => 5000,
     ]);
 
-    InstagramMedia::factory()->for($primaryAccount)->create([
+    SocialAccountMedia::factory()->for($primaryAccount)->create([
         'media_type' => MediaType::Story,
         'published_at' => now()->subDays(1),
         'engagement_rate' => 2.00,
         'reach' => 800,
     ]);
 
-    InstagramMedia::factory()->for($secondaryAccount)->create([
+    SocialAccountMedia::factory()->for($secondaryAccount)->create([
         'media_type' => MediaType::Reel,
         'published_at' => now()->subDays(10),
         'engagement_rate' => 8.00,
         'reach' => 2000,
     ]);
 
-    InstagramMedia::factory()->for($primaryAccount)->create([
+    SocialAccountMedia::factory()->for($primaryAccount)->create([
         'media_type' => MediaType::Story,
         'published_at' => now()->subDays(40),
         'engagement_rate' => 40.00,
         'reach' => 9999,
     ]);
 
-    InstagramMedia::factory()->for($outsiderAccount)->create([
+    SocialAccountMedia::factory()->for($outsiderAccount)->create([
         'media_type' => MediaType::Post,
         'published_at' => now()->subDay(),
         'engagement_rate' => 99.00,
@@ -337,42 +337,42 @@ test('engagement trend chart data aggregates by period granularity and account f
         'followers_count' => 888888,
     ]);
 
-    InstagramMedia::factory()->for($primaryAccount)->create([
+    SocialAccountMedia::factory()->for($primaryAccount)->create([
         'published_at' => '2026-02-15 10:00:00',
         'engagement_rate' => 4.00,
     ]);
 
-    InstagramMedia::factory()->for($primaryAccount)->create([
+    SocialAccountMedia::factory()->for($primaryAccount)->create([
         'published_at' => '2026-02-15 18:00:00',
         'engagement_rate' => 8.00,
     ]);
 
-    InstagramMedia::factory()->for($primaryAccount)->create([
+    SocialAccountMedia::factory()->for($primaryAccount)->create([
         'published_at' => '2026-01-30 15:00:00',
         'engagement_rate' => 10.00,
     ]);
 
-    InstagramMedia::factory()->for($primaryAccount)->create([
+    SocialAccountMedia::factory()->for($primaryAccount)->create([
         'published_at' => '2026-01-28 09:00:00',
         'engagement_rate' => 14.00,
     ]);
 
-    InstagramMedia::factory()->for($primaryAccount)->create([
+    SocialAccountMedia::factory()->for($primaryAccount)->create([
         'published_at' => '2025-12-05 09:00:00',
         'engagement_rate' => 20.00,
     ]);
 
-    InstagramMedia::factory()->for($primaryAccount)->create([
+    SocialAccountMedia::factory()->for($primaryAccount)->create([
         'published_at' => '2025-12-26 09:00:00',
         'engagement_rate' => 22.00,
     ]);
 
-    InstagramMedia::factory()->for($secondaryAccount)->create([
+    SocialAccountMedia::factory()->for($secondaryAccount)->create([
         'published_at' => '2026-02-15 12:00:00',
         'engagement_rate' => 99.00,
     ]);
 
-    InstagramMedia::factory()->for($outsiderAccount)->create([
+    SocialAccountMedia::factory()->for($outsiderAccount)->create([
         'published_at' => '2026-02-15 12:00:00',
         'engagement_rate' => 77.00,
     ]);

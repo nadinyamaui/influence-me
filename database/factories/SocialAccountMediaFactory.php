@@ -3,13 +3,13 @@
 namespace Database\Factories;
 
 use App\Enums\MediaType;
-use App\Models\InstagramMedia;
+use App\Models\SocialAccountMedia;
 use App\Models\SocialAccount;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-class InstagramMediaFactory extends Factory
+class SocialAccountMediaFactory extends Factory
 {
-    protected $model = InstagramMedia::class;
+    protected $model = SocialAccountMedia::class;
 
     public function definition(): array
     {

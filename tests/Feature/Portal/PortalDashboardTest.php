@@ -5,7 +5,7 @@ use App\Enums\ProposalStatus;
 use App\Models\Campaign;
 use App\Models\Client;
 use App\Models\ClientUser;
-use App\Models\InstagramMedia;
+use App\Models\SocialAccountMedia;
 use App\Models\Invoice;
 use App\Models\Proposal;
 use App\Models\SocialAccount;
@@ -60,15 +60,15 @@ test('portal dashboard displays scoped summary metrics and recent activity', fun
 
     $account = SocialAccount::factory()->for($influencer)->create();
 
-    $firstVisibleMedia = InstagramMedia::factory()->for($account)->create([
+    $firstVisibleMedia = SocialAccountMedia::factory()->for($account)->create([
         'reach' => 1500,
     ]);
 
-    $secondVisibleMedia = InstagramMedia::factory()->for($account)->create([
+    $secondVisibleMedia = SocialAccountMedia::factory()->for($account)->create([
         'reach' => 500,
     ]);
 
-    $hiddenMedia = InstagramMedia::factory()->for($account)->create([
+    $hiddenMedia = SocialAccountMedia::factory()->for($account)->create([
         'reach' => 9000,
     ]);
 

@@ -3,7 +3,7 @@
 use App\Enums\ClientType;
 use App\Models\Campaign;
 use App\Models\Client;
-use App\Models\InstagramMedia;
+use App\Models\SocialAccountMedia;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -30,7 +30,7 @@ it('supports brand and individual factory states', function (): void {
 it('defines user client user proposals invoices and campaigns relationships', function (): void {
     $client = Client::factory()->create();
     $campaign = Campaign::factory()->for($client)->create();
-    $media = InstagramMedia::factory()->create();
+    $media = SocialAccountMedia::factory()->create();
 
     $campaign->instagramMedia()->attach($media->id, [
         'notes' => 'Feature placement',

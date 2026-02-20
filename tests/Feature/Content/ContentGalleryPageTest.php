@@ -4,7 +4,7 @@ use App\Enums\MediaType;
 use App\Livewire\Content\Index;
 use App\Models\Campaign;
 use App\Models\Client;
-use App\Models\InstagramMedia;
+use App\Models\SocialAccountMedia;
 use App\Models\SocialAccount;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
@@ -25,12 +25,12 @@ test('authenticated users can view scoped content gallery page', function (): vo
 
     $otherAccount = SocialAccount::factory()->for($otherUser)->create();
 
-    InstagramMedia::factory()->for($account)->create([
+    SocialAccountMedia::factory()->for($account)->create([
         'caption' => 'Owner gallery post',
         'engagement_rate' => 6.25,
     ]);
 
-    InstagramMedia::factory()->for($otherAccount)->create([
+    SocialAccountMedia::factory()->for($otherAccount)->create([
         'caption' => 'Hidden outsider post',
     ]);
 
@@ -51,7 +51,7 @@ test('content gallery filters and sorting options work in query layer', function
     $primaryAccount = SocialAccount::factory()->for($user)->create();
     $secondaryAccount = SocialAccount::factory()->for($user)->create();
 
-    InstagramMedia::factory()->for($primaryAccount)->create([
+    SocialAccountMedia::factory()->for($primaryAccount)->create([
         'caption' => 'Primary Post Item',
         'media_type' => MediaType::Post,
         'published_at' => now()->subDay(),
@@ -60,7 +60,7 @@ test('content gallery filters and sorting options work in query layer', function
         'engagement_rate' => 3.20,
     ]);
 
-    InstagramMedia::factory()->for($primaryAccount)->create([
+    SocialAccountMedia::factory()->for($primaryAccount)->create([
         'caption' => 'Primary Reel Item',
         'media_type' => MediaType::Reel,
         'published_at' => now()->subDays(2),
@@ -69,7 +69,7 @@ test('content gallery filters and sorting options work in query layer', function
         'engagement_rate' => 8.10,
     ]);
 
-    InstagramMedia::factory()->for($secondaryAccount)->create([
+    SocialAccountMedia::factory()->for($secondaryAccount)->create([
         'caption' => 'Secondary Story Item',
         'media_type' => MediaType::Story,
         'published_at' => now()->subDays(3),
@@ -125,7 +125,7 @@ test('content detail modal displays metrics caption permalink and linked clients
         'name' => 'Modal Client',
     ]);
 
-    $media = InstagramMedia::factory()->for($account)->create([
+    $media = SocialAccountMedia::factory()->for($account)->create([
         'caption' => str_repeat('Detailed caption text ', 8),
         'permalink' => 'https://instagram.com/p/modal-post',
         'like_count' => 1234,
@@ -169,7 +169,7 @@ test('content detail modal displays metrics caption permalink and linked clients
 test('content detail modal can open from media query parameter', function (): void {
     $user = User::factory()->create();
     $account = SocialAccount::factory()->for($user)->create();
-    $media = InstagramMedia::factory()->for($account)->create([
+    $media = SocialAccountMedia::factory()->for($account)->create([
         'caption' => 'Deep link content caption',
     ]);
 
@@ -194,7 +194,7 @@ test('content detail modal shows 90-day account average comparisons and campaign
         'name' => 'Comparison Campaign',
     ]);
 
-    $selectedMedia = InstagramMedia::factory()->for($account)->create([
+    $selectedMedia = SocialAccountMedia::factory()->for($account)->create([
         'caption' => 'Selected comparison media',
         'published_at' => now()->subDays(5),
         'like_count' => 150,
@@ -203,7 +203,7 @@ test('content detail modal shows 90-day account average comparisons and campaign
         'engagement_rate' => 6.00,
     ]);
 
-    $recentMedia = InstagramMedia::factory()->for($account)->create([
+    $recentMedia = SocialAccountMedia::factory()->for($account)->create([
         'published_at' => now()->subDays(12),
         'like_count' => 100,
         'comments_count' => 10,
@@ -211,7 +211,7 @@ test('content detail modal shows 90-day account average comparisons and campaign
         'engagement_rate' => 4.00,
     ]);
 
-    $oldOutlierMedia = InstagramMedia::factory()->for($account)->create([
+    $oldOutlierMedia = SocialAccountMedia::factory()->for($account)->create([
         'published_at' => now()->subDays(120),
         'like_count' => 1000,
         'comments_count' => 100,
@@ -239,7 +239,7 @@ test('content detail media query ignores media outside authenticated ownership',
     $otherUser = User::factory()->create();
 
     $otherAccount = SocialAccount::factory()->for($otherUser)->create();
-    $otherMedia = InstagramMedia::factory()->for($otherAccount)->create([
+    $otherMedia = SocialAccountMedia::factory()->for($otherAccount)->create([
         'caption' => 'Outsider deep link content',
     ]);
 
@@ -258,7 +258,7 @@ test('single media cannot be linked to the same campaign twice', function (): vo
     $campaign = Campaign::factory()->for($client)->create([
         'name' => 'Spring Launch',
     ]);
-    $media = InstagramMedia::factory()->for($account)->create();
+    $media = SocialAccountMedia::factory()->for($account)->create();
 
     Livewire::actingAs($user)
         ->test(Index::class)
@@ -290,7 +290,7 @@ test('single media cannot be linked to the same campaign twice', function (): vo
 test('campaign options refresh when link client changes in the link modal', function (): void {
     $user = User::factory()->create();
     $account = SocialAccount::factory()->for($user)->create();
-    $media = InstagramMedia::factory()->for($account)->create();
+    $media = SocialAccountMedia::factory()->for($account)->create();
 
     $clientA = Client::factory()->for($user)->create(['name' => 'Client A']);
     $clientB = Client::factory()->for($user)->create(['name' => 'Client B']);
@@ -320,9 +320,9 @@ test('batch selection mode links all selected media to a client', function (): v
         'name' => 'Batch Campaign',
     ]);
 
-    $firstMedia = InstagramMedia::factory()->for($account)->create();
-    $secondMedia = InstagramMedia::factory()->for($account)->create();
-    $thirdMedia = InstagramMedia::factory()->for($account)->create();
+    $firstMedia = SocialAccountMedia::factory()->for($account)->create();
+    $secondMedia = SocialAccountMedia::factory()->for($account)->create();
+    $thirdMedia = SocialAccountMedia::factory()->for($account)->create();
 
     Livewire::actingAs($user)
         ->test(Index::class)
@@ -356,7 +356,7 @@ test('linked media can be unlinked from detail modal', function (): void {
     $user = User::factory()->create();
     $account = SocialAccount::factory()->for($user)->create();
     $client = Client::factory()->for($user)->create();
-    $media = InstagramMedia::factory()->for($account)->create();
+    $media = SocialAccountMedia::factory()->for($account)->create();
 
     $campaign = Campaign::factory()->for($client)->create([
         'name' => 'To Remove',
@@ -382,7 +382,7 @@ test('users cannot link content to clients they do not own', function (): void {
     $ownerCampaign = Campaign::factory()->for($ownerClient)->create();
 
     $outsiderAccount = SocialAccount::factory()->for($outsider)->create();
-    $outsiderMedia = InstagramMedia::factory()->for($outsiderAccount)->create();
+    $outsiderMedia = SocialAccountMedia::factory()->for($outsiderAccount)->create();
 
     Livewire::actingAs($outsider)
         ->test(Index::class)
@@ -402,7 +402,7 @@ test('inline campaign creation works in content linking flow', function (): void
     $user = User::factory()->create();
     $account = SocialAccount::factory()->for($user)->create();
     $client = Client::factory()->for($user)->create();
-    $media = InstagramMedia::factory()->for($account)->create();
+    $media = SocialAccountMedia::factory()->for($account)->create();
 
     Livewire::actingAs($user)
         ->test(Index::class)
@@ -433,7 +433,7 @@ test('content gallery uses cursor pagination', function (): void {
     $account = SocialAccount::factory()->for($user)->create();
 
     foreach (range(1, 25) as $number) {
-        InstagramMedia::factory()->for($account)->create([
+        SocialAccountMedia::factory()->for($account)->create([
             'caption' => 'Paged Item '.$number,
             'published_at' => now()->subMinutes($number),
         ]);
@@ -446,7 +446,7 @@ test('content gallery uses cursor pagination', function (): void {
         ->assertSee('Paged Item 24')
         ->assertDontSee('Paged Item 25');
 
-    $nextCursor = InstagramMedia::query()
+    $nextCursor = SocialAccountMedia::query()
         ->where('social_account_id', $account->id)
         ->orderBy('published_at', 'desc')
         ->orderByDesc('id')

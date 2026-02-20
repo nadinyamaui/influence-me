@@ -5,7 +5,7 @@ use App\Models\AudienceDemographic;
 use App\Models\Campaign;
 use App\Models\Client;
 use App\Models\ClientUser;
-use App\Models\InstagramMedia;
+use App\Models\SocialAccountMedia;
 use App\Models\SocialAccount;
 use App\Models\User;
 
@@ -45,21 +45,21 @@ test('portal analytics shows only client scoped campaign and demographic data', 
         'name' => 'Hidden Campaign',
     ]);
 
-    $firstVisibleMedia = InstagramMedia::factory()->for($visibleAccount)->create([
+    $firstVisibleMedia = SocialAccountMedia::factory()->for($visibleAccount)->create([
         'published_at' => now()->subDays(3),
         'reach' => 1400,
         'impressions' => 2100,
         'engagement_rate' => 4.5,
     ]);
 
-    $secondVisibleMedia = InstagramMedia::factory()->for($visibleAccount)->create([
+    $secondVisibleMedia = SocialAccountMedia::factory()->for($visibleAccount)->create([
         'published_at' => now()->subDays(1),
         'reach' => 900,
         'impressions' => 1700,
         'engagement_rate' => 5.5,
     ]);
 
-    $hiddenMedia = InstagramMedia::factory()->for($hiddenAccount)->create([
+    $hiddenMedia = SocialAccountMedia::factory()->for($hiddenAccount)->create([
         'published_at' => now()->subDays(2),
         'reach' => 9900,
         'impressions' => 19900,

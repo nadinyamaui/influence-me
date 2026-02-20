@@ -10,7 +10,7 @@ use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 
-class InstagramMediaBuilder extends Builder
+class SocialAccountMediaBuilder extends Builder
 {
     public function forClient(int $clientId): self
     {
