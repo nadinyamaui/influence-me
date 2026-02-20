@@ -205,3 +205,18 @@ test('owners can delete draft invoices from the list page', function (): void {
 
     $this->assertDatabaseMissing('invoices', ['id' => $invoice->id]);
 });
+
+test('invoices list includes mobile card layout and desktop table layout', function (): void {
+    $user = User::factory()->create();
+    $client = Client::factory()->for($user)->create();
+
+    Invoice::factory()->for($user)->for($client)->create([
+        'invoice_number' => 'RESP-1001',
+    ]);
+
+    $this->actingAs($user)
+        ->get(route('invoices.index'))
+        ->assertSuccessful()
+        ->assertSee('invoice-card-', false)
+        ->assertSee('class="hidden overflow-x-auto sm:block"', false);
+});
