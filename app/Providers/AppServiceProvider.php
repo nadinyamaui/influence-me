@@ -5,8 +5,11 @@ namespace App\Providers;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
+use SocialiteProviders\Manager\SocialiteWasCalled;
+use SocialiteProviders\TikTok\Provider as TikTokProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -18,6 +21,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->configureDefaults();
+        $this->configureSocialiteProviders();
     }
 
     protected function configureDefaults(): void
@@ -37,5 +41,12 @@ class AppServiceProvider extends ServiceProvider
                 ->uncompromised()
             : null
         );
+    }
+
+    protected function configureSocialiteProviders(): void
+    {
+        Event::listen(function (SocialiteWasCalled $event): void {
+            $event->extendSocialite('tiktok', TikTokProvider::class);
+        });
     }
 }
