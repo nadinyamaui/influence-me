@@ -81,6 +81,7 @@ class CatalogPlanService
         $ownedCount = CatalogProduct::query()
             ->whereIn('id', $productIds->all())
             ->where('user_id', $user->id)
+            ->where('is_active', true)
             ->count();
 
         if ($ownedCount !== $productIds->count()) {
@@ -90,9 +91,11 @@ class CatalogPlanService
 
     private function normalizePlanPayload(array $payload): array
     {
+        $description = (string) ($payload['description'] ?? '');
+
         return [
             'name' => $payload['name'],
-            'description' => $payload['description'] ?: null,
+            'description' => $description === '' ? null : $description,
             'bundle_price' => $payload['bundle_price'],
             'currency' => strtoupper($payload['currency']),
             'is_active' => (bool) $payload['is_active'],

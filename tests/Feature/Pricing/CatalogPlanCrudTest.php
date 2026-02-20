@@ -148,6 +148,7 @@ test('create form validates plan composition and ownership rules', function (): 
     $outsider = User::factory()->create();
     $ownedProduct = CatalogProduct::factory()->for($user)->create();
     $outsiderProduct = CatalogProduct::factory()->for($outsider)->create();
+    $archivedOwnedProduct = CatalogProduct::factory()->for($user)->create(['is_active' => false]);
 
     Livewire::actingAs($user)
         ->test(PlansForm::class)
@@ -168,6 +169,19 @@ test('create form validates plan composition and ownership rules', function (): 
             'items.0.catalog_product_id',
             'items.0.quantity',
         ]);
+
+    Livewire::actingAs($user)
+        ->test(PlansForm::class)
+        ->set('name', 'Archived Product Plan')
+        ->set('bundle_price', '100')
+        ->set('items', [
+            [
+                'catalog_product_id' => (string) $archivedOwnedProduct->id,
+                'quantity' => '1',
+            ],
+        ])
+        ->call('save')
+        ->assertHasErrors(['items.0.catalog_product_id']);
 
     Livewire::actingAs($user)
         ->test(PlansForm::class)
@@ -269,4 +283,52 @@ test('users cannot access or mutate other user pricing plans', function (): void
             ],
         ]);
     })->toThrow(AuthorizationException::class);
+});
+
+test('service rejects archived products in plan composition payloads', function (): void {
+    $user = User::factory()->create();
+    $archivedProduct = CatalogProduct::factory()->for($user)->create([
+        'is_active' => false,
+    ]);
+
+    expect(function () use ($user, $archivedProduct): void {
+        app(CatalogPlanService::class)->create($user, [
+            'name' => 'Archived Product Attempt',
+            'description' => '0',
+            'bundle_price' => 100,
+            'currency' => 'USD',
+            'is_active' => true,
+            'items' => [
+                [
+                    'catalog_product_id' => $archivedProduct->id,
+                    'quantity' => 1,
+                ],
+            ],
+        ]);
+    })->toThrow(AuthorizationException::class);
+});
+
+test('service preserves description value when set to zero-like string', function (): void {
+    $user = User::factory()->create();
+    $product = CatalogProduct::factory()->for($user)->create();
+
+    app(CatalogPlanService::class)->create($user, [
+        'name' => 'Zero Description Plan',
+        'description' => '0',
+        'bundle_price' => 100,
+        'currency' => 'USD',
+        'is_active' => true,
+        'items' => [
+            [
+                'catalog_product_id' => $product->id,
+                'quantity' => 1,
+            ],
+        ],
+    ]);
+
+    $this->assertDatabaseHas('catalog_plans', [
+        'user_id' => $user->id,
+        'name' => 'Zero Description Plan',
+        'description' => '0',
+    ]);
 });

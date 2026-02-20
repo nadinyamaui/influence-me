@@ -32,7 +32,9 @@ class StoreCatalogPlanRequest extends FormRequest
                 'required',
                 'integer',
                 Rule::exists('catalog_products', 'id')->where(static function ($query) use ($userId): void {
-                    $query->where('user_id', $userId);
+                    $query
+                        ->where('user_id', $userId)
+                        ->where('is_active', true);
                 }),
             ],
             'items.*.quantity' => ['required', 'numeric', 'gt:0'],
