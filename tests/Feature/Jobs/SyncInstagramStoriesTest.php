@@ -1,7 +1,7 @@
 <?php
 
 use App\Enums\MediaType;
-use App\Jobs\SyncInstagramStories;
+use App\Jobs\SyncSocialMediaStories;
 use App\Models\InstagramMedia;
 use App\Models\SocialAccount;
 use App\Services\Facebook\Client as FacebookClient;
@@ -38,7 +38,7 @@ it('fetches active stories and syncs them as story media records', function (): 
         return $facebookClient;
     });
 
-    app(SyncInstagramStories::class, ['account' => $account])->handle();
+    app(SyncSocialMediaStories::class, ['account' => $account])->handle();
 
     expect(InstagramMedia::count())->toBe(2)
         ->and(InstagramMedia::where('instagram_media_id', 'story-1')->first()->media_type)->toBe(MediaType::Story)
@@ -76,7 +76,7 @@ it('updates existing story records when rerun to keep sync idempotent', function
         return $facebookClient;
     });
 
-    app(SyncInstagramStories::class, ['account' => $account])->handle();
+    app(SyncSocialMediaStories::class, ['account' => $account])->handle();
 
     expect(InstagramMedia::where('instagram_media_id', 'story-1')->count())->toBe(1);
 
@@ -89,7 +89,7 @@ it('updates existing story records when rerun to keep sync idempotent', function
 
 it('configures queue settings for stories sync workloads', function (): void {
     $account = SocialAccount::factory()->create();
-    $job = new SyncInstagramStories($account);
+    $job = new SyncSocialMediaStories($account);
 
     expect($job->queue)->toBe('instagram-sync')
         ->and($job->tries)->toBe(3);

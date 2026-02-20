@@ -11,7 +11,7 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Bus;
 use Throwable;
 
-class SyncAllInstagramData implements ShouldQueue
+class SyncAllSocialMediaData implements ShouldQueue
 {
     use InteractsWithQueue;
     use Queueable;
@@ -35,10 +35,10 @@ class SyncAllInstagramData implements ShouldQueue
 
         try {
             Bus::chain([
-                new SyncInstagramProfile($this->account, finalizeSyncState: false),
-                new SyncInstagramMedia($this->account),
+                new SyncSocialMediaProfile($this->account, finalizeSyncState: false),
+                new SyncSocialMediaMedia($this->account),
                 new SyncMediaInsights($this->account),
-                new SyncInstagramStories($this->account),
+                new SyncSocialMediaStories($this->account),
                 new SyncAudienceDemographics($this->account),
                 function () use ($accountId): void {
                     SocialAccount::query()

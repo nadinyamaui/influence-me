@@ -2,7 +2,7 @@
 
 namespace App\Console\Commands;
 
-use App\Jobs\SyncInstagramMedia;
+use App\Jobs\SyncSocialMediaMedia;
 use App\Models\SocialAccount;
 use Illuminate\Console\Command;
 
@@ -23,12 +23,12 @@ class RetrieveAllInstagramMedia extends Command
                 $totalAccounts++;
 
                 if ($this->option('queue')) {
-                    SyncInstagramMedia::dispatch($account);
+                    SyncSocialMediaMedia::dispatch($account);
 
                     return;
                 }
 
-                SyncInstagramMedia::dispatchSync($account);
+                SyncSocialMediaMedia::dispatchSync($account);
             });
 
         if ($totalAccounts === 0) {

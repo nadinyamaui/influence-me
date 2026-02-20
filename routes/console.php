@@ -1,9 +1,9 @@
 <?php
 
 use App\Jobs\RecordFollowerSnapshot;
-use App\Jobs\RefreshInstagramToken;
-use App\Jobs\SyncAllInstagramData;
-use App\Jobs\SyncInstagramProfile;
+use App\Jobs\RefreshSocialMediaToken;
+use App\Jobs\SyncAllSocialMediaData;
+use App\Jobs\SyncSocialMediaProfile;
 use App\Jobs\SyncMediaInsights;
 use App\Models\SocialAccount;
 use Illuminate\Foundation\Inspiring;
@@ -16,13 +16,13 @@ Artisan::command('inspire', function () {
 
 Schedule::call(function (): void {
     SocialAccount::query()->each(function (SocialAccount $account): void {
-        SyncAllInstagramData::dispatch($account);
+        SyncAllSocialMediaData::dispatch($account);
     });
 })->everySixHours()->name('sync-all-instagram');
 
 Schedule::call(function (): void {
     SocialAccount::query()->each(function (SocialAccount $account): void {
-        SyncInstagramProfile::dispatch($account);
+        SyncSocialMediaProfile::dispatch($account);
         SyncMediaInsights::dispatch($account);
     });
 })->hourly()->name('refresh-instagram-insights');
@@ -34,7 +34,7 @@ Schedule::call(function (): void {
     SocialAccount::query()
         ->whereBetween('token_expires_at', [$refreshWindowStart, $refreshWindowEnd])
         ->each(function (SocialAccount $account): void {
-            RefreshInstagramToken::dispatch($account);
+            RefreshSocialMediaToken::dispatch($account);
         });
 })->daily()->name('refresh-instagram-tokens');
 

@@ -8,7 +8,7 @@ use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 
-class SyncInstagramStories implements ShouldQueue
+class SyncSocialMediaStories implements ShouldQueue
 {
     use InteractsWithQueue;
     use Queueable;

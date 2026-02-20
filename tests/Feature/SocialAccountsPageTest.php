@@ -1,7 +1,7 @@
 <?php
 
 use App\Enums\SyncStatus;
-use App\Jobs\SyncAllInstagramData;
+use App\Jobs\SyncAllSocialMediaData;
 use App\Livewire\SocialAccounts\Index;
 use App\Models\SocialAccount;
 use App\Models\User;
@@ -152,7 +152,7 @@ test('users can manually trigger sync from instagram accounts page', function ()
     expect($account->sync_status)->toBe(SyncStatus::Syncing)
         ->and($account->last_sync_error)->toBeNull();
 
-    Bus::assertDispatched(SyncAllInstagramData::class, fn (SyncAllInstagramData $job): bool => $job->account->is($account));
+    Bus::assertDispatched(SyncAllSocialMediaData::class, fn (SyncAllSocialMediaData $job): bool => $job->account->is($account));
 });
 
 test('manual sync action does not dispatch when account is already syncing', function (): void {
@@ -169,7 +169,7 @@ test('manual sync action does not dispatch when account is already syncing', fun
         ->test(Index::class)
         ->call('syncNow', $account->id);
 
-    Bus::assertNotDispatched(SyncAllInstagramData::class);
+    Bus::assertNotDispatched(SyncAllSocialMediaData::class);
 });
 
 test('failed sync status shows collapsible sync error details', function (): void {

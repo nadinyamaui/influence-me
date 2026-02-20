@@ -1,7 +1,7 @@
 <?php
 
 use App\Jobs\RecordFollowerSnapshot;
-use App\Jobs\RefreshInstagramToken;
+use App\Jobs\RefreshSocialMediaToken;
 use App\Models\SocialAccount;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\Carbon;
@@ -45,15 +45,15 @@ it('dispatches token refresh only for accounts expiring within the next seven da
 
     $tokenRefreshEvent->run(app());
 
-    Bus::assertDispatched(RefreshInstagramToken::class, function (RefreshInstagramToken $job) use ($expiringSoonAccount): bool {
+    Bus::assertDispatched(RefreshSocialMediaToken::class, function (RefreshSocialMediaToken $job) use ($expiringSoonAccount): bool {
         return $job->account->is($expiringSoonAccount);
     });
 
-    Bus::assertNotDispatched(RefreshInstagramToken::class, function (RefreshInstagramToken $job) use ($expiredAccount): bool {
+    Bus::assertNotDispatched(RefreshSocialMediaToken::class, function (RefreshSocialMediaToken $job) use ($expiredAccount): bool {
         return $job->account->is($expiredAccount);
     });
 
-    Bus::assertNotDispatched(RefreshInstagramToken::class, function (RefreshInstagramToken $job) use ($laterAccount): bool {
+    Bus::assertNotDispatched(RefreshSocialMediaToken::class, function (RefreshSocialMediaToken $job) use ($laterAccount): bool {
         return $job->account->is($laterAccount);
     });
 });

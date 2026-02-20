@@ -1,7 +1,7 @@
 <?php
 
 use App\Enums\MediaType;
-use App\Jobs\SyncInstagramMedia;
+use App\Jobs\SyncSocialMediaMedia;
 use App\Models\InstagramMedia;
 use App\Models\SocialAccount;
 use App\Services\Facebook\Client as FacebookClient;
@@ -68,7 +68,7 @@ it('fetches paginated media and syncs records with mapped media types', function
         return $facebookClient;
     });
 
-    app(SyncInstagramMedia::class, ['account' => $account])->handle();
+    app(SyncSocialMediaMedia::class, ['account' => $account])->handle();
 
     expect(InstagramMedia::count())->toBe(4)
         ->and(InstagramMedia::where('instagram_media_id', 'media-1')->first()->media_type)->toBe(MediaType::Post)
@@ -113,7 +113,7 @@ it('updates existing media records when rerun to keep sync idempotent', function
         return $facebookClient;
     });
 
-    app(SyncInstagramMedia::class, ['account' => $account])->handle();
+    app(SyncSocialMediaMedia::class, ['account' => $account])->handle();
 
     expect(InstagramMedia::where('instagram_media_id', 'media-1')->count())->toBe(1);
 
@@ -126,7 +126,7 @@ it('updates existing media records when rerun to keep sync idempotent', function
 
 it('configures queue settings for larger sync workloads', function (): void {
     $account = SocialAccount::factory()->create();
-    $job = new SyncInstagramMedia($account);
+    $job = new SyncSocialMediaMedia($account);
 
     expect($job->queue)->toBe('instagram-sync')
         ->and($job->tries)->toBe(3)

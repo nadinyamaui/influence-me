@@ -3,7 +3,7 @@
 use App\Enums\SyncStatus;
 use App\Exceptions\InstagramApiException;
 use App\Exceptions\InstagramTokenExpiredException;
-use App\Jobs\SyncAllInstagramData;
+use App\Jobs\SyncAllSocialMediaData;
 use App\Models\SocialAccount;
 use App\Services\Facebook\InstagramGraphService;
 
@@ -42,7 +42,7 @@ it('runs the full instagram sync workflow and marks account as idle on success',
         ->ordered('sync');
     app()->bind(InstagramGraphService::class, fn () => $instagramGraphService);
 
-    app(SyncAllInstagramData::class, ['account' => $account])->handle();
+    app(SyncAllSocialMediaData::class, ['account' => $account])->handle();
 
     $account->refresh();
 
@@ -79,7 +79,7 @@ it('marks account as failed when the chained sync workflow throws', function ():
     $instagramGraphService->shouldNotReceive('syncAudienceDemographics');
     app()->bind(InstagramGraphService::class, fn () => $instagramGraphService);
 
-    expect(fn () => app(SyncAllInstagramData::class, ['account' => $account])->handle())
+    expect(fn () => app(SyncAllSocialMediaData::class, ['account' => $account])->handle())
         ->toThrow(InstagramApiException::class, 'Insights sync failed');
 
     $account->refresh();
@@ -92,7 +92,7 @@ it('marks account as failed when the chained sync workflow throws', function ():
 it('configures instagram sync queue settings', function (): void {
     $account = SocialAccount::factory()->create();
 
-    $job = new SyncAllInstagramData($account);
+    $job = new SyncAllSocialMediaData($account);
 
     expect($job->queue)->toBe('instagram-sync')
         ->and($job->tries)->toBe(3);
@@ -124,7 +124,7 @@ it('does not overwrite failed status when profile marks account as failed withou
         ->ordered('sync');
     app()->bind(InstagramGraphService::class, fn () => $instagramGraphService);
 
-    app(SyncAllInstagramData::class, ['account' => $account])->handle();
+    app(SyncAllSocialMediaData::class, ['account' => $account])->handle();
 
     $account->refresh();
 

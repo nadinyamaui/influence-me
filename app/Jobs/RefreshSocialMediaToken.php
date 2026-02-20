@@ -12,7 +12,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 
-class RefreshInstagramToken implements ShouldQueue
+class RefreshSocialMediaToken implements ShouldQueue
 {
     use InteractsWithQueue;
     use Queueable;

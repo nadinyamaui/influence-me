@@ -3,7 +3,7 @@
 namespace App\Livewire\SocialAccounts;
 
 use App\Enums\SyncStatus;
-use App\Jobs\SyncAllInstagramData;
+use App\Jobs\SyncAllSocialMediaData;
 use App\Models\User;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Collection;
@@ -28,7 +28,7 @@ class Index extends Component
             'last_sync_error' => null,
         ]);
 
-        SyncAllInstagramData::dispatch($account);
+        SyncAllSocialMediaData::dispatch($account);
     }
 
     public function setPrimary(int $accountId): void
