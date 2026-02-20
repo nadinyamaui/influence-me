@@ -23,7 +23,7 @@ class StoreCatalogPlanRequest extends FormRequest
 
         return [
             'name' => ['required', 'string', 'max:255'],
-            'description' => ['nullable', 'string'],
+            'description' => ['nullable', 'string', 'max:5000'],
             'currency' => ['required', 'string', 'size:3'],
             'bundle_price' => ['required', 'numeric', 'min:0'],
             'is_active' => ['required', 'boolean'],

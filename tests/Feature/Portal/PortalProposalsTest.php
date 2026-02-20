@@ -256,6 +256,20 @@ test('client can request proposal changes with notes and influencer receives rev
     });
 });
 
+test('client cannot request proposal changes with revision notes longer than five thousand characters', function (): void {
+    $influencer = User::factory()->create();
+    $client = Client::factory()->for($influencer)->create();
+    $clientUser = ClientUser::factory()->for($client)->create();
+
+    $proposal = Proposal::factory()->for($influencer)->for($client)->sent()->create();
+
+    Livewire::actingAs($clientUser, 'client')
+        ->test(\App\Livewire\Portal\Proposals\Show::class, ['proposal' => $proposal])
+        ->set('revisionNotes', str_repeat('a', 5001))
+        ->call('requestChanges')
+        ->assertHasErrors(['revisionNotes' => 'max']);
+});
+
 test('client cannot approve a proposal that has already been responded to', function (): void {
     Mail::fake();
 
