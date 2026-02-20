@@ -140,3 +140,16 @@ test('owners can delete clients from the list page', function (): void {
 
     $this->assertDatabaseMissing('clients', ['id' => $client->id]);
 });
+
+test('clients list includes mobile card layout and desktop table layout', function (): void {
+    $user = User::factory()->create();
+    Client::factory()->for($user)->create([
+        'name' => 'Responsive Client',
+    ]);
+
+    $this->actingAs($user)
+        ->get(route('clients.index'))
+        ->assertSuccessful()
+        ->assertSee('client-card-', false)
+        ->assertSee('class="hidden overflow-x-auto sm:block"', false);
+});

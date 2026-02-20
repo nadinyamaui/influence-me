@@ -186,7 +186,7 @@ test('edit button shows for draft and revised proposals only', function (): void
     $response->assertSuccessful();
 
     $content = $response->getContent();
-    expect(substr_count($content, 'fa-pen-to-square'))->toBe(2);
+    expect(substr_count($content, 'fa-pen-to-square'))->toBe(4);
 });
 
 test('owners can delete proposals from the list page', function (): void {
@@ -222,4 +222,19 @@ test('proposal title links to proposal preview page', function (): void {
         ->assertSuccessful()
         ->assertSee('href="'.route('proposals.show', $proposal).'"', false)
         ->assertSee('Linked Preview Proposal');
+});
+
+test('proposals list includes mobile card layout and desktop table layout', function (): void {
+    $user = User::factory()->create();
+    $client = Client::factory()->for($user)->create();
+
+    Proposal::factory()->for($user)->for($client)->create([
+        'title' => 'Responsive Proposal',
+    ]);
+
+    $this->actingAs($user)
+        ->get(route('proposals.index'))
+        ->assertSuccessful()
+        ->assertSee('proposal-card-', false)
+        ->assertSee('class="hidden overflow-x-auto sm:block"', false);
 });

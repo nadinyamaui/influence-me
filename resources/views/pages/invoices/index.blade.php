@@ -71,7 +71,72 @@
         </section>
     @else
         <section class="overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm dark:border-zinc-700 dark:bg-zinc-900">
-            <div class="overflow-x-auto">
+            <div class="space-y-3 p-4 sm:hidden">
+                @foreach ($invoices as $invoice)
+                    @php
+                        $isOverdue = $invoice->status === InvoiceStatus::Overdue || (
+                            $invoice->due_date->isPast() && in_array($invoice->status, [InvoiceStatus::Draft, InvoiceStatus::Sent], true)
+                        );
+                    @endphp
+                    <article wire:key="invoice-card-{{ $invoice->id }}" class="rounded-xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-700 dark:bg-zinc-800/60">
+                        <a
+                            href="{{ url('/invoices/'.$invoice->id) }}"
+                            class="font-medium text-zinc-900 underline-offset-2 hover:underline dark:text-zinc-100"
+                        >
+                            INV-{{ $invoice->created_at->format('Y') }}-{{ str_pad((string) $invoice->id, 4, '0', STR_PAD_LEFT) }}
+                        </a>
+                        <div class="mt-2 flex flex-wrap items-center gap-2">
+                            <span class="inline-flex rounded-full px-2.5 py-1 text-xs font-medium {{ $invoice->status->badgeClasses() }}">
+                                {{ $invoice->status->label() }}
+                            </span>
+                            <span class="text-xs text-zinc-500 dark:text-zinc-300">{{ $invoice->client?->name ?? '—' }}</span>
+                        </div>
+                        <dl class="mt-3 grid grid-cols-2 gap-2 text-sm">
+                            <div>
+                                <dt class="text-zinc-500 dark:text-zinc-300">Total</dt>
+                                <dd class="mt-1 text-zinc-700 dark:text-zinc-200">${{ number_format((float) $invoice->total, 2) }}</dd>
+                            </div>
+                            <div>
+                                <dt class="text-zinc-500 dark:text-zinc-300">Due Date</dt>
+                                <dd class="mt-1 {{ $isOverdue ? 'text-rose-600 dark:text-rose-300' : 'text-zinc-700 dark:text-zinc-200' }}">{{ $invoice->due_date->format('M d, Y') }}</dd>
+                            </div>
+                        </dl>
+                        <div class="mt-4 flex justify-end gap-2">
+                            <a
+                                href="{{ url('/invoices/'.$invoice->id) }}"
+                                class="inline-flex h-11 w-11 items-center justify-center rounded-md border border-zinc-300 text-xs font-medium text-zinc-700 transition hover:bg-zinc-100 dark:border-zinc-600 dark:text-zinc-200 dark:hover:bg-zinc-800"
+                                title="View"
+                                aria-label="View"
+                            >
+                                <i class="fa-solid fa-eye" aria-hidden="true"></i>
+                            </a>
+
+                            @if ($invoice->status === InvoiceStatus::Draft)
+                                <a
+                                    href="{{ url('/invoices/'.$invoice->id.'/edit') }}"
+                                    class="inline-flex h-11 w-11 items-center justify-center rounded-md border border-zinc-300 text-xs font-medium text-zinc-700 transition hover:bg-zinc-100 dark:border-zinc-600 dark:text-zinc-200 dark:hover:bg-zinc-800"
+                                    title="Edit"
+                                    aria-label="Edit"
+                                >
+                                    <i class="fa-solid fa-pen-to-square" aria-hidden="true"></i>
+                                </a>
+                                <button
+                                    type="button"
+                                    wire:click="delete({{ $invoice->id }})"
+                                    wire:confirm="Are you sure you want to delete invoice {{ $invoice->invoice_number }}?"
+                                    class="inline-flex h-11 w-11 items-center justify-center rounded-md border border-rose-300 text-xs font-medium text-rose-700 transition hover:bg-rose-50 dark:border-rose-800 dark:text-rose-200 dark:hover:bg-rose-950/40"
+                                    title="Delete"
+                                    aria-label="Delete"
+                                >
+                                    <i class="fa-solid fa-trash" aria-hidden="true"></i>
+                                </button>
+                            @endif
+                        </div>
+                    </article>
+                @endforeach
+            </div>
+
+            <div class="hidden overflow-x-auto sm:block">
                 <table class="min-w-full divide-y divide-zinc-200 text-sm dark:divide-zinc-700">
                     <thead class="bg-zinc-50 dark:bg-zinc-800/50">
                         <tr>
@@ -111,7 +176,7 @@
                                     <div class="flex justify-end gap-2">
                                         <a
                                             href="{{ url('/invoices/'.$invoice->id) }}"
-                                            class="inline-flex items-center rounded-md border border-zinc-300 px-3 py-1.5 text-xs font-medium text-zinc-700 transition hover:bg-zinc-100 dark:border-zinc-600 dark:text-zinc-200 dark:hover:bg-zinc-800"
+                                            class="inline-flex h-11 w-11 items-center justify-center rounded-md border border-zinc-300 text-xs font-medium text-zinc-700 transition hover:bg-zinc-100 sm:h-auto sm:w-auto sm:px-3 sm:py-1.5 dark:border-zinc-600 dark:text-zinc-200 dark:hover:bg-zinc-800"
                                             title="View"
                                             aria-label="View"
                                         >
@@ -121,7 +186,7 @@
                                         @if ($invoice->status === InvoiceStatus::Draft)
                                             <a
                                                 href="{{ url('/invoices/'.$invoice->id.'/edit') }}"
-                                                class="inline-flex items-center rounded-md border border-zinc-300 px-3 py-1.5 text-xs font-medium text-zinc-700 transition hover:bg-zinc-100 dark:border-zinc-600 dark:text-zinc-200 dark:hover:bg-zinc-800"
+                                                class="inline-flex h-11 w-11 items-center justify-center rounded-md border border-zinc-300 text-xs font-medium text-zinc-700 transition hover:bg-zinc-100 sm:h-auto sm:w-auto sm:px-3 sm:py-1.5 dark:border-zinc-600 dark:text-zinc-200 dark:hover:bg-zinc-800"
                                                 title="Edit"
                                                 aria-label="Edit"
                                             >
@@ -131,7 +196,7 @@
                                                 type="button"
                                                 wire:click="delete({{ $invoice->id }})"
                                                 wire:confirm="Are you sure you want to delete invoice {{ $invoice->invoice_number }}?"
-                                                class="inline-flex items-center rounded-md border border-rose-300 px-3 py-1.5 text-xs font-medium text-rose-700 transition hover:bg-rose-50 dark:border-rose-800 dark:text-rose-200 dark:hover:bg-rose-950/40"
+                                                class="inline-flex h-11 w-11 items-center justify-center rounded-md border border-rose-300 text-xs font-medium text-rose-700 transition hover:bg-rose-50 sm:h-auto sm:w-auto sm:px-3 sm:py-1.5 dark:border-rose-800 dark:text-rose-200 dark:hover:bg-rose-950/40"
                                                 title="Delete"
                                                 aria-label="Delete"
                                             >

@@ -90,7 +90,18 @@
                                 No scheduled content for this campaign.
                             </div>
                         @else
-                            <div class="mt-4 overflow-x-auto">
+                            <div class="mt-4 space-y-2 sm:hidden">
+                                @foreach ($campaign->scheduledPosts as $scheduledPost)
+                                    <article class="rounded-lg border border-zinc-200 bg-white p-3 dark:border-zinc-700 dark:bg-zinc-900/40">
+                                        <p class="text-sm font-medium text-zinc-900 dark:text-zinc-100">{{ $scheduledPost->title }}</p>
+                                        <p class="mt-1 text-xs text-zinc-600 dark:text-zinc-300">{{ Str::of($scheduledPost->media_type->value)->headline() }}</p>
+                                        <p class="mt-1 text-xs text-zinc-600 dark:text-zinc-300">{{ $scheduledPost->instagramAccount?->username ?? 'Unknown account' }}</p>
+                                        <p class="mt-1 text-xs text-zinc-600 dark:text-zinc-300">{{ $scheduledPost->scheduled_at->format('M j, Y g:i A') }}</p>
+                                    </article>
+                                @endforeach
+                            </div>
+
+                            <div class="mt-4 hidden overflow-x-auto sm:block">
                                 <table class="min-w-full divide-y divide-zinc-200 text-sm dark:divide-zinc-700">
                                     <thead class="bg-zinc-100 dark:bg-zinc-800">
                                         <tr>

@@ -20,7 +20,7 @@
             </div>
 
             @if ($accounts->count() > 1)
-                <div class="min-w-56">
+                <div class="w-full sm:w-56">
                     <flux:select wire:model.live="accountId" :label="__('Account')">
                         <option value="all">All Accounts</option>
                         @foreach ($accounts as $account)
