@@ -114,7 +114,6 @@ class Form extends Component
             ->map(fn ($item): array => [
                 'catalog_product_id' => (string) $item->catalog_product_id,
                 'quantity' => (string) $item->quantity,
-                'unit_price_override' => $item->unit_price_override !== null ? (string) $item->unit_price_override : '',
             ])
             ->values()
             ->all();
@@ -143,7 +142,6 @@ class Form extends Component
         return [
             'catalog_product_id' => '',
             'quantity' => '1',
-            'unit_price_override' => '',
         ];
     }
 }

@@ -104,7 +104,6 @@ class CatalogPlanService
         return [
             'catalog_product_id' => (int) $item['catalog_product_id'],
             'quantity' => $item['quantity'],
-            'unit_price_override' => $item['unit_price_override'] ?: null,
         ];
     }
 }

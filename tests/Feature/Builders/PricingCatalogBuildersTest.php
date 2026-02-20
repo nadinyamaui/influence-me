@@ -171,7 +171,6 @@ it('scopes and creates catalog plan items', function (): void {
     CatalogPlanItem::query()->createForPlan([
         'catalog_product_id' => $product->id,
         'quantity' => 2,
-        'unit_price_override' => 450,
     ], $plan->id);
 
     $items = CatalogPlanItem::query()->forPlan($plan->id)->get();
@@ -192,7 +191,6 @@ it('blocks creating plan items with products from another influencer', function 
     expect(fn (): CatalogPlanItem => CatalogPlanItem::query()->createForPlan([
         'catalog_product_id' => $outsiderProduct->id,
         'quantity' => 1,
-        'unit_price_override' => null,
     ], $plan->id))->toThrow(ModelNotFoundException::class);
 });
 
@@ -208,7 +206,6 @@ it('blocks creating plan items on another influencers plan', function (): void {
     expect(fn (): CatalogPlanItem => CatalogPlanItem::query()->createForPlan([
         'catalog_product_id' => $ownerProduct->id,
         'quantity' => 1,
-        'unit_price_override' => null,
     ], $ownerPlan->id))->toThrow(ModelNotFoundException::class);
 });
 

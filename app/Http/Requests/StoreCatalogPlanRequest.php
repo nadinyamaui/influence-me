@@ -36,7 +36,6 @@ class StoreCatalogPlanRequest extends FormRequest
                 }),
             ],
             'items.*.quantity' => ['required', 'numeric', 'gt:0'],
-            'items.*.unit_price_override' => ['nullable', 'numeric', 'min:0'],
         ];
     }
 }

@@ -109,12 +109,10 @@ test('influencer can create pricing plans with nested items', function (): void 
             [
                 'catalog_product_id' => (string) $productOne->id,
                 'quantity' => '2',
-                'unit_price_override' => '',
             ],
             [
                 'catalog_product_id' => (string) $productTwo->id,
                 'quantity' => '1',
-                'unit_price_override' => '',
             ],
         ])
         ->call('save')
@@ -136,14 +134,12 @@ test('influencer can create pricing plans with nested items', function (): void 
         'catalog_plan_id' => $plan->id,
         'catalog_product_id' => $productOne->id,
         'quantity' => '2.00',
-        'unit_price_override' => null,
     ]);
 
     $this->assertDatabaseHas('catalog_plan_items', [
         'catalog_plan_id' => $plan->id,
         'catalog_product_id' => $productTwo->id,
         'quantity' => '1.00',
-        'unit_price_override' => null,
     ]);
 });
 
@@ -162,7 +158,6 @@ test('create form validates plan composition and ownership rules', function (): 
             [
                 'catalog_product_id' => (string) $outsiderProduct->id,
                 'quantity' => '0',
-                'unit_price_override' => '',
             ],
         ])
         ->call('save')
@@ -182,7 +177,6 @@ test('create form validates plan composition and ownership rules', function (): 
             [
                 'catalog_product_id' => (string) $ownedProduct->id,
                 'quantity' => '1',
-                'unit_price_override' => '',
             ],
         ])
         ->call('save')
@@ -211,7 +205,6 @@ test('influencer can edit pricing plans and replace nested items', function (): 
 
     CatalogPlanItem::factory()->for($plan)->for($productOne)->create([
         'quantity' => 1,
-        'unit_price_override' => null,
     ]);
 
     Livewire::actingAs($user)
@@ -225,7 +218,6 @@ test('influencer can edit pricing plans and replace nested items', function (): 
             [
                 'catalog_product_id' => (string) $productTwo->id,
                 'quantity' => '3',
-                'unit_price_override' => '',
             ],
         ])
         ->call('save')
@@ -244,7 +236,6 @@ test('influencer can edit pricing plans and replace nested items', function (): 
         'catalog_plan_id' => $plan->id,
         'catalog_product_id' => $productTwo->id,
         'quantity' => '3.00',
-        'unit_price_override' => null,
     ]);
 
     $this->assertDatabaseMissing('catalog_plan_items', [
@@ -274,7 +265,6 @@ test('users cannot access or mutate other user pricing plans', function (): void
                 [
                     'catalog_product_id' => (string) $ownerProduct->id,
                     'quantity' => '1',
-                    'unit_price_override' => null,
                 ],
             ],
         ]);
