@@ -24,7 +24,6 @@ class CatalogPlanItemFactory extends Factory
                     ->id;
             },
             'quantity' => fake()->randomFloat(2, 1, 10),
-            'unit_price_override' => fake()->optional()->randomFloat(2, 10, 5000),
         ];
     }
 }

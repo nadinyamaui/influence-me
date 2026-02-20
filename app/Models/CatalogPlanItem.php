@@ -22,7 +22,6 @@ class CatalogPlanItem extends Model
     {
         return [
             'quantity' => 'decimal:2',
-            'unit_price_override' => 'decimal:2',
         ];
     }
 

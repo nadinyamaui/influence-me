@@ -10,6 +10,8 @@ use App\Livewire\Content\Index as ContentIndex;
 use App\Livewire\Dashboard;
 use App\Livewire\InstagramAccounts\Index as InstagramAccountsIndex;
 use App\Livewire\Invoices\Index as InvoicesIndex;
+use App\Livewire\Pricing\Plans\Form as PricingPlansForm;
+use App\Livewire\Pricing\Plans\Index as PricingPlansIndex;
 use App\Livewire\Pricing\Products\Form as PricingProductsForm;
 use App\Livewire\Pricing\Products\Index as PricingProductsIndex;
 use App\Livewire\Proposals\Create as ProposalsCreate;
@@ -75,6 +77,15 @@ Route::middleware(['auth'])->group(function (): void {
 
     Route::livewire('pricing/products/{product}/edit', PricingProductsForm::class)
         ->name('pricing.products.edit');
+
+    Route::livewire('pricing/plans', PricingPlansIndex::class)
+        ->name('pricing.plans.index');
+
+    Route::livewire('pricing/plans/create', PricingPlansForm::class)
+        ->name('pricing.plans.create');
+
+    Route::livewire('pricing/plans/{plan}/edit', PricingPlansForm::class)
+        ->name('pricing.plans.edit');
 
     Route::middleware(['verified'])->group(function (): void {
         Route::livewire('dashboard', Dashboard::class)
