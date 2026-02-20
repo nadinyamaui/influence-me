@@ -57,9 +57,9 @@ Configure these values in each deployed environment.
 
 ### Instagram OAuth
 
-- `INSTAGRAM_CLIENT_ID`: Meta App client ID
-- `INSTAGRAM_CLIENT_SECRET`: Meta App client secret
-- `INSTAGRAM_REDIRECT_URI`: OAuth callback URL
+- `META_CLIENT_ID`: Meta App client ID
+- `META_CLIENT_SECRET`: Meta App client secret
+- `META_REDIRECT_URI`: OAuth callback URL
 
 ### Stripe
 
