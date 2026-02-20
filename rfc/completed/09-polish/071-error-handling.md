@@ -81,8 +81,8 @@ Add relevant Pulse cards to dashboard for monitoring:
 - `config/horizon.php` — verify queue config
 
 ## Acceptance Criteria
-- [ ] Custom error pages render with consistent styling
-- [ ] Instagram API errors logged to dedicated channel
-- [ ] Stripe errors logged to dedicated channel
-- [ ] Horizon configured for instagram-sync queue
-- [ ] Pulse dashboard shows relevant metrics
+- [x] Custom error pages render with consistent styling
+- [x] Instagram API errors logged to dedicated channel
+- [x] Stripe errors logged to dedicated channel
+- [x] Horizon configured for instagram-sync queue
+- [x] Pulse dashboard shows relevant metrics

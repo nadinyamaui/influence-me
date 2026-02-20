@@ -200,7 +200,7 @@ return [
     'defaults' => [
         'supervisor-1' => [
             'connection' => 'redis',
-            'queue' => ['default', 'instagram-sync'],
+            'queue' => ['default'],
             'balance' => 'auto',
             'autoScalingStrategy' => 'time',
             'maxProcesses' => 1,
@@ -209,6 +209,19 @@ return [
             'memory' => 128,
             'tries' => 1,
             'timeout' => 60,
+            'nice' => 0,
+        ],
+        'instagram-sync' => [
+            'connection' => 'redis',
+            'queue' => ['instagram-sync'],
+            'balance' => 'auto',
+            'autoScalingStrategy' => 'time',
+            'maxProcesses' => 1,
+            'maxTime' => 0,
+            'maxJobs' => 0,
+            'memory' => 128,
+            'tries' => 3,
+            'timeout' => 120,
             'nice' => 0,
         ],
     ],
@@ -220,11 +233,19 @@ return [
                 'balanceMaxShift' => 1,
                 'balanceCooldown' => 3,
             ],
+            'instagram-sync' => [
+                'maxProcesses' => 5,
+                'balanceMaxShift' => 1,
+                'balanceCooldown' => 3,
+            ],
         ],
 
         'local' => [
             'supervisor-1' => [
                 'maxProcesses' => 3,
+            ],
+            'instagram-sync' => [
+                'maxProcesses' => 2,
             ],
         ],
     ],
