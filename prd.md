@@ -5,11 +5,11 @@
 - Product: Influence Me
 - Source: RFC `000` through `073` in `/rfc`
 - Scope: MVP + quality hardening + deployment readiness
-- Primary stack assumptions from RFCs: Laravel + Livewire + Flux UI, Instagram Graph API, Stripe, Redis-backed queues
+- Primary stack assumptions from RFCs: Laravel + Livewire + Flux UI, Instagram Graph API, Redis-backed queues
 
 ## 2. Product Vision
 
-Influence Me helps influencers run the business side of content operations in one platform: connect Instagram data, manage clients, prepare proposals, issue invoices, collect payments, and report outcomes.
+Influence Me helps influencers run the business side of content operations in one platform: connect Instagram data, manage clients, prepare proposals, issue invoices, track payments, and report outcomes.
 
 ## 3. Primary Personas
 
@@ -126,11 +126,9 @@ Influence Me helps influencers run the business side of content operations in on
 - Invoice list with summaries and status filtering
 - Invoice creation with dynamic line items and automatic totals/tax
 - Invoice preview/detail with draft-only edit/delete constraints
-- Stripe backend service integration
-- Payment link generation from invoice detail
-- Stripe webhook handling (`/webhooks/stripe`) for payment completion
 - Send invoice workflow with resend support
-- Client portal invoice list/detail/pay-now paths
+- Client portal invoice list/detail views
+- Payment status tracking for paid and overdue transitions
 - Daily overdue detection command and optional reminder notifications
 
 ### 6.9 Analytics (RFC `058-066`)
@@ -192,7 +190,7 @@ Primary relationships expected by RFC set:
 ### 8.2 Invoice Status
 
 - `draft -> sent`
-- `sent -> paid` (Stripe webhook)
+- `sent -> paid` (manual payment confirmation or integrated provider callback)
 - `sent -> overdue` (scheduled overdue detection)
 
 ### 8.3 Scheduled Post Status
@@ -213,13 +211,7 @@ Primary relationships expected by RFC set:
 - API rate limit tracking per account
 - Robust error typing and retry/backoff behaviors
 
-### 9.2 Stripe
-
-- Payment link generation for invoices
-- Signed webhook verification
-- Payment completion updates invoice and sends notifications
-
-### 9.3 Email
+### 9.2 Email
 
 Mandatory mail flows include:
 
@@ -248,11 +240,11 @@ Queue expectations:
 
 - Enforce per-record ownership policies for influencer and portal users
 - Keep influencer and client sessions isolated by guard
-- Exclude Stripe webhook route from CSRF while enforcing signature validation
+- Apply CSRF protection to all application routes unless explicitly required otherwise
 - Encrypt tokens at rest
 - Validate all form input with explicit constraints and max lengths
 - Ensure markdown rendering is sanitized
-- Add rate limits for portal login and webhook endpoints as specified
+- Add rate limits for portal login and Instagram OAuth callback endpoints as specified
 
 ## 12. UX and Accessibility Requirements
 
@@ -269,7 +261,7 @@ Test strategy across RFCs:
 - Feature tests for every Livewire page/workflow
 - Authorization and guard boundary tests for protected actions
 - Validation tests for all forms
-- Mocked external integration tests (Socialite, Instagram API, Stripe)
+- Mocked external integration tests (Socialite, Instagram API)
 - End-to-end workflow tests for proposal/invoice/schedule state transitions
 
 Release acceptance:
@@ -288,7 +280,7 @@ Milestone sequence derived from dependencies:
 4. `031-037`: client management + portal core
 5. `038-042`: content operations + schedule timeline
 6. `043-048`: proposals and client response workflows
-7. `049-057`: invoicing, Stripe, overdue automation
+7. `049-057`: invoicing, payment tracking, overdue automation
 8. `058-066`: analytics for influencer and portal
 9. `067-073`: quality, security, and deployment readiness
 
@@ -296,7 +288,7 @@ Milestone sequence derived from dependencies:
 
 - Instagram API limits and token-expiry handling can disrupt data freshness if retries/backoff are weak
 - Cross-guard data leakage is a critical risk; all portal queries must be client-scoped
-- Stripe webhook robustness (signature validation + idempotence) is required to avoid payment-state errors
+- Payment-status transition robustness is required to avoid payment-state errors
 - Large analytics queries require indexing and scoped aggregation to maintain performance
 
 ## 16. RFC Traceability Index
@@ -353,9 +345,6 @@ Milestone sequence derived from dependencies:
 - `049` Invoice List Page
 - `050` Invoice Create with Dynamic Line Items
 - `051` Invoice Preview/Detail Page
-- `052` Stripe Service Integration
-- `053` Stripe Payment Link Generation UI
-- `054` Stripe Webhook Handler
 - `055` Send Invoice to Client
 - `056` Client Portal Invoices
 - `057` Overdue Invoice Detection

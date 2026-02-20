@@ -18,7 +18,7 @@ Influence Me is an influencer operating system that centralizes:
 - Content scheduling timeline
 - Client CRM and client portal access
 - Proposal authoring, sending, and approval workflows
-- Invoice generation, Stripe payment collection, and overdue tracking
+- Invoice generation, payment collection tracking, and overdue tracking
 - Analytics for influencer and client portal views
 
 ## Personas
@@ -33,7 +33,7 @@ Influence Me is an influencer operating system that centralizes:
 - Client portal uses separate `client` guard with isolated session/auth flows (RFC `018`, `019`)
 - Data ownership is strict: influencers see only their data; clients see only their client-scoped data (RFC `012`)
 - `ScheduledPost` is planning/tracking CRUD in MVP, not direct Instagram auto-publishing
-- External integrations (Instagram Graph API, Stripe) must be wrapped in service classes with typed error handling
+- External integrations (Instagram Graph API) must be wrapped in service classes with typed error handling
 
 ## Domain Model Baseline (RFC 001/002)
 
@@ -81,12 +81,6 @@ Instagram integration requirements:
   - profile + insights hourly
   - token refresh daily for expiring tokens
 
-Stripe integration requirements:
-
-- Stripe service for payment link generation and webhook verification
-- Webhook endpoint at `/webhooks/stripe` (CSRF excluded)
-- `checkout.session.completed` marks invoice paid and triggers influencer notification
-
 Additional scheduler requirements:
 
 - Overdue invoice detection daily at 9 AM
@@ -101,7 +95,7 @@ Additional scheduler requirements:
 - `031-037`: Client management and client portal foundation
 - `038-042`: Content gallery, linking, client content tab, schedule timeline
 - `043-048`: Proposal CRUD, send flow, client approval/revision workflow
-- `049-057`: Invoicing CRUD, Stripe payment link/webhook, overdue handling
+- `049-057`: Invoicing CRUD, client payment workflow, overdue handling
 - `058-066`: Analytics dashboard + client-scoped analytics
 - `067-073`: Test hardening, responsive/UX polish, security, deployment docs
 
@@ -116,7 +110,7 @@ For every task, Claude should:
 - Keep controllers and Livewire components thin: orchestration only
 - Put business workflows in service classes
 - For third-party integrations, use `client` + `connector` layers to decouple services from HTTP transport
-- Mock Instagram, Socialite, and Stripe in tests; do not rely on live APIs
+- Mock Instagram and Socialite in tests; do not rely on live APIs
 - Cover success, validation, authorization, and empty-state paths
 
 ## Decoupling Architecture Rules
@@ -149,7 +143,7 @@ Minimum by feature area:
 - Authorization/guard boundary tests (`web` vs `client`)
 - Validation tests for every form workflow
 - Workflow transition tests (proposal, invoice, schedule)
-- Integration adapter tests with mocked HTTP/Stripe
+- Integration adapter tests with mocked HTTP integrations
 - Scheduler/queue dispatch behavior tests for background jobs
 
 Global quality targets (RFC `068`):
@@ -222,9 +216,6 @@ A change is done only when:
 - `049` Invoice List Page
 - `050` Invoice Create with Dynamic Line Items
 - `051` Invoice Preview/Detail Page
-- `052` Stripe Service Integration
-- `053` Stripe Payment Link Generation UI
-- `054` Stripe Webhook Handler
 - `055` Send Invoice to Client
 - `056` Client Portal Invoices
 - `057` Overdue Invoice Detection

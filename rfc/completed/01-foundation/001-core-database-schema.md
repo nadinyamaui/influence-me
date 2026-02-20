@@ -120,8 +120,6 @@ Index: `[instagram_account_id, type, recorded_at]`
 | tax_rate | decimal(5,2), default 0 | |
 | tax_amount | decimal(10,2), default 0 | |
 | total | decimal(10,2), default 0 | |
-| stripe_payment_link | string, nullable | |
-| stripe_session_id | string, nullable | |
 | paid_at | timestamp, nullable | |
 | notes | text, nullable | |
 | timestamps | | |

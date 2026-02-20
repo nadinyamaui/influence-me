@@ -29,8 +29,6 @@ class InvoiceFactory extends Factory
             'tax_rate' => $taxRate,
             'tax_amount' => $taxAmount,
             'total' => round($subtotal + $taxAmount, 2),
-            'stripe_payment_link' => null,
-            'stripe_session_id' => null,
             'paid_at' => null,
             'notes' => fake()->optional()->sentence(10),
         ];

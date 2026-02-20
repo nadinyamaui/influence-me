@@ -19,7 +19,7 @@ Influence Me is an influencer operating system that centralizes:
 - Content scheduling timeline
 - Client CRM and client portal access
 - Proposal authoring, sending, and approval workflows
-- Invoice generation, Stripe payment collection, and overdue tracking
+- Invoice generation, payment collection tracking, and overdue tracking
 - Analytics for influencer and client portal views
 
 ## Personas
@@ -33,7 +33,7 @@ Influence Me is an influencer operating system that centralizes:
 - Client portal uses separate `client` guard with isolated session/auth flows (RFC `018`, `019`)
 - Data ownership is strict: influencers see only their data; clients see only their client-scoped data (RFC `012`)
 - `ScheduledPost` is planning/tracking CRUD in MVP, not direct Instagram auto-publishing
-- External integrations (Instagram Graph API, TikTok API, Stripe) must be wrapped in service classes with typed error handling
+- External integrations (Instagram Graph API, TikTok API) must be wrapped in service classes with typed error handling
 - Campaigns are first-class client-owned records; campaign identity must come from campaign entities, not free-text pivot metadata
 
 ## Domain Model Baseline (RFC 001/002)
@@ -97,12 +97,6 @@ TikTok integration requirements:
   - profile + insights hourly
   - token refresh daily for expiring tokens
 
-Stripe integration requirements:
-
-- Stripe service for payment link generation and webhook verification
-- Webhook endpoint at `/webhooks/stripe` (CSRF excluded)
-- `checkout.session.completed` marks invoice paid and triggers influencer notification
-
 Additional scheduler requirements:
 
 - Overdue invoice detection daily at 9 AM
@@ -118,7 +112,7 @@ Additional scheduler requirements:
 - `038-042`: Content gallery, linking, client content tab, schedule timeline
 - `093-099`: Campaign-first content architecture (campaign schema, campaign-media linking, campaign UI, proposal/analytics context)
 - `043-048`: Proposal CRUD, send flow, client approval/revision workflow
-- `049-057`: Invoicing CRUD, Stripe payment link/webhook, overdue handling
+- `049-057`: Invoicing CRUD, client payment workflow, overdue handling
 - `058-066`: Analytics dashboard + client-scoped analytics
 - `067-073`: Test hardening, responsive/UX polish, security, deployment docs
 - `074-092`: TikTok platform integration (setup, models, connector/client/service, sync jobs, accounts UI, content + analytics integration)
@@ -133,7 +127,7 @@ For every task, agents must:
 - Enforce policy and guard constraints on every protected action/page
 - Keep controllers thin: request validation/session intent + response orchestration only; business logic and external API logic must live in service classes
 - For third-party APIs, use a `client` + `connector` structure (connector handles HTTP transport/endpoints, client exposes domain methods) so services remain API-agnostic
-- Mock Instagram, TikTok, Socialite, and Stripe in tests; do not rely on live APIs
+- Mock Instagram, TikTok, and Socialite in tests; do not rely on live APIs
 - Cover success, validation, authorization, and empty-state paths
 
 ## Decoupling Architecture Rules
@@ -200,7 +194,7 @@ Minimum by feature area:
 - Authorization/guard boundary tests (`web` vs `client`)
 - Validation tests for every form workflow
 - Workflow transition tests (proposal, invoice, schedule)
-- Integration adapter tests with mocked HTTP/Stripe
+- Integration adapter tests with mocked HTTP integrations
 - Scheduler/queue dispatch behavior tests for background jobs
 
 Global quality targets (RFC `068`):

@@ -19,8 +19,6 @@ return new class extends Migration
             $table->decimal('tax_rate', 5, 2)->default(0);
             $table->decimal('tax_amount', 10, 2)->default(0);
             $table->decimal('total', 10, 2)->default(0);
-            $table->string('stripe_payment_link')->nullable();
-            $table->string('stripe_session_id')->nullable();
             $table->timestamp('paid_at')->nullable();
             $table->text('notes')->nullable();
             $table->timestamps();

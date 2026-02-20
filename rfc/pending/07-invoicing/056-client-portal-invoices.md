@@ -5,7 +5,7 @@
 
 ## Description
 
-Create invoice pages in the client portal so clients can view their invoices and pay them.
+Create invoice pages in the client portal so clients can view their invoices and review status.
 
 ## Implementation
 
@@ -29,7 +29,7 @@ Route::livewire('portal/invoices/{invoice}', 'portal.invoices.show')
 | Status | Badge |
 | Total | Currency formatted |
 | Due Date | Date, red if overdue |
-| Actions | View, Pay (if unpaid + has payment link) |
+| Actions | View |
 
 Filter by status (Sent, Paid, Overdue). Only show non-Draft invoices.
 Implement filtering in the Livewire component query, not in Blade.
@@ -38,18 +38,9 @@ Implement filtering in the Livewire component query, not in Blade.
 
 Same professional layout as influencer view (#051) but:
 - No edit/delete actions
-- Prominent "Pay Now" button if payment link exists and status is Sent/Overdue
+- Clear unpaid status messaging when status is Sent/Overdue
 - "Paid" confirmation if status is Paid (with paid_at date)
 - Read-only view of all line items and totals
-
-**Pay Now Button:**
-```blade
-@if($invoice->stripe_payment_link && $invoice->status->isUnpaid())
-    <flux:button variant="primary" href="{{ $invoice->stripe_payment_link }}" target="_blank">
-        Pay Now — ${{ number_format($invoice->total, 2) }}
-    </flux:button>
-@endif
-```
 
 ### Authorization
 All queries scoped through authenticated ClientUser's client:
@@ -75,7 +66,7 @@ Update `href="#"` for "Invoices" to `route('portal.invoices.index')`.
 - [ ] Invoice list shows non-draft invoices for client
 - [ ] Filter logic is implemented in the Livewire component query layer
 - [ ] Invoice detail displays line items and totals
-- [ ] "Pay Now" button links to Stripe payment page
+- [ ] No external payment link is exposed in portal invoice views
 - [ ] Paid invoices show paid confirmation
 - [ ] Data scoped to authenticated client
 - [ ] Feature tests verify list, detail, and authorization
