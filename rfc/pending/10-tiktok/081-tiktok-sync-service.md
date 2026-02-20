@@ -1,25 +1,26 @@
 # 081 - TikTok Sync Service Class
 
 **Labels:** `feature`, `tiktok`, `backend`
-**Depends on:** #076, #077, #078, #080
+**Depends on:** #004, #005, #080
 
 ## Description
 
-Create a service layer that orchestrates TikTok sync workflows and database persistence for accounts, media, insights, and demographics.
+Create a service layer that encapsulates TikTok sync workflows and shared-model persistence for accounts, media, insights, and demographics. Existing shared sync jobs should call this service for TikTok-specific execution.
 
 ## Implementation
 
 ### Create Service
 - `App\Services\TikTokSyncService`
 - Methods:
-  - `syncProfile(TikTokAccount $account)`
-  - `syncMedia(TikTokAccount $account)`
-  - `syncMediaInsights(TikTokAccount $account)`
-  - `syncDemographics(TikTokAccount $account)`
-  - `refreshAccessToken(TikTokAccount $account)`
+  - `syncProfile(SocialAccount $account)`
+  - `syncMedia(SocialAccount $account)`
+  - `syncMediaInsights(SocialAccount $account)`
+  - `syncDemographics(SocialAccount $account)`
+  - `refreshAccessToken(SocialAccount $account)`
 
 ### Persistence Rules
 - Upsert by platform IDs
+- Enforce `social_network = tiktok` guard before sync execution
 - Update `sync_status`, `last_synced_at`, and `last_sync_error` consistently
 
 ## Files to Create

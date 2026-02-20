@@ -1,7 +1,7 @@
 # 091 - TikTok Content Browser Integration
 
 **Labels:** `feature`, `tiktok`, `ui`
-**Depends on:** #077, #038, #039, #040
+**Depends on:** #038, #039, #040
 
 ## Description
 
