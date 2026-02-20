@@ -1,7 +1,7 @@
 # 071 - Error Handling and Monitoring
 
 **Labels:** `enhancement`, `infrastructure`
-**Depends on:** #020
+**Depends on:** #020, #052
 
 ## Description
 
@@ -11,6 +11,7 @@ Set up comprehensive error handling for external API integrations and configure 
 Already created in earlier issues:
 - `App\Exceptions\InstagramApiException`
 - `App\Exceptions\InstagramTokenExpiredException`
+- `App\Exceptions\StripeException`
 
 ## Error Pages
 
@@ -33,6 +34,11 @@ In `bootstrap/app.php`:
         ]);
     });
 
+    $exceptions->report(function (StripeException $e) {
+        Log::channel('stripe')->error($e->getMessage(), [
+            'invoice_id' => $e->invoiceId,
+        ]);
+    });
 })
 ```
 
@@ -42,6 +48,11 @@ Add to `config/logging.php`:
 'instagram' => [
     'driver' => 'daily',
     'path' => storage_path('logs/instagram.log'),
+    'days' => 14,
+],
+'stripe' => [
+    'driver' => 'daily',
+    'path' => storage_path('logs/stripe.log'),
     'days' => 14,
 ],
 ```
@@ -70,7 +81,8 @@ Add relevant Pulse cards to dashboard for monitoring:
 - `config/horizon.php` — verify queue config
 
 ## Acceptance Criteria
-- [ ] Custom error pages render with consistent styling
-- [ ] Instagram API errors logged to dedicated channel
-- [ ] Horizon configured for instagram-sync queue
-- [ ] Pulse dashboard shows relevant metrics
+- [x] Custom error pages render with consistent styling
+- [x] Instagram API errors logged to dedicated channel
+- [x] Stripe errors logged to dedicated channel
+- [x] Horizon configured for instagram-sync queue
+- [x] Pulse dashboard shows relevant metrics

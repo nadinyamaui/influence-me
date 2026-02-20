@@ -1,6 +1,5 @@
 <?php
 
-use App\Enums\ProposalStatus;
 use App\Models\Campaign;
 use App\Models\Client;
 use App\Models\InstagramAccount;
