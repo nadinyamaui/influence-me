@@ -13,7 +13,7 @@ use Laravel\Socialite\Facades\Socialite;
 
 class SocialiteLoginService
 {
-    private string $driver = 'facebook';
+    private SocialNetwork $driver = SocialNetwork::Instagram;
 
     private array $scopes = [
         'instagram_basic',
@@ -24,14 +24,14 @@ class SocialiteLoginService
 
     public function redirectToProvider(): RedirectResponse
     {
-        return Socialite::driver($this->driver)
+        return Socialite::driver($this->resolveSocialiteDriver())
             ->scopes($this->scopes)
             ->redirect();
     }
 
     public function createUserAndAccounts(): User
     {
-        $socialiteUser = Socialite::driver($this->driver)->user();
+        $socialiteUser = Socialite::driver($this->resolveSocialiteDriver())->user();
         if (! $socialiteUser->getId()) {
             throw new SocialAuthenticationException('Facebook did not return required account information.');
         }
@@ -54,7 +54,7 @@ class SocialiteLoginService
             throw new SocialAuthenticationException('You must be logged in to link Instagram accounts.');
         }
 
-        $socialiteUser = Socialite::driver($this->driver)->user();
+        $socialiteUser = Socialite::driver($this->resolveSocialiteDriver())->user();
         if (! $socialiteUser->getId()) {
             throw new SocialAuthenticationException('Facebook did not return required account information.');
         }
@@ -70,7 +70,7 @@ class SocialiteLoginService
     protected function createUpdateUser($socialiteUser): User
     {
         return User::updateOrCreate([
-            'socialite_user_type' => $this->driver,
+            'socialite_user_type' => $this->resolveSocialiteDriver(),
             'socialite_user_id' => $socialiteUser->getId(),
         ], [
             'name' => $socialiteUser->getName(),
@@ -86,7 +86,7 @@ class SocialiteLoginService
         if (
             $existingUserByEmail !== null
             && (
-                $existingUserByEmail->socialite_user_type !== $this->driver
+                $existingUserByEmail->socialite_user_type !== $this->resolveSocialiteDriver()
                 || $existingUserByEmail->socialite_user_id !== $socialiteUser->getId()
             )
         ) {
@@ -97,9 +97,17 @@ class SocialiteLoginService
     protected function findExistingSocialiteUser($socialiteUser): ?User
     {
         return User::query()
-            ->where('socialite_user_type', $this->driver)
+            ->where('socialite_user_type', $this->resolveSocialiteDriver())
             ->where('socialite_user_id', $socialiteUser->getId())
             ->first();
+    }
+
+    protected function resolveSocialiteDriver(): string
+    {
+        return match ($this->driver) {
+            SocialNetwork::Instagram => 'facebook',
+            default => $this->driver->value,
+        };
     }
 
     protected function ensureSocialAccountsBelongToUser(?User $user, Collection $accounts): void
