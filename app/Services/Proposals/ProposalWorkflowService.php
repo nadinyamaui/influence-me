@@ -127,6 +127,12 @@ class ProposalWorkflowService
             ]);
         }
 
+        if (mb_strlen($notes) > 5000) {
+            throw ValidationException::withMessages([
+                'revisionNotes' => 'Revision notes may not be greater than 5000 characters.',
+            ]);
+        }
+
         return DB::transaction(function () use ($proposal, $notes): Proposal {
             $proposal->update([
                 'status' => ProposalStatus::Revised,

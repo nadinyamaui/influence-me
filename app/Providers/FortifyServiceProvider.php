@@ -57,5 +57,13 @@ class FortifyServiceProvider extends ServiceProvider
         RateLimiter::for('client-portal-login', function (Request $request) {
             return Limit::perMinute(5)->by($request->ip());
         });
+
+        RateLimiter::for('instagram-oauth-callback', function (Request $request) {
+            return Limit::perMinute(10)->by($request->ip());
+        });
+
+        RateLimiter::for('stripe-webhooks', function (Request $request) {
+            return Limit::perMinute(60)->by($request->ip());
+        });
     }
 }

@@ -12,12 +12,7 @@ class ClientUser extends Authenticatable
 {
     use HasFactory, Notifiable;
 
-    protected $fillable = [
-        'client_id',
-        'name',
-        'email',
-        'password',
-    ];
+    protected $guarded = [];
 
     protected $hidden = [
         'password',

@@ -18,13 +18,7 @@ class User extends Authenticatable
 {
     use HasFactory, Notifiable, TwoFactorAuthenticatable;
 
-    protected $fillable = [
-        'name',
-        'email',
-        'socialite_user_type',
-        'socialite_user_id',
-        'password',
-    ];
+    protected $guarded = [];
 
     protected $hidden = [
         'password',

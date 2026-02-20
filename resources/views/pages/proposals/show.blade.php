@@ -81,7 +81,7 @@
     <section class="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-700 dark:bg-zinc-900">
         <h2 class="text-sm font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-300">Proposal Content</h2>
         <article class="prose prose-zinc mt-4 max-w-none dark:prose-invert">
-            {!! Str::markdown($proposal->content) !!}
+            {!! Str::markdown($proposal->content, ['html_input' => 'strip', 'allow_unsafe_links' => false]) !!}
         </article>
     </section>
 

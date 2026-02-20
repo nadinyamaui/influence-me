@@ -70,7 +70,7 @@ class Show extends Component
     public function requestChanges(ProposalWorkflowService $proposalWorkflowService): void
     {
         $this->validate([
-            'revisionNotes' => ['required', 'string', 'min:10'],
+            'revisionNotes' => ['required', 'string', 'min:10', 'max:5000'],
         ]);
 
         try {
