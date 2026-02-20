@@ -57,7 +57,7 @@
             </flux:field>
 
             <flux:field>
-                <flux:label>Bundle Price (Optional)</flux:label>
+                <flux:label>Bundle Price</flux:label>
                 <flux:input
                     wire:model="bundle_price"
                     name="bundle_price"
@@ -65,6 +65,7 @@
                     step="0.01"
                     min="0"
                     :placeholder="$isEditing ? null : '1500.00'"
+                    required
                 />
                 <flux:error name="bundle_price" />
             </flux:field>

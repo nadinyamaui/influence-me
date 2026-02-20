@@ -150,6 +150,7 @@ test('influencer can create pricing plans with nested items', function (): void 
 test('create form validates plan composition and ownership rules', function (): void {
     $user = User::factory()->create();
     $outsider = User::factory()->create();
+    $ownedProduct = CatalogProduct::factory()->for($user)->create();
     $outsiderProduct = CatalogProduct::factory()->for($outsider)->create();
 
     Livewire::actingAs($user)
@@ -175,7 +176,22 @@ test('create form validates plan composition and ownership rules', function (): 
 
     Livewire::actingAs($user)
         ->test(PlansForm::class)
+        ->set('name', 'Missing Bundle Price')
+        ->set('bundle_price', '')
+        ->set('items', [
+            [
+                'catalog_product_id' => (string) $ownedProduct->id,
+                'quantity' => '1',
+                'unit_price_override' => '',
+            ],
+        ])
+        ->call('save')
+        ->assertHasErrors(['bundle_price']);
+
+    Livewire::actingAs($user)
+        ->test(PlansForm::class)
         ->set('name', 'No Items Plan')
+        ->set('bundle_price', '100')
         ->set('items', [])
         ->call('save')
         ->assertHasErrors(['items']);

@@ -93,7 +93,7 @@ class CatalogPlanService
         return [
             'name' => $payload['name'],
             'description' => $payload['description'] ?: null,
-            'bundle_price' => $payload['bundle_price'] ?: null,
+            'bundle_price' => $payload['bundle_price'],
             'currency' => strtoupper($payload['currency']),
             'is_active' => (bool) $payload['is_active'],
         ];
