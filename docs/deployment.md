@@ -103,9 +103,8 @@ Configure these values in each deployed environment.
    - `php artisan db:seed --force`
 8. Configure web server root to `/public`.
 9. Set up SSL/TLS certificates (required for OAuth callbacks).
-10. Cache production config/routes/views:
+10. Cache production config/views:
     - `php artisan config:cache`
-    - `php artisan route:cache`
     - `php artisan view:cache`
 
 ## 4. Queue Workers (Supervisor)
@@ -145,7 +144,6 @@ Current scheduled workloads:
 - Full Instagram sync: every 6 hours
 - Profile + insights refresh: hourly
 - Token refresh: daily
-- Overdue invoice detection: daily at 9 AM
 - Follower snapshots: daily
 
 ## 6. Meta App Review
@@ -171,4 +169,5 @@ Before production Instagram access, prepare:
 
 - Keep `APP_DEBUG=false` in production.
 - Ensure queue workers and cron are monitored.
+- Run `php artisan route:cache` only after removing all closure routes.
 - Rotate OAuth and Stripe secrets using your secrets manager.
