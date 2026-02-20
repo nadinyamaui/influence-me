@@ -5,7 +5,7 @@
 
 ## Description
 
-Create a service layer that orchestrates TikTok sync workflows and shared-model persistence for accounts, media, insights, and demographics.
+Create a service layer that encapsulates TikTok sync workflows and shared-model persistence for accounts, media, insights, and demographics. Existing shared sync jobs should call this service for TikTok-specific execution.
 
 ## Implementation
 

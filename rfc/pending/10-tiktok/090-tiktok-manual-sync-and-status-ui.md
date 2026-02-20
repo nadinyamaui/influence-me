@@ -1,7 +1,7 @@
 # 090 - TikTok Manual Sync Trigger and Status UI
 
 **Labels:** `feature`, `tiktok`, `ui`, `backend`
-**Depends on:** #087, #088
+**Depends on:** #081, #088
 
 ## Description
 
@@ -10,7 +10,7 @@ Add manual sync controls and detailed sync status UI for TikTok accounts within 
 ## Implementation
 
 ### Manual Sync
-- Add per-TikTok-account action to dispatch sync orchestrator/profile sync job
+- Add per-TikTok-account action to dispatch the existing shared sync workflow for that account
 
 ### Status Display
 - Show `idle`, `syncing`, `failed` states
@@ -19,10 +19,10 @@ Add manual sync controls and detailed sync status UI for TikTok accounts within 
 
 ## Files to Modify
 - existing shared accounts page/view
-- `app/Jobs/SyncAllTikTokData.php` (if needed for scoped dispatch)
+- existing shared sync dispatcher/action wiring (if needed for scoped dispatch)
 
 ## Acceptance Criteria
-- [ ] Manual sync action dispatches expected jobs
+- [ ] Manual sync action dispatches expected existing shared sync workflow
 - [ ] Status updates are visible and accurate
 - [ ] Failed sync includes clear error messaging
 - [ ] Feature tests cover trigger and state rendering
