@@ -2,8 +2,7 @@
 
 use App\Enums\BillingUnitType;
 use App\Enums\PlatformType;
-use App\Livewire\Pricing\Products\Create as ProductsCreate;
-use App\Livewire\Pricing\Products\Edit as ProductsEdit;
+use App\Livewire\Pricing\Products\Form as ProductsForm;
 use App\Livewire\Pricing\Products\Index as ProductsIndex;
 use App\Models\CatalogProduct;
 use App\Models\User;
@@ -87,7 +86,7 @@ test('influencer can create pricing products', function (): void {
     $user = User::factory()->create();
 
     Livewire::actingAs($user)
-        ->test(ProductsCreate::class)
+        ->test(ProductsForm::class)
         ->set('name', 'Instagram Reel Deliverable')
         ->set('platform', PlatformType::Instagram->value)
         ->set('media_type', 'reel')
@@ -114,7 +113,7 @@ test('create form validates pricing product fields', function (): void {
     $user = User::factory()->create();
 
     Livewire::actingAs($user)
-        ->test(ProductsCreate::class)
+        ->test(ProductsForm::class)
         ->set('name', '')
         ->set('platform', 'unknown')
         ->set('media_type', 'unknown')
@@ -140,7 +139,7 @@ test('influencer can edit pricing products', function (): void {
     ]);
 
     Livewire::actingAs($user)
-        ->test(ProductsEdit::class, ['product' => $product])
+        ->test(ProductsForm::class, ['product' => $product])
         ->set('name', 'Updated Product')
         ->set('platform', PlatformType::TikTok->value)
         ->set('media_type', '')
