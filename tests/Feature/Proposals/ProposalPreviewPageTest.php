@@ -1,6 +1,5 @@
 <?php
 
-use App\Enums\ProposalStatus;
 use App\Models\Campaign;
 use App\Models\Client;
 use App\Models\InstagramAccount;
@@ -95,6 +94,25 @@ test('owner can view proposal markdown campaign totals and sorted scheduled cont
         ->assertSee('Campaign Overview')
         ->assertSee('important', false)
         ->assertSeeInOrder(['Early Post', 'Late Reel']);
+});
+
+test('proposal preview strips raw html from markdown content', function (): void {
+    $user = User::factory()->create();
+    $client = Client::factory()->for($user)->create();
+
+    $proposal = Proposal::factory()
+        ->for($user)
+        ->for($client)
+        ->create([
+            'content' => "# Heading\n\n<script>alert('xss')</script>\n\n**Safe text**",
+        ]);
+
+    $this->actingAs($user)
+        ->get(route('proposals.show', $proposal))
+        ->assertSuccessful()
+        ->assertSee('<h1>Heading</h1>', false)
+        ->assertDontSee("<script>alert('xss')</script>", false)
+        ->assertSee('Safe text', false);
 });
 
 test('draft proposal preview shows edit and send to client actions', function (): void {

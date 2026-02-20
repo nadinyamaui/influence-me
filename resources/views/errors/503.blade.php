@@ -20,7 +20,7 @@
                 <p class="code">503</p>
                 <h1>We'll be right back</h1>
                 <p>The app is temporarily unavailable while we complete maintenance.</p>
-                <a href="{{ route('dashboard') }}">Check again</a>
+                <a href="{{ route('home') }}">Check again</a>
             </section>
         </main>
     </body>

@@ -157,3 +157,25 @@ it('returns to instagram accounts with oauth error on add-account callback socia
         'oauth' => 'Facebook denied account linking.',
     ]);
 });
+
+it('rate limits facebook oauth callback to ten attempts per minute per ip', function (): void {
+    $user = User::factory()->create();
+
+    $loginService = \Mockery::mock(FacebookSocialiteLoginService::class);
+    $loginService->shouldReceive('createUserAndAccounts')
+        ->times(10)
+        ->andReturnUsing(function () use ($user) {
+            auth()->login($user);
+
+            return $user;
+        });
+    app()->instance(FacebookSocialiteLoginService::class, $loginService);
+
+    foreach (range(1, 10) as $attempt) {
+        $this->get(route('auth.facebook.callback'))
+            ->assertRedirect(route('dashboard', absolute: false));
+    }
+
+    $this->get(route('auth.facebook.callback'))
+        ->assertStatus(429);
+});

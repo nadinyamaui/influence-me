@@ -20,7 +20,7 @@
                 <p class="code">500</p>
                 <h1>Something went wrong</h1>
                 <p>An unexpected error occurred while loading this page.</p>
-                <a href="{{ route('dashboard') }}">Return to dashboard</a>
+                <a href="{{ route('home') }}">Return home</a>
             </section>
         </main>
     </body>

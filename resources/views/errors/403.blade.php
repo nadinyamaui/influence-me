@@ -20,7 +20,7 @@
                 <p class="code">403</p>
                 <h1>Access denied</h1>
                 <p>You don't have permission to access this page.</p>
-                <a href="{{ route('dashboard') }}">Return to dashboard</a>
+                <a href="{{ route('home') }}">Return home</a>
             </section>
         </main>
     </body>

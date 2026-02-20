@@ -28,7 +28,9 @@ Route::view('/terms', 'terms')->name('terms');
 Route::view('/privacy-policy', 'privacy-policy')->name('privacy-policy');
 
 Route::get('/auth/facebook', [FacebookAuthController::class, 'redirect'])->middleware('guest')->name('auth.facebook');
-Route::get('/auth/facebook/callback', [FacebookAuthController::class, 'callback'])->name('auth.facebook.callback');
+Route::get('/auth/facebook/callback', [FacebookAuthController::class, 'callback'])
+    ->middleware('throttle:instagram-oauth-callback')
+    ->name('auth.facebook.callback');
 
 Route::middleware(['auth'])->group(function (): void {
     Route::get('/auth/facebook/add', [FacebookAuthController::class, 'addAccount'])->name('auth.facebook.add');
