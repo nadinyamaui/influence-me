@@ -1,6 +1,6 @@
 <?php
 
-use App\Models\InstagramAccount;
+use App\Models\SocialAccount;
 use App\Models\User;
 
 test('guests are redirected to the login page', function () {
@@ -30,7 +30,7 @@ test('users without instagram accounts see the dashboard onboarding state', func
 
 test('users with linked instagram accounts do not see the dashboard onboarding state', function () {
     $user = User::factory()->create();
-    InstagramAccount::factory()->for($user)->create();
+    SocialAccount::factory()->for($user)->create();
     $this->actingAs($user);
 
     $response = $this->get(route('dashboard'));

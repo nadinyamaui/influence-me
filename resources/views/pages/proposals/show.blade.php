@@ -123,7 +123,7 @@
                                     <article class="rounded-lg border border-zinc-200 bg-white p-3 dark:border-zinc-700 dark:bg-zinc-900/40">
                                         <p class="text-sm font-medium text-zinc-900 dark:text-zinc-100">{{ $scheduledPost->title }}</p>
                                         <p class="mt-1 text-xs text-zinc-600 dark:text-zinc-300">{{ Str::of($scheduledPost->media_type->value)->headline() }}</p>
-                                        <p class="mt-1 text-xs text-zinc-600 dark:text-zinc-300">{{ $scheduledPost->instagramAccount?->username ?? 'Unknown account' }}</p>
+                                        <p class="mt-1 text-xs text-zinc-600 dark:text-zinc-300">{{ $scheduledPost->socialAccount?->username ?? 'Unknown account' }}</p>
                                         <p class="mt-1 text-xs text-zinc-600 dark:text-zinc-300">{{ $scheduledPost->scheduled_at->format('M j, Y g:i A') }}</p>
                                     </article>
                                 @endforeach
@@ -144,7 +144,7 @@
                                             <tr>
                                                 <td class="px-3 py-2 text-zinc-900 dark:text-zinc-100">{{ $scheduledPost->title }}</td>
                                                 <td class="px-3 py-2 text-zinc-700 dark:text-zinc-200">{{ Str::of($scheduledPost->media_type->value)->headline() }}</td>
-                                                <td class="px-3 py-2 text-zinc-700 dark:text-zinc-200">{{ $scheduledPost->instagramAccount?->username ?? 'Unknown account' }}</td>
+                                                <td class="px-3 py-2 text-zinc-700 dark:text-zinc-200">{{ $scheduledPost->socialAccount?->username ?? 'Unknown account' }}</td>
                                                 <td class="px-3 py-2 text-zinc-700 dark:text-zinc-200">{{ $scheduledPost->scheduled_at->format('M j, Y g:i A') }}</td>
                                             </tr>
                                         @endforeach

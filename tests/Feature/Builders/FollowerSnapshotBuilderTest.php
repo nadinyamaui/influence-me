@@ -2,7 +2,7 @@
 
 use App\Enums\AnalyticsPeriod;
 use App\Models\FollowerSnapshot;
-use App\Models\InstagramAccount;
+use App\Models\SocialAccount;
 use App\Models\User;
 use Carbon\CarbonImmutable;
 
@@ -12,9 +12,9 @@ it('scopes snapshots to user account and analytics period and orders by date', f
     $owner = User::factory()->create();
     $outsider = User::factory()->create();
 
-    $ownerAccount = InstagramAccount::factory()->for($owner)->create();
-    $ownerOtherAccount = InstagramAccount::factory()->for($owner)->create();
-    $outsiderAccount = InstagramAccount::factory()->for($outsider)->create();
+    $ownerAccount = SocialAccount::factory()->for($owner)->create();
+    $ownerOtherAccount = SocialAccount::factory()->for($owner)->create();
+    $outsiderAccount = SocialAccount::factory()->for($outsider)->create();
 
     FollowerSnapshot::factory()->for($ownerAccount)->create([
         'recorded_at' => '2026-02-18',
@@ -53,9 +53,9 @@ it('keeps all user accounts when account filter is all and analytics period is a
     $owner = User::factory()->create();
     $outsider = User::factory()->create();
 
-    $ownerFirstAccount = InstagramAccount::factory()->for($owner)->create();
-    $ownerSecondAccount = InstagramAccount::factory()->for($owner)->create();
-    $outsiderAccount = InstagramAccount::factory()->for($outsider)->create();
+    $ownerFirstAccount = SocialAccount::factory()->for($owner)->create();
+    $ownerSecondAccount = SocialAccount::factory()->for($owner)->create();
+    $outsiderAccount = SocialAccount::factory()->for($outsider)->create();
 
     FollowerSnapshot::factory()->for($ownerFirstAccount)->create(['recorded_at' => '2025-12-01']);
     FollowerSnapshot::factory()->for($ownerSecondAccount)->create(['recorded_at' => '2026-02-19']);

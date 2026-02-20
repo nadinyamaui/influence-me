@@ -1,11 +1,11 @@
 <?php
 
 use App\Jobs\SyncInstagramMedia;
-use App\Models\InstagramAccount;
+use App\Models\SocialAccount;
 use Illuminate\Support\Facades\Bus;
 
 it('runs media retrieval immediately for all instagram accounts by default', function (): void {
-    InstagramAccount::factory()->count(3)->create();
+    SocialAccount::factory()->count(3)->create();
     Bus::fake();
 
     $this->artisan('instagram:media:retrieve-all')
@@ -16,7 +16,7 @@ it('runs media retrieval immediately for all instagram accounts by default', fun
 });
 
 it('queues media retrieval jobs for all instagram accounts when queue option is used', function (): void {
-    InstagramAccount::factory()->count(2)->create();
+    SocialAccount::factory()->count(2)->create();
     Bus::fake();
 
     $this->artisan('instagram:media:retrieve-all --queue')

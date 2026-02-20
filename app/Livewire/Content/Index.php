@@ -91,7 +91,7 @@ class Index extends Component
     {
         if ($value !== 'all') {
             $accountId = (int) $value;
-            $hasAccount = Auth::user()->instagramAccounts()->whereKey($accountId)->exists();
+            $hasAccount = Auth::user()->socialAccounts()->whereKey($accountId)->exists();
 
             if (! $hasAccount) {
                 $this->accountId = 'all';
@@ -408,7 +408,7 @@ class Index extends Component
         $userId = (int) Auth::id();
 
         return InstagramMedia::query()
-            ->withInstagramAccount()
+            ->withSocialAccount()
             ->forUser($userId)
             ->filterByMediaType($this->mediaType)
             ->filterByAccount($this->accountId)
@@ -426,7 +426,7 @@ class Index extends Component
         }
 
         return InstagramMedia::query()
-            ->withInstagramAccount()
+            ->withSocialAccount()
             ->withOwnedCampaignsForUser((int) Auth::id())
             ->whereKey($this->selectedMediaId)
             ->forUser((int) Auth::id())
@@ -501,7 +501,7 @@ class Index extends Component
         }
 
         $averages = InstagramMedia::query()
-            ->accountAverageMetricsForRecentDays((int) $media->instagram_account_id, 90);
+            ->accountAverageMetricsForRecentDays((int) $media->social_account_id, 90);
 
         return [
             'likes' => $this->comparisonMetric((float) $media->like_count, (float) ($averages['likes'] ?? 0)),

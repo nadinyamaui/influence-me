@@ -2,8 +2,8 @@
 
 use App\Enums\SyncStatus;
 use App\Jobs\SyncAllInstagramData;
-use App\Livewire\InstagramAccounts\Index;
-use App\Models\InstagramAccount;
+use App\Livewire\SocialAccounts\Index;
+use App\Models\SocialAccount;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Bus;
@@ -20,7 +20,7 @@ test('authenticated users can see their instagram accounts with statuses and tok
     $user = User::factory()->create();
     $otherUser = User::factory()->create();
 
-    InstagramAccount::factory()->for($user)->create([
+    SocialAccount::factory()->for($user)->create([
         'username' => 'primarycreator',
         'profile_picture_url' => null,
         'is_primary' => true,
@@ -31,7 +31,7 @@ test('authenticated users can see their instagram accounts with statuses and tok
         'sync_status' => SyncStatus::Syncing,
     ]);
 
-    InstagramAccount::factory()->for($user)->create([
+    SocialAccount::factory()->for($user)->create([
         'username' => 'brandaccount',
         'followers_count' => 980,
         'media_count' => 44,
@@ -40,7 +40,7 @@ test('authenticated users can see their instagram accounts with statuses and tok
         'sync_status' => SyncStatus::Idle,
     ]);
 
-    InstagramAccount::factory()->for($otherUser)->create([
+    SocialAccount::factory()->for($otherUser)->create([
         'username' => 'hiddenaccount',
     ]);
 
@@ -81,11 +81,11 @@ test('instagram accounts page shows empty state and connect call to action', fun
 test('authenticated users can set a non-primary account as primary', function (): void {
     $user = User::factory()->create();
 
-    $primaryAccount = InstagramAccount::factory()
+    $primaryAccount = SocialAccount::factory()
         ->for($user)
         ->primary()
         ->create();
-    $secondaryAccount = InstagramAccount::factory()
+    $secondaryAccount = SocialAccount::factory()
         ->for($user)
         ->create(['is_primary' => false]);
 
@@ -100,11 +100,11 @@ test('authenticated users can set a non-primary account as primary', function ()
 test('authenticated users can disconnect an account after confirmation', function (): void {
     $user = User::factory()->create();
 
-    $firstAccount = InstagramAccount::factory()
+    $firstAccount = SocialAccount::factory()
         ->for($user)
         ->primary()
         ->create();
-    $secondAccount = InstagramAccount::factory()
+    $secondAccount = SocialAccount::factory()
         ->for($user)
         ->create(['is_primary' => false]);
 
@@ -112,14 +112,14 @@ test('authenticated users can disconnect an account after confirmation', functio
         ->test(Index::class)
         ->call('disconnect', $secondAccount->id);
 
-    $this->assertDatabaseMissing('instagram_accounts', ['id' => $secondAccount->id]);
-    $this->assertDatabaseHas('instagram_accounts', ['id' => $firstAccount->id]);
+    $this->assertDatabaseMissing('social_accounts', ['id' => $secondAccount->id]);
+    $this->assertDatabaseHas('social_accounts', ['id' => $firstAccount->id]);
 });
 
 test('users cannot disconnect their last instagram account', function (): void {
     $user = User::factory()->create();
 
-    $account = InstagramAccount::factory()
+    $account = SocialAccount::factory()
         ->for($user)
         ->primary()
         ->create();
@@ -128,14 +128,14 @@ test('users cannot disconnect their last instagram account', function (): void {
         ->test(Index::class)
         ->call('disconnect', $account->id);
 
-    $this->assertDatabaseHas('instagram_accounts', ['id' => $account->id]);
+    $this->assertDatabaseHas('social_accounts', ['id' => $account->id]);
 });
 
 test('users can manually trigger sync from instagram accounts page', function (): void {
     Bus::fake();
 
     $user = User::factory()->create();
-    $account = InstagramAccount::factory()
+    $account = SocialAccount::factory()
         ->for($user)
         ->create([
             'sync_status' => SyncStatus::Idle,
@@ -159,7 +159,7 @@ test('manual sync action does not dispatch when account is already syncing', fun
     Bus::fake();
 
     $user = User::factory()->create();
-    $account = InstagramAccount::factory()
+    $account = SocialAccount::factory()
         ->for($user)
         ->create([
             'sync_status' => SyncStatus::Syncing,
@@ -175,7 +175,7 @@ test('manual sync action does not dispatch when account is already syncing', fun
 test('failed sync status shows collapsible sync error details', function (): void {
     $user = User::factory()->create();
 
-    InstagramAccount::factory()
+    SocialAccount::factory()
         ->for($user)
         ->create([
             'sync_status' => SyncStatus::Failed,

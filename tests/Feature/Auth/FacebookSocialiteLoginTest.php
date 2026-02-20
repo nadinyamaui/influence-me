@@ -124,7 +124,7 @@ it('uses account-linking flow on callback for authenticated users with add-accou
     $user = User::factory()->create();
 
     $loginService = \Mockery::mock(FacebookSocialiteLoginService::class);
-    $loginService->shouldReceive('createInstagramAccountsForLoggedUser')
+    $loginService->shouldReceive('createSocialAccountsForLoggedUser')
         ->once()
         ->andReturn($user);
     $loginService->shouldNotReceive('createUserAndAccounts');
@@ -142,7 +142,7 @@ it('returns to instagram accounts with oauth error on add-account callback socia
     $user = User::factory()->create();
 
     $loginService = \Mockery::mock(FacebookSocialiteLoginService::class);
-    $loginService->shouldReceive('createInstagramAccountsForLoggedUser')
+    $loginService->shouldReceive('createSocialAccountsForLoggedUser')
         ->once()
         ->andThrow(new SocialAuthenticationException('Facebook denied account linking.'));
     $loginService->shouldNotReceive('createUserAndAccounts');

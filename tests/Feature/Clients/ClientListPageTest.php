@@ -4,8 +4,8 @@ use App\Enums\ClientType;
 use App\Livewire\Clients\Index;
 use App\Models\Campaign;
 use App\Models\Client;
-use App\Models\InstagramAccount;
 use App\Models\InstagramMedia;
+use App\Models\SocialAccount;
 use App\Models\User;
 use Livewire\Livewire;
 
@@ -29,7 +29,7 @@ test('authenticated users only see their own clients and sidebar link points to 
         'name' => 'Hidden Client',
     ]);
 
-    $account = InstagramAccount::factory()->for($user)->create();
+    $account = SocialAccount::factory()->for($user)->create();
     $media = InstagramMedia::factory()->for($account)->create();
     $campaign = Campaign::factory()->for($ownerClient)->create();
     $campaign->instagramMedia()->attach($media->id);

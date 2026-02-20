@@ -59,9 +59,9 @@ class ContentClientLinkService
 
     private function ensureMediaOwnership(User $user, InstagramMedia $media): void
     {
-        $media->loadMissing('instagramAccount');
+        $media->loadMissing('socialAccount');
 
-        if ($media->instagramAccount?->user_id !== $user->id) {
+        if ($media->socialAccount?->user_id !== $user->id) {
             throw new AuthorizationException('You are not allowed to modify this media-client link.');
         }
     }

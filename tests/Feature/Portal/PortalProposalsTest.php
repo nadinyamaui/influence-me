@@ -7,9 +7,9 @@ use App\Mail\ProposalRevisionRequested;
 use App\Models\Campaign;
 use App\Models\Client;
 use App\Models\ClientUser;
-use App\Models\InstagramAccount;
 use App\Models\Proposal;
 use App\Models\ScheduledPost;
+use App\Models\SocialAccount;
 use App\Models\User;
 use Illuminate\Support\Facades\Mail;
 use Livewire\Livewire;
@@ -50,7 +50,7 @@ test('portal proposals list only shows scoped non draft proposals', function ():
     ]);
 
     $campaign = Campaign::factory()->for($client)->for($visibleProposal)->create();
-    $account = InstagramAccount::factory()->for($influencer)->create();
+    $account = SocialAccount::factory()->for($influencer)->create();
 
     ScheduledPost::factory()->for($influencer)->for($client)->for($campaign)->for($account)->create([
         'title' => 'Scheduled Deliverable',
@@ -112,7 +112,7 @@ test('portal proposal detail renders markdown and campaign schedule context', fu
         'name' => 'Spring Launch',
     ]);
 
-    $account = InstagramAccount::factory()->for($influencer)->create([
+    $account = SocialAccount::factory()->for($influencer)->create([
         'username' => 'client_preview_account',
     ]);
 
@@ -178,7 +178,7 @@ test('client can approve a sent proposal and influencer receives approval email'
         'title' => 'Spring Expansion Proposal',
     ]);
 
-    $account = InstagramAccount::factory()->for($influencer)->create();
+    $account = SocialAccount::factory()->for($influencer)->create();
 
     $campaignOne = Campaign::factory()->for($client)->for($proposal)->create([
         'name' => 'Campaign One',
@@ -220,7 +220,7 @@ test('client can request proposal changes with notes and influencer receives rev
         'title' => 'Holiday Campaign Proposal',
     ]);
 
-    $account = InstagramAccount::factory()->for($influencer)->create();
+    $account = SocialAccount::factory()->for($influencer)->create();
 
     $campaignOne = Campaign::factory()->for($client)->for($proposal)->create([
         'name' => 'Campaign Alpha',

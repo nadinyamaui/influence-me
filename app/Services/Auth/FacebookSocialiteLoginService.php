@@ -2,8 +2,9 @@
 
 namespace App\Services\Auth;
 
+use App\Enums\SocialNetwork;
 use App\Exceptions\Auth\SocialAuthenticationException;
-use App\Models\InstagramAccount;
+use App\Models\SocialAccount;
 use App\Models\User;
 use App\Services\Facebook\Client;
 use Illuminate\Http\RedirectResponse;
@@ -36,15 +37,15 @@ class FacebookSocialiteLoginService
         $existingUser = $this->findExistingSocialiteUser($socialiteUser);
         $token = $this->exchangeToken($socialiteUser);
         $accounts = $this->getAccounts($socialiteUser->getId(), $token['access_token']);
-        $this->ensureInstagramAccountsBelongToUser($existingUser, $accounts);
+        $this->ensureSocialAccountsBelongToUser($existingUser, $accounts);
         $user = $this->createUpdateUser($socialiteUser);
         auth()->login($user);
-        $this->upsertInstagramAccounts($accounts, $user);
+        $this->upsertSocialAccounts($accounts, $user);
 
         return $user;
     }
 
-    public function createInstagramAccountsForLoggedUser(): User
+    public function createSocialAccountsForLoggedUser(): User
     {
         $user = auth()->user();
         if (! $user instanceof User) {
@@ -58,8 +59,8 @@ class FacebookSocialiteLoginService
 
         $token = $this->exchangeToken($socialiteUser);
         $accounts = $this->getAccounts($socialiteUser->getId(), $token['access_token']);
-        $this->ensureInstagramAccountsBelongToUser($user, $accounts);
-        $this->upsertInstagramAccounts($accounts, $user);
+        $this->ensureSocialAccountsBelongToUser($user, $accounts);
+        $this->upsertSocialAccounts($accounts, $user);
 
         return $user;
     }
@@ -99,18 +100,22 @@ class FacebookSocialiteLoginService
             ->first();
     }
 
-    protected function ensureInstagramAccountsBelongToUser(?User $user, Collection $accounts): void
+    protected function ensureSocialAccountsBelongToUser(?User $user, Collection $accounts): void
     {
-        $instagramUserIds = $accounts
-            ->pluck('instagram_user_id')
+        $socialNetworkUserIds = $accounts
+            ->filter(
+                fn (array $account): bool => ($account['social_network'] ?? SocialNetwork::Instagram->value) === SocialNetwork::Instagram->value
+            )
+            ->pluck('social_network_user_id')
             ->filter()
             ->values();
-        if ($instagramUserIds->isEmpty()) {
+        if ($socialNetworkUserIds->isEmpty()) {
             return;
         }
 
-        $conflictingAccount = InstagramAccount::query()
-            ->whereIn('instagram_user_id', $instagramUserIds)
+        $conflictingAccount = SocialAccount::query()
+            ->where('social_network', SocialNetwork::Instagram->value)
+            ->whereIn('social_network_user_id', $socialNetworkUserIds)
             ->when(
                 $user,
                 fn ($query) => $query->where('user_id', '!=', $user->id),
@@ -135,11 +140,12 @@ class FacebookSocialiteLoginService
         return new Client($token, $id)->accounts();
     }
 
-    protected function upsertInstagramAccounts($accounts, $user): void
+    protected function upsertSocialAccounts($accounts, $user): void
     {
         $accounts->each(function ($account) use ($user) {
-            $user->instagramAccounts()->updateOrCreate([
-                'instagram_user_id' => $account['instagram_user_id'],
+            $user->socialAccounts()->updateOrCreate([
+                'social_network' => $account['social_network'] ?? SocialNetwork::Instagram->value,
+                'social_network_user_id' => $account['social_network_user_id'],
             ], $account);
         });
     }

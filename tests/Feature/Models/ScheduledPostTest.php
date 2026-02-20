@@ -2,8 +2,8 @@
 
 use App\Enums\ScheduledPostStatus;
 use App\Models\Client;
-use App\Models\InstagramAccount;
 use App\Models\ScheduledPost;
+use App\Models\SocialAccount;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -13,9 +13,9 @@ it('creates valid scheduled post records with factory defaults and casts', funct
 
     expect($scheduledPost->user)->toBeInstanceOf(User::class)
         ->and($scheduledPost->client)->toBeInstanceOf(Client::class)
-        ->and($scheduledPost->instagramAccount)->toBeInstanceOf(InstagramAccount::class)
+        ->and($scheduledPost->socialAccount)->toBeInstanceOf(SocialAccount::class)
         ->and($scheduledPost->client?->user_id)->toBe($scheduledPost->user_id)
-        ->and($scheduledPost->instagramAccount->user_id)->toBe($scheduledPost->user_id)
+        ->and($scheduledPost->socialAccount->user_id)->toBe($scheduledPost->user_id)
         ->and($scheduledPost->status)->toBe(ScheduledPostStatus::Planned)
         ->and($scheduledPost->scheduled_at)->not->toBeNull()
         ->and($scheduledPost->scheduled_at->isFuture())->toBeTrue();
@@ -38,7 +38,7 @@ it('defines user client and instagram account relationships with typed returns',
 
     expect($scheduledPost->user())->toBeInstanceOf(BelongsTo::class)
         ->and($scheduledPost->client())->toBeInstanceOf(BelongsTo::class)
-        ->and($scheduledPost->instagramAccount())->toBeInstanceOf(BelongsTo::class);
+        ->and($scheduledPost->socialAccount())->toBeInstanceOf(BelongsTo::class);
 });
 
 it('allows scheduled posts without a client', function (): void {
@@ -52,10 +52,10 @@ it('allows scheduled posts without a client', function (): void {
 
 it('defines user scheduled posts relationship', function (): void {
     $user = User::factory()->create();
-    $instagramAccount = InstagramAccount::factory()->for($user)->create();
+    $socialAccount = SocialAccount::factory()->for($user)->create();
 
-    ScheduledPost::factory()->for($user)->for($instagramAccount)->create();
-    ScheduledPost::factory()->for($user)->for($instagramAccount)->create();
+    ScheduledPost::factory()->for($user)->for($socialAccount)->create();
+    ScheduledPost::factory()->for($user)->for($socialAccount)->create();
 
     expect($user->scheduledPosts())->toBeInstanceOf(HasMany::class)
         ->and($user->scheduledPosts)->toHaveCount(2);

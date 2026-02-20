@@ -292,7 +292,7 @@
                     <dl class="grid gap-2 rounded-xl border border-zinc-200 bg-zinc-50 p-3 text-sm dark:border-zinc-700 dark:bg-zinc-800/60">
                         <div class="flex items-center justify-between gap-2"><dt class="text-zinc-500 dark:text-zinc-300">Published</dt><dd class="font-medium text-zinc-900 dark:text-zinc-100">{{ $selectedMedia->published_at?->format('M j, Y g:i A') ?? 'Unpublished' }}</dd></div>
                         <div class="flex items-center justify-between gap-2"><dt class="text-zinc-500 dark:text-zinc-300">Media Type</dt><dd class="font-medium text-zinc-900 dark:text-zinc-100">{{ Str::of($selectedMedia->media_type->value)->headline() }}</dd></div>
-                        <div class="flex items-center justify-between gap-2"><dt class="text-zinc-500 dark:text-zinc-300">Account</dt><dd class="font-medium text-zinc-900 dark:text-zinc-100">{{ '@'.$selectedMedia->instagramAccount->username }}</dd></div>
+                        <div class="flex items-center justify-between gap-2"><dt class="text-zinc-500 dark:text-zinc-300">Account</dt><dd class="font-medium text-zinc-900 dark:text-zinc-100">{{ '@'.$selectedMedia->socialAccount->username }}</dd></div>
                     </dl>
 
                     <section class="rounded-xl border border-zinc-200 p-3 dark:border-zinc-700">

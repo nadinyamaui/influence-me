@@ -5,8 +5,8 @@ namespace App\Services\Facebook;
 use App\Enums\MediaType;
 use App\Exceptions\InstagramApiException;
 use App\Exceptions\InstagramTokenExpiredException;
-use App\Models\InstagramAccount;
 use App\Models\InstagramMedia;
+use App\Models\SocialAccount;
 use Carbon\Carbon;
 use FacebookAds\Http\Exception\AuthorizationException;
 use FacebookAds\Http\Exception\RequestException;
@@ -15,10 +15,10 @@ class InstagramGraphService
 {
     protected Client $client;
 
-    public function __construct(protected InstagramAccount $account)
+    public function __construct(protected SocialAccount $account)
     {
         $this->client = app(Client::class, [
-            'user_id' => $this->account->instagram_user_id,
+            'user_id' => $this->account->social_network_user_id,
             'access_token' => $this->account->access_token,
         ]);
     }
@@ -30,7 +30,7 @@ class InstagramGraphService
             $this->account->instagramMedia()->updateOrCreate([
                 'instagram_media_id' => $media['id'],
             ], [
-                'instagram_account_id' => $this->account->id,
+                'social_account_id' => $this->account->id,
                 'media_type' => MediaType::parse($media),
                 'caption' => $media['caption'] ?? null,
                 'permalink' => $media['permalink'] ?? null,
@@ -78,7 +78,7 @@ class InstagramGraphService
             $this->account->instagramMedia()->updateOrCreate([
                 'instagram_media_id' => $story['id'],
             ], [
-                'instagram_account_id' => $this->account->id,
+                'social_account_id' => $this->account->id,
                 'media_type' => MediaType::Story,
                 'caption' => $story['caption'] ?? null,
                 'permalink' => $story['permalink'],

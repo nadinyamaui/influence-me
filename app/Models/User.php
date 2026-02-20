@@ -49,14 +49,14 @@ class User extends Authenticatable
             ->implode('');
     }
 
-    public function instagramAccounts(): HasMany
+    public function socialAccounts(): HasMany
     {
-        return $this->hasMany(InstagramAccount::class);
+        return $this->hasMany(SocialAccount::class);
     }
 
-    public function primaryInstagramAccount(): HasOne
+    public function primarySocialAccount(): HasOne
     {
-        return $this->hasOne(InstagramAccount::class)->where('is_primary', true);
+        return $this->hasOne(SocialAccount::class)->where('is_primary', true);
     }
 
     public function clients(): HasMany
@@ -89,9 +89,9 @@ class User extends Authenticatable
         return $this->hasMany(ScheduledPost::class);
     }
 
-    public static function resolveInstagramAccount(int $accountId): InstagramAccount
+    public static function resolveSocialAccount(int $accountId): SocialAccount
     {
-        $account = Auth::user()?->instagramAccounts()
+        $account = Auth::user()?->socialAccounts()
             ->whereKey($accountId)
             ->first();
 
@@ -143,7 +143,7 @@ class User extends Authenticatable
 
     public static function accounts(): Collection
     {
-        return Auth::user()?->instagramAccounts()
+        return Auth::user()?->socialAccounts()
             ->orderBy('username')
             ->get(['id', 'username']) ?? collect();
     }

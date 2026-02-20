@@ -5,13 +5,13 @@ use App\Livewire\Proposals\Create as ProposalCreate;
 use App\Livewire\Proposals\Edit as ProposalEdit;
 use App\Models\Campaign;
 use App\Models\Client;
-use App\Models\InstagramAccount;
 use App\Models\Proposal;
 use App\Models\ScheduledPost;
+use App\Models\SocialAccount;
 use App\Models\User;
 use Livewire\Livewire;
 
-function proposalWorkflowPayload(int $instagramAccountId): array
+function proposalWorkflowPayload(int $socialAccountId): array
 {
     return [
         'title' => 'Q2 Campaign Proposal',
@@ -27,7 +27,7 @@ function proposalWorkflowPayload(int $instagramAccountId): array
             'title' => 'Teaser Reel',
             'description' => 'Countdown to launch',
             'media_type' => 'reel',
-            'instagram_account_id' => (string) $instagramAccountId,
+            'social_account_id' => (string) $socialAccountId,
             'scheduled_at' => now()->addDay()->format('Y-m-d\TH:i'),
         ]],
     ];
@@ -78,7 +78,7 @@ test('create page enforces scoped ownership validation for client selection', fu
 test('edit page loads existing proposal data and updates draft proposals through stepped payload', function (): void {
     $user = User::factory()->create();
     $client = Client::factory()->for($user)->create();
-    $account = InstagramAccount::factory()->for($user)->create();
+    $account = SocialAccount::factory()->for($user)->create();
 
     $proposal = Proposal::factory()->for($user)->for($client)->draft()->create([
         'title' => 'Original Title',
@@ -92,7 +92,7 @@ test('edit page loads existing proposal data and updates draft proposals through
 
     ScheduledPost::factory()->for($user)->for($client)->create([
         'campaign_id' => $campaign->id,
-        'instagram_account_id' => $account->id,
+        'social_account_id' => $account->id,
         'title' => 'Original Post',
         'media_type' => 'post',
     ]);
@@ -130,7 +130,7 @@ test('edit page loads existing proposal data and updates draft proposals through
 test('linking an existing campaign on edit is ignored while saving draft', function (): void {
     $user = User::factory()->create();
     $client = Client::factory()->for($user)->create();
-    $account = InstagramAccount::factory()->for($user)->create();
+    $account = SocialAccount::factory()->for($user)->create();
 
     $proposal = Proposal::factory()->for($user)->for($client)->draft()->create();
 
@@ -141,7 +141,7 @@ test('linking an existing campaign on edit is ignored while saving draft', funct
 
     $existingScheduledPost = ScheduledPost::factory()->for($user)->for($client)->create([
         'campaign_id' => $existingCampaign->id,
-        'instagram_account_id' => $account->id,
+        'social_account_id' => $account->id,
         'title' => 'Existing Scheduled Post',
     ]);
 
@@ -159,7 +159,7 @@ test('linking an existing campaign on edit is ignored while saving draft', funct
                 'title' => $existingScheduledPost->title,
                 'description' => $existingScheduledPost->description ?? '',
                 'media_type' => $existingScheduledPost->media_type->value,
-                'instagram_account_id' => (string) $existingScheduledPost->instagram_account_id,
+                'social_account_id' => (string) $existingScheduledPost->social_account_id,
                 'scheduled_at' => $existingScheduledPost->scheduled_at->format('Y-m-d\TH:i'),
             ],
             [
@@ -168,7 +168,7 @@ test('linking an existing campaign on edit is ignored while saving draft', funct
                 'title' => 'New Scheduled Post',
                 'description' => '',
                 'media_type' => 'post',
-                'instagram_account_id' => (string) $account->id,
+                'social_account_id' => (string) $account->id,
                 'scheduled_at' => now()->addDay()->format('Y-m-d\TH:i'),
             ],
         ])
@@ -203,7 +203,7 @@ test('saving as draft skips validation and persists safe defaults', function ():
             'title' => '',
             'description' => '',
             'media_type' => 'invalid-type',
-            'instagram_account_id' => '',
+            'social_account_id' => '',
             'scheduled_at' => '',
         ]])
         ->call('update')
@@ -250,7 +250,7 @@ test('next and previous step actions persist draft changes', function (): void {
 test('step navigation autosave does not create duplicate campaigns with same name', function (): void {
     $user = User::factory()->create();
     $client = Client::factory()->for($user)->create();
-    $account = InstagramAccount::factory()->for($user)->create();
+    $account = SocialAccount::factory()->for($user)->create();
 
     $proposal = Proposal::factory()->for($user)->for($client)->draft()->create();
 
@@ -267,7 +267,7 @@ test('step navigation autosave does not create duplicate campaigns with same nam
             'title' => 'Post One',
             'description' => '',
             'media_type' => 'post',
-            'instagram_account_id' => (string) $account->id,
+            'social_account_id' => (string) $account->id,
             'scheduled_at' => now()->addDay()->format('Y-m-d\TH:i'),
         ]])
         ->call('nextStep')

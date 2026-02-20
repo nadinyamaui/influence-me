@@ -4,11 +4,11 @@ use App\Enums\SyncStatus;
 use App\Exceptions\InstagramApiException;
 use App\Exceptions\InstagramTokenExpiredException;
 use App\Jobs\SyncAllInstagramData;
-use App\Models\InstagramAccount;
+use App\Models\SocialAccount;
 use App\Services\Facebook\InstagramGraphService;
 
 it('runs the full instagram sync workflow and marks account as idle on success', function (): void {
-    $account = InstagramAccount::factory()->create([
+    $account = SocialAccount::factory()->create([
         'username' => 'before-sync',
         'sync_status' => SyncStatus::Failed,
         'last_sync_error' => 'old error',
@@ -53,7 +53,7 @@ it('runs the full instagram sync workflow and marks account as idle on success',
 });
 
 it('marks account as failed when the chained sync workflow throws', function (): void {
-    $account = InstagramAccount::factory()->create([
+    $account = SocialAccount::factory()->create([
         'sync_status' => SyncStatus::Idle,
         'last_sync_error' => null,
         'last_synced_at' => null,
@@ -90,7 +90,7 @@ it('marks account as failed when the chained sync workflow throws', function ():
 });
 
 it('configures instagram sync queue settings', function (): void {
-    $account = InstagramAccount::factory()->create();
+    $account = SocialAccount::factory()->create();
 
     $job = new SyncAllInstagramData($account);
 
@@ -99,7 +99,7 @@ it('configures instagram sync queue settings', function (): void {
 });
 
 it('does not overwrite failed status when profile marks account as failed without throwing', function (): void {
-    $account = InstagramAccount::factory()->create([
+    $account = SocialAccount::factory()->create([
         'sync_status' => SyncStatus::Idle,
         'last_sync_error' => null,
         'last_synced_at' => null,

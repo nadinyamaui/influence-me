@@ -1,17 +1,17 @@
 <?php
 
-use App\Models\InstagramAccount;
+use App\Models\SocialAccount;
 use App\Models\User;
 
 it('scopes instagram accounts to a user and filters by a specific account id', function (): void {
     $owner = User::factory()->create();
     $outsider = User::factory()->create();
 
-    $ownerFirstAccount = InstagramAccount::factory()->for($owner)->create();
-    $ownerSecondAccount = InstagramAccount::factory()->for($owner)->create();
-    InstagramAccount::factory()->for($outsider)->create();
+    $ownerFirstAccount = SocialAccount::factory()->for($owner)->create();
+    $ownerSecondAccount = SocialAccount::factory()->for($owner)->create();
+    SocialAccount::factory()->for($outsider)->create();
 
-    $ids = InstagramAccount::query()
+    $ids = SocialAccount::query()
         ->forUser($owner->id)
         ->filterByAccount((string) $ownerSecondAccount->id)
         ->pluck('id')
@@ -25,11 +25,11 @@ it('keeps all user instagram accounts when the all filter is selected', function
     $owner = User::factory()->create();
     $outsider = User::factory()->create();
 
-    $ownerFirstAccount = InstagramAccount::factory()->for($owner)->create();
-    $ownerSecondAccount = InstagramAccount::factory()->for($owner)->create();
-    InstagramAccount::factory()->for($outsider)->create();
+    $ownerFirstAccount = SocialAccount::factory()->for($owner)->create();
+    $ownerSecondAccount = SocialAccount::factory()->for($owner)->create();
+    SocialAccount::factory()->for($outsider)->create();
 
-    $ids = InstagramAccount::query()
+    $ids = SocialAccount::query()
         ->forUser($owner->id)
         ->filterByAccount('all')
         ->pluck('id')

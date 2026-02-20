@@ -3,14 +3,15 @@
 namespace Database\Factories;
 
 use App\Enums\AccountType;
+use App\Enums\SocialNetwork;
 use App\Enums\SyncStatus;
-use App\Models\InstagramAccount;
+use App\Models\SocialAccount;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-class InstagramAccountFactory extends Factory
+class SocialAccountFactory extends Factory
 {
-    protected $model = InstagramAccount::class;
+    protected $model = SocialAccount::class;
 
     public function definition(): array
     {
@@ -18,7 +19,8 @@ class InstagramAccountFactory extends Factory
 
         return [
             'user_id' => User::factory(),
-            'instagram_user_id' => (string) fake()->unique()->numberBetween(1000000000, 9999999999),
+            'social_network' => SocialNetwork::Instagram,
+            'social_network_user_id' => (string) fake()->unique()->numberBetween(1000000000, 9999999999),
             'username' => $username,
             'name' => fake()->name(),
             'biography' => fake()->sentence(12),

@@ -4,7 +4,7 @@ namespace App\Builders;
 
 use Illuminate\Database\Eloquent\Builder;
 
-class InstagramAccountBuilder extends Builder
+class SocialAccountBuilder extends Builder
 {
     public function forUser(int $userId): self
     {

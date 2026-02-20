@@ -27,9 +27,9 @@ class InstagramMediaBuilder extends Builder
         return $this->select('instagram_media.*')->distinct();
     }
 
-    public function withInstagramAccount(): self
+    public function withSocialAccount(): self
     {
-        return $this->with('instagramAccount');
+        return $this->with('socialAccount');
     }
 
     public function withCampaignsForClient(int $clientId): self
@@ -43,14 +43,14 @@ class InstagramMediaBuilder extends Builder
 
     public function forUser(int $userId): self
     {
-        return $this->whereHas('instagramAccount', fn (Builder $builder): Builder => $builder->where('user_id', $userId));
+        return $this->whereHas('socialAccount', fn (Builder $builder): Builder => $builder->where('user_id', $userId));
     }
 
     public function forAnalyticsSummary(): self
     {
         return $this->select([
             'instagram_media.id',
-            'instagram_media.instagram_account_id',
+            'instagram_media.social_account_id',
             'instagram_media.published_at',
             'instagram_media.reach',
             'instagram_media.impressions',
@@ -83,7 +83,7 @@ class InstagramMediaBuilder extends Builder
             return $this;
         }
 
-        return $this->where('instagram_account_id', (int) $accountId);
+        return $this->where('social_account_id', (int) $accountId);
     }
 
     public function withoutClientsForUser(int $userId): self
@@ -147,9 +147,9 @@ class InstagramMediaBuilder extends Builder
         ]);
     }
 
-    public function accountAverageMetricsForRecentDays(int $instagramAccountId, int $days = 90): array
+    public function accountAverageMetricsForRecentDays(int $socialAccountId, int $days = 90): array
     {
-        $averages = $this->where('instagram_account_id', $instagramAccountId)
+        $averages = $this->where('social_account_id', $socialAccountId)
             ->where('published_at', '>=', now()->subDays($days))
             ->selectRaw('
                 AVG(like_count) as avg_likes,

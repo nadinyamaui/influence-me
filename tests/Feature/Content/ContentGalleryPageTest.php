@@ -4,8 +4,8 @@ use App\Enums\MediaType;
 use App\Livewire\Content\Index;
 use App\Models\Campaign;
 use App\Models\Client;
-use App\Models\InstagramAccount;
 use App\Models\InstagramMedia;
+use App\Models\SocialAccount;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Livewire\Livewire;
@@ -19,11 +19,11 @@ test('authenticated users can view scoped content gallery page', function (): vo
     $user = User::factory()->create();
     $otherUser = User::factory()->create();
 
-    $account = InstagramAccount::factory()->for($user)->create([
+    $account = SocialAccount::factory()->for($user)->create([
         'username' => 'owneraccount',
     ]);
 
-    $otherAccount = InstagramAccount::factory()->for($otherUser)->create();
+    $otherAccount = SocialAccount::factory()->for($otherUser)->create();
 
     InstagramMedia::factory()->for($account)->create([
         'caption' => 'Owner gallery post',
@@ -48,8 +48,8 @@ test('authenticated users can view scoped content gallery page', function (): vo
 test('content gallery filters and sorting options work in query layer', function (): void {
     $user = User::factory()->create();
 
-    $primaryAccount = InstagramAccount::factory()->for($user)->create();
-    $secondaryAccount = InstagramAccount::factory()->for($user)->create();
+    $primaryAccount = SocialAccount::factory()->for($user)->create();
+    $secondaryAccount = SocialAccount::factory()->for($user)->create();
 
     InstagramMedia::factory()->for($primaryAccount)->create([
         'caption' => 'Primary Post Item',
@@ -117,7 +117,7 @@ test('content gallery filters and sorting options work in query layer', function
 test('content detail modal displays metrics caption permalink and linked clients', function (): void {
     $user = User::factory()->create();
 
-    $account = InstagramAccount::factory()->for($user)->create([
+    $account = SocialAccount::factory()->for($user)->create([
         'username' => 'modalaccount',
     ]);
 
@@ -168,7 +168,7 @@ test('content detail modal displays metrics caption permalink and linked clients
 
 test('content detail modal can open from media query parameter', function (): void {
     $user = User::factory()->create();
-    $account = InstagramAccount::factory()->for($user)->create();
+    $account = SocialAccount::factory()->for($user)->create();
     $media = InstagramMedia::factory()->for($account)->create([
         'caption' => 'Deep link content caption',
     ]);
@@ -184,7 +184,7 @@ test('content detail modal can open from media query parameter', function (): vo
 
 test('content detail modal shows 90-day account average comparisons and campaign context', function (): void {
     $user = User::factory()->create();
-    $account = InstagramAccount::factory()->for($user)->create([
+    $account = SocialAccount::factory()->for($user)->create([
         'username' => 'analyticsmodal',
     ]);
     $client = Client::factory()->for($user)->create([
@@ -238,7 +238,7 @@ test('content detail media query ignores media outside authenticated ownership',
     $user = User::factory()->create();
     $otherUser = User::factory()->create();
 
-    $otherAccount = InstagramAccount::factory()->for($otherUser)->create();
+    $otherAccount = SocialAccount::factory()->for($otherUser)->create();
     $otherMedia = InstagramMedia::factory()->for($otherAccount)->create([
         'caption' => 'Outsider deep link content',
     ]);
@@ -253,7 +253,7 @@ test('content detail media query ignores media outside authenticated ownership',
 
 test('single media cannot be linked to the same campaign twice', function (): void {
     $user = User::factory()->create();
-    $account = InstagramAccount::factory()->for($user)->create();
+    $account = SocialAccount::factory()->for($user)->create();
     $client = Client::factory()->for($user)->create();
     $campaign = Campaign::factory()->for($client)->create([
         'name' => 'Spring Launch',
@@ -289,7 +289,7 @@ test('single media cannot be linked to the same campaign twice', function (): vo
 
 test('campaign options refresh when link client changes in the link modal', function (): void {
     $user = User::factory()->create();
-    $account = InstagramAccount::factory()->for($user)->create();
+    $account = SocialAccount::factory()->for($user)->create();
     $media = InstagramMedia::factory()->for($account)->create();
 
     $clientA = Client::factory()->for($user)->create(['name' => 'Client A']);
@@ -314,7 +314,7 @@ test('campaign options refresh when link client changes in the link modal', func
 
 test('batch selection mode links all selected media to a client', function (): void {
     $user = User::factory()->create();
-    $account = InstagramAccount::factory()->for($user)->create();
+    $account = SocialAccount::factory()->for($user)->create();
     $client = Client::factory()->for($user)->create();
     $campaign = Campaign::factory()->for($client)->create([
         'name' => 'Batch Campaign',
@@ -354,7 +354,7 @@ test('batch selection mode links all selected media to a client', function (): v
 
 test('linked media can be unlinked from detail modal', function (): void {
     $user = User::factory()->create();
-    $account = InstagramAccount::factory()->for($user)->create();
+    $account = SocialAccount::factory()->for($user)->create();
     $client = Client::factory()->for($user)->create();
     $media = InstagramMedia::factory()->for($account)->create();
 
@@ -381,7 +381,7 @@ test('users cannot link content to clients they do not own', function (): void {
     $ownerClient = Client::factory()->for($owner)->create();
     $ownerCampaign = Campaign::factory()->for($ownerClient)->create();
 
-    $outsiderAccount = InstagramAccount::factory()->for($outsider)->create();
+    $outsiderAccount = SocialAccount::factory()->for($outsider)->create();
     $outsiderMedia = InstagramMedia::factory()->for($outsiderAccount)->create();
 
     Livewire::actingAs($outsider)
@@ -400,7 +400,7 @@ test('users cannot link content to clients they do not own', function (): void {
 
 test('inline campaign creation works in content linking flow', function (): void {
     $user = User::factory()->create();
-    $account = InstagramAccount::factory()->for($user)->create();
+    $account = SocialAccount::factory()->for($user)->create();
     $client = Client::factory()->for($user)->create();
     $media = InstagramMedia::factory()->for($account)->create();
 
@@ -430,7 +430,7 @@ test('inline campaign creation works in content linking flow', function (): void
 
 test('content gallery uses cursor pagination', function (): void {
     $user = User::factory()->create();
-    $account = InstagramAccount::factory()->for($user)->create();
+    $account = SocialAccount::factory()->for($user)->create();
 
     foreach (range(1, 25) as $number) {
         InstagramMedia::factory()->for($account)->create([
@@ -447,7 +447,7 @@ test('content gallery uses cursor pagination', function (): void {
         ->assertDontSee('Paged Item 25');
 
     $nextCursor = InstagramMedia::query()
-        ->where('instagram_account_id', $account->id)
+        ->where('social_account_id', $account->id)
         ->orderBy('published_at', 'desc')
         ->orderByDesc('id')
         ->cursorPaginate(24, ['*'], 'cursor')

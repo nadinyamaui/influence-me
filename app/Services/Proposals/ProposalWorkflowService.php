@@ -10,9 +10,9 @@ use App\Mail\ProposalRevisionRequested;
 use App\Mail\ProposalSent;
 use App\Models\Campaign;
 use App\Models\Client;
-use App\Models\InstagramAccount;
 use App\Models\Proposal;
 use App\Models\ScheduledPost;
+use App\Models\SocialAccount;
 use App\Models\User;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Carbon;
@@ -364,19 +364,19 @@ class ProposalWorkflowService
 
     private function resolveScheduledPostAttributes(Proposal $proposal, User $user, array $scheduledItemPayload): ?array
     {
-        $instagramAccountId = $this->resolveOwnedInstagramAccountId($user, $scheduledItemPayload['instagram_account_id'] ?? null);
+        $socialAccountId = $this->resolveOwnedSocialAccountId($user, $scheduledItemPayload['social_account_id'] ?? null);
         $scheduledAt = $this->resolveScheduledAt($scheduledItemPayload['scheduled_at'] ?? null);
         $mediaType = $this->resolveMediaType($scheduledItemPayload['media_type'] ?? null);
         $title = is_string($scheduledItemPayload['title'] ?? null) ? trim($scheduledItemPayload['title']) : '';
 
-        if ($instagramAccountId === null || $scheduledAt === null || $mediaType === null || $title === '') {
+        if ($socialAccountId === null || $scheduledAt === null || $mediaType === null || $title === '') {
             return null;
         }
 
         return [
             'user_id' => $user->id,
             'client_id' => $proposal->client_id,
-            'instagram_account_id' => $instagramAccountId,
+            'social_account_id' => $socialAccountId,
             'title' => $title,
             'description' => is_string($scheduledItemPayload['description'] ?? null) ? $scheduledItemPayload['description'] : null,
             'media_type' => $mediaType,
@@ -385,15 +385,15 @@ class ProposalWorkflowService
         ];
     }
 
-    private function resolveOwnedInstagramAccountId(User $user, mixed $instagramAccountId): ?int
+    private function resolveOwnedSocialAccountId(User $user, mixed $socialAccountId): ?int
     {
-        if (! is_numeric($instagramAccountId)) {
+        if (! is_numeric($socialAccountId)) {
             return null;
         }
 
-        $accountId = (int) $instagramAccountId;
+        $accountId = (int) $socialAccountId;
 
-        $ownedAccountExists = InstagramAccount::query()
+        $ownedAccountExists = SocialAccount::query()
             ->where('user_id', $user->id)
             ->whereKey($accountId)
             ->exists();

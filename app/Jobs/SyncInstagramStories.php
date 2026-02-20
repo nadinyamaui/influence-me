@@ -2,7 +2,7 @@
 
 namespace App\Jobs;
 
-use App\Models\InstagramAccount;
+use App\Models\SocialAccount;
 use App\Services\Facebook\InstagramGraphService;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
@@ -17,7 +17,7 @@ class SyncInstagramStories implements ShouldQueue
 
     public int $tries = 3;
 
-    public function __construct(public InstagramAccount $account)
+    public function __construct(public SocialAccount $account)
     {
         $this->onQueue('instagram-sync');
     }

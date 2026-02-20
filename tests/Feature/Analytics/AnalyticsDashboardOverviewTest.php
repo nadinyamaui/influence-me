@@ -1,12 +1,12 @@
 <?php
 
-use App\Enums\MediaType;
 use App\Enums\DemographicType;
+use App\Enums\MediaType;
 use App\Livewire\Analytics\Index;
 use App\Models\AudienceDemographic;
 use App\Models\FollowerSnapshot;
-use App\Models\InstagramAccount;
 use App\Models\InstagramMedia;
+use App\Models\SocialAccount;
 use App\Models\User;
 use Carbon\CarbonImmutable;
 use Livewire\Livewire;
@@ -33,17 +33,17 @@ test('analytics overview cards calculate metrics and filters in query layer', fu
     $user = User::factory()->create();
     $otherUser = User::factory()->create();
 
-    $primaryAccount = InstagramAccount::factory()->for($user)->create([
+    $primaryAccount = SocialAccount::factory()->for($user)->create([
         'followers_count' => 150000,
         'username' => 'primary',
     ]);
 
-    $secondaryAccount = InstagramAccount::factory()->for($user)->create([
+    $secondaryAccount = SocialAccount::factory()->for($user)->create([
         'followers_count' => 50000,
         'username' => 'secondary',
     ]);
 
-    $outsiderAccount = InstagramAccount::factory()->for($otherUser)->create([
+    $outsiderAccount = SocialAccount::factory()->for($otherUser)->create([
         'followers_count' => 999999,
     ]);
 
@@ -147,9 +147,9 @@ test('best performing content section sorts and scopes top media', function (): 
     $user = User::factory()->create();
     $otherUser = User::factory()->create();
 
-    $primaryAccount = InstagramAccount::factory()->for($user)->create();
-    $secondaryAccount = InstagramAccount::factory()->for($user)->create();
-    $outsiderAccount = InstagramAccount::factory()->for($otherUser)->create();
+    $primaryAccount = SocialAccount::factory()->for($user)->create();
+    $secondaryAccount = SocialAccount::factory()->for($user)->create();
+    $outsiderAccount = SocialAccount::factory()->for($otherUser)->create();
 
     $engagementFirst = InstagramMedia::factory()->for($primaryAccount)->create([
         'caption' => 'Primary engagement first',
@@ -230,9 +230,9 @@ test('content type breakdown calculates counts percentages and per-type averages
     $user = User::factory()->create();
     $otherUser = User::factory()->create();
 
-    $primaryAccount = InstagramAccount::factory()->for($user)->create();
-    $secondaryAccount = InstagramAccount::factory()->for($user)->create();
-    $outsiderAccount = InstagramAccount::factory()->for($otherUser)->create();
+    $primaryAccount = SocialAccount::factory()->for($user)->create();
+    $secondaryAccount = SocialAccount::factory()->for($user)->create();
+    $outsiderAccount = SocialAccount::factory()->for($otherUser)->create();
 
     InstagramMedia::factory()->for($primaryAccount)->create([
         'media_type' => MediaType::Post,
@@ -323,17 +323,17 @@ test('engagement trend chart data aggregates by period granularity and account f
     $user = User::factory()->create();
     $otherUser = User::factory()->create();
 
-    $primaryAccount = InstagramAccount::factory()->for($user)->create([
+    $primaryAccount = SocialAccount::factory()->for($user)->create([
         'followers_count' => 120000,
         'username' => 'trend-main',
     ]);
 
-    $secondaryAccount = InstagramAccount::factory()->for($user)->create([
+    $secondaryAccount = SocialAccount::factory()->for($user)->create([
         'followers_count' => 35000,
         'username' => 'trend-alt',
     ]);
 
-    $outsiderAccount = InstagramAccount::factory()->for($otherUser)->create([
+    $outsiderAccount = SocialAccount::factory()->for($otherUser)->create([
         'followers_count' => 888888,
     ]);
 
@@ -394,17 +394,17 @@ test('audience demographics chart datasets render with account filtering and emp
     $user = User::factory()->create();
     $otherUser = User::factory()->create();
 
-    $primaryAccount = InstagramAccount::factory()->for($user)->create([
+    $primaryAccount = SocialAccount::factory()->for($user)->create([
         'username' => 'demo-main',
         'followers_count' => 100000,
     ]);
 
-    $secondaryAccount = InstagramAccount::factory()->for($user)->create([
+    $secondaryAccount = SocialAccount::factory()->for($user)->create([
         'username' => 'demo-alt',
         'followers_count' => 50000,
     ]);
 
-    $outsiderAccount = InstagramAccount::factory()->for($otherUser)->create();
+    $outsiderAccount = SocialAccount::factory()->for($otherUser)->create();
 
     $primaryAge = [
         '13-17' => 5.00,

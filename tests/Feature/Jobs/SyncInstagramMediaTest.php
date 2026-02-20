@@ -2,12 +2,12 @@
 
 use App\Enums\MediaType;
 use App\Jobs\SyncInstagramMedia;
-use App\Models\InstagramAccount;
 use App\Models\InstagramMedia;
+use App\Models\SocialAccount;
 use App\Services\Facebook\Client as FacebookClient;
 
 it('fetches paginated media and syncs records with mapped media types', function (): void {
-    $account = InstagramAccount::factory()->create();
+    $account = SocialAccount::factory()->create();
 
     $facebookClient = \Mockery::mock(FacebookClient::class);
     $facebookClient->shouldReceive('getAllMedia')
@@ -79,10 +79,10 @@ it('fetches paginated media and syncs records with mapped media types', function
 });
 
 it('updates existing media records when rerun to keep sync idempotent', function (): void {
-    $account = InstagramAccount::factory()->create();
+    $account = SocialAccount::factory()->create();
 
     InstagramMedia::factory()->create([
-        'instagram_account_id' => $account->id,
+        'social_account_id' => $account->id,
         'instagram_media_id' => 'media-1',
         'caption' => 'Old caption',
         'media_type' => MediaType::Post,
@@ -125,7 +125,7 @@ it('updates existing media records when rerun to keep sync idempotent', function
 });
 
 it('configures queue settings for larger sync workloads', function (): void {
-    $account = InstagramAccount::factory()->create();
+    $account = SocialAccount::factory()->create();
     $job = new SyncInstagramMedia($account);
 
     expect($job->queue)->toBe('instagram-sync')

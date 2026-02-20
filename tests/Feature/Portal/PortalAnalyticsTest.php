@@ -5,8 +5,8 @@ use App\Models\AudienceDemographic;
 use App\Models\Campaign;
 use App\Models\Client;
 use App\Models\ClientUser;
-use App\Models\InstagramAccount;
 use App\Models\InstagramMedia;
+use App\Models\SocialAccount;
 use App\Models\User;
 
 test('portal analytics requires authenticated client guard', function (): void {
@@ -27,12 +27,12 @@ test('portal analytics shows only client scoped campaign and demographic data', 
 
     $clientUser = ClientUser::factory()->for($client)->create();
 
-    $visibleAccount = InstagramAccount::factory()->for($influencer)->create([
+    $visibleAccount = SocialAccount::factory()->for($influencer)->create([
         'username' => 'scoped_account',
         'followers_count' => 1000,
     ]);
 
-    $hiddenAccount = InstagramAccount::factory()->for($influencer)->create([
+    $hiddenAccount = SocialAccount::factory()->for($influencer)->create([
         'username' => 'hidden_account',
         'followers_count' => 1200,
     ]);

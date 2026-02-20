@@ -163,11 +163,11 @@
                             </flux:field>
 
                             <flux:field>
-                                <flux:label>Instagram Account</flux:label>
-                                <flux:select wire:model="scheduledItems.{{ $scheduledItemIndex }}.instagram_account_id" :disabled="! $this->isEditable()" required>
+                                <flux:label>Social Account</flux:label>
+                                <flux:select wire:model="scheduledItems.{{ $scheduledItemIndex }}.social_account_id" :disabled="! $this->isEditable()" required>
                                     <option value="">Select account</option>
-                                    @foreach ($instagramAccounts as $instagramAccount)
-                                        <option value="{{ $instagramAccount->id }}">{{ $instagramAccount->username }}</option>
+                                    @foreach ($socialAccounts as $socialAccount)
+                                        <option value="{{ $socialAccount->id }}">{{ $socialAccount->username }}</option>
                                     @endforeach
                                 </flux:select>
                             </flux:field>

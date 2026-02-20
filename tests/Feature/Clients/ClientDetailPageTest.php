@@ -7,10 +7,10 @@ use App\Livewire\Clients\Show;
 use App\Models\Campaign;
 use App\Models\Client;
 use App\Models\ClientUser;
-use App\Models\InstagramAccount;
 use App\Models\InstagramMedia;
 use App\Models\Invoice;
 use App\Models\Proposal;
+use App\Models\SocialAccount;
 use App\Models\User;
 use Livewire\Livewire;
 
@@ -35,7 +35,7 @@ test('owner can view client detail page with summary and tabs', function (): voi
 
     ClientUser::factory()->for($client)->create();
 
-    $account = InstagramAccount::factory()->for($owner)->create();
+    $account = SocialAccount::factory()->for($owner)->create();
     $media = InstagramMedia::factory()->for($account)->create();
     $campaign = Campaign::factory()->for($client)->create([
         'name' => 'Uncategorized',
@@ -109,7 +109,7 @@ test('content tab groups linked media by campaign entity and shows aggregate sta
     $owner = User::factory()->create();
 
     $client = Client::factory()->for($owner)->create();
-    $account = InstagramAccount::factory()->for($owner)->create();
+    $account = SocialAccount::factory()->for($owner)->create();
 
     $launchFirst = InstagramMedia::factory()->for($account)->create([
         'caption' => 'Launch Post One',
@@ -164,7 +164,7 @@ test('analytics tab shows aggregate metrics, campaign breakdown, trend, and acco
     $owner = User::factory()->create();
     $client = Client::factory()->for($owner)->create();
     $otherClient = Client::factory()->for($owner)->create();
-    $account = InstagramAccount::factory()->for($owner)->create();
+    $account = SocialAccount::factory()->for($owner)->create();
 
     $campaignA = Campaign::factory()->for($client)->create(['name' => 'Summer Launch']);
     $campaignB = Campaign::factory()->for($client)->create(['name' => 'Product Review']);
@@ -248,7 +248,7 @@ test('analytics tab shows empty state when no linked content exists', function (
 test('owners can unlink linked media from client content tab', function (): void {
     $owner = User::factory()->create();
     $client = Client::factory()->for($owner)->create();
-    $account = InstagramAccount::factory()->for($owner)->create();
+    $account = SocialAccount::factory()->for($owner)->create();
     $media = InstagramMedia::factory()->for($account)->create();
 
     $campaign = Campaign::factory()->for($client)->create([

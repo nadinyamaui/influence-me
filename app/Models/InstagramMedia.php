@@ -30,9 +30,9 @@ class InstagramMedia extends Model
         ];
     }
 
-    public function instagramAccount(): BelongsTo
+    public function socialAccount(): BelongsTo
     {
-        return $this->belongsTo(InstagramAccount::class);
+        return $this->belongsTo(SocialAccount::class);
     }
 
     public function campaigns(): BelongsToMany
@@ -52,7 +52,7 @@ class InstagramMedia extends Model
 
         $media = self::query()
             ->whereKey($mediaId)
-            ->whereHas('instagramAccount', fn (Builder $builder): Builder => $builder->where('user_id', $userId))
+            ->whereHas('socialAccount', fn (Builder $builder): Builder => $builder->where('user_id', $userId))
             ->first();
 
         if ($media === null) {

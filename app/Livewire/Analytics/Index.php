@@ -8,8 +8,8 @@ use App\Enums\DemographicType;
 use App\Enums\MediaType;
 use App\Models\AudienceDemographic;
 use App\Models\FollowerSnapshot;
-use App\Models\InstagramAccount;
 use App\Models\InstagramMedia;
+use App\Models\SocialAccount;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
@@ -39,7 +39,7 @@ class Index extends Component
     {
         if ($value !== 'all') {
             $accountId = (int) $value;
-            $hasAccount = Auth::user()?->instagramAccounts()->whereKey($accountId)->exists() ?? false;
+            $hasAccount = Auth::user()?->socialAccounts()->whereKey($accountId)->exists() ?? false;
 
             if (! $hasAccount) {
                 $this->accountId = 'all';
@@ -59,11 +59,11 @@ class Index extends Component
         $period = AnalyticsPeriod::tryFrom($this->period) ?? AnalyticsPeriod::default();
         $topContentSort = AnalyticsTopContentSort::tryFrom($this->topContentSort) ?? AnalyticsTopContentSort::default();
 
-        $accounts = Auth::user()?->instagramAccounts()
+        $accounts = Auth::user()?->socialAccounts()
             ->orderBy('username')
             ->get(['id', 'username']) ?? collect();
 
-        $accountQuery = InstagramAccount::query()
+        $accountQuery = SocialAccount::query()
             ->forUser((int) Auth::id())
             ->filterByAccount($this->accountId);
 
@@ -74,7 +74,7 @@ class Index extends Component
 
         $media = $mediaQuery->get([
             'id',
-            'instagram_account_id',
+            'social_account_id',
             'media_type',
             'engagement_rate',
             'reach',
@@ -246,9 +246,9 @@ class Index extends Component
         $demographics = AudienceDemographic::query()
             ->forUser((int) Auth::id())
             ->filterByAccount($this->accountId)
-            ->get(['instagram_account_id', 'type', 'dimension', 'value'])
+            ->get(['social_account_id', 'type', 'dimension', 'value'])
             ->groupBy(fn (AudienceDemographic $item): string => $item->type->value);
-        $accountWeights = InstagramAccount::query()
+        $accountWeights = SocialAccount::query()
             ->forUser((int) Auth::id())
             ->filterByAccount($this->accountId)
             ->pluck('followers_count', 'id')
@@ -309,7 +309,7 @@ class Index extends Component
 
     private function weightedDemographicValues(Collection $rows, Collection $accountWeights): Collection
     {
-        $typeAccountIds = $rows->pluck('instagram_account_id')
+        $typeAccountIds = $rows->pluck('social_account_id')
             ->map(fn ($accountId): int => (int) $accountId)
             ->unique()
             ->values()
@@ -324,7 +324,7 @@ class Index extends Component
             ->groupBy('dimension')
             ->map(function (Collection $dimensionRows) use ($scopedWeights): float {
                 $perAccount = $dimensionRows
-                    ->groupBy('instagram_account_id')
+                    ->groupBy('social_account_id')
                     ->map(fn (Collection $accountRows): float => (float) $accountRows->sum(fn (AudienceDemographic $item): float => (float) $item->value));
                 $weightedSum = 0.0;
                 $totalWeight = 0;

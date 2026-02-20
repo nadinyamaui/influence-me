@@ -3,7 +3,7 @@
 namespace App\Jobs;
 
 use App\Enums\SyncStatus;
-use App\Models\InstagramAccount;
+use App\Models\SocialAccount;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Queue\InteractsWithQueue;
@@ -19,7 +19,7 @@ class SyncAllInstagramData implements ShouldQueue
 
     public int $tries = 3;
 
-    public function __construct(public InstagramAccount $account)
+    public function __construct(public SocialAccount $account)
     {
         $this->onQueue('instagram-sync');
     }
@@ -41,7 +41,7 @@ class SyncAllInstagramData implements ShouldQueue
                 new SyncInstagramStories($this->account),
                 new SyncAudienceDemographics($this->account),
                 function () use ($accountId): void {
-                    InstagramAccount::query()
+                    SocialAccount::query()
                         ->whereKey($accountId)
                         ->where('sync_status', '!=', SyncStatus::Failed->value)
                         ->update([
@@ -52,14 +52,14 @@ class SyncAllInstagramData implements ShouldQueue
                 },
             ])->onQueue('instagram-sync')
                 ->catch(function (Throwable $exception) use ($accountId): void {
-                    InstagramAccount::query()->whereKey($accountId)->update([
+                    SocialAccount::query()->whereKey($accountId)->update([
                         'sync_status' => SyncStatus::Failed,
                         'last_sync_error' => $exception->getMessage(),
                     ]);
                 })
                 ->dispatch();
         } catch (Throwable $exception) {
-            InstagramAccount::query()->whereKey($accountId)->update([
+            SocialAccount::query()->whereKey($accountId)->update([
                 'sync_status' => SyncStatus::Failed,
                 'last_sync_error' => $exception->getMessage(),
             ]);

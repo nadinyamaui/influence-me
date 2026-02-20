@@ -5,8 +5,8 @@ use App\Enums\AnalyticsTopContentSort;
 use App\Enums\MediaType;
 use App\Models\Campaign;
 use App\Models\Client;
-use App\Models\InstagramAccount;
 use App\Models\InstagramMedia;
+use App\Models\SocialAccount;
 use App\Models\User;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Carbon;
@@ -20,8 +20,8 @@ it('scopes instagram media by user and client ownership helpers', function (): v
     $owner = User::factory()->create();
     $outsider = User::factory()->create();
 
-    $ownerAccount = InstagramAccount::factory()->for($owner)->create();
-    $outsiderAccount = InstagramAccount::factory()->for($outsider)->create();
+    $ownerAccount = SocialAccount::factory()->for($owner)->create();
+    $outsiderAccount = SocialAccount::factory()->for($outsider)->create();
 
     $ownerClient = Client::factory()->for($owner)->create();
     $outsiderClient = Client::factory()->for($outsider)->create();
@@ -92,9 +92,9 @@ it('filters instagram media by media type account and date window and sorts gall
     $owner = User::factory()->create();
     $outsider = User::factory()->create();
 
-    $ownerPrimaryAccount = InstagramAccount::factory()->for($owner)->create();
-    $ownerSecondaryAccount = InstagramAccount::factory()->for($owner)->create();
-    $outsiderAccount = InstagramAccount::factory()->for($outsider)->create();
+    $ownerPrimaryAccount = SocialAccount::factory()->for($owner)->create();
+    $ownerSecondaryAccount = SocialAccount::factory()->for($owner)->create();
+    $outsiderAccount = SocialAccount::factory()->for($outsider)->create();
 
     $matchingOlder = InstagramMedia::factory()->for($ownerPrimaryAccount)->create([
         'media_type' => MediaType::Reel,
@@ -157,7 +157,7 @@ it('filters instagram media by media type account and date window and sorts gall
 
 it('orders instagram media newest first and chronologically with id tie breaking', function (): void {
     $user = User::factory()->create();
-    $account = InstagramAccount::factory()->for($user)->create();
+    $account = SocialAccount::factory()->for($user)->create();
 
     $oldest = InstagramMedia::factory()->for($account)->create([
         'published_at' => '2026-02-10 08:00:00',
@@ -199,7 +199,7 @@ it('orders instagram media newest first and chronologically with id tie breaking
 
 it('deduplicates rows with distinct media rows helper after joins', function (): void {
     $user = User::factory()->create();
-    $account = InstagramAccount::factory()->for($user)->create();
+    $account = SocialAccount::factory()->for($user)->create();
     $client = Client::factory()->for($user)->create();
 
     $campaignOne = Campaign::factory()->for($client)->create(['name' => 'Campaign One']);
@@ -228,7 +228,7 @@ it('eager loads instagram account and client filtered campaigns for media record
     $owner = User::factory()->create();
     $outsider = User::factory()->create();
 
-    $account = InstagramAccount::factory()->for($owner)->create();
+    $account = SocialAccount::factory()->for($owner)->create();
     $media = InstagramMedia::factory()->for($account)->create();
 
     $ownerClient = Client::factory()->for($owner)->create();
@@ -241,14 +241,14 @@ it('eager loads instagram account and client filtered campaigns for media record
 
     $resolved = InstagramMedia::query()
         ->whereKey($media->id)
-        ->withInstagramAccount()
+        ->withSocialAccount()
         ->withCampaignsForClient($ownerClient->id)
         ->firstOrFail();
 
     $campaignAttributes = $resolved->campaigns->first()?->getAttributes() ?? [];
 
-    expect($resolved->relationLoaded('instagramAccount'))->toBeTrue()
-        ->and($resolved->instagramAccount?->id)->toBe($account->id)
+    expect($resolved->relationLoaded('socialAccount'))->toBeTrue()
+        ->and($resolved->socialAccount?->id)->toBe($account->id)
         ->and($resolved->relationLoaded('campaigns'))->toBeTrue()
         ->and($resolved->campaigns->pluck('id')->all())->toBe([$ownerCampaign->id])
         ->and(array_key_exists('id', $campaignAttributes))->toBeTrue()
@@ -257,7 +257,7 @@ it('eager loads instagram account and client filtered campaigns for media record
 
 it('selects analytics summary columns for instagram media', function (): void {
     $user = User::factory()->create();
-    $account = InstagramAccount::factory()->for($user)->create();
+    $account = SocialAccount::factory()->for($user)->create();
 
     $media = InstagramMedia::factory()->for($account)->create([
         'reach' => 4200,
@@ -274,7 +274,7 @@ it('selects analytics summary columns for instagram media', function (): void {
     $attributes = $summary->getAttributes();
 
     expect(array_key_exists('id', $attributes))->toBeTrue()
-        ->and(array_key_exists('instagram_account_id', $attributes))->toBeTrue()
+        ->and(array_key_exists('social_account_id', $attributes))->toBeTrue()
         ->and(array_key_exists('published_at', $attributes))->toBeTrue()
         ->and(array_key_exists('reach', $attributes))->toBeTrue()
         ->and(array_key_exists('impressions', $attributes))->toBeTrue()
@@ -286,7 +286,7 @@ it('loads only campaigns owned by a user with client relation and media counts o
     $owner = User::factory()->create();
     $outsider = User::factory()->create();
 
-    $account = InstagramAccount::factory()->for($owner)->create();
+    $account = SocialAccount::factory()->for($owner)->create();
     $primaryMedia = InstagramMedia::factory()->for($account)->create();
     $secondaryMedia = InstagramMedia::factory()->for($account)->create();
 
@@ -325,8 +325,8 @@ it('calculates account average metrics for recent media and defaults to zero val
     Carbon::setTestNow('2026-02-20 10:00:00');
 
     $user = User::factory()->create();
-    $account = InstagramAccount::factory()->for($user)->create();
-    $emptyAccount = InstagramAccount::factory()->for($user)->create();
+    $account = SocialAccount::factory()->for($user)->create();
+    $emptyAccount = SocialAccount::factory()->for($user)->create();
 
     InstagramMedia::factory()->for($account)->create([
         'published_at' => '2026-02-10 10:00:00',
@@ -373,7 +373,7 @@ it('filters media by analytics period and sorts top performing results', functio
     CarbonImmutable::setTestNow('2026-02-20 10:00:00');
 
     $user = User::factory()->create();
-    $account = InstagramAccount::factory()->for($user)->create();
+    $account = SocialAccount::factory()->for($user)->create();
 
     InstagramMedia::factory()->for($account)->create([
         'published_at' => '2025-10-01 10:00:00',
@@ -421,7 +421,7 @@ it('filters media by analytics period and sorts top performing results', functio
 
 it('builds daily engagement trend buckets for recent periods', function (): void {
     $user = User::factory()->create();
-    $account = InstagramAccount::factory()->for($user)->create();
+    $account = SocialAccount::factory()->for($user)->create();
 
     InstagramMedia::factory()->for($account)->create([
         'published_at' => '2026-02-10 09:00:00',
@@ -455,7 +455,7 @@ it('builds daily engagement trend buckets for recent periods', function (): void
 
 it('builds weekly and monthly engagement trend buckets for longer periods', function (): void {
     $user = User::factory()->create();
-    $account = InstagramAccount::factory()->for($user)->create();
+    $account = SocialAccount::factory()->for($user)->create();
 
     InstagramMedia::factory()->for($account)->create([
         'published_at' => '2026-02-16 09:00:00',
@@ -507,7 +507,7 @@ it('builds weekly and monthly engagement trend buckets for longer periods', func
 
 it('builds content type breakdown including empty media type defaults', function (): void {
     $user = User::factory()->create();
-    $account = InstagramAccount::factory()->for($user)->create();
+    $account = SocialAccount::factory()->for($user)->create();
 
     InstagramMedia::factory()->for($account)->create([
         'media_type' => MediaType::Post,

@@ -14,7 +14,7 @@ class InstagramMediaPolicy
             return false;
         }
 
-        return $user->id === $instagramMedia->instagramAccount->user_id;
+        return $user->id === $instagramMedia->socialAccount->user_id;
     }
 
     public function linkToClient(User|ClientUser $user, InstagramMedia $instagramMedia): bool
@@ -23,6 +23,6 @@ class InstagramMediaPolicy
             return false;
         }
 
-        return $user->id === $instagramMedia->instagramAccount->user_id;
+        return $user->id === $instagramMedia->socialAccount->user_id;
     }
 }

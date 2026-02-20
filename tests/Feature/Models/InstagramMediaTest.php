@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 it('creates valid instagram media records with factory defaults and casts', function (): void {
     $media = InstagramMedia::factory()->create();
 
-    expect($media->instagramAccount)->not->toBeNull()
+    expect($media->socialAccount)->not->toBeNull()
         ->and($media->instagram_media_id)->not->toBeEmpty()
         ->and($media->media_type)->toBeInstanceOf(MediaType::class)
         ->and($media->published_at)->not->toBeNull()
@@ -52,7 +52,7 @@ it('defines instagram account and campaigns relationships', function (): void {
         'notes' => 'Primary placement',
     ]);
 
-    expect($media->instagramAccount())->toBeInstanceOf(BelongsTo::class)
+    expect($media->socialAccount())->toBeInstanceOf(BelongsTo::class)
         ->and($media->campaigns())->toBeInstanceOf(BelongsToMany::class)
         ->and($media->campaigns)->toHaveCount(1)
         ->and($media->campaigns->first()->id)->toBe($campaign->id)

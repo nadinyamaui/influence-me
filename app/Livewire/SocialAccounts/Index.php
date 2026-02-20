@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\InstagramAccounts;
+namespace App\Livewire\SocialAccounts;
 
 use App\Enums\SyncStatus;
 use App\Jobs\SyncAllInstagramData;
@@ -16,7 +16,7 @@ class Index extends Component
 
     public function syncNow(int $accountId): void
     {
-        $account = User::resolveInstagramAccount($accountId);
+        $account = User::resolveSocialAccount($accountId);
         $this->authorize('update', $account);
 
         if ($account->sync_status === SyncStatus::Syncing) {
@@ -33,10 +33,10 @@ class Index extends Component
 
     public function setPrimary(int $accountId): void
     {
-        $account = User::resolveInstagramAccount($accountId);
+        $account = User::resolveSocialAccount($accountId);
         $this->authorize('update', $account);
 
-        Auth::user()->instagramAccounts()->update(['is_primary' => false]);
+        Auth::user()->socialAccounts()->update(['is_primary' => false]);
         $account->update(['is_primary' => true]);
 
         session()->flash('status', 'Primary Instagram account updated.');
@@ -44,10 +44,10 @@ class Index extends Component
 
     public function disconnect(int $accountId): void
     {
-        $account = User::resolveInstagramAccount($accountId);
+        $account = User::resolveSocialAccount($accountId);
         $this->authorize('delete', $account);
 
-        if (Auth::user()->instagramAccounts()->count() <= 1) {
+        if (Auth::user()->socialAccounts()->count() <= 1) {
             $this->addError('disconnect', 'You cannot disconnect your last Instagram account.');
 
             return;
@@ -59,7 +59,7 @@ class Index extends Component
         $account->delete();
 
         if ($wasPrimary) {
-            $nextAccount = Auth::user()->instagramAccounts()
+            $nextAccount = Auth::user()->socialAccounts()
                 ->orderBy('id')
                 ->first();
 
@@ -80,7 +80,7 @@ class Index extends Component
 
     private function accounts(): Collection
     {
-        return Auth::user()->instagramAccounts()
+        return Auth::user()->socialAccounts()
             ->orderByDesc('is_primary')
             ->orderBy('username')
             ->get();

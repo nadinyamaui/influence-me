@@ -3,7 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Jobs\SyncInstagramMedia;
-use App\Models\InstagramAccount;
+use App\Models\SocialAccount;
 use Illuminate\Console\Command;
 
 class RetrieveAllInstagramMedia extends Command
@@ -16,10 +16,10 @@ class RetrieveAllInstagramMedia extends Command
     {
         $totalAccounts = 0;
 
-        InstagramAccount::query()
+        SocialAccount::query()
             ->orderBy('id')
             ->cursor()
-            ->each(function (InstagramAccount $account) use (&$totalAccounts): void {
+            ->each(function (SocialAccount $account) use (&$totalAccounts): void {
                 $totalAccounts++;
 
                 if ($this->option('queue')) {
