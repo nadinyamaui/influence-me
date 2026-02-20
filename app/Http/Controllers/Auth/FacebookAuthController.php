@@ -36,7 +36,7 @@ class FacebookAuthController extends Controller
 
         try {
             if ($isAddAccountFlow) {
-                $this->loginService->createInstagramAccountsForLoggedUser();
+                $this->loginService->createSocialAccountsForLoggedUser();
 
                 return redirect()
                     ->route('instagram-accounts.index')

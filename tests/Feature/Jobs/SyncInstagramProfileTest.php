@@ -3,13 +3,13 @@
 use App\Enums\SyncStatus;
 use App\Exceptions\InstagramApiException;
 use App\Exceptions\InstagramTokenExpiredException;
-use App\Jobs\SyncInstagramProfile;
-use App\Models\InstagramAccount;
+use App\Jobs\SyncSocialMediaProfile;
+use App\Models\SocialAccount;
 use App\Services\Facebook\InstagramGraphService;
 use Illuminate\Support\Facades\Log;
 
 it('syncs instagram profile fields to the database', function (): void {
-    $account = InstagramAccount::factory()->business()->create([
+    $account = SocialAccount::factory()->business()->create([
         'username' => 'old-username',
         'name' => 'Old Name',
         'biography' => 'Old bio',
@@ -36,7 +36,7 @@ it('syncs instagram profile fields to the database', function (): void {
 
     app()->bind(InstagramGraphService::class, fn ($app, $parameters) => $instagramGraphService);
 
-    app(SyncInstagramProfile::class, ['account' => $account])->handle();
+    app(SyncSocialMediaProfile::class, ['account' => $account])->handle();
 
     $account->refresh();
 
@@ -55,7 +55,7 @@ it('syncs instagram profile fields to the database', function (): void {
 it('marks account as failed when token is expired and does not rethrow', function (): void {
     Log::spy();
 
-    $account = InstagramAccount::factory()->create([
+    $account = SocialAccount::factory()->create([
         'sync_status' => SyncStatus::Syncing,
         'last_sync_error' => null,
     ]);
@@ -67,7 +67,7 @@ it('marks account as failed when token is expired and does not rethrow', functio
 
     app()->bind(InstagramGraphService::class, fn ($app, $parameters) => $instagramGraphService);
 
-    app(SyncInstagramProfile::class, ['account' => $account])->handle();
+    app(SyncSocialMediaProfile::class, ['account' => $account])->handle();
 
     $account->refresh();
 
@@ -79,7 +79,7 @@ it('marks account as failed when token is expired and does not rethrow', functio
 });
 
 it('rethrows api exceptions so the queue retry policy can apply', function (): void {
-    $account = InstagramAccount::factory()->create();
+    $account = SocialAccount::factory()->create();
 
     $instagramGraphService = \Mockery::mock(InstagramGraphService::class);
     $instagramGraphService->shouldReceive('getProfile')
@@ -88,14 +88,14 @@ it('rethrows api exceptions so the queue retry policy can apply', function (): v
 
     app()->bind(InstagramGraphService::class, fn ($app, $parameters) => $instagramGraphService);
 
-    expect(fn () => app(SyncInstagramProfile::class, ['account' => $account])->handle())
+    expect(fn () => app(SyncSocialMediaProfile::class, ['account' => $account])->handle())
         ->toThrow(InstagramApiException::class, 'API temporarily unavailable');
 });
 
 it('configures queue and retry backoff settings', function (): void {
-    $account = InstagramAccount::factory()->create();
+    $account = SocialAccount::factory()->create();
 
-    $job = new SyncInstagramProfile($account);
+    $job = new SyncSocialMediaProfile($account);
 
     expect($job->queue)->toBe('instagram-sync')
         ->and($job->tries)->toBe(3)
@@ -105,7 +105,7 @@ it('configures queue and retry backoff settings', function (): void {
 it('can update profile fields without finalizing sync state', function (): void {
     $syncedAt = now()->subDay();
 
-    $account = InstagramAccount::factory()->create([
+    $account = SocialAccount::factory()->create([
         'sync_status' => SyncStatus::Syncing,
         'last_synced_at' => $syncedAt,
         'last_sync_error' => 'keep until full sync completes',
@@ -126,7 +126,7 @@ it('can update profile fields without finalizing sync state', function (): void 
 
     app()->bind(InstagramGraphService::class, fn ($app, $parameters) => $instagramGraphService);
 
-    app(SyncInstagramProfile::class, ['account' => $account, 'finalizeSyncState' => false])->handle();
+    app(SyncSocialMediaProfile::class, ['account' => $account, 'finalizeSyncState' => false])->handle();
 
     $account->refresh();
 

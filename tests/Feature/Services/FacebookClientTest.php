@@ -5,8 +5,8 @@ use App\Services\Facebook\Client;
 use FacebookAds\Api;
 use FacebookAds\Http\ResponseInterface;
 use FacebookAds\Object\IGMedia;
-use FacebookAds\Object\InstagramInsightsResult;
 use FacebookAds\Object\IGUser;
+use FacebookAds\Object\InstagramInsightsResult;
 use FacebookAds\Object\Page;
 use FacebookAds\Object\User;
 
@@ -114,8 +114,8 @@ it('refreshes a long lived token from the facebook oauth endpoint', function ():
 });
 
 it('returns mapped instagram accounts from the facebook accounts endpoint', function (): void {
-    $pageWithInstagramAccount = \Mockery::mock(Page::class);
-    $pageWithInstagramAccount->shouldReceive('getData')
+    $pageWithSocialAccount = \Mockery::mock(Page::class);
+    $pageWithSocialAccount->shouldReceive('getData')
         ->times(2)
         ->andReturn([
             'id' => 'page-1',
@@ -133,8 +133,8 @@ it('returns mapped instagram accounts from the facebook accounts endpoint', func
             ],
         ]);
 
-    $pageWithoutInstagramAccount = \Mockery::mock(Page::class);
-    $pageWithoutInstagramAccount->shouldReceive('getData')
+    $pageWithoutSocialAccount = \Mockery::mock(Page::class);
+    $pageWithoutSocialAccount->shouldReceive('getData')
         ->once()
         ->andReturn([
             'id' => 'page-2',
@@ -154,7 +154,7 @@ it('returns mapped instagram accounts from the facebook accounts endpoint', func
             'verification_status',
             'instagram_business_account{id,username,name,biography,profile_picture_url,followers_count,follows_count,media_count}',
         ])
-        ->andReturn(new ArrayObject([$pageWithInstagramAccount, $pageWithoutInstagramAccount]));
+        ->andReturn(new ArrayObject([$pageWithSocialAccount, $pageWithoutSocialAccount]));
 
     $clientReflection = new ReflectionClass(Client::class);
     $client = $clientReflection->newInstanceWithoutConstructor();
@@ -165,7 +165,8 @@ it('returns mapped instagram accounts from the facebook accounts endpoint', func
 
     expect($client->accounts()->all())->toBe([
         [
-            'instagram_user_id' => 'ig-1',
+            'social_network' => 'instagram',
+            'social_network_user_id' => 'ig-1',
             'name' => 'Creator One',
             'username' => 'creator.one',
             'biography' => 'Creator bio',
@@ -257,7 +258,8 @@ it('filters out accounts without instagram id and normalizes biography', functio
 
     expect($client->accounts()->all())->toBe([
         [
-            'instagram_user_id' => 'ig-1',
+            'social_network' => 'instagram',
+            'social_network_user_id' => 'ig-1',
             'name' => 'Creator One',
             'username' => 'creator.one',
             'biography' => 'padded bio',
@@ -358,7 +360,8 @@ it('returns an empty array when no instagram media is available', function (): v
 });
 
 it('returns empty story collection when graph endpoint has no media', function (): void {
-    $cursor = new class {
+    $cursor = new class
+    {
         public function getArrayCopy(): array
         {
             return [];

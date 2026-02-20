@@ -5,20 +5,21 @@ namespace App\Services\Facebook;
 use App\Enums\MediaType;
 use App\Exceptions\InstagramApiException;
 use App\Exceptions\InstagramTokenExpiredException;
-use App\Models\InstagramAccount;
-use App\Models\InstagramMedia;
+use App\Models\SocialAccountMedia;
+use App\Models\SocialAccount;
+use App\Services\SocialMedia\SocialMediaInterface;
 use Carbon\Carbon;
 use FacebookAds\Http\Exception\AuthorizationException;
 use FacebookAds\Http\Exception\RequestException;
 
-class InstagramGraphService
+class InstagramGraphService implements SocialMediaInterface
 {
     protected Client $client;
 
-    public function __construct(protected InstagramAccount $account)
+    public function __construct(protected SocialAccount $account)
     {
         $this->client = app(Client::class, [
-            'user_id' => $this->account->instagram_user_id,
+            'user_id' => $this->account->social_network_user_id,
             'access_token' => $this->account->access_token,
         ]);
     }
@@ -30,7 +31,7 @@ class InstagramGraphService
             $this->account->instagramMedia()->updateOrCreate([
                 'instagram_media_id' => $media['id'],
             ], [
-                'instagram_account_id' => $this->account->id,
+                'social_account_id' => $this->account->id,
                 'media_type' => MediaType::parse($media),
                 'caption' => $media['caption'] ?? null,
                 'permalink' => $media['permalink'] ?? null,
@@ -49,7 +50,7 @@ class InstagramGraphService
             ->where('published_at', '>=', now()->subDays(90))
             ->where('media_type', '!=', MediaType::Story->value)
             ->chunkById(50, function ($mediaItems): void {
-                $mediaItems->each(function (InstagramMedia $media): void {
+                $mediaItems->each(function (SocialAccountMedia $media): void {
                     $insights = $this->client->getMediaInsights($media->instagram_media_id, $media->media_type);
                     $reach = (int) ($insights->get('reach') ?? 0);
                     $saved = (int) ($insights->get('saved') ?? 0);
@@ -78,7 +79,7 @@ class InstagramGraphService
             $this->account->instagramMedia()->updateOrCreate([
                 'instagram_media_id' => $story['id'],
             ], [
-                'instagram_account_id' => $this->account->id,
+                'social_account_id' => $this->account->id,
                 'media_type' => MediaType::Story,
                 'caption' => $story['caption'] ?? null,
                 'permalink' => $story['permalink'],

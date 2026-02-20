@@ -4,7 +4,7 @@ namespace Database\Factories;
 
 use App\Enums\DemographicType;
 use App\Models\AudienceDemographic;
-use App\Models\InstagramAccount;
+use App\Models\SocialAccount;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class AudienceDemographicFactory extends Factory
@@ -21,7 +21,7 @@ class AudienceDemographicFactory extends Factory
         ]);
 
         return [
-            'instagram_account_id' => InstagramAccount::factory(),
+            'social_account_id' => SocialAccount::factory(),
             'type' => $type,
             'dimension' => match ($type) {
                 DemographicType::Age => fake()->randomElement(['13-17', '18-24', '25-34', '35-44', '45-54', '55-64', '65+']),

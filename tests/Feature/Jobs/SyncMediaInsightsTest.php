@@ -2,16 +2,16 @@
 
 use App\Enums\MediaType;
 use App\Jobs\SyncMediaInsights;
-use App\Models\InstagramAccount;
-use App\Models\InstagramMedia;
+use App\Models\SocialAccountMedia;
+use App\Models\SocialAccount;
 use App\Services\Facebook\Client as FacebookClient;
 use Illuminate\Support\Collection;
 
 it('syncs insights using views for impressions on recent non-story media and calculates engagement rate', function (): void {
-    $account = InstagramAccount::factory()->create();
+    $account = SocialAccount::factory()->create();
 
-    $recentPost = InstagramMedia::factory()->post()->create([
-        'instagram_account_id' => $account->id,
+    $recentPost = SocialAccountMedia::factory()->post()->create([
+        'social_account_id' => $account->id,
         'instagram_media_id' => 'media-recent-post',
         'published_at' => now()->subDays(5),
         'like_count' => 80,
@@ -23,8 +23,8 @@ it('syncs insights using views for impressions on recent non-story media and cal
         'engagement_rate' => 0,
     ]);
 
-    $recentReel = InstagramMedia::factory()->reel()->create([
-        'instagram_account_id' => $account->id,
+    $recentReel = SocialAccountMedia::factory()->reel()->create([
+        'social_account_id' => $account->id,
         'instagram_media_id' => 'media-recent-reel',
         'published_at' => now()->subDays(10),
         'like_count' => 40,
@@ -36,16 +36,16 @@ it('syncs insights using views for impressions on recent non-story media and cal
         'engagement_rate' => 0,
     ]);
 
-    $oldPost = InstagramMedia::factory()->post()->create([
-        'instagram_account_id' => $account->id,
+    $oldPost = SocialAccountMedia::factory()->post()->create([
+        'social_account_id' => $account->id,
         'instagram_media_id' => 'media-old-post',
         'published_at' => now()->subDays(95),
         'reach' => 17,
         'impressions' => 22,
     ]);
 
-    $recentStory = InstagramMedia::factory()->story()->create([
-        'instagram_account_id' => $account->id,
+    $recentStory = SocialAccountMedia::factory()->story()->create([
+        'social_account_id' => $account->id,
         'instagram_media_id' => 'media-recent-story',
         'published_at' => now()->subDays(3),
         'reach' => 33,
@@ -102,10 +102,10 @@ it('syncs insights using views for impressions on recent non-story media and cal
 });
 
 it('maps views metric to impressions when syncing insights', function (): void {
-    $account = InstagramAccount::factory()->create();
+    $account = SocialAccount::factory()->create();
 
-    $recentPost = InstagramMedia::factory()->post()->create([
-        'instagram_account_id' => $account->id,
+    $recentPost = SocialAccountMedia::factory()->post()->create([
+        'social_account_id' => $account->id,
         'instagram_media_id' => 'media-rate-limit',
         'published_at' => now()->subDays(2),
         'like_count' => 10,
@@ -137,7 +137,7 @@ it('maps views metric to impressions when syncing insights', function (): void {
 });
 
 it('configures queue settings for insight sync workloads', function (): void {
-    $account = InstagramAccount::factory()->create();
+    $account = SocialAccount::factory()->create();
     $job = new SyncMediaInsights($account);
 
     expect($job->queue)->toBe('instagram-sync')

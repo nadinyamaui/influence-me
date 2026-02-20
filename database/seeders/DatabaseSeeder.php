@@ -2,8 +2,9 @@
 
 namespace Database\Seeders;
 
+use App\Enums\SocialNetwork;
 use App\Models\CatalogProduct;
-use App\Models\InstagramAccount;
+use App\Models\SocialAccount;
 use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -19,13 +20,20 @@ class DatabaseSeeder extends Seeder
             ['name' => 'Test User']
         );
 
-        $user->instagramAccounts()->firstOrCreate(
-            ['instagram_user_id' => '17841400000000000'],
-            InstagramAccount::factory()
+        $user->socialAccounts()->firstOrCreate(
+            [
+                'social_network' => SocialNetwork::Instagram->value,
+                'social_network_user_id' => '17841400000000000',
+            ],
+            SocialAccount::factory()
                 ->primary()
                 ->business()
                 ->state(['username' => 'testinfluencer'])
-                ->make(['user_id' => $user->id, 'instagram_user_id' => '17841400000000000'])
+                ->make([
+                    'user_id' => $user->id,
+                    'social_network' => SocialNetwork::Instagram->value,
+                    'social_network_user_id' => '17841400000000000',
+                ])
                 ->toArray()
         );
 

@@ -8,30 +8,30 @@ use App\Models\CatalogPlanItem;
 use App\Models\CatalogProduct;
 use App\Models\Client;
 use App\Models\ClientUser;
-use App\Models\InstagramAccount;
-use App\Models\InstagramMedia;
+use App\Models\SocialAccountMedia;
 use App\Models\Invoice;
 use App\Models\Proposal;
 use App\Models\ProposalLineItem;
 use App\Models\ScheduledPost;
+use App\Models\SocialAccount;
 use App\Models\User;
+use App\Policies\CampaignPolicy;
 use App\Policies\CatalogPlanItemPolicy;
 use App\Policies\CatalogPlanPolicy;
 use App\Policies\CatalogProductPolicy;
-use App\Policies\CampaignPolicy;
 use App\Policies\ClientPolicy;
-use App\Policies\InstagramAccountPolicy;
-use App\Policies\InstagramMediaPolicy;
+use App\Policies\SocialAccountMediaPolicy;
 use App\Policies\InvoicePolicy;
 use App\Policies\ProposalLineItemPolicy;
 use App\Policies\ProposalPolicy;
 use App\Policies\ScheduledPostPolicy;
+use App\Policies\SocialAccountPolicy;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
 
 it('auto-discovers all RFC 012 policies', function (): void {
-    expect(Gate::getPolicyFor(InstagramAccount::class))->toBeInstanceOf(InstagramAccountPolicy::class)
+    expect(Gate::getPolicyFor(SocialAccount::class))->toBeInstanceOf(SocialAccountPolicy::class)
         ->and(Gate::getPolicyFor(Campaign::class))->toBeInstanceOf(CampaignPolicy::class)
         ->and(Gate::getPolicyFor(CatalogProduct::class))->toBeInstanceOf(CatalogProductPolicy::class)
         ->and(Gate::getPolicyFor(CatalogPlan::class))->toBeInstanceOf(CatalogPlanPolicy::class)
@@ -41,7 +41,7 @@ it('auto-discovers all RFC 012 policies', function (): void {
         ->and(Gate::getPolicyFor(ProposalLineItem::class))->toBeInstanceOf(ProposalLineItemPolicy::class)
         ->and(Gate::getPolicyFor(Invoice::class))->toBeInstanceOf(InvoicePolicy::class)
         ->and(Gate::getPolicyFor(ScheduledPost::class))->toBeInstanceOf(ScheduledPostPolicy::class)
-        ->and(Gate::getPolicyFor(InstagramMedia::class))->toBeInstanceOf(InstagramMediaPolicy::class);
+        ->and(Gate::getPolicyFor(SocialAccountMedia::class))->toBeInstanceOf(SocialAccountMediaPolicy::class);
 });
 
 it('applies pricing catalog and proposal line item policy rules', function (): void {
@@ -102,9 +102,9 @@ it('applies instagram account policy rules', function (): void {
     $owner = User::factory()->create();
     $outsider = User::factory()->create();
 
-    $firstAccount = InstagramAccount::factory()->for($owner)->create();
-    $secondAccount = InstagramAccount::factory()->for($owner)->create();
-    $singleAccount = InstagramAccount::factory()->for($outsider)->create();
+    $firstAccount = SocialAccount::factory()->for($owner)->create();
+    $secondAccount = SocialAccount::factory()->for($owner)->create();
+    $singleAccount = SocialAccount::factory()->for($outsider)->create();
 
     $ownerGate = Gate::forUser($owner);
     $outsiderGate = Gate::forUser($outsider);
@@ -290,8 +290,8 @@ it('applies instagram media policy rules', function (): void {
     $owner = User::factory()->create();
     $outsider = User::factory()->create();
 
-    $account = InstagramAccount::factory()->for($owner)->create();
-    $media = InstagramMedia::factory()->for($account, 'instagramAccount')->create();
+    $account = SocialAccount::factory()->for($owner)->create();
+    $media = SocialAccountMedia::factory()->for($account, 'socialAccount')->create();
 
     $matchingClientUser = ClientUser::factory()->create();
 
@@ -311,7 +311,7 @@ it('returns 403 for unauthorized instagram account view', function (): void {
     $owner = User::factory()->create();
     $outsider = User::factory()->create();
 
-    $account = InstagramAccount::factory()->for($owner)->create();
+    $account = SocialAccount::factory()->for($owner)->create();
     $uri = '/_test/policies/instagram-accounts/'.Str::uuid();
 
     Route::middleware(['web', 'auth'])->get($uri, function () use ($account) {
@@ -329,8 +329,8 @@ it('returns 403 for unauthorized instagram media linking', function (): void {
     $owner = User::factory()->create();
     $outsider = User::factory()->create();
 
-    $account = InstagramAccount::factory()->for($owner)->create();
-    $media = InstagramMedia::factory()->for($account, 'instagramAccount')->create();
+    $account = SocialAccount::factory()->for($owner)->create();
+    $media = SocialAccountMedia::factory()->for($account, 'socialAccount')->create();
     $uri = '/_test/policies/instagram-media/'.Str::uuid();
 
     Route::middleware(['web', 'auth'])->get($uri, function () use ($media) {

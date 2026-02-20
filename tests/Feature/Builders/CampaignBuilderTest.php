@@ -2,9 +2,9 @@
 
 use App\Models\Campaign;
 use App\Models\Client;
-use App\Models\InstagramAccount;
-use App\Models\InstagramMedia;
+use App\Models\SocialAccountMedia;
 use App\Models\Proposal;
+use App\Models\SocialAccount;
 use App\Models\User;
 
 it('scopes campaigns by user and client and orders by name', function (): void {
@@ -38,9 +38,9 @@ it('loads campaign proposal relation and instagram media count', function (): vo
         'proposal_id' => $proposal->id,
     ]);
 
-    $account = InstagramAccount::factory()->for($user)->create();
-    $firstMedia = InstagramMedia::factory()->for($account)->create();
-    $secondMedia = InstagramMedia::factory()->for($account)->create();
+    $account = SocialAccount::factory()->for($user)->create();
+    $firstMedia = SocialAccountMedia::factory()->for($account)->create();
+    $secondMedia = SocialAccountMedia::factory()->for($account)->create();
     $campaign->instagramMedia()->attach([$firstMedia->id, $secondMedia->id]);
 
     $resolved = Campaign::query()
@@ -57,12 +57,12 @@ it('loads campaign instagram media ordered by newest published first', function 
     $user = User::factory()->create();
     $client = Client::factory()->for($user)->create();
     $campaign = Campaign::factory()->for($client)->create();
-    $account = InstagramAccount::factory()->for($user)->create();
+    $account = SocialAccount::factory()->for($user)->create();
 
-    $olderMedia = InstagramMedia::factory()->for($account)->create([
+    $olderMedia = SocialAccountMedia::factory()->for($account)->create([
         'published_at' => now()->subDays(3),
     ]);
-    $newerMedia = InstagramMedia::factory()->for($account)->create([
+    $newerMedia = SocialAccountMedia::factory()->for($account)->create([
         'published_at' => now()->subDay(),
     ]);
 
@@ -81,9 +81,9 @@ it('loads campaign instagram media analytics columns only', function (): void {
     $user = User::factory()->create();
     $client = Client::factory()->for($user)->create();
     $campaign = Campaign::factory()->for($client)->create();
-    $account = InstagramAccount::factory()->for($user)->create();
+    $account = SocialAccount::factory()->for($user)->create();
 
-    $media = InstagramMedia::factory()->for($account)->create([
+    $media = SocialAccountMedia::factory()->for($account)->create([
         'caption' => 'Should not be selected',
         'reach' => 4500,
         'engagement_rate' => 4.25,

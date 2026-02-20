@@ -5,15 +5,14 @@ namespace App\Jobs;
 use App\Enums\SyncStatus;
 use App\Exceptions\InstagramApiException;
 use App\Exceptions\InstagramTokenExpiredException;
-use App\Models\InstagramAccount;
-use App\Services\Facebook\InstagramGraphService;
+use App\Models\SocialAccount;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 
-class SyncInstagramProfile implements ShouldQueue
+class SyncSocialMediaProfile implements ShouldQueue
 {
     use InteractsWithQueue;
     use Queueable;
@@ -23,7 +22,7 @@ class SyncInstagramProfile implements ShouldQueue
 
     public array $backoff = [30, 60, 120];
 
-    public function __construct(public InstagramAccount $account, public bool $finalizeSyncState = true)
+    public function __construct(public SocialAccount $account, public bool $finalizeSyncState = true)
     {
         $this->onQueue('instagram-sync');
     }
@@ -31,10 +30,10 @@ class SyncInstagramProfile implements ShouldQueue
     public function handle(): void
     {
         try {
-            $profile = app(InstagramGraphService::class, ['account' => $this->account])->getProfile();
+            $profile = $this->account->getProfile();
         } catch (InstagramTokenExpiredException $exception) {
             Log::warning('Instagram profile sync failed due to expired token.', [
-                'instagram_account_id' => $this->account->id,
+                'social_account_id' => $this->account->id,
                 'message' => $exception->getMessage(),
             ]);
 

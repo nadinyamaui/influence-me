@@ -2,7 +2,7 @@
 
 use App\Models\Campaign;
 use App\Models\Client;
-use App\Models\InstagramMedia;
+use App\Models\SocialAccountMedia;
 use App\Models\Proposal;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -30,7 +30,7 @@ it('defines client proposal and media relationships', function (): void {
     $client = Client::factory()->for($user)->create();
     $proposal = Proposal::factory()->for($user)->for($client)->create();
     $campaign = Campaign::factory()->for($client)->for($proposal)->create();
-    $media = InstagramMedia::factory()->create();
+    $media = SocialAccountMedia::factory()->create();
 
     $campaign->instagramMedia()->attach($media->id, [
         'notes' => 'Launch placement',

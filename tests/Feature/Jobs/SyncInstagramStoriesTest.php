@@ -1,13 +1,13 @@
 <?php
 
 use App\Enums\MediaType;
-use App\Jobs\SyncInstagramStories;
-use App\Models\InstagramAccount;
-use App\Models\InstagramMedia;
+use App\Jobs\SyncSocialMediaStories;
+use App\Models\SocialAccountMedia;
+use App\Models\SocialAccount;
 use App\Services\Facebook\Client as FacebookClient;
 
 it('fetches active stories and syncs them as story media records', function (): void {
-    $account = InstagramAccount::factory()->create();
+    $account = SocialAccount::factory()->create();
 
     $facebookClient = \Mockery::mock(FacebookClient::class);
     $facebookClient->shouldReceive('getStories')
@@ -38,18 +38,18 @@ it('fetches active stories and syncs them as story media records', function (): 
         return $facebookClient;
     });
 
-    app(SyncInstagramStories::class, ['account' => $account])->handle();
+    app(SyncSocialMediaStories::class, ['account' => $account])->handle();
 
-    expect(InstagramMedia::count())->toBe(2)
-        ->and(InstagramMedia::where('instagram_media_id', 'story-1')->first()->media_type)->toBe(MediaType::Story)
-        ->and(InstagramMedia::where('instagram_media_id', 'story-2')->first()->media_type)->toBe(MediaType::Story);
+    expect(SocialAccountMedia::count())->toBe(2)
+        ->and(SocialAccountMedia::where('instagram_media_id', 'story-1')->first()->media_type)->toBe(MediaType::Story)
+        ->and(SocialAccountMedia::where('instagram_media_id', 'story-2')->first()->media_type)->toBe(MediaType::Story);
 });
 
 it('updates existing story records when rerun to keep sync idempotent', function (): void {
-    $account = InstagramAccount::factory()->create();
+    $account = SocialAccount::factory()->create();
 
-    InstagramMedia::factory()->story()->create([
-        'instagram_account_id' => $account->id,
+    SocialAccountMedia::factory()->story()->create([
+        'social_account_id' => $account->id,
         'instagram_media_id' => 'story-1',
         'caption' => 'Old story caption',
         'media_url' => 'https://example.test/old-story-1.jpg',
@@ -76,11 +76,11 @@ it('updates existing story records when rerun to keep sync idempotent', function
         return $facebookClient;
     });
 
-    app(SyncInstagramStories::class, ['account' => $account])->handle();
+    app(SyncSocialMediaStories::class, ['account' => $account])->handle();
 
-    expect(InstagramMedia::where('instagram_media_id', 'story-1')->count())->toBe(1);
+    expect(SocialAccountMedia::where('instagram_media_id', 'story-1')->count())->toBe(1);
 
-    $story = InstagramMedia::where('instagram_media_id', 'story-1')->first();
+    $story = SocialAccountMedia::where('instagram_media_id', 'story-1')->first();
 
     expect($story->caption)->toBe('Updated story caption')
         ->and($story->media_url)->toBe('https://example.test/new-story-1.jpg')
@@ -88,8 +88,8 @@ it('updates existing story records when rerun to keep sync idempotent', function
 });
 
 it('configures queue settings for stories sync workloads', function (): void {
-    $account = InstagramAccount::factory()->create();
-    $job = new SyncInstagramStories($account);
+    $account = SocialAccount::factory()->create();
+    $job = new SyncSocialMediaStories($account);
 
     expect($job->queue)->toBe('instagram-sync')
         ->and($job->tries)->toBe(3);

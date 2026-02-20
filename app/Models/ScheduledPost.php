@@ -52,8 +52,8 @@ class ScheduledPost extends Model
         return $this->belongsTo(Campaign::class);
     }
 
-    public function instagramAccount(): BelongsTo
+    public function socialAccount(): BelongsTo
     {
-        return $this->belongsTo(InstagramAccount::class);
+        return $this->belongsTo(SocialAccount::class);
     }
 }

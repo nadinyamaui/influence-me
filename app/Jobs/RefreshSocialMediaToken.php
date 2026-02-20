@@ -5,15 +5,14 @@ namespace App\Jobs;
 use App\Enums\SyncStatus;
 use App\Exceptions\InstagramApiException;
 use App\Exceptions\InstagramTokenExpiredException;
-use App\Models\InstagramAccount;
-use App\Services\Facebook\InstagramGraphService;
+use App\Models\SocialAccount;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 
-class RefreshInstagramToken implements ShouldQueue
+class RefreshSocialMediaToken implements ShouldQueue
 {
     use InteractsWithQueue;
     use Queueable;
@@ -23,7 +22,7 @@ class RefreshInstagramToken implements ShouldQueue
 
     public array $backoff = [60, 300, 900];
 
-    public function __construct(public InstagramAccount $account)
+    public function __construct(public SocialAccount $account)
     {
         $this->onQueue('instagram-sync');
     }
@@ -39,14 +38,14 @@ class RefreshInstagramToken implements ShouldQueue
             ]);
 
             Log::warning('Instagram token refresh skipped because token already expired.', [
-                'instagram_account_id' => $this->account->id,
+                'social_account_id' => $this->account->id,
             ]);
 
             return;
         }
 
         try {
-            $newToken = app(InstagramGraphService::class, ['account' => $this->account])->refreshLongLivedToken();
+            $newToken = $this->account->refreshLongLivedToken();
         } catch (InstagramTokenExpiredException $exception) {
             $message = 'Instagram token refresh failed because token is expired and requires account re-authentication.';
 
@@ -56,7 +55,7 @@ class RefreshInstagramToken implements ShouldQueue
             ]);
 
             Log::warning('Instagram token refresh failed due to expired token.', [
-                'instagram_account_id' => $this->account->id,
+                'social_account_id' => $this->account->id,
                 'message' => $exception->getMessage(),
             ]);
 
@@ -67,7 +66,7 @@ class RefreshInstagramToken implements ShouldQueue
             ]);
 
             Log::error('Instagram token refresh failed due to API error.', [
-                'instagram_account_id' => $this->account->id,
+                'social_account_id' => $this->account->id,
                 'message' => $exception->getMessage(),
             ]);
 
@@ -82,7 +81,7 @@ class RefreshInstagramToken implements ShouldQueue
         ]);
 
         Log::info('Instagram token refreshed successfully.', [
-            'instagram_account_id' => $this->account->id,
+            'social_account_id' => $this->account->id,
         ]);
     }
 }

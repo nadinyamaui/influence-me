@@ -10,12 +10,12 @@ return new class extends Migration
     {
         Schema::create('follower_snapshots', function (Blueprint $table): void {
             $table->id();
-            $table->foreignId('instagram_account_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('social_account_id')->constrained()->cascadeOnDelete();
             $table->unsignedInteger('followers_count');
             $table->date('recorded_at');
             $table->timestamps();
 
-            $table->unique(['instagram_account_id', 'recorded_at']);
+            $table->unique(['social_account_id', 'recorded_at']);
         });
     }
 

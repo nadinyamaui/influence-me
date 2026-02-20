@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('instagram_media', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('instagram_account_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('social_account_id')->constrained()->cascadeOnDelete();
             $table->string('instagram_media_id')->unique();
             $table->string('media_type');
             $table->text('caption')->nullable();

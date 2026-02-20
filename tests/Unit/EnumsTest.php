@@ -16,6 +16,7 @@ use App\Enums\MediaType;
 use App\Enums\PlatformType;
 use App\Enums\ProposalStatus;
 use App\Enums\ScheduledPostStatus;
+use App\Enums\SocialNetwork;
 use App\Enums\SyncStatus;
 
 it('defines all media type enum cases', function (): void {
@@ -209,6 +210,14 @@ it('defines all account type enum cases', function (): void {
     expect(AccountType::cases())->toHaveCount(2)
         ->and(AccountType::Business->value)->toBe('business')
         ->and(AccountType::Creator->value)->toBe('creator');
+});
+
+it('defines all social network enum cases', function (): void {
+    expect(SocialNetwork::cases())->toHaveCount(4)
+        ->and(SocialNetwork::Instagram->value)->toBe('instagram')
+        ->and(SocialNetwork::Tiktok->value)->toBe('tiktok')
+        ->and(SocialNetwork::Youtube->value)->toBe('youtube')
+        ->and(SocialNetwork::Twitch->value)->toBe('twitch');
 });
 
 it('defines all sync status enum cases', function (): void {

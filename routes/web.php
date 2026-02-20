@@ -8,7 +8,6 @@ use App\Livewire\Clients\Index as ClientsIndex;
 use App\Livewire\Clients\Show as ClientsShow;
 use App\Livewire\Content\Index as ContentIndex;
 use App\Livewire\Dashboard;
-use App\Livewire\InstagramAccounts\Index as InstagramAccountsIndex;
 use App\Livewire\Invoices\Index as InvoicesIndex;
 use App\Livewire\Pricing\Plans\Form as PricingPlansForm;
 use App\Livewire\Pricing\Plans\Index as PricingPlansIndex;
@@ -18,6 +17,7 @@ use App\Livewire\Proposals\Create as ProposalsCreate;
 use App\Livewire\Proposals\Edit as ProposalsEdit;
 use App\Livewire\Proposals\Index as ProposalsIndex;
 use App\Livewire\Proposals\Show as ProposalsShow;
+use App\Livewire\SocialAccounts\Index as SocialAccountsIndex;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -35,7 +35,7 @@ Route::get('/auth/facebook/callback', [FacebookAuthController::class, 'callback'
 Route::middleware(['auth'])->group(function (): void {
     Route::get('/auth/facebook/add', [FacebookAuthController::class, 'addAccount'])->name('auth.facebook.add');
 
-    Route::livewire('instagram-accounts', InstagramAccountsIndex::class)
+    Route::livewire('instagram-accounts', SocialAccountsIndex::class)
         ->name('instagram-accounts.index');
 
     Route::livewire('content', ContentIndex::class)

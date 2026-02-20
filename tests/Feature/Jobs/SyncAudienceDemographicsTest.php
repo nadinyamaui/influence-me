@@ -2,22 +2,22 @@
 
 use App\Jobs\SyncAudienceDemographics;
 use App\Models\AudienceDemographic;
-use App\Models\InstagramAccount;
+use App\Models\SocialAccount;
 use App\Services\Facebook\Client as FacebookClient;
 
 it('replaces existing demographics with a fresh snapshot', function (): void {
-    $account = InstagramAccount::factory()->create([
+    $account = SocialAccount::factory()->create([
         'followers_count' => 500,
     ]);
 
     AudienceDemographic::factory()->create([
-        'instagram_account_id' => $account->id,
+        'social_account_id' => $account->id,
         'type' => 'age',
         'dimension' => '18-24',
         'value' => 42,
     ]);
     AudienceDemographic::factory()->create([
-        'instagram_account_id' => $account->id,
+        'social_account_id' => $account->id,
         'type' => 'city',
         'dimension' => 'Paris',
         'value' => 15,
@@ -46,36 +46,36 @@ it('replaces existing demographics with a fresh snapshot', function (): void {
     app(SyncAudienceDemographics::class, ['account' => $account])->handle();
 
     expect(AudienceDemographic::query()
-        ->where('instagram_account_id', $account->id)
+        ->where('social_account_id', $account->id)
         ->where('dimension', '18-24')
         ->exists())->toBeFalse()
         ->and(AudienceDemographic::query()
-            ->where('instagram_account_id', $account->id)
+            ->where('social_account_id', $account->id)
             ->where('dimension', 'Paris')
             ->exists())->toBeFalse()
         ->and(AudienceDemographic::query()
-            ->where('instagram_account_id', $account->id)
+            ->where('social_account_id', $account->id)
             ->count())->toBe(4)
         ->and(AudienceDemographic::query()
-            ->where('instagram_account_id', $account->id)
+            ->where('social_account_id', $account->id)
             ->where('type', 'age')
             ->where('dimension', '25-34')
             ->first()
             ?->value)->toBe('60.00')
         ->and(AudienceDemographic::query()
-            ->where('instagram_account_id', $account->id)
+            ->where('social_account_id', $account->id)
             ->where('type', 'age')
             ->where('dimension', '35-44')
             ->first()
             ?->value)->toBe('40.00')
         ->and(AudienceDemographic::query()
-            ->where('instagram_account_id', $account->id)
+            ->where('social_account_id', $account->id)
             ->where('type', 'gender')
             ->where('dimension', 'Male')
             ->first()
             ?->value)->toBe('40.00')
         ->and(AudienceDemographic::query()
-            ->where('instagram_account_id', $account->id)
+            ->where('social_account_id', $account->id)
             ->where('type', 'gender')
             ->where('dimension', 'Female')
             ->first()
@@ -83,12 +83,12 @@ it('replaces existing demographics with a fresh snapshot', function (): void {
 });
 
 it('skips demographics sync for accounts with fewer than 100 followers', function (): void {
-    $account = InstagramAccount::factory()->create([
+    $account = SocialAccount::factory()->create([
         'followers_count' => 99,
     ]);
 
     AudienceDemographic::factory()->create([
-        'instagram_account_id' => $account->id,
+        'social_account_id' => $account->id,
         'type' => 'country',
         'dimension' => 'US',
         'value' => 10,
@@ -101,12 +101,12 @@ it('skips demographics sync for accounts with fewer than 100 followers', functio
     app(SyncAudienceDemographics::class, ['account' => $account])->handle();
 
     expect(AudienceDemographic::query()
-        ->where('instagram_account_id', $account->id)
+        ->where('social_account_id', $account->id)
         ->count())->toBe(1);
 });
 
 it('configures queue settings for demographics sync workloads', function (): void {
-    $account = InstagramAccount::factory()->create();
+    $account = SocialAccount::factory()->create();
     $job = new SyncAudienceDemographics($account);
 
     expect($job->queue)->toBe('instagram-sync')

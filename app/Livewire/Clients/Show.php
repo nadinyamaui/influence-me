@@ -3,11 +3,11 @@
 namespace App\Livewire\Clients;
 
 use App\Enums\ProposalStatus;
-use App\Builders\InstagramMediaBuilder;
+use App\Builders\SocialAccountMediaBuilder;
 use App\Livewire\Forms\CampaignForm;
 use App\Models\Campaign;
 use App\Models\Client;
-use App\Models\InstagramMedia;
+use App\Models\SocialAccountMedia;
 use App\Models\Proposal;
 use App\Services\Clients\ClientAnalyticsService;
 use App\Services\Clients\ClientPortalAccessService;
@@ -135,7 +135,7 @@ class Show extends Component
     {
         $this->authorize('update', $this->client);
 
-        $media = InstagramMedia::query()
+        $media = SocialAccountMedia::query()
             ->whereKey($mediaId)
             ->forClient($this->client->id)
             ->firstOrFail();
@@ -303,7 +303,7 @@ class Show extends Component
             ->values();
 
         $uncategorizedMedia = $linkedContentMedia
-            ->filter(function (InstagramMedia $media): bool {
+            ->filter(function (SocialAccountMedia $media): bool {
                 return $media->campaigns
                     ->where('client_id', $this->client->id)
                     ->isEmpty();
@@ -338,9 +338,9 @@ class Show extends Component
         ];
     }
 
-    private function linkedMediaQuery(): InstagramMediaBuilder
+    private function linkedMediaQuery(): SocialAccountMediaBuilder
     {
-        return InstagramMedia::query()
+        return SocialAccountMedia::query()
             ->forClient($this->client->id)
             ->distinctMediaRows();
     }

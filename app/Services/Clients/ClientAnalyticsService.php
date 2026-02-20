@@ -3,13 +3,13 @@
 namespace App\Services\Clients;
 
 use App\Models\Client;
-use App\Models\InstagramMedia;
+use App\Models\SocialAccountMedia;
 
 class ClientAnalyticsService
 {
     public function build(Client $client): array
     {
-        $linkedMedia = InstagramMedia::query()
+        $linkedMedia = SocialAccountMedia::query()
             ->forClient($client->id)
             ->distinctMediaRows()
             ->forAnalyticsSummary()
@@ -19,7 +19,7 @@ class ClientAnalyticsService
 
         $totalPosts = $linkedMedia->count();
         $averageEngagementRate = $totalPosts > 0
-            ? round((float) $linkedMedia->avg(fn (InstagramMedia $media): float => (float) $media->engagement_rate), 2)
+            ? round((float) $linkedMedia->avg(fn (SocialAccountMedia $media): float => (float) $media->engagement_rate), 2)
             : 0.0;
 
         $campaignBreakdown = $client->campaigns()
@@ -43,10 +43,10 @@ class ClientAnalyticsService
             ->values();
 
         $trendMedia = $linkedMedia
-            ->filter(fn (InstagramMedia $media): bool => $media->published_at !== null)
+            ->filter(fn (SocialAccountMedia $media): bool => $media->published_at !== null)
             ->values();
 
-        $accountAverageEngagementRate = round((float) (InstagramMedia::query()
+        $accountAverageEngagementRate = round((float) (SocialAccountMedia::query()
             ->forUser($client->user_id)
             ->avg('engagement_rate') ?? 0), 2);
 
@@ -62,10 +62,10 @@ class ClientAnalyticsService
             ],
             'trend' => [
                 'labels' => $trendMedia
-                    ->map(fn (InstagramMedia $media): string => $media->published_at?->format('M j, Y') ?? 'Unknown date')
+                    ->map(fn (SocialAccountMedia $media): string => $media->published_at?->format('M j, Y') ?? 'Unknown date')
                     ->all(),
                 'values' => $trendMedia
-                    ->map(fn (InstagramMedia $media): float => round((float) $media->engagement_rate, 2))
+                    ->map(fn (SocialAccountMedia $media): float => round((float) $media->engagement_rate, 2))
                     ->all(),
             ],
             'campaign_breakdown' => $campaignBreakdown->all(),

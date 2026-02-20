@@ -78,7 +78,7 @@ class Edit extends Component
                     'title' => $scheduledItem['title'] ?? '',
                     'description' => $scheduledItem['description'] ?? '',
                     'media_type' => $scheduledItem['media_type'] ?? MediaType::Post->value,
-                    'instagram_account_id' => $scheduledItem['instagram_account_id'] ?? '',
+                    'social_account_id' => $scheduledItem['social_account_id'] ?? '',
                     'scheduled_at' => $scheduledItem['scheduled_at'] ?? '',
                 ];
             })
@@ -173,7 +173,7 @@ class Edit extends Component
     {
         return view('pages.proposals.edit', [
             'clients' => User::availableClients(),
-            'instagramAccounts' => User::accounts(),
+            'socialAccounts' => User::accounts(),
             'mediaTypes' => MediaType::cases(),
         ])->layout('layouts.app', [
             'title' => __('Edit Proposal'),
@@ -211,7 +211,7 @@ class Edit extends Component
                     'title' => $scheduledPost->title,
                     'description' => $scheduledPost->description ?? '',
                     'media_type' => $scheduledPost->media_type->value,
-                    'instagram_account_id' => (string) $scheduledPost->instagram_account_id,
+                    'social_account_id' => (string) $scheduledPost->social_account_id,
                     'scheduled_at' => $scheduledPost->scheduled_at->format('Y-m-d\TH:i'),
                 ];
             }
@@ -246,7 +246,7 @@ class Edit extends Component
                 'title' => $scheduledItem['title'] ?? '',
                 'description' => $scheduledItem['description'] ?? '',
                 'media_type' => $scheduledItem['media_type'] ?? MediaType::Post->value,
-                'instagram_account_id' => $scheduledItem['instagram_account_id'] ?? '',
+                'social_account_id' => $scheduledItem['social_account_id'] ?? '',
                 'scheduled_at' => $scheduledItem['scheduled_at'] ?? '',
             ];
         }
@@ -276,7 +276,7 @@ class Edit extends Component
             'title' => '',
             'description' => '',
             'media_type' => MediaType::Post->value,
-            'instagram_account_id' => '',
+            'social_account_id' => '',
             'scheduled_at' => '',
         ];
     }

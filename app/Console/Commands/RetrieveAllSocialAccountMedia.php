@@ -2,11 +2,11 @@
 
 namespace App\Console\Commands;
 
-use App\Jobs\SyncInstagramMedia;
-use App\Models\InstagramAccount;
+use App\Jobs\SyncSocialMediaMedia;
+use App\Models\SocialAccount;
 use Illuminate\Console\Command;
 
-class RetrieveAllInstagramMedia extends Command
+class RetrieveAllSocialAccountMedia extends Command
 {
     protected $signature = 'instagram:media:retrieve-all {--queue : Queue sync jobs instead of running immediately}';
 
@@ -16,19 +16,19 @@ class RetrieveAllInstagramMedia extends Command
     {
         $totalAccounts = 0;
 
-        InstagramAccount::query()
+        SocialAccount::query()
             ->orderBy('id')
             ->cursor()
-            ->each(function (InstagramAccount $account) use (&$totalAccounts): void {
+            ->each(function (SocialAccount $account) use (&$totalAccounts): void {
                 $totalAccounts++;
 
                 if ($this->option('queue')) {
-                    SyncInstagramMedia::dispatch($account);
+                    SyncSocialMediaMedia::dispatch($account);
 
                     return;
                 }
 
-                SyncInstagramMedia::dispatchSync($account);
+                SyncSocialMediaMedia::dispatchSync($account);
             });
 
         if ($totalAccounts === 0) {

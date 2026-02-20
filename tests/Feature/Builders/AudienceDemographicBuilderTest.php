@@ -2,16 +2,16 @@
 
 use App\Enums\DemographicType;
 use App\Models\AudienceDemographic;
-use App\Models\InstagramAccount;
+use App\Models\SocialAccount;
 use App\Models\User;
 
 it('scopes audience demographics by user account and demographic type and orders by value', function (): void {
     $owner = User::factory()->create();
     $outsider = User::factory()->create();
 
-    $ownerAccount = InstagramAccount::factory()->for($owner)->create();
-    $secondaryOwnerAccount = InstagramAccount::factory()->for($owner)->create();
-    $outsiderAccount = InstagramAccount::factory()->for($outsider)->create();
+    $ownerAccount = SocialAccount::factory()->for($owner)->create();
+    $secondaryOwnerAccount = SocialAccount::factory()->for($owner)->create();
+    $outsiderAccount = SocialAccount::factory()->for($outsider)->create();
 
     AudienceDemographic::factory()->for($ownerAccount)->create([
         'type' => DemographicType::Age,
@@ -61,9 +61,9 @@ it('does not constrain to a specific account when all account filter is used', f
     $owner = User::factory()->create();
     $outsider = User::factory()->create();
 
-    $ownerFirstAccount = InstagramAccount::factory()->for($owner)->create();
-    $ownerSecondAccount = InstagramAccount::factory()->for($owner)->create();
-    $outsiderAccount = InstagramAccount::factory()->for($outsider)->create();
+    $ownerFirstAccount = SocialAccount::factory()->for($owner)->create();
+    $ownerSecondAccount = SocialAccount::factory()->for($owner)->create();
+    $outsiderAccount = SocialAccount::factory()->for($outsider)->create();
 
     AudienceDemographic::factory()->for($ownerFirstAccount)->create();
     AudienceDemographic::factory()->for($ownerSecondAccount)->create();

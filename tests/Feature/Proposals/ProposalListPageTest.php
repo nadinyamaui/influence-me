@@ -4,9 +4,9 @@ use App\Enums\ProposalStatus;
 use App\Livewire\Proposals\Index;
 use App\Models\Campaign;
 use App\Models\Client;
-use App\Models\InstagramAccount;
 use App\Models\Proposal;
 use App\Models\ScheduledPost;
+use App\Models\SocialAccount;
 use App\Models\User;
 use Livewire\Livewire;
 
@@ -44,7 +44,7 @@ test('authenticated users only see their own proposals', function (): void {
 test('proposals list shows campaign count and scheduled content count', function (): void {
     $user = User::factory()->create();
     $client = Client::factory()->for($user)->create();
-    $account = InstagramAccount::factory()->for($user)->create();
+    $account = SocialAccount::factory()->for($user)->create();
 
     $proposal = Proposal::factory()
         ->for($user)
@@ -56,15 +56,15 @@ test('proposals list shows campaign count and scheduled content count', function
 
     ScheduledPost::factory()->for($user)->for($client)->create([
         'campaign_id' => $campaign1->id,
-        'instagram_account_id' => $account->id,
+        'social_account_id' => $account->id,
     ]);
     ScheduledPost::factory()->for($user)->for($client)->create([
         'campaign_id' => $campaign1->id,
-        'instagram_account_id' => $account->id,
+        'social_account_id' => $account->id,
     ]);
     ScheduledPost::factory()->for($user)->for($client)->create([
         'campaign_id' => $campaign2->id,
-        'instagram_account_id' => $account->id,
+        'social_account_id' => $account->id,
     ]);
 
     $this->actingAs($user)

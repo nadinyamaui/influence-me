@@ -3,7 +3,7 @@
 namespace App\Jobs;
 
 use App\Models\FollowerSnapshot;
-use App\Models\InstagramAccount;
+use App\Models\SocialAccount;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Queue\InteractsWithQueue;
@@ -19,7 +19,7 @@ class RecordFollowerSnapshot implements ShouldQueue
 
     public array $backoff = [60, 300, 900];
 
-    public function __construct(public InstagramAccount $account)
+    public function __construct(public SocialAccount $account)
     {
         $this->onQueue('instagram-sync');
     }
@@ -30,7 +30,7 @@ class RecordFollowerSnapshot implements ShouldQueue
         $followersCount = max((int) $this->account->followers_count, 0);
 
         $snapshot = FollowerSnapshot::query()
-            ->where('instagram_account_id', $this->account->id)
+            ->where('social_account_id', $this->account->id)
             ->whereDate('recorded_at', $recordedAt)
             ->first();
 
@@ -43,7 +43,7 @@ class RecordFollowerSnapshot implements ShouldQueue
         }
 
         FollowerSnapshot::query()->create([
-            'instagram_account_id' => $this->account->id,
+            'social_account_id' => $this->account->id,
             'recorded_at' => $recordedAt,
             'followers_count' => $followersCount,
         ]);

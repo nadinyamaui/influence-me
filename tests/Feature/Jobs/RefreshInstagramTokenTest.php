@@ -3,15 +3,15 @@
 use App\Enums\SyncStatus;
 use App\Exceptions\InstagramApiException;
 use App\Exceptions\InstagramTokenExpiredException;
-use App\Jobs\RefreshInstagramToken;
-use App\Models\InstagramAccount;
+use App\Jobs\RefreshSocialMediaToken;
+use App\Models\SocialAccount;
 use App\Services\Facebook\InstagramGraphService;
 use Illuminate\Support\Facades\Log;
 
 it('refreshes instagram token and stores new token expiration', function (): void {
     Log::spy();
 
-    $account = InstagramAccount::factory()->create([
+    $account = SocialAccount::factory()->create([
         'access_token' => 'old-token',
         'token_expires_at' => now()->addDays(3),
         'sync_status' => SyncStatus::Syncing,
@@ -24,7 +24,7 @@ it('refreshes instagram token and stores new token expiration', function (): voi
         ->andReturn('new-refreshed-token');
     app()->bind(InstagramGraphService::class, fn ($app, $parameters) => $instagramGraphService);
 
-    app(RefreshInstagramToken::class, ['account' => $account])->handle();
+    app(RefreshSocialMediaToken::class, ['account' => $account])->handle();
 
     $account->refresh();
 
@@ -41,7 +41,7 @@ it('refreshes instagram token and stores new token expiration', function (): voi
 it('marks account as failed when token is already expired', function (): void {
     Log::spy();
 
-    $account = InstagramAccount::factory()->tokenExpired()->create([
+    $account = SocialAccount::factory()->tokenExpired()->create([
         'sync_status' => SyncStatus::Syncing,
         'last_sync_error' => null,
     ]);
@@ -50,7 +50,7 @@ it('marks account as failed when token is already expired', function (): void {
     $instagramGraphService->shouldNotReceive('refreshLongLivedToken');
     app()->bind(InstagramGraphService::class, fn ($app, $parameters) => $instagramGraphService);
 
-    app(RefreshInstagramToken::class, ['account' => $account])->handle();
+    app(RefreshSocialMediaToken::class, ['account' => $account])->handle();
 
     $account->refresh();
 
@@ -63,7 +63,7 @@ it('marks account as failed when token is already expired', function (): void {
 it('marks account as failed when refresh fails due to expired token response', function (): void {
     Log::spy();
 
-    $account = InstagramAccount::factory()->create([
+    $account = SocialAccount::factory()->create([
         'sync_status' => SyncStatus::Syncing,
         'last_sync_error' => null,
     ]);
@@ -74,7 +74,7 @@ it('marks account as failed when refresh fails due to expired token response', f
         ->andThrow(new InstagramTokenExpiredException('Token expired upstream'));
     app()->bind(InstagramGraphService::class, fn ($app, $parameters) => $instagramGraphService);
 
-    app(RefreshInstagramToken::class, ['account' => $account])->handle();
+    app(RefreshSocialMediaToken::class, ['account' => $account])->handle();
 
     $account->refresh();
 
@@ -87,7 +87,7 @@ it('marks account as failed when refresh fails due to expired token response', f
 it('records last sync error and rethrows api failures for retry handling', function (): void {
     Log::spy();
 
-    $account = InstagramAccount::factory()->create([
+    $account = SocialAccount::factory()->create([
         'last_sync_error' => null,
     ]);
 
@@ -97,7 +97,7 @@ it('records last sync error and rethrows api failures for retry handling', funct
         ->andThrow(new InstagramApiException('Facebook API unavailable'));
     app()->bind(InstagramGraphService::class, fn ($app, $parameters) => $instagramGraphService);
 
-    expect(fn () => app(RefreshInstagramToken::class, ['account' => $account])->handle())
+    expect(fn () => app(RefreshSocialMediaToken::class, ['account' => $account])->handle())
         ->toThrow(InstagramApiException::class, 'Facebook API unavailable');
 
     $account->refresh();
@@ -108,9 +108,9 @@ it('records last sync error and rethrows api failures for retry handling', funct
 });
 
 it('configures queue and retry backoff settings', function (): void {
-    $account = InstagramAccount::factory()->create();
+    $account = SocialAccount::factory()->create();
 
-    $job = new RefreshInstagramToken($account);
+    $job = new RefreshSocialMediaToken($account);
 
     expect($job->queue)->toBe('instagram-sync')
         ->and($job->tries)->toBe(3)

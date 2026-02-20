@@ -3,18 +3,18 @@
 namespace Database\Factories;
 
 use App\Enums\MediaType;
-use App\Models\InstagramAccount;
-use App\Models\InstagramMedia;
+use App\Models\SocialAccountMedia;
+use App\Models\SocialAccount;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-class InstagramMediaFactory extends Factory
+class SocialAccountMediaFactory extends Factory
 {
-    protected $model = InstagramMedia::class;
+    protected $model = SocialAccountMedia::class;
 
     public function definition(): array
     {
         return [
-            'instagram_account_id' => InstagramAccount::factory(),
+            'social_account_id' => SocialAccount::factory(),
             'instagram_media_id' => (string) fake()->unique()->numberBetween(100000000000000000, 999999999999999999),
             'media_type' => fake()->randomElement([MediaType::Post, MediaType::Reel, MediaType::Story]),
             'caption' => fake()->sentence(12),

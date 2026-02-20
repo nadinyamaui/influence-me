@@ -5,9 +5,9 @@ use App\Livewire\Proposals\Show;
 use App\Mail\ProposalSent;
 use App\Models\Campaign;
 use App\Models\Client;
-use App\Models\InstagramAccount;
 use App\Models\Proposal;
 use App\Models\ScheduledPost;
+use App\Models\SocialAccount;
 use App\Models\User;
 use Illuminate\Support\Facades\Mail;
 use Livewire\Livewire;
@@ -27,11 +27,11 @@ test('influencer can send a draft proposal and client receives email', function 
     ]);
 
     $campaign = Campaign::factory()->for($client)->for($proposal)->create();
-    $account = InstagramAccount::factory()->for($owner)->create();
+    $account = SocialAccount::factory()->for($owner)->create();
 
     ScheduledPost::factory()->for($owner)->for($client)->create([
         'campaign_id' => $campaign->id,
-        'instagram_account_id' => $account->id,
+        'social_account_id' => $account->id,
     ]);
 
     Livewire::actingAs($owner)
@@ -62,11 +62,11 @@ test('influencer can send a revised proposal', function (): void {
     ]);
     $proposal = Proposal::factory()->for($owner)->for($client)->revised()->create();
     $campaign = Campaign::factory()->for($client)->for($proposal)->create();
-    $account = InstagramAccount::factory()->for($owner)->create();
+    $account = SocialAccount::factory()->for($owner)->create();
 
     ScheduledPost::factory()->for($owner)->for($client)->create([
         'campaign_id' => $campaign->id,
-        'instagram_account_id' => $account->id,
+        'social_account_id' => $account->id,
     ]);
 
     Livewire::actingAs($owner)
@@ -85,11 +85,11 @@ test('proposal cannot be sent when client email is missing', function (): void {
     $client = Client::factory()->for($owner)->create(['email' => null]);
     $proposal = Proposal::factory()->for($owner)->for($client)->draft()->create();
     $campaign = Campaign::factory()->for($client)->for($proposal)->create();
-    $account = InstagramAccount::factory()->for($owner)->create();
+    $account = SocialAccount::factory()->for($owner)->create();
 
     ScheduledPost::factory()->for($owner)->for($client)->create([
         'campaign_id' => $campaign->id,
-        'instagram_account_id' => $account->id,
+        'social_account_id' => $account->id,
     ]);
 
     Livewire::actingAs($owner)
@@ -144,11 +144,11 @@ test('proposal cannot be sent when linked scheduled content has mismatched scope
     $otherClient = Client::factory()->for($otherUser)->create();
     $proposal = Proposal::factory()->for($owner)->for($client)->draft()->create();
     $campaign = Campaign::factory()->for($client)->for($proposal)->create();
-    $account = InstagramAccount::factory()->for($otherUser)->create();
+    $account = SocialAccount::factory()->for($otherUser)->create();
 
     ScheduledPost::factory()->for($otherUser)->for($otherClient)->create([
         'campaign_id' => $campaign->id,
-        'instagram_account_id' => $account->id,
+        'social_account_id' => $account->id,
     ]);
 
     Livewire::actingAs($owner)

@@ -38,7 +38,7 @@ class Campaign extends Model
 
     public function instagramMedia(): BelongsToMany
     {
-        return $this->belongsToMany(InstagramMedia::class, 'campaign_media')
+        return $this->belongsToMany(SocialAccountMedia::class, 'campaign_media', 'campaign_id', 'instagram_media_id')
             ->withPivot('notes')
             ->withTimestamps();
     }

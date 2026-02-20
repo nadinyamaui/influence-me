@@ -5,8 +5,8 @@ namespace Database\Factories;
 use App\Enums\MediaType;
 use App\Enums\ScheduledPostStatus;
 use App\Models\Client;
-use App\Models\InstagramAccount;
 use App\Models\ScheduledPost;
+use App\Models\SocialAccount;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -22,7 +22,7 @@ class ScheduledPostFactory extends Factory
                 'user_id' => $attributes['user_id'],
             ])->id,
             'campaign_id' => null,
-            'instagram_account_id' => fn (array $attributes): int => InstagramAccount::factory()->create([
+            'social_account_id' => fn (array $attributes): int => SocialAccount::factory()->create([
                 'user_id' => $attributes['user_id'],
             ])->id,
             'title' => fake()->sentence(6),

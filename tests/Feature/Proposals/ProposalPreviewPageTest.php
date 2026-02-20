@@ -2,9 +2,9 @@
 
 use App\Models\Campaign;
 use App\Models\Client;
-use App\Models\InstagramAccount;
 use App\Models\Proposal;
 use App\Models\ScheduledPost;
+use App\Models\SocialAccount;
 use App\Models\User;
 
 test('guests are redirected from proposal preview page', function (): void {
@@ -29,7 +29,7 @@ test('proposal preview enforces ownership authorization', function (): void {
 test('owner can view proposal markdown campaign totals and sorted scheduled content', function (): void {
     $user = User::factory()->create();
     $client = Client::factory()->for($user)->create(['name' => 'Acme Corp']);
-    $account = InstagramAccount::factory()->for($user)->create(['username' => 'influence_main']);
+    $account = SocialAccount::factory()->for($user)->create(['username' => 'influence_main']);
 
     $proposal = Proposal::factory()
         ->for($user)
@@ -54,7 +54,7 @@ test('owner can view proposal markdown campaign totals and sorted scheduled cont
 
     ScheduledPost::factory()->for($user)->for($client)->create([
         'campaign_id' => $campaignA->id,
-        'instagram_account_id' => $account->id,
+        'social_account_id' => $account->id,
         'title' => 'Late Reel',
         'media_type' => 'reel',
         'scheduled_at' => now()->addDays(3),
@@ -62,7 +62,7 @@ test('owner can view proposal markdown campaign totals and sorted scheduled cont
 
     ScheduledPost::factory()->for($user)->for($client)->create([
         'campaign_id' => $campaignA->id,
-        'instagram_account_id' => $account->id,
+        'social_account_id' => $account->id,
         'title' => 'Early Post',
         'media_type' => 'post',
         'scheduled_at' => now()->addDay(),
@@ -70,7 +70,7 @@ test('owner can view proposal markdown campaign totals and sorted scheduled cont
 
     ScheduledPost::factory()->for($user)->for($client)->create([
         'campaign_id' => $campaignB->id,
-        'instagram_account_id' => $account->id,
+        'social_account_id' => $account->id,
         'title' => 'Story Reminder',
         'media_type' => 'story',
         'scheduled_at' => now()->addDays(2),

@@ -1,7 +1,7 @@
 <?php
 
 use App\Exceptions\Auth\SocialAuthenticationException;
-use App\Models\InstagramAccount;
+use App\Models\SocialAccount;
 use App\Models\User;
 use App\Services\Auth\FacebookSocialiteLoginService;
 use Illuminate\Http\RedirectResponse;
@@ -129,7 +129,7 @@ it('creates the influencer user, logs them in, and syncs instagram accounts on c
         ->with('1234567890123', 'long-lived-token')
         ->andReturn(collect([
             [
-                'instagram_user_id' => 'ig-1',
+                'social_network_user_id' => 'ig-1',
                 'username' => 'ig_one',
                 'name' => 'IG One',
                 'biography' => 'Bio one',
@@ -140,7 +140,7 @@ it('creates the influencer user, logs them in, and syncs instagram accounts on c
                 'access_token' => 'page-token-1',
             ],
             [
-                'instagram_user_id' => 'ig-2',
+                'social_network_user_id' => 'ig-2',
                 'username' => 'ig_two',
                 'name' => 'IG Two',
                 'biography' => 'Bio two',
@@ -159,15 +159,15 @@ it('creates the influencer user, logs them in, and syncs instagram accounts on c
         ->and($resolvedUser->email)->toBe('social@example.com');
     $this->assertAuthenticatedAs($resolvedUser);
     $this->assertDatabaseCount('users', 1);
-    $this->assertDatabaseHas('instagram_accounts', [
+    $this->assertDatabaseHas('social_accounts', [
         'user_id' => $resolvedUser->id,
-        'instagram_user_id' => 'ig-1',
+        'social_network_user_id' => 'ig-1',
         'username' => 'ig_one',
         'followers_count' => 1000,
     ]);
-    $this->assertDatabaseHas('instagram_accounts', [
+    $this->assertDatabaseHas('social_accounts', [
         'user_id' => $resolvedUser->id,
-        'instagram_user_id' => 'ig-2',
+        'social_network_user_id' => 'ig-2',
         'username' => 'ig_two',
         'followers_count' => 3000,
     ]);
@@ -181,9 +181,9 @@ it('updates existing user and instagram account records on callback', function (
         'socialite_user_id' => '1234567890123',
     ]);
 
-    InstagramAccount::factory()->create([
+    SocialAccount::factory()->create([
         'user_id' => $existingUser->id,
-        'instagram_user_id' => 'ig-1',
+        'social_network_user_id' => 'ig-1',
         'username' => 'old_ig_username',
         'followers_count' => 25,
         'access_token' => 'old-page-token',
@@ -229,7 +229,7 @@ it('updates existing user and instagram account records on callback', function (
         ->with('1234567890123', 'long-lived-token')
         ->andReturn(collect([
             [
-                'instagram_user_id' => 'ig-1',
+                'social_network_user_id' => 'ig-1',
                 'username' => 'new_ig_username',
                 'name' => 'Updated IG',
                 'biography' => 'Updated bio',
@@ -247,10 +247,10 @@ it('updates existing user and instagram account records on callback', function (
         ->and($resolvedUser->name)->toBe('Updated Name')
         ->and($resolvedUser->email)->toBe('updated@example.com');
     $this->assertDatabaseCount('users', 1);
-    $this->assertDatabaseCount('instagram_accounts', 1);
-    $this->assertDatabaseHas('instagram_accounts', [
+    $this->assertDatabaseCount('social_accounts', 1);
+    $this->assertDatabaseHas('social_accounts', [
         'user_id' => $existingUser->id,
-        'instagram_user_id' => 'ig-1',
+        'social_network_user_id' => 'ig-1',
         'username' => 'new_ig_username',
         'followers_count' => 999,
     ]);
@@ -258,9 +258,9 @@ it('updates existing user and instagram account records on callback', function (
 
 it('throws a social authentication exception when instagram account is linked to another user', function (): void {
     $conflictingUser = User::factory()->create();
-    InstagramAccount::factory()->create([
+    SocialAccount::factory()->create([
         'user_id' => $conflictingUser->id,
-        'instagram_user_id' => 'ig-1',
+        'social_network_user_id' => 'ig-1',
     ]);
 
     $socialiteUser = new class
@@ -303,7 +303,7 @@ it('throws a social authentication exception when instagram account is linked to
         ->with('1234567890123', 'long-lived-token')
         ->andReturn(collect([
             [
-                'instagram_user_id' => 'ig-1',
+                'social_network_user_id' => 'ig-1',
                 'username' => 'ig_one',
                 'name' => 'IG One',
                 'biography' => 'Bio one',
@@ -324,7 +324,7 @@ it('throws a social authentication exception when instagram account is linked to
 });
 
 it('throws a social authentication exception when linking instagram accounts without an authenticated user', function (): void {
-    expect(fn () => app(FacebookSocialiteLoginService::class)->createInstagramAccountsForLoggedUser())
+    expect(fn () => app(FacebookSocialiteLoginService::class)->createSocialAccountsForLoggedUser())
         ->toThrow(SocialAuthenticationException::class, 'You must be logged in to link Instagram accounts.');
 });
 
@@ -365,7 +365,7 @@ it('links instagram accounts to the authenticated user only', function (): void 
         ->with('1234567890123', 'long-lived-token')
         ->andReturn(collect([
             [
-                'instagram_user_id' => 'ig-1',
+                'social_network_user_id' => 'ig-1',
                 'username' => 'ig_one',
                 'name' => 'IG One',
                 'biography' => 'Bio one',
@@ -377,14 +377,14 @@ it('links instagram accounts to the authenticated user only', function (): void 
             ],
         ]));
 
-    $resolvedUser = $service->createInstagramAccountsForLoggedUser();
+    $resolvedUser = $service->createSocialAccountsForLoggedUser();
 
     expect($resolvedUser->id)->toBe($user->id);
     $this->assertAuthenticatedAs($user);
     $this->assertDatabaseCount('users', 1);
-    $this->assertDatabaseHas('instagram_accounts', [
+    $this->assertDatabaseHas('social_accounts', [
         'user_id' => $user->id,
-        'instagram_user_id' => 'ig-1',
+        'social_network_user_id' => 'ig-1',
         'username' => 'ig_one',
         'followers_count' => 1000,
     ]);
@@ -393,9 +393,9 @@ it('links instagram accounts to the authenticated user only', function (): void 
 it('throws a social authentication exception when linking instagram accounts already linked to another user', function (): void {
     $authenticatedUser = User::factory()->create();
     $otherUser = User::factory()->create();
-    InstagramAccount::factory()->create([
+    SocialAccount::factory()->create([
         'user_id' => $otherUser->id,
-        'instagram_user_id' => 'ig-1',
+        'social_network_user_id' => 'ig-1',
     ]);
 
     $this->actingAs($authenticatedUser);
@@ -430,7 +430,7 @@ it('throws a social authentication exception when linking instagram accounts alr
         ->with('1234567890123', 'long-lived-token')
         ->andReturn(collect([
             [
-                'instagram_user_id' => 'ig-1',
+                'social_network_user_id' => 'ig-1',
                 'username' => 'ig_one',
                 'name' => 'IG One',
                 'biography' => 'Bio one',
@@ -442,6 +442,6 @@ it('throws a social authentication exception when linking instagram accounts alr
             ],
         ]));
 
-    expect(fn () => $service->createInstagramAccountsForLoggedUser())
+    expect(fn () => $service->createSocialAccountsForLoggedUser())
         ->toThrow(SocialAuthenticationException::class, 'One or more Instagram accounts are linked to a different user.');
 });

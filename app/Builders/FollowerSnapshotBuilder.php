@@ -9,7 +9,7 @@ class FollowerSnapshotBuilder extends Builder
 {
     public function forUser(int $userId): self
     {
-        return $this->whereHas('instagramAccount', fn (Builder $builder): Builder => $builder->where('user_id', $userId));
+        return $this->whereHas('socialAccount', fn (Builder $builder): Builder => $builder->where('user_id', $userId));
     }
 
     public function filterByAccount(string $accountId): self
@@ -18,7 +18,7 @@ class FollowerSnapshotBuilder extends Builder
             return $this;
         }
 
-        return $this->where('instagram_account_id', (int) $accountId);
+        return $this->where('social_account_id', (int) $accountId);
     }
 
     public function forAnalyticsPeriod(AnalyticsPeriod $period): self

@@ -5,7 +5,7 @@ namespace App\Livewire\Content;
 use App\Enums\MediaType;
 use App\Livewire\Forms\CampaignForm;
 use App\Models\Campaign;
-use App\Models\InstagramMedia;
+use App\Models\SocialAccountMedia;
 use App\Models\User;
 use App\Services\Content\ContentClientLinkService;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
@@ -65,7 +65,7 @@ class Index extends Component
             return;
         }
 
-        $media = InstagramMedia::query()
+        $media = SocialAccountMedia::query()
             ->whereKey($mediaId)
             ->forUser((int) Auth::id())
             ->first();
@@ -91,7 +91,7 @@ class Index extends Component
     {
         if ($value !== 'all') {
             $accountId = (int) $value;
-            $hasAccount = Auth::user()->instagramAccounts()->whereKey($accountId)->exists();
+            $hasAccount = Auth::user()->socialAccounts()->whereKey($accountId)->exists();
 
             if (! $hasAccount) {
                 $this->accountId = 'all';
@@ -194,7 +194,7 @@ class Index extends Component
 
     public function openDetailModal(int $mediaId): void
     {
-        $media = InstagramMedia::resolveForUser($mediaId);
+        $media = SocialAccountMedia::resolveForUser($mediaId);
         $this->authorize('view', $media);
 
         $this->selectedMediaId = $media->id;
@@ -230,7 +230,7 @@ class Index extends Component
             return;
         }
 
-        $media = InstagramMedia::resolveForUser($mediaId);
+        $media = SocialAccountMedia::resolveForUser($mediaId);
         $this->authorize('linkToClient', $media);
 
         $selectedIds = array_values(array_unique(array_map('intval', $this->selectedMediaIds)));
@@ -267,7 +267,7 @@ class Index extends Component
             return;
         }
 
-        $media = InstagramMedia::resolveForUser($this->selectedMediaId);
+        $media = SocialAccountMedia::resolveForUser($this->selectedMediaId);
         $this->authorize('linkToClient', $media);
 
         $this->linkingBatch = false;
@@ -334,7 +334,7 @@ class Index extends Component
             return;
         }
 
-        $media = InstagramMedia::resolveForUser($this->selectedMediaId);
+        $media = SocialAccountMedia::resolveForUser($this->selectedMediaId);
         $this->authorize('linkToClient', $media);
 
         $linkService->link($user, $media, $campaign, $notes);
@@ -391,7 +391,7 @@ class Index extends Component
             return;
         }
 
-        $media = InstagramMedia::resolveForUser($this->selectedMediaId);
+        $media = SocialAccountMedia::resolveForUser($this->selectedMediaId);
         $this->authorize('linkToClient', $media);
 
         $client = User::resolveClient($clientId);
@@ -407,8 +407,8 @@ class Index extends Component
         $range = $this->normalizeDateRangeValue($this->dateRange);
         $userId = (int) Auth::id();
 
-        return InstagramMedia::query()
-            ->withInstagramAccount()
+        return SocialAccountMedia::query()
+            ->withSocialAccount()
             ->forUser($userId)
             ->filterByMediaType($this->mediaType)
             ->filterByAccount($this->accountId)
@@ -419,14 +419,14 @@ class Index extends Component
             ->cursorPaginate(24, ['*'], 'cursor');
     }
 
-    private function selectedMedia(): ?InstagramMedia
+    private function selectedMedia(): ?SocialAccountMedia
     {
         if ($this->selectedMediaId === null) {
             return null;
         }
 
-        return InstagramMedia::query()
-            ->withInstagramAccount()
+        return SocialAccountMedia::query()
+            ->withSocialAccount()
             ->withOwnedCampaignsForUser((int) Auth::id())
             ->whereKey($this->selectedMediaId)
             ->forUser((int) Auth::id())
@@ -465,7 +465,7 @@ class Index extends Component
             return new EloquentCollection;
         }
 
-        return InstagramMedia::query()
+        return SocialAccountMedia::query()
             ->whereIn('id', $selectedIds)
             ->forUser((int) Auth::id())
             ->get();
@@ -494,14 +494,14 @@ class Index extends Component
         $this->resetErrorBag(['linkClientId', 'linkCampaignId', 'campaignForm.name', 'campaignForm.description', 'linkNotes']);
     }
 
-    private function selectedMediaComparisons(?InstagramMedia $media): array
+    private function selectedMediaComparisons(?SocialAccountMedia $media): array
     {
         if ($media === null) {
             return [];
         }
 
-        $averages = InstagramMedia::query()
-            ->accountAverageMetricsForRecentDays((int) $media->instagram_account_id, 90);
+        $averages = SocialAccountMedia::query()
+            ->accountAverageMetricsForRecentDays((int) $media->social_account_id, 90);
 
         return [
             'likes' => $this->comparisonMetric((float) $media->like_count, (float) ($averages['likes'] ?? 0)),

@@ -28,8 +28,8 @@ class AudienceDemographic extends Model
         ];
     }
 
-    public function instagramAccount(): BelongsTo
+    public function socialAccount(): BelongsTo
     {
-        return $this->belongsTo(InstagramAccount::class);
+        return $this->belongsTo(SocialAccount::class);
     }
 }

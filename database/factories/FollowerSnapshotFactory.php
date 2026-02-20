@@ -3,7 +3,7 @@
 namespace Database\Factories;
 
 use App\Models\FollowerSnapshot;
-use App\Models\InstagramAccount;
+use App\Models\SocialAccount;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class FollowerSnapshotFactory extends Factory
@@ -13,7 +13,7 @@ class FollowerSnapshotFactory extends Factory
     public function definition(): array
     {
         return [
-            'instagram_account_id' => InstagramAccount::factory(),
+            'social_account_id' => SocialAccount::factory(),
             'followers_count' => fake()->numberBetween(100, 500000),
             'recorded_at' => now()->subDays(fake()->numberBetween(0, 120))->toDateString(),
         ];

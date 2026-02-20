@@ -1,8 +1,8 @@
 <?php
 
 use App\Jobs\RecordFollowerSnapshot;
-use App\Jobs\RefreshInstagramToken;
-use App\Models\InstagramAccount;
+use App\Jobs\RefreshSocialMediaToken;
+use App\Models\SocialAccount;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Bus;
@@ -28,13 +28,13 @@ it('registers RFC 027 instagram scheduler tasks with expected cadence', function
 it('dispatches token refresh only for accounts expiring within the next seven days', function (): void {
     Bus::fake();
 
-    $expiredAccount = InstagramAccount::factory()->create([
+    $expiredAccount = SocialAccount::factory()->create([
         'token_expires_at' => now()->subDay(),
     ]);
-    $expiringSoonAccount = InstagramAccount::factory()->create([
+    $expiringSoonAccount = SocialAccount::factory()->create([
         'token_expires_at' => now()->addDays(3),
     ]);
-    $laterAccount = InstagramAccount::factory()->create([
+    $laterAccount = SocialAccount::factory()->create([
         'token_expires_at' => now()->addDays(12),
     ]);
 
@@ -45,15 +45,15 @@ it('dispatches token refresh only for accounts expiring within the next seven da
 
     $tokenRefreshEvent->run(app());
 
-    Bus::assertDispatched(RefreshInstagramToken::class, function (RefreshInstagramToken $job) use ($expiringSoonAccount): bool {
+    Bus::assertDispatched(RefreshSocialMediaToken::class, function (RefreshSocialMediaToken $job) use ($expiringSoonAccount): bool {
         return $job->account->is($expiringSoonAccount);
     });
 
-    Bus::assertNotDispatched(RefreshInstagramToken::class, function (RefreshInstagramToken $job) use ($expiredAccount): bool {
+    Bus::assertNotDispatched(RefreshSocialMediaToken::class, function (RefreshSocialMediaToken $job) use ($expiredAccount): bool {
         return $job->account->is($expiredAccount);
     });
 
-    Bus::assertNotDispatched(RefreshInstagramToken::class, function (RefreshInstagramToken $job) use ($laterAccount): bool {
+    Bus::assertNotDispatched(RefreshSocialMediaToken::class, function (RefreshSocialMediaToken $job) use ($laterAccount): bool {
         return $job->account->is($laterAccount);
     });
 });
@@ -62,8 +62,8 @@ it('dispatches follower snapshots for each instagram account', function (): void
     Bus::fake();
     Carbon::setTestNow('2026-02-17 00:05:00');
 
-    $firstAccount = InstagramAccount::factory()->create();
-    $secondAccount = InstagramAccount::factory()->create();
+    $firstAccount = SocialAccount::factory()->create();
+    $secondAccount = SocialAccount::factory()->create();
 
     $events = collect(app(Schedule::class)->events());
     $followerSnapshotEvent = $events->first(fn ($event) => $event->description === 'record-follower-snapshots');

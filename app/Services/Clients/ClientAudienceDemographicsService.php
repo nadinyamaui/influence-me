@@ -5,18 +5,18 @@ namespace App\Services\Clients;
 use App\Enums\DemographicType;
 use App\Models\AudienceDemographic;
 use App\Models\Client;
-use App\Models\InstagramAccount;
-use App\Models\InstagramMedia;
+use App\Models\SocialAccountMedia;
+use App\Models\SocialAccount;
 use Illuminate\Support\Collection;
 
 class ClientAudienceDemographicsService
 {
     public function build(Client $client): array
     {
-        $accountIds = InstagramMedia::query()
+        $accountIds = SocialAccountMedia::query()
             ->forClient($client->id)
             ->distinctMediaRows()
-            ->pluck('instagram_account_id')
+            ->pluck('social_account_id')
             ->map(fn ($accountId): int => (int) $accountId)
             ->unique()
             ->values();
@@ -26,11 +26,11 @@ class ClientAudienceDemographicsService
         }
 
         $demographics = AudienceDemographic::query()
-            ->whereIn('instagram_account_id', $accountIds->all())
-            ->get(['instagram_account_id', 'type', 'dimension', 'value'])
+            ->whereIn('social_account_id', $accountIds->all())
+            ->get(['social_account_id', 'type', 'dimension', 'value'])
             ->groupBy(fn (AudienceDemographic $item): string => $item->type->value);
 
-        $accountWeights = InstagramAccount::query()
+        $accountWeights = SocialAccount::query()
             ->whereIn('id', $accountIds->all())
             ->pluck('followers_count', 'id')
             ->mapWithKeys(fn ($followersCount, $id): array => [(int) $id => max((int) $followersCount, 1)]);
@@ -108,7 +108,7 @@ class ClientAudienceDemographicsService
 
     private function weightedDemographicValues(Collection $rows, Collection $accountWeights): Collection
     {
-        $typeAccountIds = $rows->pluck('instagram_account_id')
+        $typeAccountIds = $rows->pluck('social_account_id')
             ->map(fn ($accountId): int => (int) $accountId)
             ->unique()
             ->values()
@@ -124,7 +124,7 @@ class ClientAudienceDemographicsService
             ->groupBy('dimension')
             ->map(function (Collection $dimensionRows) use ($scopedWeights): float {
                 $perAccount = $dimensionRows
-                    ->groupBy('instagram_account_id')
+                    ->groupBy('social_account_id')
                     ->map(fn (Collection $accountRows): float => (float) $accountRows->sum(fn (AudienceDemographic $item): float => (float) $item->value));
 
                 $weightedSum = 0.0;

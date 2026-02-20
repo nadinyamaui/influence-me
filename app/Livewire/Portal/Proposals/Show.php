@@ -33,7 +33,7 @@ class Show extends Component
                 ->load([
                     'campaigns' => fn ($query) => $query->orderBy('name'),
                     'campaigns.scheduledPosts' => fn ($query) => $query
-                        ->with('instagramAccount:id,username')
+                        ->with('socialAccount:id,username')
                         ->orderBy('scheduled_at'),
                 ]);
         } catch (ValidationException $exception) {
@@ -79,7 +79,7 @@ class Show extends Component
                 ->load([
                     'campaigns' => fn ($query) => $query->orderBy('name'),
                     'campaigns.scheduledPosts' => fn ($query) => $query
-                        ->with('instagramAccount:id,username')
+                        ->with('socialAccount:id,username')
                         ->orderBy('scheduled_at'),
                 ]);
         } catch (ValidationException $exception) {
@@ -132,7 +132,7 @@ class Show extends Component
             ->with([
                 'campaigns' => fn ($query) => $query->orderBy('name'),
                 'campaigns.scheduledPosts' => fn ($query) => $query
-                    ->with('instagramAccount:id,username')
+                    ->with('socialAccount:id,username')
                     ->orderBy('scheduled_at'),
             ])
             ->firstOrFail();

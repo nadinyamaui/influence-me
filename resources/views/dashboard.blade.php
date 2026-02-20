@@ -1,10 +1,10 @@
 <x-layouts::app :title="__('Dashboard')">
     @php
-        $hasLinkedInstagramAccount = auth()->user()?->instagramAccounts()->exists() ?? false;
+        $hasLinkedSocialAccount = auth()->user()?->socialAccounts()->exists() ?? false;
     @endphp
 
     <div class="flex h-full w-full flex-1 flex-col gap-6 rounded-xl">
-        @if (! $hasLinkedInstagramAccount)
+        @if (! $hasLinkedSocialAccount)
             <section class="rounded-2xl border border-sky-200 bg-sky-50 p-6 text-sky-950 dark:border-sky-800 dark:bg-sky-950/20 dark:text-sky-100">
                 <h2 class="text-xl font-semibold">Explore your dashboard with demo-ready tools</h2>
                 <p class="mt-2 text-sm text-sky-800 dark:text-sky-200">

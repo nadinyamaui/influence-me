@@ -22,7 +22,7 @@ class Show extends Component
             'client:id,name,email',
             'campaigns' => fn ($query) => $query->orderBy('name'),
             'campaigns.scheduledPosts' => fn ($query) => $query
-                ->with('instagramAccount:id,username')
+                ->with('socialAccount:id,username')
                 ->orderBy('scheduled_at'),
         ]);
     }
@@ -36,7 +36,7 @@ class Show extends Component
                 'client:id,name,email',
                 'campaigns' => fn ($query) => $query->orderBy('name'),
                 'campaigns.scheduledPosts' => fn ($query) => $query
-                    ->with('instagramAccount:id,username')
+                    ->with('socialAccount:id,username')
                     ->orderBy('scheduled_at'),
             ]);
         } catch (ValidationException $exception) {

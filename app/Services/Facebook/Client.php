@@ -3,6 +3,7 @@
 namespace App\Services\Facebook;
 
 use App\Enums\MediaType;
+use App\Enums\SocialNetwork;
 use FacebookAds\Api;
 use FacebookAds\Object\IGMedia;
 use FacebookAds\Object\IGUser;
@@ -52,7 +53,8 @@ class Client
                 $ig = $account['instagram_business_account'];
 
                 return [
-                    'instagram_user_id' => $ig['id'],
+                    'social_network' => SocialNetwork::Instagram->value,
+                    'social_network_user_id' => $ig['id'],
                     'name' => $ig['name'],
                     'username' => $ig['username'],
                     'biography' => trim($ig['biography'] ?? ''),

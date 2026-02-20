@@ -2,23 +2,23 @@
 
 use App\Jobs\RecordFollowerSnapshot;
 use App\Models\FollowerSnapshot;
-use App\Models\InstagramAccount;
+use App\Models\SocialAccount;
 use Illuminate\Support\Carbon;
 
 it('records a follower snapshot for the instagram account', function (): void {
     $frozenNow = Carbon::parse('2026-02-17 12:00:00');
     Carbon::setTestNow($frozenNow);
 
-    $account = InstagramAccount::factory()->create([
+    $account = SocialAccount::factory()->create([
         'followers_count' => 12345,
     ]);
 
     try {
         app(RecordFollowerSnapshot::class, ['account' => $account])->handle();
-        $snapshot = FollowerSnapshot::query()->where('instagram_account_id', $account->id)->first();
+        $snapshot = FollowerSnapshot::query()->where('social_account_id', $account->id)->first();
 
-        expect(FollowerSnapshot::query()->where('instagram_account_id', $account->id)->count())->toBe(1)
-            ->and(FollowerSnapshot::query()->where('instagram_account_id', $account->id)->value('followers_count'))->toBe(12345)
+        expect(FollowerSnapshot::query()->where('social_account_id', $account->id)->count())->toBe(1)
+            ->and(FollowerSnapshot::query()->where('social_account_id', $account->id)->value('followers_count'))->toBe(12345)
             ->and($snapshot)->not->toBeNull()
             ->and($snapshot?->recorded_at?->toDateString())->toBe($frozenNow->toDateString());
     } finally {
@@ -30,7 +30,7 @@ it('updates the existing account snapshot when rerun for the same day', function
     $frozenNow = Carbon::parse('2026-02-17 12:00:00');
     Carbon::setTestNow($frozenNow);
 
-    $account = InstagramAccount::factory()->create([
+    $account = SocialAccount::factory()->create([
         'followers_count' => 1000,
     ]);
 
@@ -41,15 +41,15 @@ it('updates the existing account snapshot when rerun for the same day', function
 
         app(RecordFollowerSnapshot::class, ['account' => $account])->handle();
 
-        expect(FollowerSnapshot::query()->where('instagram_account_id', $account->id)->count())->toBe(1)
-            ->and(FollowerSnapshot::query()->where('instagram_account_id', $account->id)->value('followers_count'))->toBe(1500);
+        expect(FollowerSnapshot::query()->where('social_account_id', $account->id)->count())->toBe(1)
+            ->and(FollowerSnapshot::query()->where('social_account_id', $account->id)->value('followers_count'))->toBe(1500);
     } finally {
         Carbon::setTestNow();
     }
 });
 
 it('configures queue and retry backoff settings', function (): void {
-    $account = InstagramAccount::factory()->create();
+    $account = SocialAccount::factory()->create();
 
     $job = new RecordFollowerSnapshot($account);
 
