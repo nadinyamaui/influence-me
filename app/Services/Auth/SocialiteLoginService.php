@@ -15,17 +15,10 @@ class SocialiteLoginService
 {
     private SocialNetwork $driver = SocialNetwork::Instagram;
 
-    private array $scopes = [
-        'instagram_basic',
-        'instagram_manage_insights',
-        'pages_show_list',
-        'pages_read_engagement',
-    ];
-
     public function redirectToProvider(): RedirectResponse
     {
         return Socialite::driver($this->resolveSocialiteDriver())
-            ->scopes($this->scopes)
+            ->scopes($this->driver->oauthScopes())
             ->redirect();
     }
 

@@ -8,4 +8,17 @@ enum SocialNetwork: string
     case Instagram = 'instagram';
     case Youtube = 'youtube';
     case Twitch = 'twitch';
+
+    public function oauthScopes(): array
+    {
+        return match ($this) {
+            self::Instagram => [
+                'instagram_basic',
+                'instagram_manage_insights',
+                'pages_show_list',
+                'pages_read_engagement',
+            ],
+            default => [],
+        };
+    }
 }
