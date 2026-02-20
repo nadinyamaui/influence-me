@@ -142,7 +142,7 @@
                     <div class="float-b absolute -bottom-10 -left-8 hidden rounded-2xl border border-slate-300 bg-white p-4 shadow-xl shadow-slate-400/20 md:block">
                         <p class="text-[11px] uppercase tracking-[0.18em] text-slate-500">Payments</p>
                         <p class="mt-1 text-sm font-semibold text-slate-900">Invoice #3021 marked paid</p>
-                        <p class="mt-1 text-xs text-slate-500">via Stripe checkout session</p>
+                        <p class="mt-1 text-xs text-slate-500">via payment confirmation</p>
                     </div>
                 </div>
             </div>
@@ -154,7 +154,7 @@
                 <span class="h-1 w-1 rounded-full bg-slate-400"></span>
                 <span>Client portal approvals</span>
                 <span class="h-1 w-1 rounded-full bg-slate-400"></span>
-                <span>Stripe payment events</span>
+                <span>Payment status events</span>
                 <span class="h-1 w-1 rounded-full bg-slate-400"></span>
                 <span>Audience trend snapshots</span>
             </div>
@@ -308,7 +308,7 @@
                         <ul class="mt-6 grow space-y-3 text-sm text-slate-200">
                             <li class="flex items-center gap-3"><i class="fa-solid fa-circle-check text-teal-300" aria-hidden="true"></i>3 Instagram accounts</li>
                             <li class="flex items-center gap-3"><i class="fa-solid fa-circle-check text-teal-300" aria-hidden="true"></i>Unlimited clients</li>
-                            <li class="flex items-center gap-3"><i class="fa-solid fa-circle-check text-teal-300" aria-hidden="true"></i>Invoices and Stripe payments</li>
+                            <li class="flex items-center gap-3"><i class="fa-solid fa-circle-check text-teal-300" aria-hidden="true"></i>Invoices and payment tracking</li>
                             <li class="flex items-center gap-3"><i class="fa-solid fa-circle-check text-teal-300" aria-hidden="true"></i>Advanced analytics views</li>
                         </ul>
                         <a href="{{ route('auth.facebook') }}" class="mt-8 inline-flex items-center justify-center rounded-full bg-teal-300 px-4 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-teal-200">Start Free Trial</a>
@@ -367,7 +367,7 @@
                             How do invoice payments update?
                             <i class="fa-solid fa-chevron-down text-xs text-slate-500 transition group-open:rotate-180" aria-hidden="true"></i>
                         </summary>
-                        <p class="mt-4 text-sm leading-relaxed text-slate-600">Stripe checkout completion webhooks mark invoices paid automatically and keep status timelines accurate.</p>
+                        <p class="mt-4 text-sm leading-relaxed text-slate-600">Invoice payment statuses stay aligned with client and influencer workflow updates.</p>
                     </details>
                 </div>
             </div>

@@ -16,7 +16,7 @@ protected $guarded = [];
 ```
 
 Expected persisted attributes:
-`user_id`, `client_id`, `invoice_number`, `status`, `due_date`, `subtotal`, `tax_rate`, `tax_amount`, `total`, `stripe_payment_link`, `stripe_session_id`, `paid_at`, `notes`
+`user_id`, `client_id`, `invoice_number`, `status`, `due_date`, `subtotal`, `tax_rate`, `tax_amount`, `total`, `paid_at`, `notes`
 
 ### Casts
 ```php

@@ -33,9 +33,6 @@ REDIS_HOST, REDIS_PASSWORD, REDIS_PORT
 # Instagram OAuth
 INSTAGRAM_CLIENT_ID, INSTAGRAM_CLIENT_SECRET, INSTAGRAM_REDIRECT_URI
 
-# Stripe
-STRIPE_KEY, STRIPE_SECRET, STRIPE_WEBHOOK_SECRET
-
 # Mail
 MAIL_MAILER, MAIL_HOST, MAIL_PORT, MAIL_USERNAME, MAIL_PASSWORD, MAIL_FROM_ADDRESS
 
@@ -85,11 +82,6 @@ Checklist for submitting Instagram API for production access:
 - Terms of service URL
 - App verification
 
-**7. Stripe Webhook Configuration**
-- Set up webhook in Stripe Dashboard pointing to `https://yourdomain.com/webhooks/stripe`
-- Select event: `checkout.session.completed`
-- Copy webhook secret to `STRIPE_WEBHOOK_SECRET`
-
 ## Also Update
 - `.env.example` — ensure ALL variables documented with comments
 
@@ -106,4 +98,3 @@ Checklist for submitting Instagram API for production access:
 - [ ] Queue worker configuration documented
 - [ ] Cron schedule documented
 - [ ] Meta App Review checklist included
-- [ ] Stripe webhook setup documented

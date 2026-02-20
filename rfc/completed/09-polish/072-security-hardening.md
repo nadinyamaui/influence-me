@@ -1,7 +1,7 @@
 # 072 - Security Hardening
 
 **Labels:** `security`, `enhancement`
-**Depends on:** #016, #019, #054
+**Depends on:** #016, #019
 
 ## Description
 
@@ -12,13 +12,11 @@ Review and harden security across the application, focusing on external integrat
 ### Rate Limiting
 Add rate limiting to sensitive endpoints in `bootstrap/app.php` or route definitions:
 - Portal login: 5 attempts per minute per IP (already in #019)
-- Webhook endpoint: 60 requests per minute
 - Instagram OAuth callback: 10 per minute per IP
 
 ### Token Storage
 Verify all tokens are encrypted at rest:
 - `InstagramAccount.access_token` — encrypted cast (done in #003)
-- Stripe keys — in env vars only, never in database
 
 ### Markdown XSS Prevention
 When rendering proposal markdown content, sanitize HTML output:
@@ -29,7 +27,7 @@ When rendering proposal markdown content, sanitize HTML output:
 
 ### CSRF Protection
 Verify all forms have `@csrf` (Livewire handles this automatically).
-Verify webhook route is excluded (#054).
+Verify all external callback routes have appropriate middleware and validation.
 
 ### Mass Assignment Audit
 Standardize model mass assignment to:
@@ -61,7 +59,7 @@ Verify all form requests have proper validation rules:
 - Review all Form Requests for completeness
 
 ## Acceptance Criteria
-- [ ] Rate limiting on portal login and webhooks
+- [ ] Rate limiting on portal login and Instagram OAuth callback
 - [ ] All tokens stored encrypted
 - [ ] Markdown rendering is XSS-safe
 - [ ] No mass assignment vulnerabilities
