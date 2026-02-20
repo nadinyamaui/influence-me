@@ -26,8 +26,9 @@ Route::livewire('schedule', 'schedule.index')
 **Filters:**
 - Status: All, Planned, Published, Cancelled
 - Client: dropdown of clients (or All)
-- Instagram Account: dropdown
 - Campaign: dropdown of user's campaigns (or All)
+- Platform: enum-backed options from `PlatformType` (plus All)
+- Platform account: scoped dropdown based on selected platform
 - Media Type: All, Post, Reel, Story
 - Date range: from/to
 - Apply all filters in the Livewire component query (not by filtering data in Blade)
@@ -40,8 +41,9 @@ Each entry shows:
 - Description (truncated)
 - Client name (or "No client")
 - Campaign name (or "No campaign")
-- Media type badge (`Post`, `Reel`, `Story`)
-- Instagram account (@username)
+- Platform badge (`Instagram`, `TikTok`, `Snapchat`, `YouTube`, `Twitch`, `Kick`)
+- Media type badge (`Post`, `Reel`, `Story`) when present
+- Platform account handle/channel name
 - Proposal context badge when campaign is linked to a proposal (`Draft`, `Sent`, `Approved`, `Rejected`, `Revised`)
 - Actions: Edit, Delete, Mark as Published, Mark as Cancelled
 
@@ -62,8 +64,9 @@ Flux UI modal with:
 - Description (optional, textarea)
 - Client (optional, select from user's clients)
 - Campaign (optional, select scoped to selected client when present)
-- Media Type (required, select: Post, Reel, Story)
-- Instagram Account (required, select from connected accounts)
+- Platform (required, enum-backed select)
+- Platform account (required, select scoped to platform and authenticated influencer)
+- Media Type (nullable, select: Post, Reel, Story)
 - Date & Time (required, datetime picker)
 - Status (select: Planned, Published, Cancelled)
 - Save / Cancel buttons
@@ -74,8 +77,10 @@ Flux UI modal with:
 - `description`: nullable, string, max:5000
 - `client_id`: nullable, exists:clients,id
 - `campaign_id`: nullable, exists:campaigns,id (scoped to user/client)
-- `media_type`: required, in:post,reel,story
-- `instagram_account_id`: required, exists:instagram_accounts,id
+- `platform`: required, in:instagram,tiktok,snapchat,youtube,twitch,kick
+- `platform_account_type`: required, string
+- `platform_account_id`: required, integer
+- `media_type`: nullable, in:post,reel,story
 - `scheduled_at`: required, date, after:now (for new posts)
 - `status`: required, in:planned,published,cancelled
 
@@ -93,14 +98,14 @@ Update sidebar `href="#"` for "Schedule" to `route('schedule.index')`.
 ## Acceptance Criteria
 - [ ] Page renders at `/schedule` with chronological list
 - [ ] Posts grouped by day
-- [ ] Filters work: status, client, account, date range
+- [ ] Filters work: status, client, campaign, platform, account, date range
 - [ ] Campaign and media type filters work
 - [ ] Filter logic is implemented in the Livewire component query layer
 - [ ] Create modal works with all fields
 - [ ] Edit modal pre-fills existing data
-- [ ] Timeline entries show campaign and media type context
+- [ ] Timeline entries show campaign, platform, account, and media-type context
 - [ ] Timeline entries show proposal status context when available
-- [ ] Status can be changed (Planned → Published/Cancelled)
+- [ ] Status can be changed (Planned -> Published/Cancelled)
 - [ ] Delete with confirmation works
 - [ ] Authorization enforced
 - [ ] Feature tests cover CRUD and filtering

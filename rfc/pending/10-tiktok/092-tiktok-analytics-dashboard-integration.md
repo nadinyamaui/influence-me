@@ -11,6 +11,8 @@ Integrate TikTok metrics into analytics dashboards with platform-scoped toggles 
 
 ### Dashboard Updates
 - Add platform-level filters and cards that include TikTok metrics
+- Keep platform toggles enum-driven and extendable through `PlatformType`
+- Ensure at minimum `instagram`, `tiktok`, and `all` are available in this phase
 - Update trend and breakdown charts to support TikTok datasets
 
 ### Ownership + Guard Rules

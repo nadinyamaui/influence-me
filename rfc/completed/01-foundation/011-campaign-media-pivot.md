@@ -1,42 +1,51 @@
-# 011 - CampaignMedia Pivot Configuration
+# 011 - CampaignMedia Link Configuration
 
 **Labels:** `feature`, `foundation`, `campaigns`
 **Depends on:** #001, #004, #006
 
 ## Description
 
-This issue ensures the `campaign_media` pivot table is properly configured in both the `Client` and `InstagramMedia` models. No new model file is needed — the pivot is accessed through `belongsToMany` on both sides.
+Configure `campaign_media` as the campaign-scoped, polymorphic content-link table. Links must target campaign entities and platform media records, not free-text metadata.
 
 ## Implementation
 
-### Client Model (`app/Models/Client.php`)
-Ensure the relationship exists:
+### `campaign_media` table contract
+- `campaign_id`
+- `platform`
+- `linkable_type`
+- `linkable_id`
+- `notes`
+- timestamps
+
+Uniqueness:
+- Composite unique key on `[campaign_id, linkable_type, linkable_id]`
+
+### Campaign link model (`app/Models/CampaignMedia.php`)
+Ensure the model exposes:
+- `belongsTo(Campaign::class)`
+- `morphTo('linkable')`
+- enum cast for `platform` via `PlatformType`
+
+### Campaign model (`app/Models/Campaign.php`)
+Ensure relationship exists:
 ```php
-public function instagramMedia(): BelongsToMany
+public function contentLinks(): HasMany
 {
-    return $this->belongsToMany(InstagramMedia::class, 'campaign_media')
-        ->withPivot('campaign_name', 'notes')
-        ->withTimestamps();
+    return $this->hasMany(CampaignMedia::class);
 }
 ```
 
-### InstagramMedia Model (`app/Models/InstagramMedia.php`)
-Ensure the relationship exists:
-```php
-public function clients(): BelongsToMany
-{
-    return $this->belongsToMany(Client::class, 'campaign_media')
-        ->withPivot('campaign_name', 'notes')
-        ->withTimestamps();
-}
-```
+### Platform media models
+Each platform media model must expose a reverse polymorphic relationship to campaign links (for example on `InstagramMedia`, `TikTokMedia`, and future platform media models).
 
 ## Files to Modify
-- `app/Models/Client.php` (verify/add relationship)
-- `app/Models/InstagramMedia.php` (verify/add relationship)
+- `app/Models/Campaign.php`
+- `app/Models/InstagramMedia.php`
+- `app/Models/TikTokMedia.php` (when introduced)
+- `app/Models/CampaignMedia.php`
 
 ## Acceptance Criteria
-- [ ] Both sides of the many-to-many relationship work
-- [ ] Pivot data (`campaign_name`, `notes`) is accessible
-- [ ] Timestamps on pivot are tracked
-- [ ] Feature tests verify attaching/detaching media to clients with pivot data
+- [ ] Campaign-content links are stored through polymorphic rows in `campaign_media`
+- [ ] Duplicate links are prevented by unique constraint
+- [ ] Link rows include platform context via enum-backed `platform`
+- [ ] Feature tests verify attach/detach and ownership enforcement

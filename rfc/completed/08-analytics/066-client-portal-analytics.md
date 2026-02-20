@@ -65,4 +65,4 @@ Update `href="#"` for "Analytics" to `route('portal.analytics.index')`.
 
 ## Campaign Source Note
 
-Campaign-first analytics sourcing requirements are defined in RFC `099`.
+Campaign-first analytics sourcing requirements are defined in RFCs `064` and `097`, with TikTok dashboard expansion in RFC `092`.

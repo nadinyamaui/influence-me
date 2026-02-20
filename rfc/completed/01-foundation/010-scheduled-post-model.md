@@ -16,13 +16,14 @@ protected $guarded = [];
 ```
 
 Expected persisted attributes:
-`user_id`, `client_id`, `campaign_id`, `instagram_account_id`, `title`, `description`, `media_type`, `scheduled_at`, `status`
+`user_id`, `client_id`, `campaign_id`, `platform`, `platform_account_type`, `platform_account_id`, `title`, `description`, `media_type`, `scheduled_at`, `status`
 
 ### Casts
 ```php
 protected function casts(): array
 {
     return [
+        'platform' => PlatformType::class,
         'media_type' => MediaType::class,
         'status' => ScheduledPostStatus::class,
         'scheduled_at' => 'datetime',
@@ -34,7 +35,7 @@ protected function casts(): array
 - `belongsTo(User::class)`
 - `belongsTo(Client::class)` - nullable
 - `belongsTo(Campaign::class)` - nullable
-- `belongsTo(InstagramAccount::class)`
+- `morphTo('platformAccount', 'platform_account_type', 'platform_account_id')`
 
 ### Factory States
 - Default: planned post in the future
@@ -61,7 +62,8 @@ public function scheduledPosts(): HasMany
 - [ ] Relationships defined with return type hints
 - [ ] Client relationship is nullable
 - [ ] Campaign relationship is nullable
-- [ ] `media_type` is cast to `MediaType`
+- [ ] `platform` is cast to `PlatformType`
+- [ ] `media_type` remains enum-backed and nullable for non-mapped deliverables
 - [ ] Factory produces valid instances with all states
 - [ ] User model has `scheduledPosts()` relationship
-- [ ] Tests verify factory and relationships
+- [ ] Tests verify factory, relationships, and platform account ownership scoping

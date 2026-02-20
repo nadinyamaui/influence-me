@@ -33,7 +33,10 @@ protected function casts(): array
 - `hasOne(ClientUser::class)` - portal account
 - `hasMany(Proposal::class)`
 - `hasMany(Invoice::class)`
-- `belongsToMany(InstagramMedia::class, 'campaign_media')->withPivot('campaign_name', 'notes')->withTimestamps()` - linked content
+- `hasMany(Campaign::class)`
+
+Linked content source of truth:
+- Client-linked content is resolved through campaign entities and campaign-content links (`Client -> Campaign -> campaign_media`), not through direct client-media pivot metadata.
 
 ### Factory States
 - Default: generates realistic client data
@@ -59,4 +62,4 @@ public function clients(): HasMany
 - [ ] Relationships defined with return type hints
 - [ ] Factory produces valid instances with states
 - [ ] User model has `clients()` relationship
-- [ ] Tests verify factory and relationships
+- [ ] Tests verify factory, relationships, and campaign-scoped content ownership

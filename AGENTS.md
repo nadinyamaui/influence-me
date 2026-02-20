@@ -1,6 +1,6 @@
 # Influence Me Agent Delivery Guide
 
-This file is generated from the RFC set in `/rfc` (RFC `000` through `099`).
+This file is generated from the RFC set in `/rfc` (RFC `000` through `107`).
 Use it as the execution contract for AI agents working in this repository.
 
 ## Source of Truth
@@ -13,8 +13,7 @@ Use it as the execution contract for AI agents working in this repository.
 
 Influence Me is an influencer operating system that centralizes:
 
-- Instagram account connectivity and sync
-- TikTok account connectivity and sync
+- Multi-network account connectivity and sync (Instagram-first auth with platform expansion)
 - Content browsing and client campaign linking
 - Content scheduling timeline
 - Client CRM and client portal access
@@ -32,9 +31,10 @@ Influence Me is an influencer operating system that centralizes:
 - TikTok is an additional connected platform and must not replace Instagram-first influencer authentication
 - Client portal uses separate `client` guard with isolated session/auth flows (RFC `018`, `019`)
 - Data ownership is strict: influencers see only their data; clients see only their client-scoped data (RFC `012`)
-- `ScheduledPost` is planning/tracking CRUD in MVP, not direct Instagram auto-publishing
+- `ScheduledPost` is planning/tracking CRUD in MVP across supported platforms, not direct auto-publishing
 - External integrations (Instagram Graph API, TikTok API, Stripe) must be wrapped in service classes with typed error handling
 - Campaigns are first-class client-owned records; campaign identity must come from campaign entities, not free-text pivot metadata
+- `campaign_media` is a campaign-scoped polymorphic link table (`campaign_id` + `platform` + `linkable_type` + `linkable_id`)
 
 ## Domain Model Baseline (RFC 001/002)
 
@@ -54,7 +54,7 @@ Core entities:
 - `InvoiceItem`
 - `ScheduledPost`
 - `Campaign`
-- `campaign_media` pivot
+- `CampaignMedia` polymorphic link (`campaign_media` table)
 
 Required enums:
 
@@ -66,6 +66,7 @@ Required enums:
 - `DemographicType`: `age`, `gender`, `city`, `country`
 - `AccountType`: `business`, `creator`
 - `SyncStatus`: `idle`, `syncing`, `failed`
+- `PlatformType`: `instagram`, `tiktok`, `snapchat`, `youtube`, `twitch`, `kick`
 
 ## Required State Transitions
 
@@ -116,12 +117,13 @@ Additional scheduler requirements:
 - `020-030`: Instagram services, sync jobs, orchestration, accounts UI
 - `031-037`: Client management and client portal foundation
 - `038-042`: Content gallery, linking, client content tab, schedule timeline
-- `093-099`: Campaign-first content architecture (campaign schema, campaign-media linking, campaign UI, proposal/analytics context)
+- `093-098`: Campaign-first content architecture (campaign schema, campaign-media linking, campaign UI, proposal context)
 - `043-048`: Proposal CRUD, send flow, client approval/revision workflow
 - `049-057`: Invoicing CRUD, Stripe payment link/webhook, overdue handling
 - `058-066`: Analytics dashboard + client-scoped analytics
 - `067-073`: Test hardening, responsive/UX polish, security, deployment docs
 - `074-092`: TikTok platform integration (setup, models, connector/client/service, sync jobs, accounts UI, content + analytics integration)
+- `100-107`: Pricing catalog, proposal commercial snapshots, invoice import context, and hardening
 
 ## Implementation Expectations For Agents
 

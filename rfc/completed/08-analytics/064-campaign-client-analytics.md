@@ -27,7 +27,7 @@ Line chart (Chart.js) showing engagement of linked content over time:
 - Data points: each linked post
 
 **Campaign Breakdown:**
-If content is grouped by campaign names, show per-campaign stats:
+Show per-campaign stats sourced by campaign entities:
 | Campaign | Posts | Reach | Avg Engagement |
 |----------|-------|-------|----------------|
 | Summer Launch | 5 | 15,200 | 4.3% |
@@ -39,13 +39,20 @@ If content is grouped by campaign names, show per-campaign stats:
 
 ### Data Query
 ```php
-$linkedMedia = $client->instagramMedia()
-    ->with('instagramAccount')
+$campaigns = $client->campaigns()
+    ->with(['contentLinks.linkable', 'contentLinks.linkable.instagramAccount'])
     ->get();
+
+$linkedMedia = $campaigns
+    ->flatMap(fn ($campaign) => $campaign->contentLinks)
+    ->map(fn ($link) => $link->linkable)
+    ->filter();
 
 $totalReach = $linkedMedia->sum('reach');
 $avgEngagement = $linkedMedia->avg('engagement_rate');
-$campaignBreakdown = $linkedMedia->groupBy('pivot.campaign_name');
+$campaignBreakdown = $campaigns->mapWithKeys(fn ($campaign) => [
+    $campaign->name => $campaign->contentLinks,
+]);
 ```
 
 ## Files to Modify
@@ -61,4 +68,4 @@ $campaignBreakdown = $linkedMedia->groupBy('pivot.campaign_name');
 
 ## Campaign Source Note
 
-Campaign-first analytics sourcing requirements are defined in RFC `099`.
+Campaign-first analytics sourcing follows campaign entities and campaign-content links, not free-text pivot metadata.

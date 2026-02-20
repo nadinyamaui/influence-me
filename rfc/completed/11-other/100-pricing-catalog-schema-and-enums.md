@@ -10,7 +10,7 @@ Add schema and enums for influencer pricing products/plans and proposal pricing 
 ## Implementation
 
 ### Enums
-- Add `App\Enums\PlatformType` with values: `instagram`, `tiktok`.
+- Add `App\Enums\PlatformType` with values: `instagram`, `tiktok`, `snapchat`, `youtube`, `twitch`, `kick`.
 - Add `App\Enums\CatalogSourceType` with values: `product`, `plan`, `custom`.
 - Add `App\Enums\BillingUnitType` with values: `deliverable`, `package`.
 - Keep enum UI metadata (`label()`, badge helpers where relevant) on enum classes.
@@ -66,6 +66,9 @@ Create tables:
 - `line_total` (decimal 10,2)
 - `sort_order` (unsignedInteger default 0)
 - timestamps
+
+Platform deliverable rule:
+- `media_type` and `media_type_snapshot` may be null for platform deliverables that do not map to `post`, `reel`, or `story`.
 
 ### Models and Builders
 Create models + typed builders:

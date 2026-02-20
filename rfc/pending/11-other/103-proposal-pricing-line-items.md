@@ -21,6 +21,7 @@ Extend proposal editing and preview to include commercial line items sourced fro
 - Store all proposal commercial rows in `proposal_line_items`.
 - Save snapshot columns (`name_snapshot`, platform/media snapshots, price snapshot, quantity, total).
 - Recompute proposal commercial subtotal on save (computed in service, not inline UI).
+- For cross-platform packages, persist explicit split rows per platform/media-type combination (no unresolved aggregate bucket quantity).
 
 ### Service Changes
 - Add `ProposalPricingService` and integrate into `ProposalWorkflowService::updateDraftWithCampaignSchedule`.
@@ -45,6 +46,7 @@ Extend proposal editing and preview to include commercial line items sourced fro
 
 ## Acceptance Criteria
 - [ ] Proposal edit supports mixed-source pricing line items
+- [ ] Cross-platform package quantities are persisted as explicit platform split rows
 - [ ] Snapshots persist and remain unchanged after catalog edits
 - [ ] Proposal preview renders commercial breakdown and totals
 - [ ] Read-only behavior remains enforced for non-editable proposal statuses

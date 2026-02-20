@@ -5,21 +5,23 @@
 
 ## Description
 
-Render client linked content grouped by campaign entities rather than pivot campaign name text.
+Render client linked content grouped by campaign entities rather than pivot campaign-name text.
 
 ## Implementation
 
 ### Grouping behavior
 - Group by campaign record (`campaign.id`, display `campaign.name`).
+- Include linked content from all supported platforms.
 - Keep an "Uncategorized" group only for legacy/null-linked content if present.
 
 ### Display requirements
-- Campaign header: campaign name, linked post count, aggregate reach.
+- Campaign header: campaign name, linked content count, aggregate reach.
 - Media grid/cards remain compact.
+- Each media card includes platform badge.
 - Maintain aggregate stats banner for total linked metrics.
 
 ### Unlink behavior
-- Unlink continues to remove media association from campaign pivot.
+- Unlink removes the relevant polymorphic `campaign_media` link row.
 
 ## Files to Modify
 - `resources/views/pages/clients/show.blade.php`
@@ -27,6 +29,7 @@ Render client linked content grouped by campaign entities rather than pivot camp
 
 ## Acceptance Criteria
 - [ ] Content tab groups by campaign entity
+- [ ] Mixed-platform content renders with platform context
 - [ ] Aggregates are correct per campaign and global totals
 - [ ] Unlink behavior is preserved
 - [ ] Empty state is shown correctly

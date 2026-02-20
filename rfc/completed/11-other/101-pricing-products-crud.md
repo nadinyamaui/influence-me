@@ -23,8 +23,8 @@ Create Livewire pages for:
 
 Product form fields:
 - Name
-- Platform (`instagram`, `tiktok`)
-- Media type (`post`, `reel`, `story`) or nullable when generic
+- Platform (`instagram`, `tiktok`, `snapchat`, `youtube`, `twitch`, `kick`)
+- Media type (`post`, `reel`, `story`) or nullable when generic/non-mapped
 - Billing unit (`deliverable`, `package`)
 - Base price
 - Currency (default `USD`)
@@ -39,6 +39,8 @@ Implement query composition in `CatalogProductBuilder`:
 - `filterByPlatform(?string $platform)`
 - `filterByActive(?bool $active)`
 - `applySort(string $sort)`
+
+Platform filter options must come from `PlatformType` enum values (no hardcoded two-platform list).
 
 ### Service Layer
 Create `CatalogProductService` for create/update/archive workflows.

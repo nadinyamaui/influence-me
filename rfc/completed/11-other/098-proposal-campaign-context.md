@@ -20,6 +20,7 @@ Show campaign collection context in proposal experiences when campaigns are link
 - Campaign collection rendering is nullable-safe for legacy proposals with no linked campaigns.
 - Campaign grouping source of truth is campaign entities linked via `campaigns.proposal_id`.
 - Scheduled content display source of truth is scheduled posts linked to each campaign.
+- Each scheduled row includes platform, account, media type (when present), and datetime context.
 
 ## Files to Modify
 - `resources/views/pages/proposals/create.blade.php`
@@ -30,6 +31,6 @@ Show campaign collection context in proposal experiences when campaigns are link
 ## Acceptance Criteria
 - [ ] Influencer proposal pages show campaign collection context when campaigns are linked
 - [ ] Client portal proposal detail shows campaign collection context when campaigns are linked
-- [ ] Each campaign section includes scheduled content rows with media type and datetime
+- [ ] Each campaign section includes scheduled content rows with platform, account, media type (when present), and datetime
 - [ ] Null/legacy no-campaign state is handled cleanly
 - [ ] Feature tests cover multi-campaign and absent-campaign contexts

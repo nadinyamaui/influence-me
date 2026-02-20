@@ -32,7 +32,7 @@ protected function casts(): array
 
 ### Relationships
 - `belongsTo(InstagramAccount::class)` - the account this media belongs to
-- `belongsToMany(Client::class, 'campaign_media')->withPivot('campaign_name', 'notes')->withTimestamps()` - linked clients
+- `morphMany(CampaignMedia::class, 'linkable')` - campaign links for this media in `campaign_media`
 
 ### Factory States
 - Default: generates realistic post data
@@ -49,4 +49,4 @@ protected function casts(): array
 - [ ] Model created with `protected $guarded = [];` and required casts
 - [ ] Relationships defined with return type hints
 - [ ] Factory produces valid model instances with all states
-- [ ] Tests verify factory and relationships
+- [ ] Tests verify factory and polymorphic campaign-link relationship behavior

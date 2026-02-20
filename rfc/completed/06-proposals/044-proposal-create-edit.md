@@ -32,8 +32,10 @@ Route::livewire('proposals/{proposal}/edit', 'proposals.edit')
 - `campaigns.*.scheduled_items`: required, array, min:1
 - `campaigns.*.scheduled_items.*.title`: required, string, max:255
 - `campaigns.*.scheduled_items.*.description`: nullable, string, max:5000
-- `campaigns.*.scheduled_items.*.media_type`: required, in:post,reel,story
-- `campaigns.*.scheduled_items.*.instagram_account_id`: required, exists:instagram_accounts,id (scoped to user)
+- `campaigns.*.scheduled_items.*.platform`: required, in:instagram,tiktok,snapchat,youtube,twitch,kick
+- `campaigns.*.scheduled_items.*.platform_account_type`: required, string
+- `campaigns.*.scheduled_items.*.platform_account_id`: required, integer
+- `campaigns.*.scheduled_items.*.media_type`: nullable, in:post,reel,story
 - `campaigns.*.scheduled_items.*.scheduled_at`: required, date
 
 ### Create Page: `resources/views/pages/proposals/create.blade.php`
@@ -49,8 +51,9 @@ Route::livewire('proposals/{proposal}/edit', 'proposals.edit')
   - Optional selection of existing client campaign
 - Scheduled content builder inside each campaign (required, min 1 per campaign):
   - Title
-  - Content type (`Post`, `Reel`, `Story`)
-  - Instagram account
+  - Platform (`Instagram`, `TikTok`, `Snapchat`, `YouTube`, `Twitch`, `Kick`)
+  - Platform account
+  - Content type (`Post`, `Reel`, `Story`) when applicable
   - Date/time
   - Optional description
 - Preview toggle: button that switches between edit and preview mode
@@ -99,7 +102,8 @@ public function update(): void
 - [ ] Markdown preview toggle works
 - [ ] Proposal requires at least one linked campaign
 - [ ] Every linked campaign requires at least one scheduled content item
-- [ ] Scheduled content enforces valid `media_type` (`post`, `reel`, `story`)
+- [ ] Scheduled content enforces valid platform and ownership-scoped account linkage
+- [ ] `media_type` remains valid and nullable for non-mapped platform deliverables
 - [ ] Campaign and schedule ownership scoping is enforced for authenticated influencer
 - [ ] Only Draft/Revised proposals are editable
 - [ ] Client dropdown scoped to user's clients

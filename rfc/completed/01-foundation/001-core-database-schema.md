@@ -137,17 +137,22 @@ Index: `[instagram_account_id, type, recorded_at]`
 | total | decimal(10,2) | |
 | timestamps | | |
 
-### `campaign_media` (pivot)
+### `campaign_media` (polymorphic campaign-content link)
 | Column | Type | Notes |
 |--------|------|-------|
 | id | bigIncrements | |
-| client_id | foreignId | constrained, cascadeOnDelete |
-| instagram_media_id | foreignId | constrained, cascadeOnDelete |
-| campaign_name | string, nullable | |
+| campaign_id | foreignId | constrained, cascadeOnDelete |
+| platform | string | enum-backed `PlatformType` |
+| linkable_type | string | target model class |
+| linkable_id | unsignedBigInteger | target model key |
 | notes | text, nullable | |
 | timestamps | | |
 
-Unique: `[client_id, instagram_media_id]`
+Unique:
+- `[campaign_id, linkable_type, linkable_id]`
+
+Indexes:
+- `[platform, linkable_type, linkable_id]`
 
 ### `scheduled_posts`
 | Column | Type | Notes |
@@ -156,13 +161,18 @@ Unique: `[client_id, instagram_media_id]`
 | user_id | foreignId | constrained, cascadeOnDelete |
 | client_id | foreignId, nullable | constrained, nullOnDelete |
 | campaign_id | foreignId, nullable | constrained, nullOnDelete |
-| instagram_account_id | foreignId | constrained, cascadeOnDelete |
+| platform | string | enum-backed `PlatformType` |
+| platform_account_type | string | morph type for connected account model |
+| platform_account_id | unsignedBigInteger | morph id for connected account model |
 | title | string | |
 | description | text, nullable | |
-| media_type | string | Post, Reel, Story |
+| media_type | string, nullable | Post, Reel, Story when applicable |
 | scheduled_at | timestamp | |
 | status | string, default 'planned' | Planned, Published, Cancelled |
 | timestamps | | |
+
+Index:
+- `[platform, platform_account_type, platform_account_id]`
 
 ## Files to Create/Modify
 - `database/migrations/xxxx_modify_users_table_for_oauth.php`
@@ -182,4 +192,4 @@ Unique: `[client_id, instagram_media_id]`
 - [ ] All foreign keys and indexes are properly defined
 - [ ] Rollbacks work cleanly
 - [ ] `users.password` is nullable
-- [ ] Pivot table has composite unique constraint
+- [ ] `campaign_media` polymorphic unique constraint prevents duplicate campaign-content links

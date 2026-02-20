@@ -55,4 +55,4 @@ $linkedMedia = $client->instagramMedia()
 
 ## Forward Compatibility Note
 
-This RFC remains historical for the initial implementation. Campaign-entity grouping requirements are defined in RFCs `097` and `099`.
+This RFC remains historical for the initial implementation. Campaign-entity and polymorphic campaign-content linking requirements are defined in RFCs `094`, `096`, and `097`.
