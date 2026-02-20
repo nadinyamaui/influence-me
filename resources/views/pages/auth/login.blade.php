@@ -28,7 +28,7 @@
                 viewable
             />
 
-            <label for="remember" class="inline-flex items-center gap-2 text-sm text-zinc-600 dark:text-zinc-400">
+            <label for="remember" class="inline-flex min-h-11 items-center gap-2 text-sm text-zinc-600 dark:text-zinc-400">
                 <input id="remember" type="checkbox" name="remember" class="rounded border-zinc-300 text-zinc-900 shadow-sm focus:ring-zinc-500 dark:border-zinc-600 dark:bg-zinc-900" />
                 <span>{{ __('Remember me') }}</span>
             </label>

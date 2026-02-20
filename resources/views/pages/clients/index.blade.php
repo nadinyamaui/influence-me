@@ -50,7 +50,60 @@
         </section>
     @else
         <section class="overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm dark:border-zinc-700 dark:bg-zinc-900">
-            <div class="overflow-x-auto">
+            <div class="space-y-3 p-4 sm:hidden">
+                @foreach ($clients as $client)
+                    <article wire:key="client-card-{{ $client->id }}" class="rounded-xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-700 dark:bg-zinc-800/60">
+                        <div class="flex items-start justify-between gap-3">
+                            <div class="min-w-0">
+                                <a
+                                    href="{{ route('clients.show', $client) }}"
+                                    class="font-medium text-blue-600 transition hover:underline dark:text-blue-400"
+                                    wire:navigate
+                                >
+                                    {{ $client->name }}
+                                </a>
+                                <p class="mt-1 text-sm text-zinc-600 dark:text-zinc-300">{{ $client->company_name ?? '—' }}</p>
+                            </div>
+                            <span class="inline-flex rounded-full px-2.5 py-1 text-xs font-medium {{ $client->type->badgeClasses() }}">
+                                {{ $client->type->label() }}
+                            </span>
+                        </div>
+                        <dl class="mt-3 space-y-2 text-sm">
+                            <div class="flex items-center justify-between gap-3">
+                                <dt class="text-zinc-500 dark:text-zinc-300">Email</dt>
+                                <dd class="truncate text-zinc-700 dark:text-zinc-200">{{ $client->email ?? '—' }}</dd>
+                            </div>
+                            <div class="flex items-center justify-between gap-3">
+                                <dt class="text-zinc-500 dark:text-zinc-300">Campaigns</dt>
+                                <dd class="text-zinc-700 dark:text-zinc-200">{{ number_format($client->campaigns_count) }}</dd>
+                            </div>
+                        </dl>
+                        <div class="mt-4 flex justify-end gap-2">
+                            <a
+                                href="{{ route('clients.edit', $client) }}"
+                                class="inline-flex h-11 w-11 items-center justify-center rounded-md border border-zinc-300 text-xs font-medium text-zinc-700 transition hover:bg-zinc-100 dark:border-zinc-600 dark:text-zinc-200 dark:hover:bg-zinc-800"
+                                title="Edit"
+                                aria-label="Edit"
+                                wire:navigate
+                            >
+                                <i class="fa-solid fa-pen-to-square" aria-hidden="true"></i>
+                            </a>
+                            <button
+                                type="button"
+                                wire:click="delete({{ $client->id }})"
+                                wire:confirm="Are you sure you want to delete '{{ $client->name }}'?"
+                                class="inline-flex h-11 w-11 items-center justify-center rounded-md border border-rose-300 text-xs font-medium text-rose-700 transition hover:bg-rose-50 dark:border-rose-800 dark:text-rose-200 dark:hover:bg-rose-950/40"
+                                title="Delete"
+                                aria-label="Delete"
+                            >
+                                <i class="fa-solid fa-trash" aria-hidden="true"></i>
+                            </button>
+                        </div>
+                    </article>
+                @endforeach
+            </div>
+
+            <div class="hidden overflow-x-auto sm:block">
                 <table class="min-w-full divide-y divide-zinc-200 text-sm dark:divide-zinc-700">
                     <thead class="bg-zinc-50 dark:bg-zinc-800/50">
                         <tr>
@@ -86,7 +139,7 @@
                                     <div class="flex justify-end gap-2">
                                         <a
                                             href="{{ route('clients.edit', $client) }}"
-                                            class="inline-flex items-center rounded-md border border-zinc-300 px-3 py-1.5 text-xs font-medium text-zinc-700 transition hover:bg-zinc-100 dark:border-zinc-600 dark:text-zinc-200 dark:hover:bg-zinc-800"
+                                            class="inline-flex h-11 w-11 items-center justify-center rounded-md border border-zinc-300 text-xs font-medium text-zinc-700 transition hover:bg-zinc-100 sm:h-auto sm:w-auto sm:px-3 sm:py-1.5 dark:border-zinc-600 dark:text-zinc-200 dark:hover:bg-zinc-800"
                                             title="Edit"
                                             aria-label="Edit"
                                             wire:navigate
@@ -97,7 +150,7 @@
                                             type="button"
                                             wire:click="delete({{ $client->id }})"
                                             wire:confirm="Are you sure you want to delete '{{ $client->name }}'?"
-                                            class="inline-flex items-center rounded-md border border-rose-300 px-3 py-1.5 text-xs font-medium text-rose-700 transition hover:bg-rose-50 dark:border-rose-800 dark:text-rose-200 dark:hover:bg-rose-950/40"
+                                            class="inline-flex h-11 w-11 items-center justify-center rounded-md border border-rose-300 text-xs font-medium text-rose-700 transition hover:bg-rose-50 sm:h-auto sm:w-auto sm:px-3 sm:py-1.5 dark:border-rose-800 dark:text-rose-200 dark:hover:bg-rose-950/40"
                                             title="Delete"
                                             aria-label="Delete"
                                         >

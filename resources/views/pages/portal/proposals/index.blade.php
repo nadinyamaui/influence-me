@@ -27,7 +27,42 @@
         </section>
     @else
         <section class="overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm dark:border-zinc-700 dark:bg-zinc-900">
-            <div class="overflow-x-auto">
+            <div class="space-y-3 p-4 sm:hidden">
+                @foreach ($proposals as $proposal)
+                    <article wire:key="portal-proposal-card-{{ $proposal->id }}" class="rounded-xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-700 dark:bg-zinc-800/60">
+                        <a
+                            href="{{ route('portal.proposals.show', $proposal) }}"
+                            wire:navigate
+                            class="font-medium text-zinc-900 underline-offset-2 hover:underline dark:text-zinc-100"
+                        >
+                            {{ $proposal->title }}
+                        </a>
+                        <div class="mt-2 flex flex-wrap items-center gap-2">
+                            <span class="inline-flex rounded-full px-2.5 py-1 text-xs font-medium {{ $proposal->status->badgeClasses() }}">
+                                {{ $proposal->status->label() }}
+                            </span>
+                            <span class="text-xs text-zinc-500 dark:text-zinc-300">Received {{ $proposal->sent_at?->format('M d, Y') ?? '—' }}</span>
+                        </div>
+                        <dl class="mt-3 grid grid-cols-2 gap-2 text-sm">
+                            <div>
+                                <dt class="text-zinc-500 dark:text-zinc-300">Campaigns</dt>
+                                <dd class="mt-1 text-zinc-700 dark:text-zinc-200">{{ number_format($proposal->campaigns_count) }}</dd>
+                            </div>
+                            <div>
+                                <dt class="text-zinc-500 dark:text-zinc-300">Scheduled</dt>
+                                <dd class="mt-1 text-zinc-700 dark:text-zinc-200">{{ number_format($proposal->scheduled_content_count ?? 0) }}</dd>
+                            </div>
+                        </dl>
+                        <div class="mt-4">
+                            <flux:button :href="route('portal.proposals.show', $proposal)" wire:navigate variant="filled" class="w-full" size="sm">
+                                View
+                            </flux:button>
+                        </div>
+                    </article>
+                @endforeach
+            </div>
+
+            <div class="hidden overflow-x-auto sm:block">
                 <table class="min-w-full divide-y divide-zinc-200 text-sm dark:divide-zinc-700">
                     <thead class="bg-zinc-50 dark:bg-zinc-800/50">
                         <tr>

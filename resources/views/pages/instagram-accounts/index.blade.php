@@ -13,7 +13,7 @@
         @if ($accounts->isNotEmpty())
             <a
                 href="{{ route('auth.facebook.add') }}"
-                class="inline-flex items-center rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-zinc-700 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300"
+                class="inline-flex min-h-11 items-center rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-zinc-700 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300"
             >
                 Connect Another Account
             </a>
@@ -38,7 +38,7 @@
             <p class="mt-2 text-sm text-zinc-600 dark:text-zinc-300">Click below to connect your first account.</p>
             <a
                 href="{{ route('auth.facebook.add') }}"
-                class="mt-5 inline-flex items-center rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-zinc-700 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300"
+                class="mt-5 inline-flex min-h-11 items-center rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-zinc-700 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300"
             >
                 Connect Instagram Account
             </a>
@@ -160,7 +160,7 @@
                             type="button"
                             wire:click="syncNow({{ $account->id }})"
                             @disabled($accountIsSyncing)
-                            class="inline-flex items-center rounded-md border border-amber-300 px-3 py-1.5 text-xs font-medium text-amber-700 transition hover:bg-amber-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-amber-700 dark:text-amber-200 dark:hover:bg-amber-900/20"
+                            class="inline-flex min-h-11 items-center rounded-md border border-amber-300 px-3 py-1.5 text-xs font-medium text-amber-700 transition hover:bg-amber-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-amber-700 dark:text-amber-200 dark:hover:bg-amber-900/20"
                         >
                             Sync Now
                         </button>
@@ -169,7 +169,7 @@
                             <button
                                 type="button"
                                 wire:click="setPrimary({{ $account->id }})"
-                                class="inline-flex items-center rounded-md border border-zinc-300 px-3 py-1.5 text-xs font-medium text-zinc-700 transition hover:bg-zinc-100 dark:border-zinc-600 dark:text-zinc-200 dark:hover:bg-zinc-800"
+                                class="inline-flex min-h-11 items-center rounded-md border border-zinc-300 px-3 py-1.5 text-xs font-medium text-zinc-700 transition hover:bg-zinc-100 dark:border-zinc-600 dark:text-zinc-200 dark:hover:bg-zinc-800"
                             >
                                 Set Primary
                             </button>
@@ -179,7 +179,7 @@
                             type="button"
                             wire:click="disconnect({{ $account->id }})"
                             wire:confirm="Disconnect @{{ $account->username }}?"
-                            class="inline-flex items-center rounded-md border border-rose-300 px-3 py-1.5 text-xs font-medium text-rose-700 transition hover:bg-rose-50 dark:border-rose-800 dark:text-rose-200 dark:hover:bg-rose-950/40"
+                            class="inline-flex min-h-11 items-center rounded-md border border-rose-300 px-3 py-1.5 text-xs font-medium text-rose-700 transition hover:bg-rose-50 dark:border-rose-800 dark:text-rose-200 dark:hover:bg-rose-950/40"
                         >
                             Disconnect
                         </button>

@@ -41,6 +41,7 @@ test('authenticated users can view scoped content gallery page', function (): vo
         ->assertSee('Owner gallery post')
         ->assertSee('6.25%')
         ->assertDontSee('Hidden outsider post')
+        ->assertSee('class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4"', false)
         ->assertSee('href="'.route('content.index').'"', false);
 });
 
