@@ -5,7 +5,7 @@
 
 ## Description
 
-Create a queued job that syncs TikTok videos for a linked account with cursor pagination.
+Create a queued job that syncs TikTok videos for a linked TikTok `SocialAccount` with cursor pagination.
 
 ## Implementation
 

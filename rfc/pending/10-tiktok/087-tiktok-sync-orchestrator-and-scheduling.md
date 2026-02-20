@@ -11,7 +11,7 @@ Create an orchestration job and scheduler entries for periodic TikTok sync opera
 
 ### Orchestrator Job
 - `App\Jobs\SyncAllTikTokData`
-- For each connected account, chain profile/media/insights/demographics jobs
+- For each connected TikTok `SocialAccount`, chain profile/media/insights/demographics jobs
 
 ### Scheduler Cadence
 - Full sync every 6 hours

@@ -5,12 +5,12 @@
 
 ## Description
 
-Add manual sync controls and detailed sync status UI for each TikTok account.
+Add manual sync controls and detailed sync status UI for TikTok accounts within the shared connected-accounts UI.
 
 ## Implementation
 
 ### Manual Sync
-- Add per-account action to dispatch sync orchestrator/profile sync job
+- Add per-TikTok-account action to dispatch sync orchestrator/profile sync job
 
 ### Status Display
 - Show `idle`, `syncing`, `failed` states
@@ -18,7 +18,7 @@ Add manual sync controls and detailed sync status UI for each TikTok account.
 - Add loading and disabled states during active sync
 
 ## Files to Modify
-- `resources/views/pages/tiktok-accounts/index.blade.php`
+- existing shared accounts page/view
 - `app/Jobs/SyncAllTikTokData.php` (if needed for scoped dispatch)
 
 ## Acceptance Criteria

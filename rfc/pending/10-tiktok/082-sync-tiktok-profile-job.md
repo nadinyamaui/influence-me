@@ -5,7 +5,7 @@
 
 ## Description
 
-Create a queued job to sync a single TikTok account profile.
+Create a queued job to sync a single TikTok `SocialAccount` profile.
 
 ## Implementation
 

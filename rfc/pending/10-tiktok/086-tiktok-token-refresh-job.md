@@ -14,7 +14,7 @@ Create a queued job that refreshes expiring TikTok access tokens and stores upda
 - Calls `TikTokSyncService::refreshAccessToken()`
 
 ### Behavior
-- Runs only for accounts expiring within a configurable threshold
+- Runs only for TikTok `SocialAccount` records expiring within a configurable threshold
 - Logs and marks sync failure when refresh fails
 
 ## Files to Create
