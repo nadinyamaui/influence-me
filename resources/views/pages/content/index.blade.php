@@ -30,7 +30,7 @@
     @endif
 
     <section class="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-700 dark:bg-zinc-900">
-        <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+        <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
             <flux:select wire:model.live="mediaType" :label="__('Media Type')">
                 <option value="all">All</option>
                 @foreach ($mediaTypeFilters as $mediaType)
@@ -70,7 +70,7 @@
             <h2 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100">No content synced yet. Connect an Instagram account and run a sync.</h2>
         </section>
     @else
-        <section class="grid grid-cols-2 gap-4 lg:grid-cols-4">
+        <section class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             @foreach ($media as $item)
                 @php
                     $isSelected = in_array($item->id, $selectedMediaIds, true);
@@ -188,7 +188,7 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-2 text-sm">
+                    <div class="grid grid-cols-1 gap-2 text-sm sm:grid-cols-2">
                         @php
                             $likesComparison = $selectedMediaComparisons['likes'] ?? null;
                             $commentsComparison = $selectedMediaComparisons['comments'] ?? null;
@@ -353,7 +353,7 @@
         name="content-link-modal"
         wire:model="showLinkModal"
         @close="closeLinkModal"
-        class="max-w-2xl sm:min-w-[42rem]"
+        class="w-full max-w-2xl"
     >
         <h2 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100">{{ $linkingBatch ? 'Link Selected Content to Client' : 'Link Content to Client' }}</h2>
 

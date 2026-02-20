@@ -63,7 +63,29 @@
                 @if (count($clientAnalytics['campaign_breakdown']) === 0)
                     <p class="mt-4 text-sm text-zinc-600 dark:text-zinc-300">No campaign-level analytics available yet.</p>
                 @else
-                    <div class="mt-4 overflow-x-auto">
+                    <div class="mt-4 space-y-2 sm:hidden">
+                        @foreach ($clientAnalytics['campaign_breakdown'] as $item)
+                            <article wire:key="portal-client-analytics-campaign-card-{{ $item['campaign_id'] }}" class="rounded-lg border border-zinc-200 bg-zinc-50 p-3 dark:border-zinc-700 dark:bg-zinc-800/60">
+                                <p class="text-sm font-medium text-zinc-900 dark:text-zinc-100">{{ $item['campaign_name'] }}</p>
+                                <dl class="mt-2 grid grid-cols-2 gap-2 text-xs">
+                                    <div>
+                                        <dt class="text-zinc-500 dark:text-zinc-300">Posts</dt>
+                                        <dd class="mt-1 text-zinc-700 dark:text-zinc-200">{{ number_format($item['posts']) }}</dd>
+                                    </div>
+                                    <div>
+                                        <dt class="text-zinc-500 dark:text-zinc-300">Reach</dt>
+                                        <dd class="mt-1 text-zinc-700 dark:text-zinc-200">{{ number_format($item['reach']) }}</dd>
+                                    </div>
+                                    <div class="col-span-2">
+                                        <dt class="text-zinc-500 dark:text-zinc-300">Avg Engagement</dt>
+                                        <dd class="mt-1 text-zinc-700 dark:text-zinc-200">{{ number_format($item['average_engagement_rate'], 2) }}%</dd>
+                                    </div>
+                                </dl>
+                            </article>
+                        @endforeach
+                    </div>
+
+                    <div class="mt-4 hidden overflow-x-auto sm:block">
                         <table class="min-w-full divide-y divide-zinc-200 text-sm dark:divide-zinc-700">
                             <thead class="bg-zinc-50 dark:bg-zinc-800/50">
                                 <tr>

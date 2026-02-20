@@ -275,6 +275,24 @@ test('client cannot approve a proposal that has already been responded to', func
     Mail::assertNothingSent();
 });
 
+test('portal proposals list includes mobile card layout and desktop table layout', function (): void {
+    $influencer = User::factory()->create();
+    $client = Client::factory()->for($influencer)->create();
+    $clientUser = ClientUser::factory()->for($client)->create();
+
+    Proposal::factory()->for($influencer)->for($client)->create([
+        'title' => 'Responsive Portal Proposal',
+        'status' => ProposalStatus::Sent,
+        'sent_at' => now()->subDay(),
+    ]);
+
+    $this->actingAs($clientUser, 'client')
+        ->get(route('portal.proposals.index'))
+        ->assertSuccessful()
+        ->assertSee('portal-proposal-card-', false)
+        ->assertSee('class="hidden overflow-x-auto sm:block"', false);
+});
+
 test('client request changes requires revision notes with at least ten characters', function (): void {
     Mail::fake();
 
