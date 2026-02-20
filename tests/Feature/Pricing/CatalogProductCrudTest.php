@@ -73,6 +73,33 @@ test('pricing products index supports search platform status and sort filters th
         ->assertSee('Archived Product');
 });
 
+test('pricing products index normalizes invalid filter values', function (): void {
+    $user = User::factory()->create();
+
+    CatalogProduct::factory()->for($user)->create([
+        'name' => 'Active Product',
+        'platform' => PlatformType::Instagram,
+        'is_active' => true,
+    ]);
+
+    CatalogProduct::factory()->for($user)->create([
+        'name' => 'Archived Product',
+        'platform' => PlatformType::TikTok,
+        'is_active' => false,
+    ]);
+
+    Livewire::actingAs($user)
+        ->test(ProductsIndex::class)
+        ->set('status', 'invalid-status')
+        ->assertSet('status', 'active')
+        ->set('platform', 'youtube')
+        ->assertSet('platform', 'all')
+        ->set('sort', 'invalid-sort')
+        ->assertSet('sort', 'newest')
+        ->assertSee('Active Product')
+        ->assertDontSee('Archived Product');
+});
+
 test('pricing products list shows empty state', function (): void {
     $user = User::factory()->create();
 
@@ -178,6 +205,30 @@ test('archiving and unarchiving products works from list page', function (): voi
     Livewire::actingAs($user)
         ->test(ProductsIndex::class)
         ->call('unarchive', $product->id);
+
+    $this->assertDatabaseHas('catalog_products', [
+        'id' => $product->id,
+        'is_active' => 1,
+    ]);
+});
+
+test('archiving and unarchiving products works from edit form page', function (): void {
+    $user = User::factory()->create();
+    $product = CatalogProduct::factory()->for($user)->create(['is_active' => true]);
+
+    $component = Livewire::actingAs($user)
+        ->test(ProductsForm::class, ['product' => $product])
+        ->call('archive')
+        ->assertSet('is_active', false);
+
+    $this->assertDatabaseHas('catalog_products', [
+        'id' => $product->id,
+        'is_active' => 0,
+    ]);
+
+    $component
+        ->call('unarchive')
+        ->assertSet('is_active', true);
 
     $this->assertDatabaseHas('catalog_products', [
         'id' => $product->id,

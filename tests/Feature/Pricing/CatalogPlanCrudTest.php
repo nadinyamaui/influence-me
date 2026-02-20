@@ -75,6 +75,34 @@ test('pricing plans index supports search status and sort filters through builde
         ->assertDontSee('Alpha Plan');
 });
 
+test('pricing plans index normalizes invalid filter values', function (): void {
+    $user = User::factory()->create();
+
+    $product = CatalogProduct::factory()->for($user)->create();
+
+    $activePlan = CatalogPlan::factory()->for($user)->create([
+        'name' => 'Active Plan',
+        'is_active' => true,
+    ]);
+
+    $archivedPlan = CatalogPlan::factory()->for($user)->create([
+        'name' => 'Archived Plan',
+        'is_active' => false,
+    ]);
+
+    CatalogPlanItem::factory()->for($activePlan)->for($product)->create();
+    CatalogPlanItem::factory()->for($archivedPlan)->for($product)->create();
+
+    Livewire::actingAs($user)
+        ->test(PlansIndex::class)
+        ->set('status', 'invalid-status')
+        ->assertSet('status', 'active')
+        ->set('sort', 'invalid-sort')
+        ->assertSet('sort', 'newest')
+        ->assertSee('Active Plan')
+        ->assertDontSee('Archived Plan');
+});
+
 test('pricing plans list shows empty state', function (): void {
     $user = User::factory()->create();
 
@@ -91,6 +119,63 @@ test('plan form hides unit override and row total columns', function (): void {
         ->test(PlansForm::class)
         ->assertDontSee('Unit Override')
         ->assertDontSee('Row Total');
+});
+
+test('plan form only lists active products owned by influencer', function (): void {
+    $user = User::factory()->create();
+    $outsider = User::factory()->create();
+
+    $activeOwnedProduct = CatalogProduct::factory()->for($user)->create([
+        'name' => 'Owned Active Product',
+        'is_active' => true,
+    ]);
+
+    $archivedOwnedProduct = CatalogProduct::factory()->for($user)->create([
+        'name' => 'Owned Archived Product',
+        'is_active' => false,
+    ]);
+
+    $outsiderActiveProduct = CatalogProduct::factory()->for($outsider)->create([
+        'name' => 'Outsider Active Product',
+        'is_active' => true,
+    ]);
+
+    Livewire::actingAs($user)
+        ->test(PlansForm::class)
+        ->assertSee($activeOwnedProduct->name)
+        ->assertDontSee($archivedOwnedProduct->name)
+        ->assertDontSee($outsiderActiveProduct->name);
+});
+
+test('plan form supports adding and removing item rows', function (): void {
+    $user = User::factory()->create();
+
+    $component = Livewire::actingAs($user)
+        ->test(PlansForm::class)
+        ->assertSet('items', [[
+            'catalog_product_id' => '',
+            'quantity' => '1',
+        ]])
+        ->call('addItemRow');
+
+    expect($component->get('items'))->toHaveCount(2);
+
+    $component
+        ->set('items.0.quantity', '2')
+        ->set('items.1.quantity', '3')
+        ->call('removeItemRow', 0);
+
+    expect($component->get('items'))->toBe([[
+        'catalog_product_id' => '',
+        'quantity' => '3',
+    ]]);
+
+    $component->call('removeItemRow', 0);
+
+    expect($component->get('items'))->toBe([[
+        'catalog_product_id' => '',
+        'quantity' => '3',
+    ]]);
 });
 
 test('influencer can create pricing plans with nested items', function (): void {
@@ -203,6 +288,18 @@ test('create form validates plan composition and ownership rules', function (): 
         ->set('items', [])
         ->call('save')
         ->assertHasErrors(['items']);
+});
+
+test('plan edit form seeds an empty row when existing plan has no items', function (): void {
+    $user = User::factory()->create();
+    $plan = CatalogPlan::factory()->for($user)->create();
+
+    Livewire::actingAs($user)
+        ->test(PlansForm::class, ['plan' => $plan])
+        ->assertSet('items', [[
+            'catalog_product_id' => '',
+            'quantity' => '1',
+        ]]);
 });
 
 test('influencer can edit pricing plans and replace nested items', function (): void {
