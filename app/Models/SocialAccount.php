@@ -6,6 +6,8 @@ use App\Builders\SocialAccountBuilder;
 use App\Enums\AccountType;
 use App\Enums\SocialNetwork;
 use App\Enums\SyncStatus;
+use App\Services\SocialMedia\SocialMediaInterface;
+use App\Services\SocialMedia\SocialMediaManager;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -53,5 +55,40 @@ class SocialAccount extends Model
     public function followerSnapshots(): HasMany
     {
         return $this->hasMany(FollowerSnapshot::class);
+    }
+
+    public function retrieveMedia(): void
+    {
+        $this->socialMediaService()->retrieveMedia();
+    }
+
+    public function syncMediaInsights(): void
+    {
+        $this->socialMediaService()->syncMediaInsights();
+    }
+
+    public function syncStories(): void
+    {
+        $this->socialMediaService()->syncStories();
+    }
+
+    public function getProfile(): array
+    {
+        return $this->socialMediaService()->getProfile();
+    }
+
+    public function refreshLongLivedToken(): string
+    {
+        return $this->socialMediaService()->refreshLongLivedToken();
+    }
+
+    public function syncAudienceDemographics(): void
+    {
+        $this->socialMediaService()->syncAudienceDemographics();
+    }
+
+    protected function socialMediaService(): SocialMediaInterface
+    {
+        return app(SocialMediaManager::class)->forAccount($this);
     }
 }

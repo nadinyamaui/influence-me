@@ -6,7 +6,6 @@ use App\Enums\SyncStatus;
 use App\Exceptions\InstagramApiException;
 use App\Exceptions\InstagramTokenExpiredException;
 use App\Models\SocialAccount;
-use App\Services\Facebook\InstagramGraphService;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Queue\InteractsWithQueue;
@@ -31,7 +30,7 @@ class SyncInstagramProfile implements ShouldQueue
     public function handle(): void
     {
         try {
-            $profile = app(InstagramGraphService::class, ['account' => $this->account])->getProfile();
+            $profile = $this->account->getProfile();
         } catch (InstagramTokenExpiredException $exception) {
             Log::warning('Instagram profile sync failed due to expired token.', [
                 'social_account_id' => $this->account->id,

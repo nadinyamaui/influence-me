@@ -6,7 +6,6 @@ use App\Enums\SyncStatus;
 use App\Exceptions\InstagramApiException;
 use App\Exceptions\InstagramTokenExpiredException;
 use App\Models\SocialAccount;
-use App\Services\Facebook\InstagramGraphService;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Queue\InteractsWithQueue;
@@ -46,7 +45,7 @@ class RefreshInstagramToken implements ShouldQueue
         }
 
         try {
-            $newToken = app(InstagramGraphService::class, ['account' => $this->account])->refreshLongLivedToken();
+            $newToken = $this->account->refreshLongLivedToken();
         } catch (InstagramTokenExpiredException $exception) {
             $message = 'Instagram token refresh failed because token is expired and requires account re-authentication.';
 

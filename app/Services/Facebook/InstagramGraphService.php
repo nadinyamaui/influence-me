@@ -7,11 +7,12 @@ use App\Exceptions\InstagramApiException;
 use App\Exceptions\InstagramTokenExpiredException;
 use App\Models\InstagramMedia;
 use App\Models\SocialAccount;
+use App\Services\SocialMedia\SocialMediaInterface;
 use Carbon\Carbon;
 use FacebookAds\Http\Exception\AuthorizationException;
 use FacebookAds\Http\Exception\RequestException;
 
-class InstagramGraphService
+class InstagramGraphService implements SocialMediaInterface
 {
     protected Client $client;
 
