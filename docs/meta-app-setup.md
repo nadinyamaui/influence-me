@@ -97,7 +97,7 @@ Typical review timeline: 3-10 business days, depending on submission quality and
 ## 9. Troubleshooting
 
 ### Invalid redirect URI
-- Ensure URI in Meta app exactly equals `META_REDIRECT_URI` (or legacy `INSTAGRAM_REDIRECT_URI`) in environment config.
+- Ensure URI in Meta app exactly equals `META_REDIRECT_URI` in environment config.
 - Check scheme (`https`), host, path, and trailing slash mismatches.
 
 ### Missing permissions or access denied
