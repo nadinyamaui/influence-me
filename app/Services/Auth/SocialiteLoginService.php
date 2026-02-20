@@ -11,8 +11,10 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Collection;
 use Laravel\Socialite\Facades\Socialite;
 
-class FacebookSocialiteLoginService
+class SocialiteLoginService
 {
+    private string $driver = 'facebook';
+
     private array $scopes = [
         'instagram_basic',
         'instagram_manage_insights',
@@ -22,14 +24,14 @@ class FacebookSocialiteLoginService
 
     public function redirectToProvider(): RedirectResponse
     {
-        return Socialite::driver('facebook')
+        return Socialite::driver($this->driver)
             ->scopes($this->scopes)
             ->redirect();
     }
 
     public function createUserAndAccounts(): User
     {
-        $socialiteUser = Socialite::driver('facebook')->user();
+        $socialiteUser = Socialite::driver($this->driver)->user();
         if (! $socialiteUser->getId()) {
             throw new SocialAuthenticationException('Facebook did not return required account information.');
         }
@@ -52,7 +54,7 @@ class FacebookSocialiteLoginService
             throw new SocialAuthenticationException('You must be logged in to link Instagram accounts.');
         }
 
-        $socialiteUser = Socialite::driver('facebook')->user();
+        $socialiteUser = Socialite::driver($this->driver)->user();
         if (! $socialiteUser->getId()) {
             throw new SocialAuthenticationException('Facebook did not return required account information.');
         }

@@ -4,15 +4,15 @@ namespace App\Http\Controllers\Auth;
 
 use App\Exceptions\Auth\SocialAuthenticationException;
 use App\Http\Controllers\Controller;
-use App\Services\Auth\FacebookSocialiteLoginService;
+use App\Services\Auth\SocialiteLoginService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Throwable;
 
-class FacebookAuthController extends Controller
+class SocialAuthController extends Controller
 {
     public function __construct(
-        private readonly FacebookSocialiteLoginService $loginService,
+        private readonly SocialiteLoginService $loginService,
     ) {}
 
     public function redirect(Request $request): RedirectResponse

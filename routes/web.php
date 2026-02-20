@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\Auth\FacebookAuthController;
+use App\Http\Controllers\Auth\SocialAuthController;
 use App\Livewire\Analytics\Index as AnalyticsIndex;
 use App\Livewire\Clients\Create as ClientsCreate;
 use App\Livewire\Clients\Edit as ClientsEdit;
@@ -27,13 +27,13 @@ Route::get('/', function () {
 Route::view('/terms', 'terms')->name('terms');
 Route::view('/privacy-policy', 'privacy-policy')->name('privacy-policy');
 
-Route::get('/auth/facebook', [FacebookAuthController::class, 'redirect'])->middleware('guest')->name('auth.facebook');
-Route::get('/auth/facebook/callback', [FacebookAuthController::class, 'callback'])
+Route::get('/auth/facebook', [SocialAuthController::class, 'redirect'])->middleware('guest')->name('auth.facebook');
+Route::get('/auth/facebook/callback', [SocialAuthController::class, 'callback'])
     ->middleware('throttle:instagram-oauth-callback')
     ->name('auth.facebook.callback');
 
 Route::middleware(['auth'])->group(function (): void {
-    Route::get('/auth/facebook/add', [FacebookAuthController::class, 'addAccount'])->name('auth.facebook.add');
+    Route::get('/auth/facebook/add', [SocialAuthController::class, 'addAccount'])->name('auth.facebook.add');
 
     Route::livewire('instagram-accounts', SocialAccountsIndex::class)
         ->name('instagram-accounts.index');

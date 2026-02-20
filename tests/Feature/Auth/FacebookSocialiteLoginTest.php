@@ -2,7 +2,7 @@
 
 use App\Exceptions\Auth\SocialAuthenticationException;
 use App\Models\User;
-use App\Services\Auth\FacebookSocialiteLoginService;
+use App\Services\Auth\SocialiteLoginService;
 use Laravel\Socialite\Facades\Socialite;
 
 it('renders a facebook oauth login button', function (): void {
@@ -72,7 +72,7 @@ it('redirects authenticated users to facebook provider for add-account flow', fu
 it('redirects to dashboard after successful facebook callback', function (): void {
     $user = User::factory()->create();
 
-    $loginService = \Mockery::mock(FacebookSocialiteLoginService::class);
+    $loginService = \Mockery::mock(SocialiteLoginService::class);
     $loginService->shouldReceive('createUserAndAccounts')
         ->once()
         ->andReturnUsing(function () use ($user) {
@@ -80,7 +80,7 @@ it('redirects to dashboard after successful facebook callback', function (): voi
 
             return $user;
         });
-    app()->instance(FacebookSocialiteLoginService::class, $loginService);
+    app()->instance(SocialiteLoginService::class, $loginService);
 
     $response = $this->get(route('auth.facebook.callback'));
 
@@ -89,11 +89,11 @@ it('redirects to dashboard after successful facebook callback', function (): voi
 });
 
 it('returns to login when facebook oauth callback fails', function (): void {
-    $loginService = \Mockery::mock(FacebookSocialiteLoginService::class);
+    $loginService = \Mockery::mock(SocialiteLoginService::class);
     $loginService->shouldReceive('createUserAndAccounts')
         ->once()
         ->andThrow(new RuntimeException('Denied'));
-    app()->instance(FacebookSocialiteLoginService::class, $loginService);
+    app()->instance(SocialiteLoginService::class, $loginService);
 
     $response = $this->get(route('auth.facebook.callback'));
 
@@ -105,11 +105,11 @@ it('returns to login when facebook oauth callback fails', function (): void {
 });
 
 it('returns to login with social auth error message when callback raises social authentication exception', function (): void {
-    $loginService = \Mockery::mock(FacebookSocialiteLoginService::class);
+    $loginService = \Mockery::mock(SocialiteLoginService::class);
     $loginService->shouldReceive('createUserAndAccounts')
         ->once()
         ->andThrow(new SocialAuthenticationException('Facebook denied access to the requested scopes.'));
-    app()->instance(FacebookSocialiteLoginService::class, $loginService);
+    app()->instance(SocialiteLoginService::class, $loginService);
 
     $response = $this->get(route('auth.facebook.callback'));
 
@@ -123,12 +123,12 @@ it('returns to login with social auth error message when callback raises social 
 it('uses account-linking flow on callback for authenticated users with add-account intent', function (): void {
     $user = User::factory()->create();
 
-    $loginService = \Mockery::mock(FacebookSocialiteLoginService::class);
+    $loginService = \Mockery::mock(SocialiteLoginService::class);
     $loginService->shouldReceive('createSocialAccountsForLoggedUser')
         ->once()
         ->andReturn($user);
     $loginService->shouldNotReceive('createUserAndAccounts');
-    app()->instance(FacebookSocialiteLoginService::class, $loginService);
+    app()->instance(SocialiteLoginService::class, $loginService);
 
     $response = $this->actingAs($user)
         ->withSession(['facebook_auth_intent' => 'add_account'])
@@ -141,12 +141,12 @@ it('uses account-linking flow on callback for authenticated users with add-accou
 it('returns to instagram accounts with oauth error on add-account callback social auth failure', function (): void {
     $user = User::factory()->create();
 
-    $loginService = \Mockery::mock(FacebookSocialiteLoginService::class);
+    $loginService = \Mockery::mock(SocialiteLoginService::class);
     $loginService->shouldReceive('createSocialAccountsForLoggedUser')
         ->once()
         ->andThrow(new SocialAuthenticationException('Facebook denied account linking.'));
     $loginService->shouldNotReceive('createUserAndAccounts');
-    app()->instance(FacebookSocialiteLoginService::class, $loginService);
+    app()->instance(SocialiteLoginService::class, $loginService);
 
     $response = $this->actingAs($user)
         ->withSession(['facebook_auth_intent' => 'add_account'])
@@ -161,7 +161,7 @@ it('returns to instagram accounts with oauth error on add-account callback socia
 it('rate limits facebook oauth callback to ten attempts per minute per ip', function (): void {
     $user = User::factory()->create();
 
-    $loginService = \Mockery::mock(FacebookSocialiteLoginService::class);
+    $loginService = \Mockery::mock(SocialiteLoginService::class);
     $loginService->shouldReceive('createUserAndAccounts')
         ->times(10)
         ->andReturnUsing(function () use ($user) {
@@ -169,7 +169,7 @@ it('rate limits facebook oauth callback to ten attempts per minute per ip', func
 
             return $user;
         });
-    app()->instance(FacebookSocialiteLoginService::class, $loginService);
+    app()->instance(SocialiteLoginService::class, $loginService);
 
     foreach (range(1, 10) as $attempt) {
         $this->get(route('auth.facebook.callback'))
