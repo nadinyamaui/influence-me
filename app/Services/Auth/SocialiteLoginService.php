@@ -70,7 +70,7 @@ class SocialiteLoginService
     protected function createUpdateUser($socialiteUser): User
     {
         return User::updateOrCreate([
-            'socialite_user_type' => 'facebook',
+            'socialite_user_type' => $this->driver,
             'socialite_user_id' => $socialiteUser->getId(),
         ], [
             'name' => $socialiteUser->getName(),
@@ -86,7 +86,7 @@ class SocialiteLoginService
         if (
             $existingUserByEmail !== null
             && (
-                $existingUserByEmail->socialite_user_type !== 'facebook'
+                $existingUserByEmail->socialite_user_type !== $this->driver
                 || $existingUserByEmail->socialite_user_id !== $socialiteUser->getId()
             )
         ) {
@@ -97,7 +97,7 @@ class SocialiteLoginService
     protected function findExistingSocialiteUser($socialiteUser): ?User
     {
         return User::query()
-            ->where('socialite_user_type', 'facebook')
+            ->where('socialite_user_type', $this->driver)
             ->where('socialite_user_id', $socialiteUser->getId())
             ->first();
     }
