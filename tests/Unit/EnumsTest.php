@@ -4,6 +4,8 @@ use App\Enums\AccountType;
 use App\Enums\AnalyticsPeriod;
 use App\Enums\AnalyticsTopContentSort;
 use App\Enums\BillingUnitType;
+use App\Enums\CatalogPlanSort;
+use App\Enums\CatalogPlanStatusFilter;
 use App\Enums\CatalogProductSort;
 use App\Enums\CatalogProductStatusFilter;
 use App\Enums\CatalogSourceType;
@@ -329,5 +331,43 @@ it('defines catalog product sort options', function (): void {
             'name_desc' => 'Name (Z-A)',
             'price_asc' => 'Price (Low to High)',
             'price_desc' => 'Price (High to Low)',
+        ]);
+});
+
+it('defines catalog plan status filter options', function (): void {
+    expect(CatalogPlanStatusFilter::default())->toBe(CatalogPlanStatusFilter::Active)
+        ->and(CatalogPlanStatusFilter::values())->toBe([
+            'active',
+            'archived',
+        ])
+        ->and(CatalogPlanStatusFilter::options())->toBe([
+            'active' => 'Active',
+            'archived' => 'Archived',
+        ])
+        ->and(CatalogPlanStatusFilter::Active->activeValue())->toBeTrue()
+        ->and(CatalogPlanStatusFilter::Archived->activeValue())->toBeFalse();
+});
+
+it('defines catalog plan sort options', function (): void {
+    expect(CatalogPlanSort::default())->toBe(CatalogPlanSort::Newest)
+        ->and(CatalogPlanSort::values())->toBe([
+            'newest',
+            'oldest',
+            'name_asc',
+            'name_desc',
+            'bundle_price_asc',
+            'bundle_price_desc',
+            'items_desc',
+            'items_asc',
+        ])
+        ->and(CatalogPlanSort::options())->toBe([
+            'newest' => 'Newest',
+            'oldest' => 'Oldest',
+            'name_asc' => 'Name (A-Z)',
+            'name_desc' => 'Name (Z-A)',
+            'bundle_price_asc' => 'Bundle Price (Low to High)',
+            'bundle_price_desc' => 'Bundle Price (High to Low)',
+            'items_desc' => 'Most Items',
+            'items_asc' => 'Fewest Items',
         ]);
 });

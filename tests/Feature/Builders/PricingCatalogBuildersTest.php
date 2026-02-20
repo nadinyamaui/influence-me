@@ -89,6 +89,55 @@ it('applies catalog product active filter and sort options', function (): void {
         ->and($archivedNames)->toBe(['Archived Product']);
 });
 
+it('applies catalog plan search active filter items count and sort options', function (): void {
+    $user = User::factory()->create();
+
+    $activePlan = CatalogPlan::factory()->for($user)->create([
+        'name' => 'Active Launch Plan',
+        'description' => 'Bundle for launch week',
+        'is_active' => true,
+    ]);
+
+    $secondActivePlan = CatalogPlan::factory()->for($user)->create([
+        'name' => 'Active Evergreen Plan',
+        'description' => 'Always-on bundle',
+        'is_active' => true,
+    ]);
+
+    $archivedPlan = CatalogPlan::factory()->for($user)->create([
+        'name' => 'Archived Plan',
+        'description' => 'Retired bundle',
+        'is_active' => false,
+    ]);
+
+    $activeProduct = CatalogProduct::factory()->for($user)->create();
+
+    CatalogPlanItem::factory()->for($activePlan)->for($activeProduct)->count(2)->create();
+    CatalogPlanItem::factory()->for($secondActivePlan)->for($activeProduct)->count(1)->create();
+    CatalogPlanItem::factory()->for($archivedPlan)->for($activeProduct)->count(3)->create();
+
+    $activePlanNames = CatalogPlan::query()
+        ->forUser($user->id)
+        ->search('active')
+        ->filterByActive(true)
+        ->withItemsCount()
+        ->applySort('items_desc')
+        ->pluck('name')
+        ->all();
+
+    $archivedPlanNames = CatalogPlan::query()
+        ->forUser($user->id)
+        ->search('archived')
+        ->filterByActive(false)
+        ->withItemsCount()
+        ->applySort('newest')
+        ->pluck('name')
+        ->all();
+
+    expect($activePlanNames)->toBe(['Active Launch Plan', 'Active Evergreen Plan'])
+        ->and($archivedPlanNames)->toBe(['Archived Plan']);
+});
+
 it('creates catalog product and plan records with scoped builder helpers', function (): void {
     $user = User::factory()->create();
 
@@ -122,7 +171,6 @@ it('scopes and creates catalog plan items', function (): void {
     CatalogPlanItem::query()->createForPlan([
         'catalog_product_id' => $product->id,
         'quantity' => 2,
-        'unit_price_override' => 450,
     ], $plan->id);
 
     $items = CatalogPlanItem::query()->forPlan($plan->id)->get();
@@ -143,7 +191,6 @@ it('blocks creating plan items with products from another influencer', function 
     expect(fn (): CatalogPlanItem => CatalogPlanItem::query()->createForPlan([
         'catalog_product_id' => $outsiderProduct->id,
         'quantity' => 1,
-        'unit_price_override' => null,
     ], $plan->id))->toThrow(ModelNotFoundException::class);
 });
 
@@ -159,7 +206,6 @@ it('blocks creating plan items on another influencers plan', function (): void {
     expect(fn (): CatalogPlanItem => CatalogPlanItem::query()->createForPlan([
         'catalog_product_id' => $ownerProduct->id,
         'quantity' => 1,
-        'unit_price_override' => null,
     ], $ownerPlan->id))->toThrow(ModelNotFoundException::class);
 });
 

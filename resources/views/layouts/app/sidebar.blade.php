@@ -39,7 +39,11 @@
                     </flux:sidebar.item>
 
                     <flux:sidebar.item icon="tag" :href="route('pricing.products.index')" :current="request()->routeIs('pricing.products.*')" wire:navigate>
-                        {{ __('Pricing') }}
+                        {{ __('Pricing Products') }}
+                    </flux:sidebar.item>
+
+                    <flux:sidebar.item icon="squares-2x2" :href="route('pricing.plans.index')" :current="request()->routeIs('pricing.plans.*')" wire:navigate>
+                        {{ __('Pricing Plans') }}
                     </flux:sidebar.item>
                 </flux:sidebar.group>
 

@@ -5,6 +5,9 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
+- RFC 102: added influencer pricing plan CRUD routes in `routes/web.php` (`pricing.plans.index|create|edit`), Livewire pages `app/Livewire/Pricing/Plans/Index.php` and shared create/edit form page `app/Livewire/Pricing/Plans/Form.php`, plus Flux-based plan UI templates in `resources/views/pages/pricing/plans/`.
+- RFC 102: implemented plan composition workflow abstractions with `app/Http/Requests/StoreCatalogPlanRequest.php` validation and `app/Services/Catalog/CatalogPlanService.php` transactional nested-item persistence; extended query composition in `app/Builders/CatalogPlanBuilder.php` (`search`, `filterByActive`, `withItemsCount`, `applySort`) and added enum-backed filter/sort metadata in `app/Enums/CatalogPlanStatusFilter.php` and `app/Enums/CatalogPlanSort.php`.
+- RFC 102: updated influencer navigation in `resources/views/layouts/app/sidebar.blade.php` to include pricing products/plans links and added coverage in `tests/Feature/Pricing/CatalogPlanCrudTest.php`, `tests/Feature/Builders/PricingCatalogBuildersTest.php`, `tests/Feature/NavigationStructureTest.php`, and `tests/Unit/EnumsTest.php`; validated with targeted test runs (`61` tests passing).
 - RFC 075: added TikTok Socialite service configuration in `config/services.php` and environment placeholders in `.env.example` for `TIKTOK_CLIENT_ID`, `TIKTOK_CLIENT_SECRET`, and `TIKTOK_REDIRECT_URI`.
 - RFC 075: installed `socialiteproviders/tiktok` (with `socialiteproviders/manager`) and registered TikTok provider listener wiring in `app/Providers/AppServiceProvider.php` so `Socialite::driver('tiktok')` resolves.
 - RFC 075: added feature coverage in `tests/Feature/Auth/TikTokSocialiteConfigurationTest.php` and validated existing Instagram/client auth flows with targeted auth test execution.
