@@ -5,7 +5,7 @@
 
 ## Description
 
-Implement the "Send Invoice" action that changes status to Sent and emails the invoice to the client with payment link (if available).
+Implement the "Send Invoice" action that changes status to Sent and emails the invoice to the client.
 
 ## Implementation
 
@@ -41,7 +41,7 @@ public function sendInvoice(): void
 - Content:
   - Invoice number, amount, due date
   - Line items summary
-  - "Pay Now" button (links to Stripe payment link if available, or portal link)
+  - "View Invoice" button (links to client portal invoice detail)
   - "View Invoice" link to client portal
 - Reply-to: influencer email
 
@@ -58,7 +58,7 @@ For Sent/Overdue invoices, show a "Resend" button that re-sends the email withou
 ## Acceptance Criteria
 - [ ] "Send Invoice" changes status to Sent
 - [ ] Email sent to client with invoice details
-- [ ] Payment link included in email if available
+- [ ] Invoice detail link included in email
 - [ ] Confirmation shown before sending
 - [ ] Cannot send if client has no email
 - [ ] Resend works for Sent/Overdue invoices

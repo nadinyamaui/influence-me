@@ -31,7 +31,7 @@ Ensure comprehensive feature test coverage for every Livewire page and workflow 
 - `tests/Feature/Invoices/InvoiceListTest.php` — list, summary cards
 - `tests/Feature/Invoices/InvoiceCreateTest.php` — line items, calculations
 - `tests/Feature/Invoices/InvoiceSendTest.php` — send workflow
-- `tests/Feature/Invoices/StripePaymentTest.php` — payment link, webhook
+- `tests/Feature/Invoices/InvoiceStatusTransitionsTest.php` — sent, paid, overdue transitions
 
 ### Analytics Tests
 - `tests/Feature/Analytics/AnalyticsDashboardTest.php` — overview cards, filters
@@ -50,7 +50,7 @@ Ensure comprehensive feature test coverage for every Livewire page and workflow 
 
 ## Testing Patterns
 - Use model factories for all test data
-- Mock external services (Socialite, Stripe, Instagram API)
+- Mock external services (Socialite, Instagram API)
 - Test authorization (403 for unauthorized access)
 - Test validation (422 for invalid input)
 - Use `RefreshDatabase` trait

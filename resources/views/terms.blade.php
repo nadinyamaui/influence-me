@@ -28,7 +28,7 @@
 
                 <section class="space-y-3">
                     <h2 class="text-xl font-semibold text-slate-900">4. Third-Party Platforms and Integrations</h2>
-                    <p>The Service depends on third-party providers including, without limitation, Meta/Instagram, TikTok, and Stripe. Your use of those providers is subject to their independent terms, policies, and technical constraints. Influence Me is not responsible for provider outages, API deprecations, policy changes, account restrictions, data delays, or downstream decisions made by those providers.</p>
+                    <p>The Service depends on third-party providers including, without limitation, Meta/Instagram and TikTok. Your use of those providers is subject to their independent terms, policies, and technical constraints. Influence Me is not responsible for provider outages, API deprecations, policy changes, account restrictions, data delays, or downstream decisions made by those providers.</p>
                     <p>You authorize us to access and process third-party account data made available through your approved integrations. You represent that you have all rights and permissions necessary to grant this authorization.</p>
                 </section>
 
@@ -47,7 +47,7 @@
                 <section class="space-y-3">
                     <h2 class="text-xl font-semibold text-slate-900">7. Fees, Billing, and Payment Terms</h2>
                     <p>Fees, if applicable, are presented at purchase or in applicable ordering documents. You authorize us and our payment processor to collect amounts due, including recurring charges where selected, taxes where applicable, and past-due balances. You are responsible for maintaining accurate billing details and resolving payment failures promptly.</p>
-                    <p>Invoice payment workflows are facilitated through Stripe. Influence Me does not store full payment card numbers. Chargebacks, payment fraud, abusive disputes, or repeated payment failures may result in immediate restriction or suspension of affected accounts.</p>
+                    <p>Invoice payment workflows are managed within the platform. Chargebacks, payment fraud, abusive disputes, or repeated payment failures may result in immediate restriction or suspension of affected accounts.</p>
                 </section>
 
                 <section class="space-y-3">
