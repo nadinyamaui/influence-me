@@ -87,5 +87,6 @@ it('configures horizon to process instagram-sync queue with dedicated worker set
     expect(config('horizon.defaults.instagram-sync.queue'))->toBe(['instagram-sync'])
         ->and(config('horizon.defaults.instagram-sync.tries'))->toBe(3)
         ->and(config('horizon.defaults.instagram-sync.timeout'))->toBe(120)
-        ->and(config('horizon.waits.redis:instagram-sync'))->toBe(120);
+        ->and(config('horizon.waits.redis:instagram-sync'))->toBe(120)
+        ->and(array_key_exists('waits_notification_email', config('horizon')))->toBeTrue();
 });

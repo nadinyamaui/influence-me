@@ -43,6 +43,8 @@ return [
 
     'path' => env('HORIZON_PATH', 'horizon'),
 
+    'waits_notification_email' => env('HORIZON_WAITS_NOTIFICATION_EMAIL'),
+
     /*
     |--------------------------------------------------------------------------
     | Horizon Redis Connection

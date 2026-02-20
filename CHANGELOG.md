@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
-- RFC 071: added custom Flux-styled error pages in `resources/views/errors/403.blade.php`, `resources/views/errors/404.blade.php`, `resources/views/errors/500.blade.php`, and `resources/views/errors/503.blade.php` with RFC-compliant messaging and dashboard recovery actions.
+- RFC 071: added custom standalone error pages in `resources/views/errors/403.blade.php`, `resources/views/errors/404.blade.php`, `resources/views/errors/500.blade.php`, and `resources/views/errors/503.blade.php` with RFC-compliant messaging and dashboard recovery actions.
 - RFC 071: expanded exception handling and monitoring configuration with dedicated report hooks in `bootstrap/app.php`, contextual exception constructors in `app/Exceptions/InstagramApiException.php` and new `app/Exceptions/StripeException.php`, per-integration logging channels in `config/logging.php`, and Horizon long-wait mail routing in `app/Providers/HorizonServiceProvider.php`.
 - RFC 071: strengthened queue monitoring setup in `config/horizon.php` with a dedicated `instagram-sync` supervisor profile (`tries=3`, `timeout=120`) and added feature coverage in `tests/Feature/Infrastructure/ErrorHandlingAndMonitoringTest.php` (8 tests) plus targeted regression runs for Instagram job flows.
 - RFC 102: added influencer pricing plan CRUD routes in `routes/web.php` (`pricing.plans.index|create|edit`), Livewire pages `app/Livewire/Pricing/Plans/Index.php` and shared create/edit form page `app/Livewire/Pricing/Plans/Form.php`, plus Flux-based plan UI templates in `resources/views/pages/pricing/plans/`.

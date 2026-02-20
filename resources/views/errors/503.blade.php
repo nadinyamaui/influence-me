@@ -1,19 +1,27 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="dark">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
     <head>
-        @include('partials.head')
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>503 | {{ config('app.name') }}</title>
+        <style>
+            body { margin: 0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; background: #f5f5f5; color: #18181b; }
+            .wrap { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px; }
+            .card { width: 100%; max-width: 640px; background: #fff; border: 1px solid #e4e4e7; border-radius: 16px; padding: 40px; text-align: center; }
+            .code { margin: 0; color: #71717a; font-size: 14px; letter-spacing: .08em; text-transform: uppercase; font-weight: 700; }
+            h1 { margin: 12px 0 0; font-size: 32px; line-height: 1.2; }
+            p { margin: 16px 0 0; color: #52525b; font-size: 16px; }
+            a { display: inline-block; margin-top: 28px; padding: 12px 16px; border-radius: 10px; text-decoration: none; background: #18181b; color: #fff; font-weight: 600; }
+        </style>
     </head>
-    <body class="min-h-screen bg-white antialiased dark:bg-neutral-950">
-        <main class="mx-auto flex min-h-screen w-full max-w-3xl items-center justify-center px-6 py-16">
-            <div class="w-full rounded-2xl border border-zinc-200 bg-white p-10 text-center shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
-                <p class="text-sm font-semibold uppercase tracking-widest text-zinc-500">503</p>
-                <h1 class="mt-3 text-3xl font-semibold text-zinc-900 dark:text-zinc-100">We'll be right back</h1>
-                <p class="mt-4 text-base text-zinc-600 dark:text-zinc-300">The app is temporarily unavailable while we complete maintenance.</p>
-                <div class="mt-8 flex justify-center">
-                    <flux:button href="{{ route('dashboard') }}" wire:navigate variant="primary">Check again</flux:button>
-                </div>
-            </div>
+    <body>
+        <main class="wrap">
+            <section class="card">
+                <p class="code">503</p>
+                <h1>We'll be right back</h1>
+                <p>The app is temporarily unavailable while we complete maintenance.</p>
+                <a href="{{ route('dashboard') }}">Check again</a>
+            </section>
         </main>
-        @fluxScripts
     </body>
 </html>

@@ -12,7 +12,7 @@ class HorizonServiceProvider extends HorizonApplicationServiceProvider
     {
         parent::boot();
 
-        $notificationEmail = env('HORIZON_WAITS_NOTIFICATION_EMAIL');
+        $notificationEmail = config('horizon.waits_notification_email');
 
         if (is_string($notificationEmail) && $notificationEmail !== '') {
             Horizon::routeMailNotificationsTo($notificationEmail);
