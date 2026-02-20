@@ -5,6 +5,9 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
+- RFC 075: added TikTok Socialite service configuration in `config/services.php` and environment placeholders in `.env.example` for `TIKTOK_CLIENT_ID`, `TIKTOK_CLIENT_SECRET`, and `TIKTOK_REDIRECT_URI`.
+- RFC 075: installed `socialiteproviders/tiktok` (with `socialiteproviders/manager`) and registered TikTok provider listener wiring in `app/Providers/AppServiceProvider.php` so `Socialite::driver('tiktok')` resolves.
+- RFC 075: added feature coverage in `tests/Feature/Auth/TikTokSocialiteConfigurationTest.php` and validated existing Instagram/client auth flows with targeted auth test execution.
 - RFC 101: added influencer pricing product CRUD surface with authenticated routes in `routes/web.php`, new Livewire pages `app/Livewire/Pricing/Products/Index.php`, `app/Livewire/Pricing/Products/Create.php`, `app/Livewire/Pricing/Products/Edit.php`, and Flux-based page templates under `resources/views/pages/pricing/products/`.
 - RFC 101: added pricing product workflow abstractions via `app/Http/Requests/StoreCatalogProductRequest.php` and `app/Services/Catalog/CatalogProductService.php`, plus builder/query enhancements in `app/Builders/CatalogProductBuilder.php` (`search`, `filterByPlatform`, `filterByActive`, `applySort`) and enum-backed filter/sort metadata in `app/Enums/CatalogProductStatusFilter.php` and `app/Enums/CatalogProductSort.php`.
 - RFC 101: added pricing navigation links in `resources/views/layouts/app/sidebar.blade.php` and `resources/views/layouts/app/header.blade.php`, extended enum support with `MediaType::values()` in `app/Enums/MediaType.php`, and added coverage in `tests/Feature/Pricing/CatalogProductCrudTest.php`, `tests/Feature/Builders/PricingCatalogBuildersTest.php`, `tests/Feature/NavigationStructureTest.php`, and `tests/Unit/EnumsTest.php`.
