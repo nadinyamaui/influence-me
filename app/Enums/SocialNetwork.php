@@ -21,4 +21,12 @@ enum SocialNetwork: string
             default => [],
         };
     }
+
+    public function socialiteDriver(): string
+    {
+        return match ($this) {
+            self::Instagram => 'facebook',
+            default => $this->value,
+        };
+    }
 }
