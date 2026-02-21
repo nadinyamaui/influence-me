@@ -28,13 +28,13 @@ Route::get('/', function () {
 Route::view('/terms', 'terms')->name('terms');
 Route::view('/privacy-policy', 'privacy-policy')->name('privacy-policy');
 
-Route::get('/auth/facebook', [SocialAuthController::class, 'redirect'])->middleware('guest')->name('auth.facebook');
-Route::get('/auth/facebook/callback', [SocialAuthController::class, 'callback'])
+Route::get('/auth/instagram', [SocialAuthController::class, 'redirect'])->middleware('guest')->name('auth.instagram');
+Route::get('/auth/instagram/callback', [SocialAuthController::class, 'callback'])
     ->middleware('throttle:instagram-oauth-callback')
-    ->name('auth.facebook.callback');
+    ->name('auth.instagram.callback');
 
 Route::middleware(['auth'])->group(function (): void {
-    Route::get('/auth/facebook/add', [SocialAuthController::class, 'addAccount'])->name('auth.facebook.add');
+    Route::get('/auth/instagram/add', [SocialAuthController::class, 'addAccount'])->name('auth.instagram.add');
 
     Route::livewire('instagram-accounts', SocialAccountsIndex::class)
         ->name('instagram-accounts.index');

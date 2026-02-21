@@ -4,12 +4,12 @@ namespace App\Services\SocialMedia;
 
 use App\Enums\SocialNetwork;
 use App\Models\SocialAccount;
-use App\Services\Facebook\InstagramGraphService;
+use App\Services\SocialMedia\Instagram\Service;
 use InvalidArgumentException;
 
-class SocialMediaManager
+class Manager
 {
-    public function forAccount(SocialAccount $account): SocialMediaInterface
+    public function forAccount(SocialAccount $account): SocialMediaContract
     {
         $network = $account->social_network;
         if (! $network instanceof SocialNetwork) {
@@ -17,7 +17,7 @@ class SocialMediaManager
         }
 
         return match ($network) {
-            SocialNetwork::Instagram => app(InstagramGraphService::class, ['account' => $account]),
+            SocialNetwork::Instagram => app(Service::class, ['account' => $account]),
             SocialNetwork::Tiktok,
             SocialNetwork::Youtube,
             SocialNetwork::Twitch => throw new InvalidArgumentException(

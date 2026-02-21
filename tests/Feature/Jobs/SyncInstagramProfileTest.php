@@ -5,7 +5,7 @@ use App\Exceptions\InstagramApiException;
 use App\Exceptions\InstagramTokenExpiredException;
 use App\Jobs\SyncSocialMediaProfile;
 use App\Models\SocialAccount;
-use App\Services\Facebook\InstagramGraphService;
+use App\Services\SocialMedia\Instagram\Service;
 use Illuminate\Support\Facades\Log;
 
 it('syncs instagram profile fields to the database', function (): void {
@@ -21,7 +21,7 @@ it('syncs instagram profile fields to the database', function (): void {
         'last_sync_error' => 'old error',
     ]);
 
-    $instagramGraphService = \Mockery::mock(InstagramGraphService::class);
+    $instagramGraphService = \Mockery::mock(Service::class);
     $instagramGraphService->shouldReceive('getProfile')
         ->once()
         ->andReturn([
@@ -34,7 +34,7 @@ it('syncs instagram profile fields to the database', function (): void {
             'media_count' => 120,
         ]);
 
-    app()->bind(InstagramGraphService::class, fn ($app, $parameters) => $instagramGraphService);
+    app()->bind(Service::class, fn ($app, $parameters) => $instagramGraphService);
 
     app(SyncSocialMediaProfile::class, ['account' => $account])->handle();
 
@@ -60,12 +60,12 @@ it('marks account as failed when token is expired and does not rethrow', functio
         'last_sync_error' => null,
     ]);
 
-    $instagramGraphService = \Mockery::mock(InstagramGraphService::class);
+    $instagramGraphService = \Mockery::mock(Service::class);
     $instagramGraphService->shouldReceive('getProfile')
         ->once()
         ->andThrow(new InstagramTokenExpiredException('Token expired'));
 
-    app()->bind(InstagramGraphService::class, fn ($app, $parameters) => $instagramGraphService);
+    app()->bind(Service::class, fn ($app, $parameters) => $instagramGraphService);
 
     app(SyncSocialMediaProfile::class, ['account' => $account])->handle();
 
@@ -81,12 +81,12 @@ it('marks account as failed when token is expired and does not rethrow', functio
 it('rethrows api exceptions so the queue retry policy can apply', function (): void {
     $account = SocialAccount::factory()->create();
 
-    $instagramGraphService = \Mockery::mock(InstagramGraphService::class);
+    $instagramGraphService = \Mockery::mock(Service::class);
     $instagramGraphService->shouldReceive('getProfile')
         ->once()
         ->andThrow(new InstagramApiException('API temporarily unavailable'));
 
-    app()->bind(InstagramGraphService::class, fn ($app, $parameters) => $instagramGraphService);
+    app()->bind(Service::class, fn ($app, $parameters) => $instagramGraphService);
 
     expect(fn () => app(SyncSocialMediaProfile::class, ['account' => $account])->handle())
         ->toThrow(InstagramApiException::class, 'API temporarily unavailable');
@@ -111,7 +111,7 @@ it('can update profile fields without finalizing sync state', function (): void 
         'last_sync_error' => 'keep until full sync completes',
     ]);
 
-    $instagramGraphService = \Mockery::mock(InstagramGraphService::class);
+    $instagramGraphService = \Mockery::mock(Service::class);
     $instagramGraphService->shouldReceive('getProfile')
         ->once()
         ->andReturn([
@@ -124,7 +124,7 @@ it('can update profile fields without finalizing sync state', function (): void 
             'media_count' => 95,
         ]);
 
-    app()->bind(InstagramGraphService::class, fn ($app, $parameters) => $instagramGraphService);
+    app()->bind(Service::class, fn ($app, $parameters) => $instagramGraphService);
 
     app(SyncSocialMediaProfile::class, ['account' => $account, 'finalizeSyncState' => false])->handle();
 

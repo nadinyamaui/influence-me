@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\Facebook;
+namespace App\Services\SocialMedia\Instagram;
 
 use App\Enums\MediaType;
 use App\Enums\SocialNetwork;

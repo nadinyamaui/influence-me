@@ -1,7 +1,7 @@
 <?php
 
 use App\Enums\MediaType;
-use App\Services\Facebook\Client;
+use App\Services\SocialMedia\Instagram\Client;
 use FacebookAds\Api;
 use FacebookAds\Http\ResponseInterface;
 use FacebookAds\Object\IGMedia;
@@ -25,7 +25,7 @@ it('initializes facebook api with configured credentials and default graph versi
         ->and($api->getDefaultGraphVersion())->toBe('24.0');
 });
 
-it('gets a long lived token from the facebook oauth endpoint', function (): void {
+it('gets a long lived token from the instagram oauth endpoint', function (): void {
     config()->set('services.facebook.client_id', 'facebook-client-id');
     config()->set('services.facebook.client_secret', 'facebook-client-secret');
 
@@ -69,7 +69,7 @@ it('gets a long lived token from the facebook oauth endpoint', function (): void
     expect($client->getLongLivedToken())->toBe($tokenResponse);
 });
 
-it('refreshes a long lived token from the facebook oauth endpoint', function (): void {
+it('refreshes a long lived token from the instagram oauth endpoint', function (): void {
     config()->set('services.facebook.client_id', 'facebook-client-id');
     config()->set('services.facebook.client_secret', 'facebook-client-secret');
 

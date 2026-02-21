@@ -2,7 +2,7 @@
 
 namespace App\Services\SocialMedia;
 
-interface SocialMediaInterface
+interface SocialMediaContract
 {
     public function retrieveMedia(): void;
 

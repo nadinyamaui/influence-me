@@ -5,7 +5,7 @@ use App\Exceptions\InstagramApiException;
 use App\Exceptions\InstagramTokenExpiredException;
 use App\Jobs\SyncAllSocialMediaData;
 use App\Models\SocialAccount;
-use App\Services\Facebook\InstagramGraphService;
+use App\Services\SocialMedia\Instagram\Service;
 
 it('runs the full instagram sync workflow and marks account as idle on success', function (): void {
     $account = SocialAccount::factory()->create([
@@ -15,7 +15,7 @@ it('runs the full instagram sync workflow and marks account as idle on success',
         'last_synced_at' => null,
     ]);
 
-    $instagramGraphService = \Mockery::mock(InstagramGraphService::class);
+    $instagramGraphService = \Mockery::mock(Service::class);
     $instagramGraphService->shouldReceive('getProfile')
         ->once()
         ->ordered('sync')
@@ -40,7 +40,7 @@ it('runs the full instagram sync workflow and marks account as idle on success',
     $instagramGraphService->shouldReceive('syncAudienceDemographics')
         ->once()
         ->ordered('sync');
-    app()->bind(InstagramGraphService::class, fn () => $instagramGraphService);
+    app()->bind(Service::class, fn () => $instagramGraphService);
 
     app(SyncAllSocialMediaData::class, ['account' => $account])->handle();
 
@@ -59,7 +59,7 @@ it('marks account as failed when the chained sync workflow throws', function ():
         'last_synced_at' => null,
     ]);
 
-    $instagramGraphService = \Mockery::mock(InstagramGraphService::class);
+    $instagramGraphService = \Mockery::mock(Service::class);
     $instagramGraphService->shouldReceive('getProfile')
         ->once()
         ->andReturn([
@@ -77,7 +77,7 @@ it('marks account as failed when the chained sync workflow throws', function ():
         ->andThrow(new InstagramApiException('Insights sync failed'));
     $instagramGraphService->shouldNotReceive('syncStories');
     $instagramGraphService->shouldNotReceive('syncAudienceDemographics');
-    app()->bind(InstagramGraphService::class, fn () => $instagramGraphService);
+    app()->bind(Service::class, fn () => $instagramGraphService);
 
     expect(fn () => app(SyncAllSocialMediaData::class, ['account' => $account])->handle())
         ->toThrow(InstagramApiException::class, 'Insights sync failed');
@@ -105,7 +105,7 @@ it('does not overwrite failed status when profile marks account as failed withou
         'last_synced_at' => null,
     ]);
 
-    $instagramGraphService = \Mockery::mock(InstagramGraphService::class);
+    $instagramGraphService = \Mockery::mock(Service::class);
     $instagramGraphService->shouldReceive('getProfile')
         ->once()
         ->ordered('sync')
@@ -122,7 +122,7 @@ it('does not overwrite failed status when profile marks account as failed withou
     $instagramGraphService->shouldReceive('syncAudienceDemographics')
         ->once()
         ->ordered('sync');
-    app()->bind(InstagramGraphService::class, fn () => $instagramGraphService);
+    app()->bind(Service::class, fn () => $instagramGraphService);
 
     app(SyncAllSocialMediaData::class, ['account' => $account])->handle();
 

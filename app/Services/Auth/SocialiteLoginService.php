@@ -6,7 +6,7 @@ use App\Enums\SocialNetwork;
 use App\Exceptions\Auth\SocialAuthenticationException;
 use App\Models\SocialAccount;
 use App\Models\User;
-use App\Services\Facebook\Client;
+use App\Services\SocialMedia\Instagram\Client;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Collection;
 use Laravel\Socialite\Facades\Socialite;
