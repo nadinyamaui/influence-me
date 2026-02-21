@@ -28,34 +28,20 @@ class TikTokApiConnector
 
     public function get(string $endpoint, array $query = []): array
     {
-        return $this->requestWithClient(
-            endpoint: $endpoint,
-            callback: fn (string $normalizedEndpoint): Response => $this->client->get($normalizedEndpoint, $query),
-        );
+        return $this->request('GET', $endpoint, ['query' => $query]);
     }
 
     public function post(string $endpoint, array $data = []): array
     {
-        return $this->requestWithClient(
-            endpoint: $endpoint,
-            callback: fn (string $normalizedEndpoint): Response => $this->client->post($normalizedEndpoint, $data),
-        );
+        return $this->request('POST', $endpoint, ['json' => $data]);
     }
 
     public function request(string $method, string $endpoint, array $options = []): array
     {
-        return $this->requestWithClient(
-            endpoint: $endpoint,
-            callback: fn (string $normalizedEndpoint): Response => $this->client->send($method, $normalizedEndpoint, $options),
-        );
-    }
-
-    protected function requestWithClient(string $endpoint, callable $callback): array
-    {
         $normalizedEndpoint = '/'.ltrim($endpoint, '/');
 
         try {
-            $response = $callback($normalizedEndpoint);
+            $response = $this->client->send($method, $normalizedEndpoint, $options);
         } catch (ConnectionException $exception) {
             throw new TikTokApiException(
                 message: 'TikTok API connection failed.',
