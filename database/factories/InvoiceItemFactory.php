@@ -17,6 +17,8 @@ class InvoiceItemFactory extends Factory
 
         return [
             'invoice_id' => Invoice::factory(),
+            'catalog_product_id' => null,
+            'catalog_plan_id' => null,
             'description' => fake()->randomElement([
                 'Instagram Post - Product Review',
                 'Reel - Campaign Launch',
