@@ -79,6 +79,11 @@ class User extends Authenticatable
         return $this->hasMany(CatalogPlan::class);
     }
 
+    public function taxRates(): HasMany
+    {
+        return $this->hasMany(TaxRate::class);
+    }
+
     public function invoices(): HasMany
     {
         return $this->hasMany(Invoice::class);

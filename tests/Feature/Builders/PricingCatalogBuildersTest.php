@@ -9,6 +9,7 @@ use App\Models\CatalogProduct;
 use App\Models\Client;
 use App\Models\Proposal;
 use App\Models\ProposalLineItem;
+use App\Models\TaxRate;
 use App\Models\User;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
@@ -161,6 +162,51 @@ it('creates catalog product and plan records with scoped builder helpers', funct
 
     expect($product->user_id)->toBe($user->id)
         ->and($plan->user_id)->toBe($user->id);
+});
+
+it('scopes tax rates to owner and applies filters and sorting', function (): void {
+    $owner = User::factory()->create();
+    $outsider = User::factory()->create();
+
+    TaxRate::factory()->for($owner)->create([
+        'label' => 'Local Sales Tax',
+        'rate' => 7.5,
+        'is_active' => true,
+    ]);
+    TaxRate::factory()->for($owner)->create([
+        'label' => 'EU VAT',
+        'rate' => 20,
+        'is_active' => false,
+    ]);
+    TaxRate::factory()->for($outsider)->create([
+        'label' => 'Outsider Tax',
+        'rate' => 18,
+        'is_active' => true,
+    ]);
+
+    $results = TaxRate::query()
+        ->forUser($owner->id)
+        ->search('tax')
+        ->filterByActive(true)
+        ->applySort('label_asc')
+        ->get();
+
+    expect($results)->toHaveCount(1)
+        ->and($results->first()->user_id)->toBe($owner->id)
+        ->and($results->first()->label)->toBe('Local Sales Tax');
+});
+
+it('creates tax rates with scoped builder helper', function (): void {
+    $user = User::factory()->create();
+
+    $taxRate = TaxRate::query()->createForUser([
+        'label' => 'VAT',
+        'rate' => 20,
+        'is_active' => true,
+    ], $user->id);
+
+    expect($taxRate->user_id)->toBe($user->id)
+        ->and($taxRate->label)->toBe('VAT');
 });
 
 it('scopes and creates catalog plan items', function (): void {

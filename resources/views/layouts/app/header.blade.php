@@ -31,6 +31,9 @@
                 <flux:navbar.item icon="tag" :href="route('pricing.products.index')" :current="request()->routeIs('pricing.products.*')" wire:navigate>
                     {{ __('Pricing') }}
                 </flux:navbar.item>
+                <flux:navbar.item icon="receipt-percent" :href="route('pricing.tax-rates.index')" :current="request()->routeIs('pricing.tax-rates.*')" wire:navigate>
+                    {{ __('Tax Rates') }}
+                </flux:navbar.item>
                 <flux:navbar.item icon="at-symbol" :href="route('instagram-accounts.index')" :current="request()->routeIs('instagram-accounts.index')" wire:navigate>
                     {{ __('Accounts') }}
                 </flux:navbar.item>
@@ -73,6 +76,9 @@
                     </flux:sidebar.item>
                     <flux:sidebar.item icon="tag" :href="route('pricing.products.index')" :current="request()->routeIs('pricing.products.*')" wire:navigate>
                         {{ __('Pricing') }}
+                    </flux:sidebar.item>
+                    <flux:sidebar.item icon="receipt-percent" :href="route('pricing.tax-rates.index')" :current="request()->routeIs('pricing.tax-rates.*')" wire:navigate>
+                        {{ __('Tax Rates') }}
                     </flux:sidebar.item>
                 </flux:sidebar.group>
 
