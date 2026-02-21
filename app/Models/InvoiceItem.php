@@ -21,6 +21,8 @@ class InvoiceItem extends Model
     protected function casts(): array
     {
         return [
+            'catalog_product_id' => 'integer',
+            'catalog_plan_id' => 'integer',
             'quantity' => 'decimal:2',
             'unit_price' => 'decimal:2',
             'total' => 'decimal:2',
@@ -30,5 +32,15 @@ class InvoiceItem extends Model
     public function invoice(): BelongsTo
     {
         return $this->belongsTo(Invoice::class);
+    }
+
+    public function catalogProduct(): BelongsTo
+    {
+        return $this->belongsTo(CatalogProduct::class);
+    }
+
+    public function catalogPlan(): BelongsTo
+    {
+        return $this->belongsTo(CatalogPlan::class);
     }
 }
