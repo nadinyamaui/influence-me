@@ -12,7 +12,7 @@ it('syncs insights using views for impressions on recent non-story media and cal
 
     $recentPost = SocialAccountMedia::factory()->post()->create([
         'social_account_id' => $account->id,
-        'instagram_media_id' => 'media-recent-post',
+        'social_account_media_id' => 'media-recent-post',
         'published_at' => now()->subDays(5),
         'like_count' => 80,
         'comments_count' => 20,
@@ -25,7 +25,7 @@ it('syncs insights using views for impressions on recent non-story media and cal
 
     $recentReel = SocialAccountMedia::factory()->reel()->create([
         'social_account_id' => $account->id,
-        'instagram_media_id' => 'media-recent-reel',
+        'social_account_media_id' => 'media-recent-reel',
         'published_at' => now()->subDays(10),
         'like_count' => 40,
         'comments_count' => 10,
@@ -38,7 +38,7 @@ it('syncs insights using views for impressions on recent non-story media and cal
 
     $oldPost = SocialAccountMedia::factory()->post()->create([
         'social_account_id' => $account->id,
-        'instagram_media_id' => 'media-old-post',
+        'social_account_media_id' => 'media-old-post',
         'published_at' => now()->subDays(95),
         'reach' => 17,
         'impressions' => 22,
@@ -46,7 +46,7 @@ it('syncs insights using views for impressions on recent non-story media and cal
 
     $recentStory = SocialAccountMedia::factory()->story()->create([
         'social_account_id' => $account->id,
-        'instagram_media_id' => 'media-recent-story',
+        'social_account_media_id' => 'media-recent-story',
         'published_at' => now()->subDays(3),
         'reach' => 33,
         'impressions' => 44,
@@ -106,7 +106,7 @@ it('maps views metric to impressions when syncing insights', function (): void {
 
     $recentPost = SocialAccountMedia::factory()->post()->create([
         'social_account_id' => $account->id,
-        'instagram_media_id' => 'media-rate-limit',
+        'social_account_media_id' => 'media-rate-limit',
         'published_at' => now()->subDays(2),
         'like_count' => 10,
         'comments_count' => 5,
