@@ -12,13 +12,13 @@ use Carbon\Carbon;
 use FacebookAds\Http\Exception\AuthorizationException;
 use FacebookAds\Http\Exception\RequestException;
 
-class InstagramGraphService implements SocialMediaContract
+class Service implements SocialMediaContract
 {
-    protected InstagramClient $client;
+    protected Client $client;
 
     public function __construct(protected SocialAccount $account)
     {
-        $this->client = app(InstagramClient::class, [
+        $this->client = app(Client::class, [
             'user_id' => $this->account->social_network_user_id,
             'access_token' => $this->account->access_token,
         ]);

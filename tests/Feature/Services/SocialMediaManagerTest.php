@@ -2,7 +2,7 @@
 
 use App\Enums\SocialNetwork;
 use App\Models\SocialAccount;
-use App\Services\SocialMedia\Instagram\InstagramGraphService;
+use App\Services\SocialMedia\Instagram\Service;
 use App\Services\SocialMedia\SocialMediaContract;
 use App\Services\SocialMedia\Manager;
 
@@ -11,8 +11,8 @@ it('returns the instagram social media service for instagram accounts', function
         'social_network' => SocialNetwork::Instagram,
     ]);
 
-    $service = \Mockery::mock(InstagramGraphService::class);
-    app()->bind(InstagramGraphService::class, fn () => $service);
+    $service = \Mockery::mock(Service::class);
+    app()->bind(Service::class, fn () => $service);
 
     $resolved = app(Manager::class)->forAccount($account);
 

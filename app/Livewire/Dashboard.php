@@ -3,7 +3,7 @@
 namespace App\Livewire;
 
 use App\Enums\MediaType;
-use App\Services\SocialMedia\Instagram\InstagramClient;
+use App\Services\SocialMedia\Instagram\Client;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 
@@ -13,7 +13,7 @@ class Dashboard extends Component
     {
         /*
         $account = Auth::user()?->socialAccounts()->first();
-        $client = app(InstagramClient::class, [
+        $client = app(Client::class, [
             'user_id' => $account->social_network_user_id,
             'access_token' => $account->access_token,
         ]);

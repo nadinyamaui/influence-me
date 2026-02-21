@@ -5,7 +5,7 @@ use App\Exceptions\InstagramApiException;
 use App\Exceptions\InstagramTokenExpiredException;
 use App\Jobs\RefreshSocialMediaToken;
 use App\Models\SocialAccount;
-use App\Services\SocialMedia\Instagram\InstagramGraphService;
+use App\Services\SocialMedia\Instagram\Service;
 use Illuminate\Support\Facades\Log;
 
 it('refreshes instagram token and stores new token expiration', function (): void {
@@ -18,11 +18,11 @@ it('refreshes instagram token and stores new token expiration', function (): voi
         'last_sync_error' => 'old sync error',
     ]);
 
-    $instagramGraphService = \Mockery::mock(InstagramGraphService::class);
+    $instagramGraphService = \Mockery::mock(Service::class);
     $instagramGraphService->shouldReceive('refreshLongLivedToken')
         ->once()
         ->andReturn('new-refreshed-token');
-    app()->bind(InstagramGraphService::class, fn ($app, $parameters) => $instagramGraphService);
+    app()->bind(Service::class, fn ($app, $parameters) => $instagramGraphService);
 
     app(RefreshSocialMediaToken::class, ['account' => $account])->handle();
 
@@ -46,9 +46,9 @@ it('marks account as failed when token is already expired', function (): void {
         'last_sync_error' => null,
     ]);
 
-    $instagramGraphService = \Mockery::mock(InstagramGraphService::class);
+    $instagramGraphService = \Mockery::mock(Service::class);
     $instagramGraphService->shouldNotReceive('refreshLongLivedToken');
-    app()->bind(InstagramGraphService::class, fn ($app, $parameters) => $instagramGraphService);
+    app()->bind(Service::class, fn ($app, $parameters) => $instagramGraphService);
 
     app(RefreshSocialMediaToken::class, ['account' => $account])->handle();
 
@@ -68,11 +68,11 @@ it('marks account as failed when refresh fails due to expired token response', f
         'last_sync_error' => null,
     ]);
 
-    $instagramGraphService = \Mockery::mock(InstagramGraphService::class);
+    $instagramGraphService = \Mockery::mock(Service::class);
     $instagramGraphService->shouldReceive('refreshLongLivedToken')
         ->once()
         ->andThrow(new InstagramTokenExpiredException('Token expired upstream'));
-    app()->bind(InstagramGraphService::class, fn ($app, $parameters) => $instagramGraphService);
+    app()->bind(Service::class, fn ($app, $parameters) => $instagramGraphService);
 
     app(RefreshSocialMediaToken::class, ['account' => $account])->handle();
 
@@ -91,11 +91,11 @@ it('records last sync error and rethrows api failures for retry handling', funct
         'last_sync_error' => null,
     ]);
 
-    $instagramGraphService = \Mockery::mock(InstagramGraphService::class);
+    $instagramGraphService = \Mockery::mock(Service::class);
     $instagramGraphService->shouldReceive('refreshLongLivedToken')
         ->once()
         ->andThrow(new InstagramApiException('Facebook API unavailable'));
-    app()->bind(InstagramGraphService::class, fn ($app, $parameters) => $instagramGraphService);
+    app()->bind(Service::class, fn ($app, $parameters) => $instagramGraphService);
 
     expect(fn () => app(RefreshSocialMediaToken::class, ['account' => $account])->handle())
         ->toThrow(InstagramApiException::class, 'Facebook API unavailable');

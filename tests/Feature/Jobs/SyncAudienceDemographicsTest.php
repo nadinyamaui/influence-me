@@ -3,7 +3,7 @@
 use App\Jobs\SyncAudienceDemographics;
 use App\Models\AudienceDemographic;
 use App\Models\SocialAccount;
-use App\Services\SocialMedia\Instagram\InstagramClient;
+use App\Services\SocialMedia\Instagram\Client;
 
 it('replaces existing demographics with a fresh snapshot', function (): void {
     $account = SocialAccount::factory()->create([
@@ -23,7 +23,7 @@ it('replaces existing demographics with a fresh snapshot', function (): void {
         'value' => 15,
     ]);
 
-    $facebookClient = \Mockery::mock(InstagramClient::class);
+    $facebookClient = \Mockery::mock(Client::class);
     $facebookClient->shouldReceive('getAudienceDemographics')
         ->once()
         ->andReturn([
@@ -37,7 +37,7 @@ it('replaces existing demographics with a fresh snapshot', function (): void {
             ],
         ]);
 
-    app()->bind(InstagramClient::class, function ($app, $parameters) use ($facebookClient, $account) {
+    app()->bind(Client::class, function ($app, $parameters) use ($facebookClient, $account) {
         expect($parameters['access_token'] ?? null)->toBe($account->access_token);
 
         return $facebookClient;
@@ -94,9 +94,9 @@ it('skips demographics sync for accounts with fewer than 100 followers', functio
         'value' => 10,
     ]);
 
-    $facebookClient = \Mockery::mock(InstagramClient::class);
+    $facebookClient = \Mockery::mock(Client::class);
     $facebookClient->shouldNotReceive('getAudienceDemographics');
-    app()->bind(InstagramClient::class, fn () => $facebookClient);
+    app()->bind(Client::class, fn () => $facebookClient);
 
     app(SyncAudienceDemographics::class, ['account' => $account])->handle();
 

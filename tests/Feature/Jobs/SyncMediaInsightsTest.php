@@ -4,7 +4,7 @@ use App\Enums\MediaType;
 use App\Jobs\SyncMediaInsights;
 use App\Models\SocialAccountMedia;
 use App\Models\SocialAccount;
-use App\Services\SocialMedia\Instagram\InstagramClient;
+use App\Services\SocialMedia\Instagram\Client;
 use Illuminate\Support\Collection;
 
 it('syncs insights using views for impressions on recent non-story media and calculates engagement rate', function (): void {
@@ -52,7 +52,7 @@ it('syncs insights using views for impressions on recent non-story media and cal
         'impressions' => 44,
     ]);
 
-    $facebookClient = \Mockery::mock(InstagramClient::class);
+    $facebookClient = \Mockery::mock(Client::class);
     $facebookClient->shouldReceive('getMediaInsights')
         ->once()
         ->with('media-recent-post', MediaType::Post)
@@ -72,7 +72,7 @@ it('syncs insights using views for impressions on recent non-story media and cal
             'shares' => 1,
         ]));
 
-    app()->bind(InstagramClient::class, function ($app, $parameters) use ($facebookClient, $account) {
+    app()->bind(Client::class, function ($app, $parameters) use ($facebookClient, $account) {
         expect($parameters['access_token'] ?? null)->toBe($account->access_token);
 
         return $facebookClient;
@@ -112,7 +112,7 @@ it('maps views metric to impressions when syncing insights', function (): void {
         'comments_count' => 5,
     ]);
 
-    $facebookClient = \Mockery::mock(InstagramClient::class);
+    $facebookClient = \Mockery::mock(Client::class);
     $facebookClient->shouldReceive('getMediaInsights')
         ->once()
         ->with('media-rate-limit', MediaType::Post)
@@ -123,7 +123,7 @@ it('maps views metric to impressions when syncing insights', function (): void {
             'shares' => 2,
         ]));
 
-    app()->bind(InstagramClient::class, fn () => $facebookClient);
+    app()->bind(Client::class, fn () => $facebookClient);
 
     app(SyncMediaInsights::class, ['account' => $account])->handle();
 

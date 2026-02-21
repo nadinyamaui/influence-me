@@ -12,7 +12,7 @@ use FacebookAds\Object\Page;
 use FacebookAds\Object\User;
 use Illuminate\Support\Collection;
 
-class InstagramClient
+class Client
 {
     protected Api $api;
 
