@@ -19,10 +19,9 @@ class SocialAuthController extends Controller
     public function redirect(Request $request): RedirectResponse
     {
         $driver = $this->resolveDriver(
-            $request->query('driver'),
+            $request->route('driver'),
         );
         $request->session()->put('social_account_auth_intent', 'login');
-        $request->session()->put('social_account_auth_driver', $driver->value);
         $this->loginService->useDriver($driver);
 
         return $this->loginService->redirectToProvider();
@@ -31,10 +30,9 @@ class SocialAuthController extends Controller
     public function addAccount(Request $request): RedirectResponse
     {
         $driver = $this->resolveDriver(
-            $request->query('driver'),
+            $request->route('driver'),
         );
         $request->session()->put('social_account_auth_intent', 'add_account');
-        $request->session()->put('social_account_auth_driver', $driver->value);
         $this->loginService->useDriver($driver);
 
         return $this->loginService->redirectToProvider();
@@ -43,10 +41,7 @@ class SocialAuthController extends Controller
     public function callback(Request $request): RedirectResponse
     {
         $driver = $this->resolveDriver(
-            $request->query(
-                'driver',
-                $request->session()->pull('social_account_auth_driver', SocialNetwork::Instagram->value),
-            ),
+            $request->route('driver'),
         );
         $this->loginService->useDriver($driver);
         $intent = $request->session()->pull('social_account_auth_intent', 'login');

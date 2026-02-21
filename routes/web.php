@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\SocialNetwork;
 use App\Http\Controllers\Auth\SocialAuthController;
 use App\Livewire\Analytics\Index as AnalyticsIndex;
 use App\Livewire\Clients\Create as ClientsCreate;
@@ -20,6 +21,14 @@ use App\Livewire\Proposals\Show as ProposalsShow;
 use App\Livewire\SocialAccounts\Index as SocialAccountsIndex;
 use Illuminate\Support\Facades\Route;
 
+$socialDriversPattern = implode(
+    '|',
+    array_map(
+        static fn (SocialNetwork $network): string => $network->value,
+        SocialNetwork::cases(),
+    ),
+);
+
 Route::get('/', function () {
     return view('welcome');
 })->name('home');
@@ -27,13 +36,19 @@ Route::get('/', function () {
 Route::view('/terms', 'terms')->name('terms');
 Route::view('/privacy-policy', 'privacy-policy')->name('privacy-policy');
 
-Route::get('/auth/facebook', [SocialAuthController::class, 'redirect'])->middleware('guest')->name('auth.facebook');
-Route::get('/auth/facebook/callback', [SocialAuthController::class, 'callback'])
+Route::get('/auth/{driver}', [SocialAuthController::class, 'redirect'])
+    ->where('driver', $socialDriversPattern)
+    ->middleware('guest')
+    ->name('auth.facebook');
+Route::get('/auth/{driver}/callback', [SocialAuthController::class, 'callback'])
+    ->where('driver', $socialDriversPattern)
     ->middleware('throttle:instagram-oauth-callback')
     ->name('auth.facebook.callback');
 
-Route::middleware(['auth'])->group(function (): void {
-    Route::get('/auth/facebook/add', [SocialAuthController::class, 'addAccount'])->name('auth.facebook.add');
+Route::middleware(['auth'])->group(function () use ($socialDriversPattern): void {
+    Route::get('/auth/{driver}/add', [SocialAuthController::class, 'addAccount'])
+        ->where('driver', $socialDriversPattern)
+        ->name('auth.facebook.add');
 
     Route::livewire('instagram-accounts', SocialAccountsIndex::class)
         ->name('instagram-accounts.index');

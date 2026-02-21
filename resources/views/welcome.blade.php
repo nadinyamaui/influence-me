@@ -79,7 +79,7 @@
                     </p>
 
                     <div class="mt-10 flex flex-col items-start gap-4 sm:flex-row sm:items-center">
-                        <a href="{{ route('auth.facebook') }}" class="inline-flex w-full items-center justify-center gap-2 rounded-full border border-teal-200 bg-teal-300 px-7 py-3 text-sm font-semibold text-slate-950 transition hover:bg-teal-200 sm:w-auto">
+                        <a href="{{ route('auth.facebook', ['driver' => 'instagram']) }}" class="inline-flex w-full items-center justify-center gap-2 rounded-full border border-teal-200 bg-teal-300 px-7 py-3 text-sm font-semibold text-slate-950 transition hover:bg-teal-200 sm:w-auto">
                             <i class="fa-brands fa-instagram text-base" aria-hidden="true"></i>
                             Continue with Instagram
                         </a>
@@ -297,7 +297,7 @@
                             <li class="flex items-center gap-3"><i class="fa-solid fa-circle-check text-teal-500" aria-hidden="true"></i>Core media browsing</li>
                             <li class="flex items-center gap-3"><i class="fa-solid fa-circle-check text-teal-500" aria-hidden="true"></i>3 active proposals</li>
                         </ul>
-                        <a href="{{ route('auth.facebook') }}" class="mt-8 inline-flex items-center justify-center rounded-full border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-100">Get Started</a>
+                        <a href="{{ route('auth.facebook', ['driver' => 'instagram']) }}" class="mt-8 inline-flex items-center justify-center rounded-full border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-100">Get Started</a>
                     </article>
 
                     <article class="relative flex flex-col rounded-3xl border border-slate-900 bg-slate-900 p-7 text-white shadow-xl shadow-slate-400/30">
@@ -311,7 +311,7 @@
                             <li class="flex items-center gap-3"><i class="fa-solid fa-circle-check text-teal-300" aria-hidden="true"></i>Invoices and payment tracking</li>
                             <li class="flex items-center gap-3"><i class="fa-solid fa-circle-check text-teal-300" aria-hidden="true"></i>Advanced analytics views</li>
                         </ul>
-                        <a href="{{ route('auth.facebook') }}" class="mt-8 inline-flex items-center justify-center rounded-full bg-teal-300 px-4 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-teal-200">Start Free Trial</a>
+                        <a href="{{ route('auth.facebook', ['driver' => 'instagram']) }}" class="mt-8 inline-flex items-center justify-center rounded-full bg-teal-300 px-4 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-teal-200">Start Free Trial</a>
                     </article>
 
                     <article class="stagger flex flex-col rounded-3xl border border-slate-300 bg-white p-7 [animation-delay:1.8s]">
@@ -379,7 +379,7 @@
                     <p class="text-xs font-semibold uppercase tracking-[0.22em] text-teal-200">Start your stack</p>
                     <h2 class="mt-4 font-display text-4xl leading-tight text-white sm:text-5xl">Trade tool sprawl for one creator operating system.</h2>
                     <p class="mt-5 max-w-2xl text-sm leading-relaxed text-slate-300">Connect your Instagram account, sync the fundamentals, and run proposals, clients, and invoices from a single operational backbone.</p>
-                    <a href="{{ route('auth.facebook') }}" class="mt-10 inline-flex items-center justify-center gap-2 rounded-full bg-teal-300 px-8 py-3 text-sm font-semibold text-slate-950 transition hover:bg-teal-200">
+                    <a href="{{ route('auth.facebook', ['driver' => 'instagram']) }}" class="mt-10 inline-flex items-center justify-center gap-2 rounded-full bg-teal-300 px-8 py-3 text-sm font-semibold text-slate-950 transition hover:bg-teal-200">
                         <i class="fa-brands fa-instagram" aria-hidden="true"></i>
                         Continue with Instagram
                     </a>

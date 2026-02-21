@@ -58,7 +58,7 @@
         @endif
 
         <div class="flex flex-col gap-3">
-            <flux:button :href="route('auth.facebook')" variant="primary" class="w-full" data-test="facebook-login-button">
+            <flux:button :href="route('auth.facebook', ['driver' => 'instagram'])" variant="primary" class="w-full" data-test="facebook-login-button">
                 {{ __('Continue with Facebook') }}
             </flux:button>
         </div>

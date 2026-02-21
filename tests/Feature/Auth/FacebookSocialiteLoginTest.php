@@ -11,7 +11,7 @@ it('renders a facebook oauth login button', function (): void {
 
     $response->assertOk();
     $response->assertSee('Continue with Facebook');
-    $response->assertSee(route('auth.facebook'));
+    $response->assertSee(route('auth.facebook', ['driver' => SocialNetwork::Instagram->value]));
 });
 
 it('redirects to the facebook socialite provider', function (): void {
@@ -32,15 +32,14 @@ it('redirects to the facebook socialite provider', function (): void {
         ->once()
         ->andReturn(redirect('https://www.facebook.com/v18.0/dialog/oauth'));
 
-    $response = $this->get(route('auth.facebook'));
+    $response = $this->get(route('auth.facebook', ['driver' => SocialNetwork::Instagram->value]));
 
     $response->assertRedirect('https://www.facebook.com/v18.0/dialog/oauth');
     $response->assertSessionHas('social_account_auth_intent', 'login');
-    $response->assertSessionHas('social_account_auth_driver', SocialNetwork::Instagram->value);
 });
 
 it('requires authentication to connect additional instagram accounts', function (): void {
-    $response = $this->get(route('auth.facebook.add'));
+    $response = $this->get(route('auth.facebook.add', ['driver' => SocialNetwork::Instagram->value]));
 
     $response->assertRedirect(route('login'));
 });
@@ -65,14 +64,13 @@ it('redirects authenticated users to facebook provider for add-account flow', fu
         ->once()
         ->andReturn(redirect('https://www.facebook.com/v18.0/dialog/oauth'));
 
-    $response = $this->actingAs($user)->get(route('auth.facebook.add'));
+    $response = $this->actingAs($user)->get(route('auth.facebook.add', ['driver' => SocialNetwork::Instagram->value]));
 
     $response->assertRedirect('https://www.facebook.com/v18.0/dialog/oauth');
     $response->assertSessionHas('social_account_auth_intent', 'add_account');
-    $response->assertSessionHas('social_account_auth_driver', SocialNetwork::Instagram->value);
 });
 
-it('uses the driver query parameter for redirect flow', function (): void {
+it('uses the route driver parameter for redirect flow', function (): void {
     Socialite::shouldReceive('driver')
         ->once()
         ->with('tiktok')
@@ -88,7 +86,6 @@ it('uses the driver query parameter for redirect flow', function (): void {
     $response = $this->get(route('auth.facebook', ['driver' => SocialNetwork::Tiktok->value]));
 
     $response->assertRedirect('https://www.tiktok.com/v2/auth/authorize');
-    $response->assertSessionHas('social_account_auth_driver', SocialNetwork::Tiktok->value);
 });
 
 it('redirects to dashboard after successful facebook callback', function (): void {
@@ -108,7 +105,7 @@ it('redirects to dashboard after successful facebook callback', function (): voi
         });
     app()->instance(SocialiteLoginService::class, $loginService);
 
-    $response = $this->get(route('auth.facebook.callback'));
+    $response = $this->get(route('auth.facebook.callback', ['driver' => SocialNetwork::Instagram->value]));
 
     $response->assertRedirect(route('dashboard', absolute: false));
     $this->assertAuthenticatedAs($user);
@@ -128,7 +125,7 @@ it('returns to login when facebook oauth callback fails', function (): void {
         ->andReturn('Instagram');
     app()->instance(SocialiteLoginService::class, $loginService);
 
-    $response = $this->get(route('auth.facebook.callback'));
+    $response = $this->get(route('auth.facebook.callback', ['driver' => SocialNetwork::Instagram->value]));
 
     $response->assertRedirect(route('login'));
     $response->assertSessionHasErrors([
@@ -148,7 +145,7 @@ it('returns to login with social auth error message when callback raises social 
         ->andThrow(new SocialAuthenticationException('Facebook denied access to the requested scopes.'));
     app()->instance(SocialiteLoginService::class, $loginService);
 
-    $response = $this->get(route('auth.facebook.callback'));
+    $response = $this->get(route('auth.facebook.callback', ['driver' => SocialNetwork::Instagram->value]));
 
     $response->assertRedirect(route('login'));
     $response->assertSessionHasErrors([
@@ -173,7 +170,7 @@ it('uses account-linking flow on callback for authenticated users with add-accou
 
     $response = $this->actingAs($user)
         ->withSession(['social_account_auth_intent' => 'add_account'])
-        ->get(route('auth.facebook.callback'));
+        ->get(route('auth.facebook.callback', ['driver' => SocialNetwork::Instagram->value]));
 
     $response->assertRedirect(route('instagram-accounts.index'));
     $response->assertSessionHas('status', 'Instagram accounts connected successfully.');
@@ -195,7 +192,7 @@ it('returns to instagram accounts with oauth error on add-account callback socia
 
     $response = $this->actingAs($user)
         ->withSession(['social_account_auth_intent' => 'add_account'])
-        ->get(route('auth.facebook.callback'));
+        ->get(route('auth.facebook.callback', ['driver' => SocialNetwork::Instagram->value]));
 
     $response->assertRedirect(route('instagram-accounts.index'));
     $response->assertSessionHasErrors([
@@ -221,15 +218,15 @@ it('rate limits facebook oauth callback to ten attempts per minute per ip', func
     app()->instance(SocialiteLoginService::class, $loginService);
 
     foreach (range(1, 10) as $attempt) {
-        $this->get(route('auth.facebook.callback'))
+        $this->get(route('auth.facebook.callback', ['driver' => SocialNetwork::Instagram->value]))
             ->assertRedirect(route('dashboard', absolute: false));
     }
 
-    $this->get(route('auth.facebook.callback'))
+    $this->get(route('auth.facebook.callback', ['driver' => SocialNetwork::Instagram->value]))
         ->assertStatus(429);
 });
 
-it('uses the session driver on callback when query parameter is absent', function (): void {
+it('uses the route driver on callback', function (): void {
     $user = User::factory()->create();
 
     $loginService = \Mockery::mock(SocialiteLoginService::class);
@@ -246,9 +243,7 @@ it('uses the session driver on callback when query parameter is absent', functio
         });
     app()->instance(SocialiteLoginService::class, $loginService);
 
-    $response = $this
-        ->withSession(['social_account_auth_driver' => SocialNetwork::Tiktok->value])
-        ->get(route('auth.facebook.callback'));
+    $response = $this->get(route('auth.facebook.callback', ['driver' => SocialNetwork::Tiktok->value]));
 
     $response->assertRedirect(route('dashboard', absolute: false));
 });
