@@ -10,6 +10,7 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
 use SocialiteProviders\Manager\SocialiteWasCalled;
 use SocialiteProviders\TikTok\Provider as TikTokProvider;
+use SocialiteProviders\Twitch\Provider as TwitchProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -47,6 +48,7 @@ class AppServiceProvider extends ServiceProvider
     {
         Event::listen(function (SocialiteWasCalled $event): void {
             $event->extendSocialite('tiktok', TikTokProvider::class);
+            $event->extendSocialite('twitch', TwitchProvider::class);
         });
     }
 }
