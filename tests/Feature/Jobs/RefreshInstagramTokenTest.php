@@ -5,7 +5,7 @@ use App\Exceptions\InstagramApiException;
 use App\Exceptions\InstagramTokenExpiredException;
 use App\Jobs\RefreshSocialMediaToken;
 use App\Models\SocialAccount;
-use App\Services\Facebook\InstagramGraphService;
+use App\Services\Instagram\InstagramGraphService;
 use Illuminate\Support\Facades\Log;
 
 it('refreshes instagram token and stores new token expiration', function (): void {

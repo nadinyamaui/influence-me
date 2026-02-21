@@ -2,7 +2,7 @@
 
 use App\Enums\SocialNetwork;
 use App\Models\SocialAccount;
-use App\Services\Facebook\InstagramGraphService;
+use App\Services\Instagram\InstagramGraphService;
 use App\Services\SocialMedia\SocialMediaInterface;
 use App\Services\SocialMedia\SocialMediaManager;
 

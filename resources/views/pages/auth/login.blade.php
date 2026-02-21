@@ -1,6 +1,6 @@
 <x-layouts::auth>
     <div class="flex flex-col gap-6">
-        <x-auth-header :title="__('Log in to your account')" :description="__('Use your email and password or continue with Facebook.')" />
+        <x-auth-header :title="__('Log in to your account')" :description="__('Use your email and password or continue with Instagram.')" />
 
         <x-auth-session-status class="text-center" :status="session('status')" />
 
@@ -58,8 +58,8 @@
         @endif
 
         <div class="flex flex-col gap-3">
-            <flux:button :href="route('auth.facebook')" variant="primary" class="w-full" data-test="facebook-login-button">
-                {{ __('Continue with Facebook') }}
+            <flux:button :href="route('auth.instagram')" variant="primary" class="w-full" data-test="instagram-login-button">
+                {{ __('Continue with Instagram') }}
             </flux:button>
         </div>
 

@@ -1,7 +1,7 @@
 <?php
 
 use App\Enums\MediaType;
-use App\Services\Facebook\Client;
+use App\Services\Instagram\InstagramClient;
 use FacebookAds\Api;
 use FacebookAds\Http\ResponseInterface;
 use FacebookAds\Object\IGMedia;
@@ -14,9 +14,9 @@ it('initializes facebook api with configured credentials and default graph versi
     config()->set('services.facebook.client_id', 'facebook-client-id');
     config()->set('services.facebook.client_secret', 'facebook-client-secret');
 
-    $client = new Client('short-lived-token');
+    $client = new InstagramClient('short-lived-token');
 
-    $clientReflection = new ReflectionClass(Client::class);
+    $clientReflection = new ReflectionClass(InstagramClient::class);
     $apiProperty = $clientReflection->getProperty('api');
     $apiProperty->setAccessible(true);
     $api = $apiProperty->getValue($client);
@@ -25,7 +25,7 @@ it('initializes facebook api with configured credentials and default graph versi
         ->and($api->getDefaultGraphVersion())->toBe('24.0');
 });
 
-it('gets a long lived token from the facebook oauth endpoint', function (): void {
+it('gets a long lived token from the instagram oauth endpoint', function (): void {
     config()->set('services.facebook.client_id', 'facebook-client-id');
     config()->set('services.facebook.client_secret', 'facebook-client-secret');
 
@@ -55,7 +55,7 @@ it('gets a long lived token from the facebook oauth endpoint', function (): void
         })
         ->andReturn($response);
 
-    $clientReflection = new ReflectionClass(Client::class);
+    $clientReflection = new ReflectionClass(InstagramClient::class);
     $client = $clientReflection->newInstanceWithoutConstructor();
 
     $accessTokenProperty = $clientReflection->getProperty('access_token');
@@ -69,7 +69,7 @@ it('gets a long lived token from the facebook oauth endpoint', function (): void
     expect($client->getLongLivedToken())->toBe($tokenResponse);
 });
 
-it('refreshes a long lived token from the facebook oauth endpoint', function (): void {
+it('refreshes a long lived token from the instagram oauth endpoint', function (): void {
     config()->set('services.facebook.client_id', 'facebook-client-id');
     config()->set('services.facebook.client_secret', 'facebook-client-secret');
 
@@ -99,7 +99,7 @@ it('refreshes a long lived token from the facebook oauth endpoint', function ():
         })
         ->andReturn($response);
 
-    $clientReflection = new ReflectionClass(Client::class);
+    $clientReflection = new ReflectionClass(InstagramClient::class);
     $client = $clientReflection->newInstanceWithoutConstructor();
 
     $accessTokenProperty = $clientReflection->getProperty('access_token');
@@ -156,7 +156,7 @@ it('returns mapped instagram accounts from the facebook accounts endpoint', func
         ])
         ->andReturn(new ArrayObject([$pageWithSocialAccount, $pageWithoutSocialAccount]));
 
-    $clientReflection = new ReflectionClass(Client::class);
+    $clientReflection = new ReflectionClass(InstagramClient::class);
     $client = $clientReflection->newInstanceWithoutConstructor();
 
     $userIdProperty = $clientReflection->getProperty('user_id');
@@ -249,7 +249,7 @@ it('filters out accounts without instagram id and normalizes biography', functio
         ])
         ->andReturn(new ArrayObject([$pageWithInstagramId, $pageWithoutInstagramId, $pageWithNullInstagramId]));
 
-    $clientReflection = new ReflectionClass(Client::class);
+    $clientReflection = new ReflectionClass(InstagramClient::class);
     $client = $clientReflection->newInstanceWithoutConstructor();
 
     $userIdProperty = $clientReflection->getProperty('user_id');
@@ -318,7 +318,7 @@ it('gets all instagram media from graph endpoint', function (): void {
         ])
         ->andReturn($cursor);
 
-    $clientReflection = new ReflectionClass(Client::class);
+    $clientReflection = new ReflectionClass(InstagramClient::class);
     $client = $clientReflection->newInstanceWithoutConstructor();
 
     $userIdProperty = $clientReflection->getProperty('user_id');
@@ -349,7 +349,7 @@ it('returns an empty array when no instagram media is available', function (): v
         ->once()
         ->andReturn($cursor);
 
-    $clientReflection = new ReflectionClass(Client::class);
+    $clientReflection = new ReflectionClass(InstagramClient::class);
     $client = $clientReflection->newInstanceWithoutConstructor();
 
     $userIdProperty = $clientReflection->getProperty('user_id');
@@ -384,7 +384,7 @@ it('returns empty story collection when graph endpoint has no media', function (
         ])
         ->andReturn($cursor);
 
-    $clientReflection = new ReflectionClass(Client::class);
+    $clientReflection = new ReflectionClass(InstagramClient::class);
     $client = $clientReflection->newInstanceWithoutConstructor();
 
     $userIdProperty = $clientReflection->getProperty('user_id');
@@ -435,7 +435,7 @@ it('gets a single instagram media item from graph endpoint', function (): void {
         ])
         ->andReturn($media);
 
-    $clientReflection = new ReflectionClass(Client::class);
+    $clientReflection = new ReflectionClass(InstagramClient::class);
     $client = $clientReflection->newInstanceWithoutConstructor();
 
     expect($client->getMedia(17900000000000001))->toBe($mediaResponse);
@@ -464,7 +464,7 @@ it('returns nullable thumbnail_url when single instagram media response omits va
         ->once()
         ->andReturn($media);
 
-    $clientReflection = new ReflectionClass(Client::class);
+    $clientReflection = new ReflectionClass(InstagramClient::class);
     $client = $clientReflection->newInstanceWithoutConstructor();
 
     expect($client->getMedia(17900000000000001))->toBe([
@@ -505,7 +505,7 @@ it('gets image and carousel media insights from graph endpoint', function (): vo
         })
         ->andReturn(new ArrayObject($insights));
 
-    $clientReflection = new ReflectionClass(Client::class);
+    $clientReflection = new ReflectionClass(InstagramClient::class);
     $client = $clientReflection->newInstanceWithoutConstructor();
 
     expect($client->getMediaInsights('17900000000000001', MediaType::Post)->all())->toBe([
@@ -547,7 +547,7 @@ it('gets video and reel media insights from graph endpoint', function (): void {
         })
         ->andReturn(new ArrayObject($insights));
 
-    $clientReflection = new ReflectionClass(Client::class);
+    $clientReflection = new ReflectionClass(InstagramClient::class);
     $client = $clientReflection->newInstanceWithoutConstructor();
 
     expect($client->getMediaInsights('17900000000000002', MediaType::Reel)->all())->toBe([
@@ -581,7 +581,7 @@ it('gets story media insights from graph endpoint', function (): void {
         })
         ->andReturn(new ArrayObject($insights));
 
-    $clientReflection = new ReflectionClass(Client::class);
+    $clientReflection = new ReflectionClass(InstagramClient::class);
     $client = $clientReflection->newInstanceWithoutConstructor();
 
     expect($client->getMediaInsights('17900000000000003', MediaType::Story)->all())->toBe([
@@ -624,7 +624,7 @@ it('gets instagram profile data from graph endpoint', function (): void {
         ])
         ->andReturn($profile);
 
-    $clientReflection = new ReflectionClass(Client::class);
+    $clientReflection = new ReflectionClass(InstagramClient::class);
     $client = $clientReflection->newInstanceWithoutConstructor();
 
     $userIdProperty = $clientReflection->getProperty('user_id');
@@ -666,7 +666,7 @@ it('returns nullable instagram profile keys when graph response omits values', f
         ->once()
         ->andReturn($profile);
 
-    $clientReflection = new ReflectionClass(Client::class);
+    $clientReflection = new ReflectionClass(InstagramClient::class);
     $client = $clientReflection->newInstanceWithoutConstructor();
 
     $userIdProperty = $clientReflection->getProperty('user_id');

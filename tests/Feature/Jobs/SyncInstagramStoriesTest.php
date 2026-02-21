@@ -4,12 +4,12 @@ use App\Enums\MediaType;
 use App\Jobs\SyncSocialMediaStories;
 use App\Models\SocialAccountMedia;
 use App\Models\SocialAccount;
-use App\Services\Facebook\Client as FacebookClient;
+use App\Services\Instagram\InstagramClient;
 
 it('fetches active stories and syncs them as story media records', function (): void {
     $account = SocialAccount::factory()->create();
 
-    $facebookClient = \Mockery::mock(FacebookClient::class);
+    $facebookClient = \Mockery::mock(InstagramClient::class);
     $facebookClient->shouldReceive('getStories')
         ->once()
         ->andReturn(collect([
@@ -32,7 +32,7 @@ it('fetches active stories and syncs them as story media records', function (): 
                 'timestamp' => '2026-02-12T10:15:00+0000',
             ],
         ]));
-    app()->bind(FacebookClient::class, function ($app, $parameters) use ($facebookClient, $account) {
+    app()->bind(InstagramClient::class, function ($app, $parameters) use ($facebookClient, $account) {
         expect($parameters['access_token'] ?? null)->toBe($account->access_token);
 
         return $facebookClient;
@@ -56,7 +56,7 @@ it('updates existing story records when rerun to keep sync idempotent', function
         'published_at' => now()->subDay(),
     ]);
 
-    $facebookClient = \Mockery::mock(FacebookClient::class);
+    $facebookClient = \Mockery::mock(InstagramClient::class);
     $facebookClient->shouldReceive('getStories')
         ->once()
         ->andReturn(collect([
@@ -70,7 +70,7 @@ it('updates existing story records when rerun to keep sync idempotent', function
                 'timestamp' => '2026-02-12T11:00:00+0000',
             ],
         ]));
-    app()->bind(FacebookClient::class, function ($app, $parameters) use ($facebookClient, $account) {
+    app()->bind(InstagramClient::class, function ($app, $parameters) use ($facebookClient, $account) {
         expect($parameters['access_token'] ?? null)->toBe($account->access_token);
 
         return $facebookClient;

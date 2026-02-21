@@ -5,12 +5,12 @@ use App\Models\User;
 use App\Services\Auth\SocialiteLoginService;
 use Laravel\Socialite\Facades\Socialite;
 
-it('renders a facebook oauth login button', function (): void {
+it('renders a instagram oauth login button', function (): void {
     $response = $this->get(route('login'));
 
     $response->assertOk();
-    $response->assertSee('Continue with Facebook');
-    $response->assertSee(route('auth.facebook'));
+    $response->assertSee('Continue with Instagram');
+    $response->assertSee(route('auth.instagram'));
 });
 
 it('redirects to the facebook socialite provider', function (): void {
@@ -31,19 +31,19 @@ it('redirects to the facebook socialite provider', function (): void {
         ->once()
         ->andReturn(redirect('https://www.facebook.com/v18.0/dialog/oauth'));
 
-    $response = $this->get(route('auth.facebook'));
+    $response = $this->get(route('auth.instagram'));
 
     $response->assertRedirect('https://www.facebook.com/v18.0/dialog/oauth');
     $response->assertSessionHas('social_account_auth_intent', 'login');
 });
 
 it('requires authentication to connect additional instagram accounts', function (): void {
-    $response = $this->get(route('auth.facebook.add'));
+    $response = $this->get(route('auth.instagram.add'));
 
     $response->assertRedirect(route('login'));
 });
 
-it('redirects authenticated users to facebook provider for add-account flow', function (): void {
+it('redirects authenticated users to instagram provider for add-account flow', function (): void {
     $user = User::factory()->create();
 
     Socialite::shouldReceive('driver')
@@ -63,13 +63,13 @@ it('redirects authenticated users to facebook provider for add-account flow', fu
         ->once()
         ->andReturn(redirect('https://www.facebook.com/v18.0/dialog/oauth'));
 
-    $response = $this->actingAs($user)->get(route('auth.facebook.add'));
+    $response = $this->actingAs($user)->get(route('auth.instagram.add'));
 
     $response->assertRedirect('https://www.facebook.com/v18.0/dialog/oauth');
     $response->assertSessionHas('social_account_auth_intent', 'add_account');
 });
 
-it('redirects to dashboard after successful facebook callback', function (): void {
+it('redirects to dashboard after successful instagram callback', function (): void {
     $user = User::factory()->create();
 
     $loginService = \Mockery::mock(SocialiteLoginService::class);
@@ -82,13 +82,13 @@ it('redirects to dashboard after successful facebook callback', function (): voi
         });
     app()->instance(SocialiteLoginService::class, $loginService);
 
-    $response = $this->get(route('auth.facebook.callback'));
+    $response = $this->get(route('auth.instagram.callback'));
 
     $response->assertRedirect(route('dashboard', absolute: false));
     $this->assertAuthenticatedAs($user);
 });
 
-it('returns to login when facebook oauth callback fails', function (): void {
+it('returns to login when instagram oauth callback fails', function (): void {
     $loginService = \Mockery::mock(SocialiteLoginService::class);
     $loginService->shouldReceive('createUserAndAccounts')
         ->once()
@@ -98,7 +98,7 @@ it('returns to login when facebook oauth callback fails', function (): void {
         ->andReturn('Instagram');
     app()->instance(SocialiteLoginService::class, $loginService);
 
-    $response = $this->get(route('auth.facebook.callback'));
+    $response = $this->get(route('auth.instagram.callback'));
 
     $response->assertRedirect(route('login'));
     $response->assertSessionHasErrors([
@@ -114,7 +114,7 @@ it('returns to login with social auth error message when callback raises social 
         ->andThrow(new SocialAuthenticationException('Facebook denied access to the requested scopes.'));
     app()->instance(SocialiteLoginService::class, $loginService);
 
-    $response = $this->get(route('auth.facebook.callback'));
+    $response = $this->get(route('auth.instagram.callback'));
 
     $response->assertRedirect(route('login'));
     $response->assertSessionHasErrors([
@@ -135,7 +135,7 @@ it('uses account-linking flow on callback for authenticated users with add-accou
 
     $response = $this->actingAs($user)
         ->withSession(['social_account_auth_intent' => 'add_account'])
-        ->get(route('auth.facebook.callback'));
+        ->get(route('auth.instagram.callback'));
 
     $response->assertRedirect(route('instagram-accounts.index'));
     $response->assertSessionHas('status', 'Instagram accounts connected successfully.');
@@ -153,7 +153,7 @@ it('returns to instagram accounts with oauth error on add-account callback socia
 
     $response = $this->actingAs($user)
         ->withSession(['social_account_auth_intent' => 'add_account'])
-        ->get(route('auth.facebook.callback'));
+        ->get(route('auth.instagram.callback'));
 
     $response->assertRedirect(route('instagram-accounts.index'));
     $response->assertSessionHasErrors([
@@ -161,7 +161,7 @@ it('returns to instagram accounts with oauth error on add-account callback socia
     ]);
 });
 
-it('rate limits facebook oauth callback to ten attempts per minute per ip', function (): void {
+it('rate limits instagram oauth callback to ten attempts per minute per ip', function (): void {
     $user = User::factory()->create();
 
     $loginService = \Mockery::mock(SocialiteLoginService::class);
@@ -175,10 +175,10 @@ it('rate limits facebook oauth callback to ten attempts per minute per ip', func
     app()->instance(SocialiteLoginService::class, $loginService);
 
     foreach (range(1, 10) as $attempt) {
-        $this->get(route('auth.facebook.callback'))
+        $this->get(route('auth.instagram.callback'))
             ->assertRedirect(route('dashboard', absolute: false));
     }
 
-    $this->get(route('auth.facebook.callback'))
+    $this->get(route('auth.instagram.callback'))
         ->assertStatus(429);
 });
