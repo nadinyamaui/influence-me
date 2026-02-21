@@ -13,6 +13,8 @@ use App\Livewire\Pricing\Plans\Form as PricingPlansForm;
 use App\Livewire\Pricing\Plans\Index as PricingPlansIndex;
 use App\Livewire\Pricing\Products\Form as PricingProductsForm;
 use App\Livewire\Pricing\Products\Index as PricingProductsIndex;
+use App\Livewire\Pricing\TaxRates\Form as TaxRatesForm;
+use App\Livewire\Pricing\TaxRates\Index as TaxRatesIndex;
 use App\Livewire\Proposals\Create as ProposalsCreate;
 use App\Livewire\Proposals\Edit as ProposalsEdit;
 use App\Livewire\Proposals\Index as ProposalsIndex;
@@ -88,6 +90,15 @@ Route::middleware(['auth'])->group(function (): void {
 
     Route::livewire('pricing/plans/{plan}/edit', PricingPlansForm::class)
         ->name('pricing.plans.edit');
+
+    Route::livewire('pricing/tax-rates', TaxRatesIndex::class)
+        ->name('pricing.tax-rates.index');
+
+    Route::livewire('pricing/tax-rates/create', TaxRatesForm::class)
+        ->name('pricing.tax-rates.create');
+
+    Route::livewire('pricing/tax-rates/{taxRate}/edit', TaxRatesForm::class)
+        ->name('pricing.tax-rates.edit');
 
     Route::middleware(['verified'])->group(function (): void {
         Route::livewire('dashboard', Dashboard::class)
