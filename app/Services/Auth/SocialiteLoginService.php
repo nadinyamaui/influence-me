@@ -11,27 +11,27 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Collection;
 use Laravel\Socialite\Facades\Socialite;
 
-class FacebookSocialiteLoginService
+class SocialiteLoginService
 {
-    private array $scopes = [
-        'instagram_basic',
-        'instagram_manage_insights',
-        'pages_show_list',
-        'pages_read_engagement',
-    ];
+    private SocialNetwork $driver = SocialNetwork::Instagram;
+
+    public function driverLabel(): string
+    {
+        return $this->driver->label();
+    }
 
     public function redirectToProvider(): RedirectResponse
     {
-        return Socialite::driver('facebook')
-            ->scopes($this->scopes)
+        return Socialite::driver($this->driver->socialiteDriver())
+            ->scopes($this->driver->oauthScopes())
             ->redirect();
     }
 
     public function createUserAndAccounts(): User
     {
-        $socialiteUser = Socialite::driver('facebook')->user();
+        $socialiteUser = Socialite::driver($this->driver->socialiteDriver())->user();
         if (! $socialiteUser->getId()) {
-            throw new SocialAuthenticationException('Facebook did not return required account information.');
+            throw new SocialAuthenticationException("{$this->driverLabel()} did not return required account information.");
         }
         $this->ensureNoConflictingEmailUser($socialiteUser);
         $existingUser = $this->findExistingSocialiteUser($socialiteUser);
@@ -49,12 +49,12 @@ class FacebookSocialiteLoginService
     {
         $user = auth()->user();
         if (! $user instanceof User) {
-            throw new SocialAuthenticationException('You must be logged in to link Instagram accounts.');
+            throw new SocialAuthenticationException("You must be logged in to link {$this->driverLabel()} accounts.");
         }
 
-        $socialiteUser = Socialite::driver('facebook')->user();
+        $socialiteUser = Socialite::driver($this->driver->socialiteDriver())->user();
         if (! $socialiteUser->getId()) {
-            throw new SocialAuthenticationException('Facebook did not return required account information.');
+            throw new SocialAuthenticationException("{$this->driverLabel()} did not return required account information.");
         }
 
         $token = $this->exchangeToken($socialiteUser);
@@ -68,7 +68,7 @@ class FacebookSocialiteLoginService
     protected function createUpdateUser($socialiteUser): User
     {
         return User::updateOrCreate([
-            'socialite_user_type' => 'facebook',
+            'socialite_user_type' => $this->driver->socialiteDriver(),
             'socialite_user_id' => $socialiteUser->getId(),
         ], [
             'name' => $socialiteUser->getName(),
@@ -84,7 +84,7 @@ class FacebookSocialiteLoginService
         if (
             $existingUserByEmail !== null
             && (
-                $existingUserByEmail->socialite_user_type !== 'facebook'
+                $existingUserByEmail->socialite_user_type !== $this->driver->socialiteDriver()
                 || $existingUserByEmail->socialite_user_id !== $socialiteUser->getId()
             )
         ) {
@@ -95,7 +95,7 @@ class FacebookSocialiteLoginService
     protected function findExistingSocialiteUser($socialiteUser): ?User
     {
         return User::query()
-            ->where('socialite_user_type', 'facebook')
+            ->where('socialite_user_type', $this->driver->socialiteDriver())
             ->where('socialite_user_id', $socialiteUser->getId())
             ->first();
     }
@@ -126,7 +126,7 @@ class FacebookSocialiteLoginService
             )
             ->first();
         if ($conflictingAccount !== null) {
-            throw new SocialAuthenticationException('One or more Instagram accounts are linked to a different user.');
+            throw new SocialAuthenticationException("One or more {$this->driverLabel()} accounts are linked to a different user.");
         }
     }
 

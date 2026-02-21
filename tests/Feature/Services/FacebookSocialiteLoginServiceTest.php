@@ -3,7 +3,7 @@
 use App\Exceptions\Auth\SocialAuthenticationException;
 use App\Models\SocialAccount;
 use App\Models\User;
-use App\Services\Auth\FacebookSocialiteLoginService;
+use App\Services\Auth\SocialiteLoginService;
 use Illuminate\Http\RedirectResponse;
 use Laravel\Socialite\Facades\Socialite;
 
@@ -27,7 +27,7 @@ it('redirects to facebook provider with required scopes', function (): void {
         ->once()
         ->andReturn($expectedRedirect);
 
-    $response = app(FacebookSocialiteLoginService::class)->redirectToProvider();
+    $response = app(SocialiteLoginService::class)->redirectToProvider();
 
     expect($response)->toBeInstanceOf(RedirectResponse::class)
         ->and($response->getTargetUrl())->toBe('https://www.facebook.com/v18.0/dialog/oauth');
@@ -52,8 +52,8 @@ it('throws a social authentication exception when facebook does not return an id
         ->once()
         ->andReturn($socialiteUser);
 
-    app(FacebookSocialiteLoginService::class)->createUserAndAccounts();
-})->throws(SocialAuthenticationException::class, 'Facebook did not return required account information.');
+    app(SocialiteLoginService::class)->createUserAndAccounts();
+})->throws(SocialAuthenticationException::class, 'Instagram did not return required account information.');
 
 it('throws a social authentication exception when another user already has the callback email', function (): void {
     User::factory()->create([
@@ -85,7 +85,7 @@ it('throws a social authentication exception when another user already has the c
         ->once()
         ->andReturn($socialiteUser);
 
-    app(FacebookSocialiteLoginService::class)->createUserAndAccounts();
+    app(SocialiteLoginService::class)->createUserAndAccounts();
 })->throws(SocialAuthenticationException::class, 'A user with this email already exists.');
 
 it('creates the influencer user, logs them in, and syncs instagram accounts on callback', function (): void {
@@ -117,7 +117,7 @@ it('creates the influencer user, logs them in, and syncs instagram accounts on c
         ->once()
         ->andReturn($socialiteUser);
 
-    $service = \Mockery::mock(FacebookSocialiteLoginService::class)
+    $service = \Mockery::mock(SocialiteLoginService::class)
         ->makePartial()
         ->shouldAllowMockingProtectedMethods();
     $service->shouldReceive('exchangeToken')
@@ -217,7 +217,7 @@ it('updates existing user and instagram account records on callback', function (
         ->once()
         ->andReturn($socialiteUser);
 
-    $service = \Mockery::mock(FacebookSocialiteLoginService::class)
+    $service = \Mockery::mock(SocialiteLoginService::class)
         ->makePartial()
         ->shouldAllowMockingProtectedMethods();
     $service->shouldReceive('exchangeToken')
@@ -291,7 +291,7 @@ it('throws a social authentication exception when instagram account is linked to
         ->once()
         ->andReturn($socialiteUser);
 
-    $service = \Mockery::mock(FacebookSocialiteLoginService::class)
+    $service = \Mockery::mock(SocialiteLoginService::class)
         ->makePartial()
         ->shouldAllowMockingProtectedMethods();
     $service->shouldReceive('exchangeToken')
@@ -324,7 +324,7 @@ it('throws a social authentication exception when instagram account is linked to
 });
 
 it('throws a social authentication exception when linking instagram accounts without an authenticated user', function (): void {
-    expect(fn () => app(FacebookSocialiteLoginService::class)->createSocialAccountsForLoggedUser())
+    expect(fn () => app(SocialiteLoginService::class)->createSocialAccountsForLoggedUser())
         ->toThrow(SocialAuthenticationException::class, 'You must be logged in to link Instagram accounts.');
 });
 
@@ -353,7 +353,7 @@ it('links instagram accounts to the authenticated user only', function (): void 
         ->once()
         ->andReturn($socialiteUser);
 
-    $service = \Mockery::mock(FacebookSocialiteLoginService::class)
+    $service = \Mockery::mock(SocialiteLoginService::class)
         ->makePartial()
         ->shouldAllowMockingProtectedMethods();
     $service->shouldReceive('exchangeToken')
@@ -418,7 +418,7 @@ it('throws a social authentication exception when linking instagram accounts alr
         ->once()
         ->andReturn($socialiteUser);
 
-    $service = \Mockery::mock(FacebookSocialiteLoginService::class)
+    $service = \Mockery::mock(SocialiteLoginService::class)
         ->makePartial()
         ->shouldAllowMockingProtectedMethods();
     $service->shouldReceive('exchangeToken')
