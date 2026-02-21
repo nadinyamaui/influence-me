@@ -1,4 +1,4 @@
-<x-layouts.marketing title="Terms of Service | Influence Me" body-class="bg-slate-50 text-slate-700">
+<x-layouts.marketing title="Terms of Service | Okacrm" body-class="bg-slate-50 text-slate-700">
     <main class="mx-auto max-w-4xl px-6 pb-16 pt-28 sm:pb-20 sm:pt-32">
         <div class="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm sm:p-12">
             <div class="mb-10 border-b border-slate-100 pb-6">
@@ -10,7 +10,7 @@
             <div class="space-y-8 text-sm leading-7 text-slate-600 sm:text-base">
                 <section class="space-y-3">
                     <h2 class="text-xl font-semibold text-slate-900">1. Account Eligibility and Acceptance</h2>
-                    <p>These Terms of Service govern your access to and use of Influence Me websites, applications, content workflows, integrations, and related services (collectively, the "Service"). By using the Service, you agree to be bound by these Terms. If you do not agree, do not access or use the Service.</p>
+                    <p>These Terms of Service govern your access to and use of Okacrm websites, applications, content workflows, integrations, and related services (collectively, the "Service"). By using the Service, you agree to be bound by these Terms. If you do not agree, do not access or use the Service.</p>
                     <p>Account Eligibility requires that influencer users maintain valid credentials and, where required, a compatible Instagram Professional account for primary platform authentication. Client users must access the Service only through invitation-based client portal credentials issued by an authorized influencer workspace.</p>
                 </section>
 
@@ -28,7 +28,7 @@
 
                 <section class="space-y-3">
                     <h2 class="text-xl font-semibold text-slate-900">4. Third-Party Platforms and Integrations</h2>
-                    <p>The Service depends on third-party providers including, without limitation, Meta/Instagram and TikTok. Your use of those providers is subject to their independent terms, policies, and technical constraints. Influence Me is not responsible for provider outages, API deprecations, policy changes, account restrictions, data delays, or downstream decisions made by those providers.</p>
+                    <p>The Service depends on third-party providers including, without limitation, Meta/Instagram and TikTok. Your use of those providers is subject to their independent terms, policies, and technical constraints. Okacrm is not responsible for provider outages, API deprecations, policy changes, account restrictions, data delays, or downstream decisions made by those providers.</p>
                     <p>You authorize us to access and process third-party account data made available through your approved integrations. You represent that you have all rights and permissions necessary to grant this authorization.</p>
                 </section>
 
@@ -58,7 +58,7 @@
 
                 <section class="space-y-3">
                     <h2 class="text-xl font-semibold text-slate-900">9. Intellectual Property and License</h2>
-                    <p>The Service, including software, interfaces, visual design, text, trademarks, and related materials, is owned by Influence Me or its licensors and protected by intellectual property laws. Subject to these Terms, we grant you a limited, non-exclusive, non-transferable, revocable license to access and use the Service for internal business purposes.</p>
+                    <p>The Service, including software, interfaces, visual design, text, trademarks, and related materials, is owned by Okacrm or its licensors and protected by intellectual property laws. Subject to these Terms, we grant you a limited, non-exclusive, non-transferable, revocable license to access and use the Service for internal business purposes.</p>
                     <p>No rights are granted except as expressly stated. You may not copy, modify, distribute, sublicense, sell, lease, create derivative works from, or otherwise exploit the Service except as allowed by law or written agreement.</p>
                 </section>
 
@@ -74,14 +74,14 @@
 
                 <section class="space-y-3">
                     <h2 class="text-xl font-semibold text-slate-900">12. Limitation of Liability</h2>
-                    <p>To the maximum extent permitted by law, Influence Me and its affiliates, officers, directors, employees, contractors, licensors, and service providers will not be liable for indirect, incidental, consequential, special, exemplary, punitive, or enhanced damages, including lost profits, lost revenue, lost goodwill, business interruption, data loss, corruption, or replacement costs, arising out of or relating to the Service, even if advised of the possibility of such damages.</p>
-                    <p>To the maximum extent permitted by law, the aggregate liability of Influence Me for all claims arising out of or related to the Service will not exceed the greater of: (a) amounts paid by you to Influence Me for the Service during the twelve months preceding the event giving rise to the claim; or (b) one hundred U.S. dollars (USD $100). Some jurisdictions do not allow certain limitations, so portions of this section may not apply to you.</p>
+                    <p>To the maximum extent permitted by law, Okacrm and its affiliates, officers, directors, employees, contractors, licensors, and service providers will not be liable for indirect, incidental, consequential, special, exemplary, punitive, or enhanced damages, including lost profits, lost revenue, lost goodwill, business interruption, data loss, corruption, or replacement costs, arising out of or relating to the Service, even if advised of the possibility of such damages.</p>
+                    <p>To the maximum extent permitted by law, the aggregate liability of Okacrm for all claims arising out of or related to the Service will not exceed the greater of: (a) amounts paid by you to Okacrm for the Service during the twelve months preceding the event giving rise to the claim; or (b) one hundred U.S. dollars (USD $100). Some jurisdictions do not allow certain limitations, so portions of this section may not apply to you.</p>
                 </section>
 
                 <section class="space-y-3">
                     <h2 class="text-xl font-semibold text-slate-900">13. Release and Indemnification</h2>
-                    <p>To the fullest extent permitted by law, you release and discharge Influence Me and its affiliates from claims, demands, and damages arising from disputes between users, third-party platforms, clients, agencies, payment processors, or other external parties related to your use of the Service. If you are a California resident, you waive California Civil Code section 1542 and similar protections to the extent legally permitted.</p>
-                    <p>You agree to defend, indemnify, and hold harmless Influence Me and its affiliates from and against claims, liabilities, damages, judgments, awards, losses, costs, and expenses (including reasonable attorneys' fees) arising out of or related to your content, your use of the Service, your breach of these Terms, your violation of law, or your infringement or misappropriation of rights of any third party.</p>
+                    <p>To the fullest extent permitted by law, you release and discharge Okacrm and its affiliates from claims, demands, and damages arising from disputes between users, third-party platforms, clients, agencies, payment processors, or other external parties related to your use of the Service. If you are a California resident, you waive California Civil Code section 1542 and similar protections to the extent legally permitted.</p>
+                    <p>You agree to defend, indemnify, and hold harmless Okacrm and its affiliates from and against claims, liabilities, damages, judgments, awards, losses, costs, and expenses (including reasonable attorneys' fees) arising out of or related to your content, your use of the Service, your breach of these Terms, your violation of law, or your infringement or misappropriation of rights of any third party.</p>
                 </section>
 
                 <section class="space-y-3">
@@ -91,8 +91,8 @@
 
                 <section class="space-y-3">
                     <h2 class="text-xl font-semibold text-slate-900">15. Governing Law and Dispute Resolution</h2>
-                    <p>Except where prohibited by applicable law, these Terms are governed by the laws of the jurisdiction designated in your applicable order form or, if no designation exists, the jurisdiction of Influence Me's principal place of business, without regard to conflicts-of-law rules. Subject to mandatory legal rights, disputes will be resolved in the courts located in that jurisdiction, and you consent to personal jurisdiction and venue there.</p>
-                    <p>Where enforceable, you and Influence Me agree that each may bring claims only in an individual capacity and not as a plaintiff or class member in any purported class, consolidated, representative, or private attorney general proceeding.</p>
+                    <p>Except where prohibited by applicable law, these Terms are governed by the laws of the jurisdiction designated in your applicable order form or, if no designation exists, the jurisdiction of Okacrm's principal place of business, without regard to conflicts-of-law rules. Subject to mandatory legal rights, disputes will be resolved in the courts located in that jurisdiction, and you consent to personal jurisdiction and venue there.</p>
+                    <p>Where enforceable, you and Okacrm agree that each may bring claims only in an individual capacity and not as a plaintiff or class member in any purported class, consolidated, representative, or private attorney general proceeding.</p>
                 </section>
 
                 <section class="space-y-3">
@@ -102,7 +102,7 @@
 
                 <section class="space-y-3">
                     <h2 class="text-xl font-semibold text-slate-900">17. Contact</h2>
-                    <p>For legal inquiries, account disputes, or contractual notices, contact support through your account workspace or by email at <a href="mailto:legal@influenceme.app" class="font-medium text-indigo-600 hover:text-indigo-500">legal@influenceme.app</a>.</p>
+                    <p>For legal inquiries, account disputes, or contractual notices, contact support through your account workspace or by email at <a href="mailto:legal@okacrm.app" class="font-medium text-indigo-600 hover:text-indigo-500">legal@okacrm.app</a>.</p>
                 </section>
             </div>
         </div>

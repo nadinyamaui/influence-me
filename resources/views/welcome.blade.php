@@ -1,4 +1,4 @@
-<x-layouts.marketing title="Influence Me | The Operating System for Creators">
+<x-layouts.marketing title="Okacrm | The Operating System for Creators">
     <style>
         .font-display {
             font-family: 'DM Serif Display', serif;
@@ -75,7 +75,7 @@
                     <h1 class="font-display text-5xl leading-[0.98] text-white sm:text-6xl lg:text-7xl">Run your influencer business like a <span class="text-amber-200">real CRM</span>.</h1>
 
                     <p class="mt-7 max-w-2xl text-base leading-relaxed text-slate-200 sm:text-lg">
-                        Influence Me helps you send polished proposals, manage client deliverables, and share campaign reports automatically. We sync your account stats and linked posts so you spend less time reporting and more time creating.
+                        Okacrm helps you send polished proposals, manage client deliverables, and share campaign reports automatically. We sync your account stats and linked posts so you spend less time reporting and more time creating.
                     </p>
 
                     <div class="mt-10 flex flex-col items-start gap-4 sm:flex-row sm:items-center">

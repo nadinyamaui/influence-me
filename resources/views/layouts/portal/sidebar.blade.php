@@ -20,7 +20,7 @@
             <flux:sidebar.header>
                 <a href="{{ route('portal.dashboard') }}" class="inline-flex items-center gap-2 font-semibold text-zinc-900 dark:text-zinc-100" wire:navigate>
                     <span class="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-zinc-900 text-xs font-semibold text-white dark:bg-zinc-100 dark:text-zinc-900">IM</span>
-                    <span class="text-sm">Influence Me - Client Portal</span>
+                    <span class="text-sm">Okacrm - Client Portal</span>
                 </a>
                 <flux:sidebar.collapse class="lg:hidden" />
             </flux:sidebar.header>

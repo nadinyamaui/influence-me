@@ -13,7 +13,7 @@ Create a dedicated layout for the client portal. Similar to the main app layout 
 `resources/views/layouts/portal.blade.php`
 
 Based on the existing `app.blade.php` pattern but with:
-- Different branding/heading: "Influence Me — Client Portal"
+- Different branding/heading: "Okacrm — Client Portal"
 - Simplified sidebar with only client-relevant items:
   - Dashboard (icon: `home`)
   - Proposals (icon: `document-text`)

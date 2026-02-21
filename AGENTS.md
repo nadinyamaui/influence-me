@@ -1,4 +1,4 @@
-# Influence Me Agent Delivery Guide
+# Okacrm Agent Delivery Guide
 
 This file is generated from the RFC set in `/rfc` (RFC `000` through `099`).
 Use it as the execution contract for AI agents working in this repository.
@@ -11,7 +11,7 @@ Use it as the execution contract for AI agents working in this repository.
 
 ## Product Summary
 
-Influence Me is an influencer operating system that centralizes:
+Okacrm is an influencer operating system that centralizes:
 
 - Instagram account connectivity and sync
 - TikTok account connectivity and sync

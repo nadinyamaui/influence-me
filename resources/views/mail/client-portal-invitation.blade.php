@@ -1,7 +1,7 @@
 <x-mail::message>
 # Hello,
 
-{{ $influencerName }} invited you to the Influence Me client portal.
+{{ $influencerName }} invited you to the Okacrm client portal.
 
 <x-mail::panel>
 Login URL: {{ $loginUrl }}

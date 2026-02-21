@@ -1,15 +1,15 @@
-# Influence Me Product Requirements Document (PRD)
+# Okacrm Product Requirements Document (PRD)
 
 ## 1. Document Context
 
-- Product: Influence Me
+- Product: Okacrm
 - Source: RFC `000` through `073` in `/rfc`
 - Scope: MVP + quality hardening + deployment readiness
 - Primary stack assumptions from RFCs: Laravel + Livewire + Flux UI, Instagram Graph API, Redis-backed queues
 
 ## 2. Product Vision
 
-Influence Me helps influencers run the business side of content operations in one platform: connect Instagram data, manage clients, prepare proposals, issue invoices, track payments, and report outcomes.
+Okacrm helps influencers run the business side of content operations in one platform: connect Instagram data, manage clients, prepare proposals, issue invoices, track payments, and report outcomes.
 
 ## 3. Primary Personas
 

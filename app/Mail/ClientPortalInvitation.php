@@ -22,7 +22,7 @@ class ClientPortalInvitation extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: "You've been invited to the Influence Me client portal",
+            subject: "You've been invited to the Okacrm client portal",
         );
     }
 

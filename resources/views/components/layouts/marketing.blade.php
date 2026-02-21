@@ -1,5 +1,5 @@
 @props([
-    'title' => 'Influence Me',
+    'title' => 'Okacrm',
     'bodyClass' => 'bg-white text-slate-600 selection:bg-indigo-100 selection:text-indigo-900',
 ])
 

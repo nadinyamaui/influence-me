@@ -1,4 +1,4 @@
-<x-layouts.marketing title="Privacy Policy | Influence Me" body-class="bg-slate-50 text-slate-700">
+<x-layouts.marketing title="Privacy Policy | Okacrm" body-class="bg-slate-50 text-slate-700">
     <main class="mx-auto max-w-4xl px-6 pb-16 pt-28 sm:pb-20 sm:pt-32">
         <div class="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm sm:p-12">
             <div class="mb-10 border-b border-slate-100 pb-6">
@@ -10,7 +10,7 @@
             <div class="space-y-8 text-sm leading-7 text-slate-600 sm:text-base">
                 <section class="space-y-3">
                     <h2 class="text-xl font-semibold text-slate-900">1. Scope and Controller Information</h2>
-                    <p>This Privacy Policy explains how Influence Me collects, uses, discloses, stores, and otherwise processes information when you access or use the Influence Me websites, applications, dashboards, client portal, integrations, APIs, and related services (collectively, the "Service"). Depending on your jurisdiction, Influence Me acts as a data controller for account administration, service delivery, product security, billing operations, and legal compliance activities. This policy applies to influencer users, client users, prospective customers, and authorized representatives who interact with the Service.</p>
+                    <p>This Privacy Policy explains how Okacrm collects, uses, discloses, stores, and otherwise processes information when you access or use the Okacrm websites, applications, dashboards, client portal, integrations, APIs, and related services (collectively, the "Service"). Depending on your jurisdiction, Okacrm acts as a data controller for account administration, service delivery, product security, billing operations, and legal compliance activities. This policy applies to influencer users, client users, prospective customers, and authorized representatives who interact with the Service.</p>
                     <p>By creating an account, connecting third-party platforms, sending content through workflows, or using the client portal, you acknowledge the data practices described in this Privacy Policy. If you do not agree with this policy, do not use the Service.</p>
                 </section>
 
@@ -99,7 +99,7 @@
 
                 <section class="space-y-3">
                     <h2 class="text-xl font-semibold text-slate-900">12. Third-Party Services and External Policies</h2>
-                    <p>The Service integrates with or links to third-party products and services. Their data practices are governed by their own terms and policies. Influence Me is not responsible for third-party privacy, security, operational, or compliance practices, including platform changes, API limitations, account suspensions, or independent processing performed by those providers.</p>
+                    <p>The Service integrates with or links to third-party products and services. Their data practices are governed by their own terms and policies. Okacrm is not responsible for third-party privacy, security, operational, or compliance practices, including platform changes, API limitations, account suspensions, or independent processing performed by those providers.</p>
                 </section>
 
                 <section class="space-y-3">
@@ -114,7 +114,7 @@
 
                 <section class="space-y-3">
                     <h2 class="text-xl font-semibold text-slate-900">15. Contact</h2>
-                    <p>For privacy questions, rights requests, or data-protection concerns, contact <a href="mailto:privacy@influenceme.app" class="font-medium text-indigo-600 hover:text-indigo-500">privacy@influenceme.app</a>. We may require verification details before fulfilling sensitive requests.</p>
+                    <p>For privacy questions, rights requests, or data-protection concerns, contact <a href="mailto:privacy@okacrm.app" class="font-medium text-indigo-600 hover:text-indigo-500">privacy@okacrm.app</a>. We may require verification details before fulfilling sensitive requests.</p>
                 </section>
             </div>
         </div>
