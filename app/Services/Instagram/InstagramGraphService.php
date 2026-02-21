@@ -29,7 +29,7 @@ class InstagramGraphService implements SocialMediaInterface
         $mediaPosts = $this->client->getAllMedia();
         foreach ($mediaPosts as $media) {
             $this->account->instagramMedia()->updateOrCreate([
-                'instagram_media_id' => $media['id'],
+                'social_account_media_id' => $media['id'],
             ], [
                 'social_account_id' => $this->account->id,
                 'media_type' => MediaType::parse($media),
@@ -51,7 +51,7 @@ class InstagramGraphService implements SocialMediaInterface
             ->where('media_type', '!=', MediaType::Story->value)
             ->chunkById(50, function ($mediaItems): void {
                 $mediaItems->each(function (SocialAccountMedia $media): void {
-                    $insights = $this->client->getMediaInsights($media->instagram_media_id, $media->media_type);
+                    $insights = $this->client->getMediaInsights($media->social_account_media_id, $media->media_type);
                     $reach = (int) ($insights->get('reach') ?? 0);
                     $saved = (int) ($insights->get('saved') ?? 0);
                     $shares = (int) ($insights->get('shares') ?? 0);
@@ -77,7 +77,7 @@ class InstagramGraphService implements SocialMediaInterface
         $stories = $this->client->getStories();
         foreach ($stories as $story) {
             $this->account->instagramMedia()->updateOrCreate([
-                'instagram_media_id' => $story['id'],
+                'social_account_media_id' => $story['id'],
             ], [
                 'social_account_id' => $this->account->id,
                 'media_type' => MediaType::Story,

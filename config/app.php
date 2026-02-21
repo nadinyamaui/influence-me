@@ -13,7 +13,7 @@ return [
     |
     */
 
-    'name' => env('APP_NAME', 'InfluenceME CRM'),
+    'name' => env('APP_NAME', 'OkaCRM'),
 
     /*
     |--------------------------------------------------------------------------
