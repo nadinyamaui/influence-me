@@ -1,6 +1,6 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
-    "name": "influenceme/crm",
+    "name": "okacrm/crm",
     "type": "project",
     "description": "InfluenceME CRM application.",
     "keywords": [

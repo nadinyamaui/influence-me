@@ -22,7 +22,7 @@ Add an "Invite to Portal" button (shown only if no `ClientUser` exists for this 
 ### Create Mailable
 `App\Mail\ClientPortalInvitation`
 - To: client email
-- Subject: "You've been invited to the Influence Me client portal"
+- Subject: "You've been invited to the Okacrm client portal"
 - Content:
   - Welcome message with influencer's name
   - Portal login URL (`/portal/login`)

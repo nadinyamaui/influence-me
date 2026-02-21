@@ -22,7 +22,7 @@ test('authenticated client users can view the portal dashboard layout', function
     $this->actingAs($clientUser, 'client')
         ->get(route('portal.dashboard'))
         ->assertSuccessful()
-        ->assertSee('Influence Me - Client Portal')
+        ->assertSee('Okacrm - Client Portal')
         ->assertSee('Welcome back, Avery Client')
         ->assertSee('Dashboard')
         ->assertSee('Proposals')

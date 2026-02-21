@@ -1,24 +1,24 @@
-# TikTok Developer App Setup for Influence Me
+# TikTok Developer App Setup for Okacrm
 
-This guide documents the TikTok developer configuration required before implementing TikTok OAuth and sync features in Influence Me.
+This guide documents the TikTok developer configuration required before implementing TikTok OAuth and sync features in Okacrm.
 
 ## RFC Reference
 - RFC `074` - TikTok Developer App Setup Documentation
 
 ## Prerequisites
 - TikTok for Developers account with access to [TikTok Developer Center](https://developers.tiktok.com/)
-- Access to environment domains used by Influence Me (local/staging/production)
+- Access to environment domains used by Okacrm (local/staging/production)
 - Team process for storing secrets in a server-side secret manager
 
 ## 1. Create and Separate TikTok Apps by Environment
 TikTok supports app sandboxes. Keep one app for lower environments and one app for production.
 
-1. In [Developer Center](https://developers.tiktok.com/), create a new app for Influence Me.
+1. In [Developer Center](https://developers.tiktok.com/), create a new app for Okacrm.
 2. Add `Login Kit` and complete the required app metadata.
 3. Create a sandbox for development/testing from the app dashboard.
 4. Keep environment usage strict:
 
-| Influence Me Environment | TikTok App Mode | Purpose |
+| Okacrm Environment | TikTok App Mode | Purpose |
 | --- | --- | --- |
 | Local + Staging | Sandbox app | Integration development, QA, and non-production token tests |
 | Production | Production app | Real creator account linking and live sync |

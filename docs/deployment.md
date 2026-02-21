@@ -1,6 +1,6 @@
 # Deployment Guide
 
-This document covers production deployment requirements and operating procedures for Influence Me.
+This document covers production deployment requirements and operating procedures for Okacrm.
 
 ## RFC Reference
 

@@ -4,7 +4,7 @@
             <a href="{{ route('home') }}" class="flex items-center gap-2 group">
                 <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-900 text-white transition group-hover:bg-indigo-600">
                 </div>
-                <span class="text-sm font-semibold tracking-tight text-slate-900">Influence Me</span>
+                <span class="text-sm font-semibold tracking-tight text-slate-900">Okacrm</span>
             </a>
 
             <div class="hidden md:flex items-center gap-8">

@@ -1,6 +1,6 @@
 # Meta App Setup for Instagram Graph API
 
-This guide walks through creating and configuring a Meta app for Influence Me Instagram OAuth and API sync.
+This guide walks through creating and configuring a Meta app for Okacrm Instagram OAuth and API sync.
 
 ## RFC Reference
 - RFC `014` - Meta App Setup Documentation
@@ -70,7 +70,7 @@ Where to use them:
 - server secrets manager or production env config for deployed environments
 
 ## 7. Token Flow
-Influence Me should use the standard Instagram Graph token lifecycle.
+Okacrm should use the standard Instagram Graph token lifecycle.
 
 1. User completes OAuth and receives a short-lived user token (about 1 hour).
 2. Backend exchanges it for a long-lived token (about 60 days).

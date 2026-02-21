@@ -1,4 +1,4 @@
-# Influence Me Claude Guide
+# Okacrm Claude Guide
 
 This file is generated from the RFC set in `/rfc` (RFC `000` through `073`).
 Use it as the Claude-oriented implementation brief for this repository.
@@ -11,7 +11,7 @@ Use it as the Claude-oriented implementation brief for this repository.
 
 ## Product Summary
 
-Influence Me is an influencer operating system that centralizes:
+Okacrm is an influencer operating system that centralizes:
 
 - Instagram account connectivity and sync
 - Content browsing and client campaign linking
