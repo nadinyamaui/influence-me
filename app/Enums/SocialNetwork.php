@@ -29,4 +29,14 @@ enum SocialNetwork: string
             default => $this->value,
         };
     }
+
+    public function label(): string
+    {
+        return match ($this) {
+            self::Tiktok => 'TikTok',
+            self::Instagram => 'Instagram',
+            self::Youtube => 'YouTube',
+            self::Twitch => 'Twitch',
+        };
+    }
 }

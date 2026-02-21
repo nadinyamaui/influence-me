@@ -53,7 +53,7 @@ it('throws a social authentication exception when facebook does not return an id
         ->andReturn($socialiteUser);
 
     app(SocialiteLoginService::class)->createUserAndAccounts();
-})->throws(SocialAuthenticationException::class, 'Facebook did not return required account information.');
+})->throws(SocialAuthenticationException::class, 'Instagram did not return required account information.');
 
 it('throws a social authentication exception when another user already has the callback email', function (): void {
     User::factory()->create([

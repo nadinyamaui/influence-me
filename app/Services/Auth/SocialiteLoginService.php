@@ -15,6 +15,11 @@ class SocialiteLoginService
 {
     private SocialNetwork $driver = SocialNetwork::Instagram;
 
+    public function driverLabel(): string
+    {
+        return $this->driver->label();
+    }
+
     public function redirectToProvider(): RedirectResponse
     {
         return Socialite::driver($this->driver->socialiteDriver())
@@ -26,7 +31,7 @@ class SocialiteLoginService
     {
         $socialiteUser = Socialite::driver($this->driver->socialiteDriver())->user();
         if (! $socialiteUser->getId()) {
-            throw new SocialAuthenticationException('Facebook did not return required account information.');
+            throw new SocialAuthenticationException("{$this->driverLabel()} did not return required account information.");
         }
         $this->ensureNoConflictingEmailUser($socialiteUser);
         $existingUser = $this->findExistingSocialiteUser($socialiteUser);
@@ -44,12 +49,12 @@ class SocialiteLoginService
     {
         $user = auth()->user();
         if (! $user instanceof User) {
-            throw new SocialAuthenticationException('You must be logged in to link Instagram accounts.');
+            throw new SocialAuthenticationException("You must be logged in to link {$this->driverLabel()} accounts.");
         }
 
         $socialiteUser = Socialite::driver($this->driver->socialiteDriver())->user();
         if (! $socialiteUser->getId()) {
-            throw new SocialAuthenticationException('Facebook did not return required account information.');
+            throw new SocialAuthenticationException("{$this->driverLabel()} did not return required account information.");
         }
 
         $token = $this->exchangeToken($socialiteUser);
@@ -121,7 +126,7 @@ class SocialiteLoginService
             )
             ->first();
         if ($conflictingAccount !== null) {
-            throw new SocialAuthenticationException('One or more Instagram accounts are linked to a different user.');
+            throw new SocialAuthenticationException("One or more {$this->driverLabel()} accounts are linked to a different user.");
         }
     }
 

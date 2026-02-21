@@ -64,12 +64,12 @@ class SocialAuthController extends Controller
             if ($isAddAccountFlow) {
                 return redirect()
                     ->route('instagram-accounts.index')
-                    ->withErrors(['oauth' => 'Unable to connect Instagram accounts. Please try again.']);
+                    ->withErrors(['oauth' => "Unable to connect {$this->loginService->driverLabel()} accounts. Please try again."]);
             }
 
             return redirect()
                 ->route('login')
-                ->withErrors(['oauth' => 'Unable to complete Facebook sign in. Please try again.']);
+                ->withErrors(['oauth' => "Unable to complete {$this->loginService->driverLabel()} sign in. Please try again."]);
         }
     }
 }

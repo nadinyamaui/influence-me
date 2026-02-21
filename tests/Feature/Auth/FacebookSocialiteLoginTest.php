@@ -93,13 +93,16 @@ it('returns to login when facebook oauth callback fails', function (): void {
     $loginService->shouldReceive('createUserAndAccounts')
         ->once()
         ->andThrow(new RuntimeException('Denied'));
+    $loginService->shouldReceive('driverLabel')
+        ->once()
+        ->andReturn('Instagram');
     app()->instance(SocialiteLoginService::class, $loginService);
 
     $response = $this->get(route('auth.facebook.callback'));
 
     $response->assertRedirect(route('login'));
     $response->assertSessionHasErrors([
-        'oauth' => 'Unable to complete Facebook sign in. Please try again.',
+        'oauth' => 'Unable to complete Instagram sign in. Please try again.',
     ]);
     $this->assertGuest();
 });
