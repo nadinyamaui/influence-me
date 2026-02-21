@@ -5,6 +5,7 @@ namespace App\Services\Tiktok;
 use App\Exceptions\TikTokApiException;
 use App\Exceptions\TikTokTokenExpiredException;
 use Illuminate\Http\Client\ConnectionException;
+use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Client\RequestException;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
@@ -12,33 +13,49 @@ use Throwable;
 
 class TikTokApiConnector
 {
+    protected PendingRequest $client;
+
     public function __construct(
         protected ?string $accessToken = null,
         protected ?int $accountId = null,
     ) {
+        $this->client = Http::baseUrl($this->baseUrl())
+            ->acceptJson()
+            ->timeout($this->timeoutSeconds())
+            ->retry($this->retryTimes(), $this->retrySleepMilliseconds(), throw: false)
+            ->withToken($this->accessToken ?? '');
     }
 
     public function get(string $endpoint, array $query = []): array
     {
-        return $this->request('GET', $endpoint, ['query' => $query]);
+        return $this->requestWithClient(
+            endpoint: $endpoint,
+            callback: fn (string $normalizedEndpoint): Response => $this->client->get($normalizedEndpoint, $query),
+        );
     }
 
     public function post(string $endpoint, array $data = []): array
     {
-        return $this->request('POST', $endpoint, ['json' => $data]);
+        return $this->requestWithClient(
+            endpoint: $endpoint,
+            callback: fn (string $normalizedEndpoint): Response => $this->client->post($normalizedEndpoint, $data),
+        );
     }
 
     public function request(string $method, string $endpoint, array $options = []): array
     {
+        return $this->requestWithClient(
+            endpoint: $endpoint,
+            callback: fn (string $normalizedEndpoint): Response => $this->client->send($method, $normalizedEndpoint, $options),
+        );
+    }
+
+    protected function requestWithClient(string $endpoint, callable $callback): array
+    {
         $normalizedEndpoint = '/'.ltrim($endpoint, '/');
 
         try {
-            $response = Http::baseUrl($this->baseUrl())
-                ->acceptJson()
-                ->timeout($this->timeoutSeconds())
-                ->retry($this->retryTimes(), $this->retrySleepMilliseconds(), throw: false)
-                ->withToken($this->accessToken ?? '')
-                ->send($method, $normalizedEndpoint, $options);
+            $response = $callback($normalizedEndpoint);
         } catch (ConnectionException $exception) {
             throw new TikTokApiException(
                 message: 'TikTok API connection failed.',
