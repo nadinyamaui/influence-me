@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\Facebook;
+namespace App\Services\Instagram;
 
 use App\Enums\MediaType;
 use App\Enums\SocialNetwork;
@@ -12,7 +12,7 @@ use FacebookAds\Object\Page;
 use FacebookAds\Object\User;
 use Illuminate\Support\Collection;
 
-class Client
+class InstagramClient
 {
     protected Api $api;
 

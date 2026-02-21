@@ -12,7 +12,7 @@
 
         @if ($accounts->isNotEmpty())
             <a
-                href="{{ route('auth.facebook.add') }}"
+                href="{{ route('auth.instagram.add') }}"
                 class="inline-flex min-h-11 items-center rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-zinc-700 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300"
             >
                 Connect Another Account
@@ -37,7 +37,7 @@
             <h2 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100">No Instagram accounts connected.</h2>
             <p class="mt-2 text-sm text-zinc-600 dark:text-zinc-300">Click below to connect your first account.</p>
             <a
-                href="{{ route('auth.facebook.add') }}"
+                href="{{ route('auth.instagram.add') }}"
                 class="mt-5 inline-flex min-h-11 items-center rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-zinc-700 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300"
             >
                 Connect Instagram Account
@@ -126,7 +126,7 @@
                                 <span class="font-medium text-rose-600 dark:text-rose-300">
                                     Expired
                                     <a
-                                        href="{{ route('auth.facebook.add') }}"
+                                        href="{{ route('auth.instagram.add') }}"
                                         class="underline underline-offset-2 hover:text-rose-700 dark:hover:text-rose-200"
                                     >
                                         Re-authenticate
@@ -136,7 +136,7 @@
                                 <span class="font-medium text-amber-600 dark:text-amber-300">
                                     Expires within 7 days
                                     <a
-                                        href="{{ route('auth.facebook.add') }}"
+                                        href="{{ route('auth.instagram.add') }}"
                                         class="underline underline-offset-2 hover:text-amber-700 dark:hover:text-amber-200"
                                     >
                                         Re-authenticate

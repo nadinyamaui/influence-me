@@ -38,13 +38,17 @@ return [
     'facebook' => [
         'client_id' => env('META_CLIENT_ID'),
         'client_secret' => env('META_CLIENT_SECRET'),
-        'redirect' => '/auth/facebook/callback',
+        'redirect' => '/auth/instagram/callback',
     ],
 
     'tiktok' => [
         'client_id' => env('TIKTOK_CLIENT_ID'),
         'client_secret' => env('TIKTOK_CLIENT_SECRET'),
         'redirect' => '/auth/tiktok/callback',
+        'base_url' => env('TIKTOK_API_BASE_URL', 'https://open.tiktokapis.com'),
+        'timeout' => (int) env('TIKTOK_API_TIMEOUT', 10),
+        'retry_times' => (int) env('TIKTOK_API_RETRY_TIMES', 3),
+        'retry_sleep_ms' => (int) env('TIKTOK_API_RETRY_SLEEP_MS', 200),
     ],
 
     'twitch' => [

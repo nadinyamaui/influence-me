@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\Facebook;
+namespace App\Services\Instagram;
 
 use App\Enums\MediaType;
 use App\Exceptions\InstagramApiException;
@@ -14,11 +14,11 @@ use FacebookAds\Http\Exception\RequestException;
 
 class InstagramGraphService implements SocialMediaInterface
 {
-    protected Client $client;
+    protected InstagramClient $client;
 
     public function __construct(protected SocialAccount $account)
     {
-        $this->client = app(Client::class, [
+        $this->client = app(InstagramClient::class, [
             'user_id' => $this->account->social_network_user_id,
             'access_token' => $this->account->access_token,
         ]);

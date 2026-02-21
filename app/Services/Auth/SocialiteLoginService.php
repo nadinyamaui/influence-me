@@ -6,7 +6,7 @@ use App\Enums\SocialNetwork;
 use App\Exceptions\Auth\SocialAuthenticationException;
 use App\Models\SocialAccount;
 use App\Models\User;
-use App\Services\Facebook\Client;
+use App\Services\Instagram\InstagramClient;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Collection;
 use Laravel\Socialite\Facades\Socialite;
@@ -132,12 +132,12 @@ class SocialiteLoginService
 
     protected function exchangeToken($socialiteUser): array
     {
-        return new Client($socialiteUser->token)->getLongLivedToken();
+        return new InstagramClient($socialiteUser->token)->getLongLivedToken();
     }
 
     protected function getAccounts(string $id, string $token): Collection
     {
-        return new Client($token, $id)->accounts();
+        return new InstagramClient($token, $id)->accounts();
     }
 
     protected function upsertSocialAccounts($accounts, $user): void

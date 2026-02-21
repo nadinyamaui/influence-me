@@ -10,11 +10,9 @@ it('resolves the tiktok socialite driver with expected service configuration', f
         'services.tiktok.redirect' => 'https://influence-me.test/auth/tiktok/callback',
     ]);
 
-    expect(config('services.tiktok'))->toBe([
-        'client_id' => 'tiktok-client-id',
-        'client_secret' => 'tiktok-client-secret',
-        'redirect' => 'https://influence-me.test/auth/tiktok/callback',
-    ]);
+    expect(config('services.tiktok.client_id'))->toBe('tiktok-client-id')
+        ->and(config('services.tiktok.client_secret'))->toBe('tiktok-client-secret')
+        ->and(config('services.tiktok.redirect'))->toBe('https://influence-me.test/auth/tiktok/callback');
 
     $provider = Socialite::driver('tiktok');
 

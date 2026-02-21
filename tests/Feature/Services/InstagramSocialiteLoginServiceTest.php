@@ -7,7 +7,7 @@ use App\Services\Auth\SocialiteLoginService;
 use Illuminate\Http\RedirectResponse;
 use Laravel\Socialite\Facades\Socialite;
 
-it('redirects to facebook provider with required scopes', function (): void {
+it('redirects to instagram provider with required scopes', function (): void {
     $expectedRedirect = redirect('https://www.facebook.com/v18.0/dialog/oauth');
 
     Socialite::shouldReceive('driver')
