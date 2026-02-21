@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\Tiktok;
+namespace App\Services\SocialMedia\Tiktok;
 
 use App\Exceptions\TikTokApiException;
 use App\Exceptions\TikTokTokenExpiredException;

@@ -3,7 +3,7 @@
 namespace App\Livewire;
 
 use App\Enums\MediaType;
-use App\Services\Instagram\InstagramClient;
+use App\Services\SocialMedia\Instagram\InstagramClient;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 

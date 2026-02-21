@@ -5,7 +5,7 @@ use App\Exceptions\InstagramApiException;
 use App\Exceptions\InstagramTokenExpiredException;
 use App\Jobs\SyncSocialMediaProfile;
 use App\Models\SocialAccount;
-use App\Services\Instagram\InstagramGraphService;
+use App\Services\SocialMedia\Instagram\InstagramGraphService;
 use Illuminate\Support\Facades\Log;
 
 it('syncs instagram profile fields to the database', function (): void {

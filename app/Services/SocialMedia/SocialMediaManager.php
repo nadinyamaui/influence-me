@@ -4,7 +4,7 @@ namespace App\Services\SocialMedia;
 
 use App\Enums\SocialNetwork;
 use App\Models\SocialAccount;
-use App\Services\Instagram\InstagramGraphService;
+use App\Services\SocialMedia\Instagram\InstagramGraphService;
 use InvalidArgumentException;
 
 class SocialMediaManager

@@ -4,7 +4,7 @@ use App\Enums\MediaType;
 use App\Jobs\SyncMediaInsights;
 use App\Models\SocialAccountMedia;
 use App\Models\SocialAccount;
-use App\Services\Instagram\InstagramClient;
+use App\Services\SocialMedia\Instagram\InstagramClient;
 use Illuminate\Support\Collection;
 
 it('syncs insights using views for impressions on recent non-story media and calculates engagement rate', function (): void {

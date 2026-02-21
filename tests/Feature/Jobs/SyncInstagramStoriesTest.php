@@ -4,7 +4,7 @@ use App\Enums\MediaType;
 use App\Jobs\SyncSocialMediaStories;
 use App\Models\SocialAccountMedia;
 use App\Models\SocialAccount;
-use App\Services\Instagram\InstagramClient;
+use App\Services\SocialMedia\Instagram\InstagramClient;
 
 it('fetches active stories and syncs them as story media records', function (): void {
     $account = SocialAccount::factory()->create();

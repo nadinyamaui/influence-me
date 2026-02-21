@@ -5,7 +5,7 @@ use App\Exceptions\InstagramApiException;
 use App\Exceptions\InstagramTokenExpiredException;
 use App\Jobs\SyncAllSocialMediaData;
 use App\Models\SocialAccount;
-use App\Services\Instagram\InstagramGraphService;
+use App\Services\SocialMedia\Instagram\InstagramGraphService;
 
 it('runs the full instagram sync workflow and marks account as idle on success', function (): void {
     $account = SocialAccount::factory()->create([
