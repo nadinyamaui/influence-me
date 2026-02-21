@@ -7,7 +7,7 @@
                 <p class="mt-3 text-sm text-slate-500">Last updated: {{ now()->toFormattedDateString() }}</p>
             </div>
 
-            <div class="space-y-8 text-sm leading-7 text-slate-600 sm:text-base">
+            <div class="space-y-8 text-justify text-sm leading-7 text-slate-600 sm:text-base">
                 <section class="space-y-3">
                     <h2 class="text-xl font-semibold text-slate-900">1. Account Eligibility and Acceptance</h2>
                     <p>These Terms of Service govern your access to and use of Okacrm websites, applications, content workflows, integrations, and related services (collectively, the "Service"). By using the Service, you agree to be bound by these Terms. If you do not agree, do not access or use the Service.</p>
@@ -102,7 +102,7 @@
 
                 <section class="space-y-3">
                     <h2 class="text-xl font-semibold text-slate-900">17. Contact</h2>
-                    <p>For legal inquiries, account disputes, or contractual notices, contact support through your account workspace or by email at <a href="mailto:legal@okacrm.app" class="font-medium text-indigo-600 hover:text-indigo-500">legal@okacrm.app</a>.</p>
+                    <p>For legal inquiries, account disputes, or contractual notices, contact support through your account workspace or by email at <a href="mailto:info@okacrm.net" class="font-medium text-indigo-600 hover:text-indigo-500">info@okacrm.net</a>.</p>
                 </section>
             </div>
         </div>

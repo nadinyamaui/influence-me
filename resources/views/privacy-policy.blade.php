@@ -7,7 +7,7 @@
                 <p class="mt-3 text-sm text-slate-500">Last updated: {{ now()->toFormattedDateString() }}</p>
             </div>
 
-            <div class="space-y-8 text-sm leading-7 text-slate-600 sm:text-base">
+            <div class="space-y-8 text-justify text-sm leading-7 text-slate-600 sm:text-base">
                 <section class="space-y-3">
                     <h2 class="text-xl font-semibold text-slate-900">1. Scope and Controller Information</h2>
                     <p>This Privacy Policy explains how Okacrm collects, uses, discloses, stores, and otherwise processes information when you access or use the Okacrm websites, applications, dashboards, client portal, integrations, APIs, and related services (collectively, the "Service"). Depending on your jurisdiction, Okacrm acts as a data controller for account administration, service delivery, product security, billing operations, and legal compliance activities. This policy applies to influencer users, client users, prospective customers, and authorized representatives who interact with the Service.</p>
@@ -114,7 +114,7 @@
 
                 <section class="space-y-3">
                     <h2 class="text-xl font-semibold text-slate-900">15. Contact</h2>
-                    <p>For privacy questions, rights requests, or data-protection concerns, contact <a href="mailto:privacy@okacrm.app" class="font-medium text-indigo-600 hover:text-indigo-500">privacy@okacrm.app</a>. We may require verification details before fulfilling sensitive requests.</p>
+                    <p>For privacy questions, rights requests, or data-protection concerns, contact <a href="mailto:info@okacrm.net" class="font-medium text-indigo-600 hover:text-indigo-500">info@okacrm.net</a>. We may require verification details before fulfilling sensitive requests.</p>
                 </section>
             </div>
         </div>
