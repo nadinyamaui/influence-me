@@ -6,8 +6,8 @@ use App\Builders\SocialAccountBuilder;
 use App\Enums\AccountType;
 use App\Enums\SocialNetwork;
 use App\Enums\SyncStatus;
-use App\Services\SocialMedia\SocialMediaInterface;
-use App\Services\SocialMedia\SocialMediaManager;
+use App\Services\SocialMedia\SocialMediaContract;
+use App\Services\SocialMedia\Manager;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -87,8 +87,8 @@ class SocialAccount extends Model
         $this->socialMediaService()->syncAudienceDemographics();
     }
 
-    protected function socialMediaService(): SocialMediaInterface
+    protected function socialMediaService(): SocialMediaContract
     {
-        return app(SocialMediaManager::class)->forAccount($this);
+        return app(Manager::class)->forAccount($this);
     }
 }

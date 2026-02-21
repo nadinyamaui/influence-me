@@ -7,9 +7,9 @@ use App\Models\SocialAccount;
 use App\Services\SocialMedia\Instagram\InstagramGraphService;
 use InvalidArgumentException;
 
-class SocialMediaManager
+class Manager
 {
-    public function forAccount(SocialAccount $account): SocialMediaInterface
+    public function forAccount(SocialAccount $account): SocialMediaContract
     {
         $network = $account->social_network;
         if (! $network instanceof SocialNetwork) {
