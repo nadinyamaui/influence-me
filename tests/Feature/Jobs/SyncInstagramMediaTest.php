@@ -4,12 +4,12 @@ use App\Enums\MediaType;
 use App\Jobs\SyncSocialMediaMedia;
 use App\Models\SocialAccountMedia;
 use App\Models\SocialAccount;
-use App\Services\SocialMedia\Instagram\InstagramClient;
+use App\Services\SocialMedia\Instagram\Client;
 
 it('fetches paginated media and syncs records with mapped media types', function (): void {
     $account = SocialAccount::factory()->create();
 
-    $facebookClient = \Mockery::mock(InstagramClient::class);
+    $facebookClient = \Mockery::mock(Client::class);
     $facebookClient->shouldReceive('getAllMedia')
         ->once()
         ->andReturn([
@@ -62,7 +62,7 @@ it('fetches paginated media and syncs records with mapped media types', function
                 'comments_count' => 2,
             ],
         ]);
-    app()->bind(InstagramClient::class, function ($app, $parameters) use ($facebookClient, $account) {
+    app()->bind(Client::class, function ($app, $parameters) use ($facebookClient, $account) {
         expect($parameters['access_token'] ?? null)->toBe($account->access_token);
 
         return $facebookClient;
@@ -90,7 +90,7 @@ it('updates existing media records when rerun to keep sync idempotent', function
         'comments_count' => 0,
     ]);
 
-    $facebookClient = \Mockery::mock(InstagramClient::class);
+    $facebookClient = \Mockery::mock(Client::class);
     $facebookClient->shouldReceive('getAllMedia')
         ->once()
         ->andReturn([
@@ -107,7 +107,7 @@ it('updates existing media records when rerun to keep sync idempotent', function
                 'comments_count' => 22,
             ],
         ]);
-    app()->bind(InstagramClient::class, function ($app, $parameters) use ($facebookClient, $account) {
+    app()->bind(Client::class, function ($app, $parameters) use ($facebookClient, $account) {
         expect($parameters['access_token'] ?? null)->toBe($account->access_token);
 
         return $facebookClient;
