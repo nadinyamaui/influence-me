@@ -1,7 +1,7 @@
 <?php
 
 use App\Enums\MediaType;
-use App\Services\Instagram\InstagramClient;
+use App\Services\SocialMedia\Instagram\InstagramClient;
 use FacebookAds\Api;
 use FacebookAds\Http\ResponseInterface;
 use FacebookAds\Object\IGMedia;

@@ -3,7 +3,7 @@
 use App\Jobs\SyncAudienceDemographics;
 use App\Models\AudienceDemographic;
 use App\Models\SocialAccount;
-use App\Services\Instagram\InstagramClient;
+use App\Services\SocialMedia\Instagram\InstagramClient;
 
 it('replaces existing demographics with a fresh snapshot', function (): void {
     $account = SocialAccount::factory()->create([

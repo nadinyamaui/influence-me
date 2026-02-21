@@ -4,7 +4,7 @@ use App\Enums\MediaType;
 use App\Jobs\SyncSocialMediaMedia;
 use App\Models\SocialAccountMedia;
 use App\Models\SocialAccount;
-use App\Services\Instagram\InstagramClient;
+use App\Services\SocialMedia\Instagram\InstagramClient;
 
 it('fetches paginated media and syncs records with mapped media types', function (): void {
     $account = SocialAccount::factory()->create();

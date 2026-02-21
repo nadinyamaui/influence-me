@@ -2,7 +2,7 @@
 
 use App\Exceptions\TikTokApiException;
 use App\Exceptions\TikTokTokenExpiredException;
-use App\Services\Tiktok\TikTokApiConnector;
+use App\Services\SocialMedia\Tiktok\TikTokApiConnector;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Http;
 
