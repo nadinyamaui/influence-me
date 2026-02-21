@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\SocialNetwork;
 use App\Exceptions\Auth\SocialAuthenticationException;
 use App\Models\User;
 use App\Services\Auth\SocialiteLoginService;
@@ -35,6 +36,7 @@ it('redirects to the facebook socialite provider', function (): void {
 
     $response->assertRedirect('https://www.facebook.com/v18.0/dialog/oauth');
     $response->assertSessionHas('social_account_auth_intent', 'login');
+    $response->assertSessionHas('social_account_auth_driver', SocialNetwork::Instagram->value);
 });
 
 it('requires authentication to connect additional instagram accounts', function (): void {
@@ -67,12 +69,36 @@ it('redirects authenticated users to facebook provider for add-account flow', fu
 
     $response->assertRedirect('https://www.facebook.com/v18.0/dialog/oauth');
     $response->assertSessionHas('social_account_auth_intent', 'add_account');
+    $response->assertSessionHas('social_account_auth_driver', SocialNetwork::Instagram->value);
+});
+
+it('uses the driver query parameter for redirect flow', function (): void {
+    Socialite::shouldReceive('driver')
+        ->once()
+        ->with('tiktok')
+        ->andReturnSelf();
+    Socialite::shouldReceive('scopes')
+        ->once()
+        ->with([])
+        ->andReturnSelf();
+    Socialite::shouldReceive('redirect')
+        ->once()
+        ->andReturn(redirect('https://www.tiktok.com/v2/auth/authorize'));
+
+    $response = $this->get(route('auth.facebook', ['driver' => SocialNetwork::Tiktok->value]));
+
+    $response->assertRedirect('https://www.tiktok.com/v2/auth/authorize');
+    $response->assertSessionHas('social_account_auth_driver', SocialNetwork::Tiktok->value);
 });
 
 it('redirects to dashboard after successful facebook callback', function (): void {
     $user = User::factory()->create();
 
     $loginService = \Mockery::mock(SocialiteLoginService::class);
+    $loginService->shouldReceive('useDriver')
+        ->once()
+        ->with(SocialNetwork::Instagram)
+        ->andReturnSelf();
     $loginService->shouldReceive('createUserAndAccounts')
         ->once()
         ->andReturnUsing(function () use ($user) {
@@ -90,6 +116,10 @@ it('redirects to dashboard after successful facebook callback', function (): voi
 
 it('returns to login when facebook oauth callback fails', function (): void {
     $loginService = \Mockery::mock(SocialiteLoginService::class);
+    $loginService->shouldReceive('useDriver')
+        ->once()
+        ->with(SocialNetwork::Instagram)
+        ->andReturnSelf();
     $loginService->shouldReceive('createUserAndAccounts')
         ->once()
         ->andThrow(new RuntimeException('Denied'));
@@ -109,6 +139,10 @@ it('returns to login when facebook oauth callback fails', function (): void {
 
 it('returns to login with social auth error message when callback raises social authentication exception', function (): void {
     $loginService = \Mockery::mock(SocialiteLoginService::class);
+    $loginService->shouldReceive('useDriver')
+        ->once()
+        ->with(SocialNetwork::Instagram)
+        ->andReturnSelf();
     $loginService->shouldReceive('createUserAndAccounts')
         ->once()
         ->andThrow(new SocialAuthenticationException('Facebook denied access to the requested scopes.'));
@@ -127,6 +161,10 @@ it('uses account-linking flow on callback for authenticated users with add-accou
     $user = User::factory()->create();
 
     $loginService = \Mockery::mock(SocialiteLoginService::class);
+    $loginService->shouldReceive('useDriver')
+        ->once()
+        ->with(SocialNetwork::Instagram)
+        ->andReturnSelf();
     $loginService->shouldReceive('createSocialAccountsForLoggedUser')
         ->once()
         ->andReturn($user);
@@ -145,6 +183,10 @@ it('returns to instagram accounts with oauth error on add-account callback socia
     $user = User::factory()->create();
 
     $loginService = \Mockery::mock(SocialiteLoginService::class);
+    $loginService->shouldReceive('useDriver')
+        ->once()
+        ->with(SocialNetwork::Instagram)
+        ->andReturnSelf();
     $loginService->shouldReceive('createSocialAccountsForLoggedUser')
         ->once()
         ->andThrow(new SocialAuthenticationException('Facebook denied account linking.'));
@@ -165,6 +207,10 @@ it('rate limits facebook oauth callback to ten attempts per minute per ip', func
     $user = User::factory()->create();
 
     $loginService = \Mockery::mock(SocialiteLoginService::class);
+    $loginService->shouldReceive('useDriver')
+        ->times(10)
+        ->with(SocialNetwork::Instagram)
+        ->andReturnSelf();
     $loginService->shouldReceive('createUserAndAccounts')
         ->times(10)
         ->andReturnUsing(function () use ($user) {
@@ -181,4 +227,28 @@ it('rate limits facebook oauth callback to ten attempts per minute per ip', func
 
     $this->get(route('auth.facebook.callback'))
         ->assertStatus(429);
+});
+
+it('uses the session driver on callback when query parameter is absent', function (): void {
+    $user = User::factory()->create();
+
+    $loginService = \Mockery::mock(SocialiteLoginService::class);
+    $loginService->shouldReceive('useDriver')
+        ->once()
+        ->with(SocialNetwork::Tiktok)
+        ->andReturnSelf();
+    $loginService->shouldReceive('createUserAndAccounts')
+        ->once()
+        ->andReturnUsing(function () use ($user) {
+            auth()->login($user);
+
+            return $user;
+        });
+    app()->instance(SocialiteLoginService::class, $loginService);
+
+    $response = $this
+        ->withSession(['social_account_auth_driver' => SocialNetwork::Tiktok->value])
+        ->get(route('auth.facebook.callback'));
+
+    $response->assertRedirect(route('dashboard', absolute: false));
 });
