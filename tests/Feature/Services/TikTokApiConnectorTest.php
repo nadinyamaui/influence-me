@@ -106,3 +106,47 @@ it('flags rate limited failures on typed api exception', function (): void {
                 ->and($exception->endpoint)->toBe('/v2/video/query/');
         });
 });
+
+it('does not map all forbidden responses to token expired exceptions', function (): void {
+    config()->set('services.tiktok.base_url', 'https://api.example.test');
+
+    Http::fake([
+        'https://api.example.test/v2/user/info/*' => Http::response([
+            'error' => [
+                'code' => 'scope_permission_missing',
+                'message' => 'Permission denied for this endpoint.',
+            ],
+        ], 403),
+    ]);
+
+    $connector = new TikTokApiConnector('token-abc', 44);
+
+    expect(fn () => $connector->get('/v2/user/info/'))
+        ->toThrow(function (TikTokApiException $exception): void {
+            expect($exception)->not->toBeInstanceOf(TikTokTokenExpiredException::class)
+                ->and($exception->getCode())->toBe(403)
+                ->and($exception->apiErrorCode)->toBe('scope_permission_missing');
+        });
+});
+
+it('treats payloads with error code zero as successful responses', function (): void {
+    config()->set('services.tiktok.base_url', 'https://api.example.test');
+
+    Http::fake([
+        'https://api.example.test/v2/user/info/*' => Http::response([
+            'error' => [
+                'code' => 0,
+                'message' => 'ok',
+            ],
+            'data' => [
+                'open_id' => 'open-xyz',
+            ],
+        ], 200),
+    ]);
+
+    $connector = new TikTokApiConnector('token-abc');
+
+    expect($connector->get('/v2/user/info/'))->toBe([
+        'open_id' => 'open-xyz',
+    ]);
+});

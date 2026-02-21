@@ -5,6 +5,7 @@ namespace App\Services\Tiktok;
 use App\Exceptions\TikTokApiException;
 use App\Exceptions\TikTokTokenExpiredException;
 use Illuminate\Http\Client\ConnectionException;
+use Illuminate\Http\Client\RequestException;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
 use Throwable;
@@ -35,12 +36,34 @@ class TikTokApiConnector
             $response = Http::baseUrl($this->baseUrl())
                 ->acceptJson()
                 ->timeout($this->timeoutSeconds())
-                ->retry($this->retryTimes(), $this->retrySleepMilliseconds())
+                ->retry($this->retryTimes(), $this->retrySleepMilliseconds(), throw: false)
                 ->withToken($this->accessToken ?? '')
                 ->send($method, $normalizedEndpoint, $options);
         } catch (ConnectionException $exception) {
             throw new TikTokApiException(
                 message: 'TikTok API connection failed.',
+                previous: $exception,
+                accountId: $this->accountId,
+                endpoint: $normalizedEndpoint,
+            );
+        } catch (RequestException $exception) {
+            $response = $exception->response;
+
+            if ($response instanceof Response) {
+                $payload = $response->json();
+                if (! is_array($payload)) {
+                    $payload = ['raw' => $response->body()];
+                }
+
+                throw $this->mapApiException(
+                    endpoint: $normalizedEndpoint,
+                    statusCode: $response->status(),
+                    payload: $payload,
+                );
+            }
+
+            throw new TikTokApiException(
+                message: 'TikTok API request failed.',
                 previous: $exception,
                 accountId: $this->accountId,
                 endpoint: $normalizedEndpoint,
@@ -106,13 +129,27 @@ class TikTokApiConnector
 
     protected function hasApiError(array $payload): bool
     {
-        if (isset($payload['error'])) {
-            return true;
+        $error = $payload['error'] ?? null;
+        if (is_array($error)) {
+            $errorCode = $error['code'] ?? $error['error_code'] ?? null;
+
+            if ($errorCode === 0 || $errorCode === '0') {
+                return false;
+            }
+
+            if ($errorCode !== null && $errorCode !== '') {
+                return true;
+            }
+
+            $errorMessage = $error['message'] ?? $error['description'] ?? $error['msg'] ?? null;
+            if (is_string($errorMessage) && $errorMessage !== '') {
+                return true;
+            }
         }
 
         $code = $payload['code'] ?? $payload['error_code'] ?? null;
-        if (is_int($code)) {
-            return $code !== 0;
+        if (is_numeric($code)) {
+            return (int) $code !== 0;
         }
 
         return false;
@@ -155,12 +192,12 @@ class TikTokApiConnector
 
     protected function isTokenExpired(int $statusCode, string $message, ?string $apiErrorCode): bool
     {
-        if (in_array($statusCode, [401, 403], true)) {
+        if ($statusCode === 401) {
             return true;
         }
 
         $normalizedMessage = strtolower($message);
-        if (str_contains($normalizedMessage, 'token') && str_contains($normalizedMessage, 'expire')) {
+        if (str_contains($normalizedMessage, 'token') && (str_contains($normalizedMessage, 'expire') || str_contains($normalizedMessage, 'invalid'))) {
             return true;
         }
 
