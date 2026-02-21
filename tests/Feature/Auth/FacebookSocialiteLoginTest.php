@@ -34,7 +34,7 @@ it('redirects to the facebook socialite provider', function (): void {
     $response = $this->get(route('auth.facebook'));
 
     $response->assertRedirect('https://www.facebook.com/v18.0/dialog/oauth');
-    $response->assertSessionHas('facebook_auth_intent', 'login');
+    $response->assertSessionHas('social_account_auth_intent', 'login');
 });
 
 it('requires authentication to connect additional instagram accounts', function (): void {
@@ -66,7 +66,7 @@ it('redirects authenticated users to facebook provider for add-account flow', fu
     $response = $this->actingAs($user)->get(route('auth.facebook.add'));
 
     $response->assertRedirect('https://www.facebook.com/v18.0/dialog/oauth');
-    $response->assertSessionHas('facebook_auth_intent', 'add_account');
+    $response->assertSessionHas('social_account_auth_intent', 'add_account');
 });
 
 it('redirects to dashboard after successful facebook callback', function (): void {
@@ -134,7 +134,7 @@ it('uses account-linking flow on callback for authenticated users with add-accou
     app()->instance(SocialiteLoginService::class, $loginService);
 
     $response = $this->actingAs($user)
-        ->withSession(['facebook_auth_intent' => 'add_account'])
+        ->withSession(['social_account_auth_intent' => 'add_account'])
         ->get(route('auth.facebook.callback'));
 
     $response->assertRedirect(route('instagram-accounts.index'));
@@ -152,7 +152,7 @@ it('returns to instagram accounts with oauth error on add-account callback socia
     app()->instance(SocialiteLoginService::class, $loginService);
 
     $response = $this->actingAs($user)
-        ->withSession(['facebook_auth_intent' => 'add_account'])
+        ->withSession(['social_account_auth_intent' => 'add_account'])
         ->get(route('auth.facebook.callback'));
 
     $response->assertRedirect(route('instagram-accounts.index'));
