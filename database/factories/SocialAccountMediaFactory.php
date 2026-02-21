@@ -15,7 +15,7 @@ class SocialAccountMediaFactory extends Factory
     {
         return [
             'social_account_id' => SocialAccount::factory(),
-            'instagram_media_id' => (string) fake()->unique()->numberBetween(100000000000000000, 999999999999999999),
+            'social_account_media_id' => (string) fake()->unique()->numberBetween(100000000000000000, 999999999999999999),
             'media_type' => fake()->randomElement([MediaType::Post, MediaType::Reel, MediaType::Story]),
             'caption' => fake()->sentence(12),
             'permalink' => fake()->url(),

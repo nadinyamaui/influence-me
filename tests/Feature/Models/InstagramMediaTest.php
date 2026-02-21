@@ -13,7 +13,7 @@ it('creates valid instagram media records with factory defaults and casts', func
     $media = SocialAccountMedia::factory()->create();
 
     expect($media->socialAccount)->not->toBeNull()
-        ->and($media->instagram_media_id)->not->toBeEmpty()
+        ->and($media->social_account_media_id)->not->toBeEmpty()
         ->and($media->media_type)->toBeInstanceOf(MediaType::class)
         ->and($media->published_at)->not->toBeNull()
         ->and($media->engagement_rate)->toBeString();
