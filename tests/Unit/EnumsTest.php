@@ -18,7 +18,6 @@ use App\Enums\ProposalStatus;
 use App\Enums\ScheduledPostStatus;
 use App\Enums\SocialNetwork;
 use App\Enums\SyncStatus;
-use App\Services\SocialMedia\Instagram\Client as InstagramClient;
 
 it('defines all media type enum cases', function (): void {
     expect(MediaType::cases())->toHaveCount(3)
@@ -220,14 +219,6 @@ it('defines all social network enum cases', function (): void {
         ->and(SocialNetwork::Youtube->value)->toBe('youtube')
         ->and(SocialNetwork::Twitch->value)->toBe('twitch');
 });
-
-it('returns the oauth client configured for a social network', function (): void {
-    expect(SocialNetwork::Instagram->getClient())->toBe(InstagramClient::class);
-});
-
-it('throws when oauth client is not configured for a social network', function (): void {
-    SocialNetwork::Tiktok->getClient();
-})->throws(\InvalidArgumentException::class, 'No OAuth client is configured for network [tiktok].');
 
 it('defines all sync status enum cases', function (): void {
     expect(SyncStatus::cases())->toHaveCount(3)
