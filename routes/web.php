@@ -29,10 +29,14 @@ Route::get('/', function () {
 Route::view('/terms', 'terms')->name('terms');
 Route::view('/privacy-policy', 'privacy-policy')->name('privacy-policy');
 
-Route::get('/auth/instagram', [SocialAuthController::class, 'redirect'])->middleware('guest')->name('auth.instagram');
-Route::get('/auth/instagram/callback', [SocialAuthController::class, 'callback'])
-    ->middleware('throttle:instagram-oauth-callback')
-    ->name('auth.instagram.callback');
+Route::group(['prefix' => '/auth', 'as' => 'auth.'], function (): void {
+    Route::get('instagram', [SocialAuthController::class, 'redirect'])
+        ->middleware('guest')
+        ->name('instagram');
+    Route::get('instagram/callback', [SocialAuthController::class, 'callback'])
+        ->middleware('throttle:instagram-oauth-callback')
+        ->name('instagram.callback');
+});
 
 Route::middleware(['auth'])->group(function (): void {
     Route::get('/auth/instagram/add', [SocialAuthController::class, 'addAccount'])->name('auth.instagram.add');
