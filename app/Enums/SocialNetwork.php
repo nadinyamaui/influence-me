@@ -2,6 +2,9 @@
 
 namespace App\Enums;
 
+use App\Services\SocialMedia\Instagram\Client as InstagramClient;
+use InvalidArgumentException;
+
 enum SocialNetwork: string
 {
     case Tiktok = 'tiktok';
@@ -37,6 +40,14 @@ enum SocialNetwork: string
             self::Instagram => 'Instagram',
             self::Youtube => 'YouTube',
             self::Twitch => 'Twitch',
+        };
+    }
+
+    public function getClient(): string
+    {
+        return match ($this) {
+            self::Instagram => InstagramClient::class,
+            default => throw new InvalidArgumentException("No OAuth client is configured for network [{$this->value}]."),
         };
     }
 }
