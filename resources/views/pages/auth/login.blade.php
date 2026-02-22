@@ -58,7 +58,7 @@
         @endif
 
         <div class="flex flex-col gap-3">
-            <flux:button :href="route('auth.instagram')" variant="primary" class="w-full" data-test="instagram-login-button">
+            <flux:button :href="route('social.auth', ['provider' => \App\Enums\SocialNetwork::Instagram])" variant="primary" class="w-full" data-test="instagram-login-button">
                 {{ __('Continue with Instagram') }}
             </flux:button>
         </div>
