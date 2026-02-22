@@ -2,6 +2,9 @@
 
 namespace App\Enums;
 
+use App\Services\SocialMedia\Instagram\Client as InstagramClient;
+use LogicException;
+
 enum SocialNetwork: string
 {
     case Tiktok = 'tiktok';
@@ -37,6 +40,14 @@ enum SocialNetwork: string
             self::Instagram => 'Instagram',
             self::Youtube => 'YouTube',
             self::Twitch => 'Twitch',
+        };
+    }
+
+    public function socialiteClient(string $accessToken, ?string $userId = null): InstagramClient
+    {
+        return match ($this) {
+            self::Instagram => new InstagramClient($accessToken, $userId),
+            default => throw new LogicException("{$this->label()} social login client is not configured."),
         };
     }
 }
