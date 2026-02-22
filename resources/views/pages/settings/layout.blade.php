@@ -7,6 +7,10 @@
                 <flux:navlist.item :href="route('two-factor.show')" wire:navigate>{{ __('Two-Factor Auth') }}</flux:navlist.item>
             @endif
             <flux:navlist.item :href="route('appearance.edit')" wire:navigate>{{ __('Appearance') }}</flux:navlist.item>
+            <flux:separator class="my-2" />
+            <flux:navlist.item :href="route('pricing.products.index')" wire:navigate>{{ __('Pricing Products') }}</flux:navlist.item>
+            <flux:navlist.item :href="route('pricing.plans.index')" wire:navigate>{{ __('Pricing Plans') }}</flux:navlist.item>
+            <flux:navlist.item :href="route('pricing.tax-rates.index')" wire:navigate>{{ __('Tax Rates') }}</flux:navlist.item>
         </flux:navlist>
     </div>
 
