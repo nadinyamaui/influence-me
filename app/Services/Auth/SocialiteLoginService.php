@@ -15,6 +15,14 @@ class SocialiteLoginService
 {
     private SocialNetwork $driver = SocialNetwork::Instagram;
 
+    public function usingDriver(SocialNetwork $driver): self
+    {
+        $service = clone $this;
+        $service->driver = $driver;
+
+        return $service;
+    }
+
     public function driverLabel(): string
     {
         return $this->driver->label();

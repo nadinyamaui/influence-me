@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Enums\SocialNetwork;
 use App\Exceptions\Auth\SocialAuthenticationException;
 use App\Http\Controllers\Controller;
 use App\Services\Auth\SocialiteLoginService;
@@ -15,11 +16,11 @@ class SocialAuthController extends Controller
         private readonly SocialiteLoginService $loginService,
     ) {}
 
-    public function redirect(Request $request): RedirectResponse
+    public function redirect(Request $request, SocialNetwork $provider): RedirectResponse
     {
         $request->session()->put('social_account_auth_intent', 'login');
 
-        return $this->loginService->redirectToProvider();
+        return $this->loginService->usingDriver($provider)->redirectToProvider();
     }
 
     public function addAccount(Request $request): RedirectResponse
@@ -29,21 +30,22 @@ class SocialAuthController extends Controller
         return $this->loginService->redirectToProvider();
     }
 
-    public function callback(Request $request): RedirectResponse
+    public function callback(Request $request, SocialNetwork $provider): RedirectResponse
     {
+        $loginService = $this->loginService->usingDriver($provider);
         $intent = $request->session()->pull('social_account_auth_intent', 'login');
         $isAddAccountFlow = $intent === 'add_account' && $request->user() !== null;
 
         try {
             if ($isAddAccountFlow) {
-                $this->loginService->createSocialAccountsForLoggedUser();
+                $loginService->createSocialAccountsForLoggedUser();
 
                 return redirect()
                     ->route('instagram-accounts.index')
                     ->with('status', 'Instagram accounts connected successfully.');
             }
 
-            $this->loginService->createUserAndAccounts();
+            $loginService->createUserAndAccounts();
 
             return redirect()->intended(route('dashboard', absolute: false));
         } catch (SocialAuthenticationException $exception) {
@@ -64,12 +66,12 @@ class SocialAuthController extends Controller
             if ($isAddAccountFlow) {
                 return redirect()
                     ->route('instagram-accounts.index')
-                    ->withErrors(['oauth' => "Unable to connect {$this->loginService->driverLabel()} accounts. Please try again."]);
+                    ->withErrors(['oauth' => "Unable to connect {$loginService->driverLabel()} accounts. Please try again."]);
             }
 
             return redirect()
                 ->route('login')
-                ->withErrors(['oauth' => "Unable to complete {$this->loginService->driverLabel()} sign in. Please try again."]);
+                ->withErrors(['oauth' => "Unable to complete {$loginService->driverLabel()} sign in. Please try again."]);
         }
     }
 }
