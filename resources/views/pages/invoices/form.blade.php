@@ -137,13 +137,11 @@
         </div>
 
         <div class="grid gap-5 lg:grid-cols-2">
-            <section class="rounded-xl border border-zinc-200 p-4 dark:border-zinc-700">
-                <flux:field>
-                    <flux:label>Notes</flux:label>
-                    <flux:textarea wire:model="notes" name="notes" rows="6" />
-                    <flux:error name="notes" />
-                </flux:field>
-            </section>
+            <flux:field>
+                <flux:label>Notes</flux:label>
+                <flux:textarea wire:model="notes" name="notes" rows="6" />
+                <flux:error name="notes" />
+            </flux:field>
 
             <section class="rounded-xl border border-zinc-200 p-4 dark:border-zinc-700">
                 <h2 class="text-base font-semibold text-zinc-900 dark:text-zinc-100">Totals</h2>
