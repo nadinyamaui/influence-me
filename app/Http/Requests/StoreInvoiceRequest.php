@@ -30,6 +30,13 @@ class StoreInvoiceRequest extends FormRequest
                 }),
             ],
             'due_date' => ['required', 'date', 'after:today'],
+            'tax_id' => [
+                'nullable',
+                'integer',
+                Rule::exists('tax_rates', 'id')->where(static function ($query) use ($userId): void {
+                    $query->where('user_id', $userId);
+                }),
+            ],
             'tax_rate' => ['nullable', 'numeric', 'min:0', 'max:100'],
             'notes' => ['nullable', 'string', 'max:5000'],
             'items' => ['required', 'array', 'min:1'],

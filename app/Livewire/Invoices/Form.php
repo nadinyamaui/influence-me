@@ -7,6 +7,7 @@ use App\Models\CatalogPlan;
 use App\Models\CatalogProduct;
 use App\Models\Client;
 use App\Models\Invoice;
+use App\Models\TaxRate;
 use App\Services\Invoices\InvoiceService;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Collection;
@@ -21,6 +22,8 @@ class Form extends Component
     public string $client_id = '';
 
     public string $due_date = '';
+
+    public string $tax_id = '';
 
     public string $tax_rate = '0';
 
@@ -116,6 +119,28 @@ class Form extends Component
         return $this->redirectRoute('invoices.index', navigate: true);
     }
 
+    public function updatedTaxId(string $value): void
+    {
+        if ($value === '') {
+            $this->tax_rate = '0';
+
+            return;
+        }
+
+        $taxRate = TaxRate::query()
+            ->forUser((int) auth()->id())
+            ->find((int) $value);
+
+        if ($taxRate === null) {
+            $this->tax_id = '';
+            $this->tax_rate = '0';
+
+            return;
+        }
+
+        $this->tax_rate = (string) $taxRate->rate;
+    }
+
     public function getSubtotalProperty(): float
     {
         return round((float) collect($this->items)
@@ -142,6 +167,7 @@ class Form extends Component
             'clients' => $this->availableClients(),
             'products' => $this->availableProducts(),
             'plans' => $this->availablePlans(),
+            'taxRates' => $this->availableTaxRates(),
             'isEditing' => $isEditing,
         ])->layout('layouts.app', [
             'title' => $isEditing ? __('Edit Invoice') : __('Create Invoice'),
@@ -154,6 +180,7 @@ class Form extends Component
 
         $this->client_id = (string) $invoice->client_id;
         $this->due_date = $invoice->due_date->toDateString();
+        $this->tax_id = $invoice->tax_id !== null ? (string) $invoice->tax_id : '';
         $this->tax_rate = (string) $invoice->tax_rate;
         $this->notes = $invoice->notes ?? '';
         $this->items = $invoice->items
@@ -326,6 +353,15 @@ class Form extends Component
             ->activeOnly()
             ->applySort('name_asc')
             ->get(['id', 'name', 'bundle_price', 'currency']);
+    }
+
+    private function availableTaxRates(): Collection
+    {
+        return TaxRate::query()
+            ->forUser((int) auth()->id())
+            ->filterByActive(true)
+            ->orderBy('label')
+            ->get(['id', 'label', 'rate']);
     }
 
     private function emptyItem(): array

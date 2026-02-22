@@ -7,6 +7,7 @@ use App\Models\CatalogPlanItem;
 use App\Models\CatalogProduct;
 use App\Models\Client;
 use App\Models\Invoice;
+use App\Models\TaxRate;
 use App\Models\User;
 use Livewire\Livewire;
 
@@ -121,6 +122,45 @@ test('influencer can create invoice with product plan and custom line items', fu
         'unit_price' => '250.00',
         'total' => '250.00',
     ]);
+});
+
+test('influencer can select a saved tax rate on invoice form', function (): void {
+    $user = User::factory()->create();
+    $client = Client::factory()->for($user)->create();
+    $taxRate = TaxRate::factory()->for($user)->create([
+        'label' => 'Sales Tax',
+        'rate' => 7.5,
+        'is_active' => true,
+    ]);
+
+    Livewire::actingAs($user)
+        ->test(InvoiceForm::class)
+        ->set('client_id', (string) $client->id)
+        ->set('due_date', now()->addDays(10)->toDateString())
+        ->set('tax_id', (string) $taxRate->id)
+        ->set('items', [
+            [
+                'source' => '',
+                'catalog_product_id' => null,
+                'catalog_plan_id' => null,
+                'description' => 'Consulting',
+                'quantity' => '2',
+                'unit_price' => '100',
+            ],
+        ])
+        ->call('save')
+        ->assertRedirect(route('invoices.index'));
+
+    $invoice = Invoice::query()
+        ->where('user_id', $user->id)
+        ->latest('id')
+        ->firstOrFail();
+
+    expect($invoice->tax_id)->toBe($taxRate->id)
+        ->and((float) $invoice->tax_rate)->toBe(7.5)
+        ->and((float) $invoice->subtotal)->toBe(200.0)
+        ->and((float) $invoice->tax_amount)->toBe(15.0)
+        ->and((float) $invoice->total)->toBe(215.0);
 });
 
 test('influencer can edit draft invoice using shared form component', function (): void {

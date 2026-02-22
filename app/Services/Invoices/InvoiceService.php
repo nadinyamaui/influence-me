@@ -22,6 +22,7 @@ class InvoiceService
             $invoice = Invoice::query()->create([
                 'user_id' => $user->id,
                 'client_id' => (int) $payload['client_id'],
+                'tax_id' => ($payload['tax_id'] ?? null) !== '' ? (int) $payload['tax_id'] : null,
                 'status' => InvoiceStatus::Draft,
                 'due_date' => $payload['due_date'],
                 'tax_rate' => $payload['tax_rate'] ?? 0,
@@ -43,6 +44,7 @@ class InvoiceService
         return DB::transaction(function () use ($invoice, $payload): Invoice {
             $invoice->update([
                 'client_id' => (int) $payload['client_id'],
+                'tax_id' => ($payload['tax_id'] ?? null) !== '' ? (int) $payload['tax_id'] : null,
                 'due_date' => $payload['due_date'],
                 'tax_rate' => $payload['tax_rate'] ?? 0,
                 'notes' => $payload['notes'] ?? null,
