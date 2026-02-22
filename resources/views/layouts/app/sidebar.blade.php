@@ -51,9 +51,9 @@
                     </flux:sidebar.item>
                 </flux:sidebar.group>
 
-                <flux:sidebar.group :heading="__('Instagram')" class="grid">
+                <flux:sidebar.group :heading="__('Social Accounts')" class="grid">
                     <flux:sidebar.item icon="at-symbol" :href="route('instagram-accounts.index')" :current="request()->routeIs('instagram-accounts.index')" wire:navigate>
-                        {{ __('Accounts') }}
+                        {{ __('Instagram') }}
                     </flux:sidebar.item>
                 </flux:sidebar.group>
             </flux:sidebar.nav>
