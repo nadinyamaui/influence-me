@@ -61,6 +61,11 @@ class Invoice extends Model
         return $this->belongsTo(Client::class);
     }
 
+    public function tax(): BelongsTo
+    {
+        return $this->belongsTo(TaxRate::class, 'tax_id');
+    }
+
     public function items(): HasMany
     {
         return $this->hasMany(InvoiceItem::class);
