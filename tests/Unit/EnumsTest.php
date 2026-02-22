@@ -222,9 +222,12 @@ it('defines all social network enum cases', function (): void {
 });
 
 it('builds the instagram socialite client from social network enum', function (): void {
+    $instagramClient = Mockery::mock(InstagramClient::class);
+    app()->bind(InstagramClient::class, fn (): InstagramClient => $instagramClient);
+
     $client = SocialNetwork::Instagram->socialiteClient('access-token', 'user-id');
 
-    expect($client)->toBeInstanceOf(InstagramClient::class);
+    expect($client)->toBe($instagramClient);
 });
 
 it('throws when socialite client is requested for unsupported social network', function (): void {

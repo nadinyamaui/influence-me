@@ -46,7 +46,10 @@ enum SocialNetwork: string
     public function socialiteClient(string $accessToken, ?string $userId = null): InstagramClient
     {
         return match ($this) {
-            self::Instagram => new InstagramClient($accessToken, $userId),
+            self::Instagram => app()->make(InstagramClient::class, [
+                'access_token' => $accessToken,
+                'user_id' => $userId,
+            ]),
             default => throw new LogicException("{$this->label()} social login client is not configured."),
         };
     }
