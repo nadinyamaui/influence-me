@@ -17,10 +17,9 @@ class SocialiteLoginService
 
     public function usingDriver(SocialNetwork $driver): self
     {
-        $service = clone $this;
-        $service->driver = $driver;
+        $this->driver = $driver;
 
-        return $service;
+        return $this;
     }
 
     public function driverLabel(): string
