@@ -14,6 +14,7 @@ use App\Models\Proposal;
 use App\Models\ProposalLineItem;
 use App\Models\ScheduledPost;
 use App\Models\SocialAccount;
+use App\Models\TaxRate;
 use App\Models\User;
 use App\Policies\CampaignPolicy;
 use App\Policies\CatalogPlanItemPolicy;
@@ -26,6 +27,7 @@ use App\Policies\ProposalLineItemPolicy;
 use App\Policies\ProposalPolicy;
 use App\Policies\ScheduledPostPolicy;
 use App\Policies\SocialAccountPolicy;
+use App\Policies\TaxRatePolicy;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
@@ -40,6 +42,7 @@ it('auto-discovers all RFC 012 policies', function (): void {
         ->and(Gate::getPolicyFor(Proposal::class))->toBeInstanceOf(ProposalPolicy::class)
         ->and(Gate::getPolicyFor(ProposalLineItem::class))->toBeInstanceOf(ProposalLineItemPolicy::class)
         ->and(Gate::getPolicyFor(Invoice::class))->toBeInstanceOf(InvoicePolicy::class)
+        ->and(Gate::getPolicyFor(TaxRate::class))->toBeInstanceOf(TaxRatePolicy::class)
         ->and(Gate::getPolicyFor(ScheduledPost::class))->toBeInstanceOf(ScheduledPostPolicy::class)
         ->and(Gate::getPolicyFor(SocialAccountMedia::class))->toBeInstanceOf(SocialAccountMediaPolicy::class);
 });
@@ -54,6 +57,7 @@ it('applies pricing catalog and proposal line item policy rules', function (): v
         ->for($catalogPlan)
         ->for($catalogProduct)
         ->create();
+    $taxRate = TaxRate::factory()->for($owner)->create();
 
     $client = Client::factory()->for($owner)->create();
     $proposal = Proposal::factory()->for($owner)->for($client)->create();
@@ -89,6 +93,17 @@ it('applies pricing catalog and proposal line item policy rules', function (): v
         ->and($ownerGate->allows('delete', $catalogPlanItem))->toBeTrue()
         ->and($outsiderGate->allows('view', $catalogPlanItem))->toBeFalse()
         ->and($clientUserGate->allows('view', $catalogPlanItem))->toBeFalse()
+        ->and($ownerGate->allows('viewAny', TaxRate::class))->toBeTrue()
+        ->and($ownerGate->allows('create', TaxRate::class))->toBeTrue()
+        ->and($ownerGate->allows('view', $taxRate))->toBeTrue()
+        ->and($ownerGate->allows('update', $taxRate))->toBeTrue()
+        ->and($ownerGate->allows('delete', $taxRate))->toBeTrue()
+        ->and($outsiderGate->allows('view', $taxRate))->toBeFalse()
+        ->and($outsiderGate->allows('update', $taxRate))->toBeFalse()
+        ->and($outsiderGate->allows('delete', $taxRate))->toBeFalse()
+        ->and($clientUserGate->allows('viewAny', TaxRate::class))->toBeFalse()
+        ->and($clientUserGate->allows('create', TaxRate::class))->toBeFalse()
+        ->and($clientUserGate->allows('view', $taxRate))->toBeFalse()
         ->and($ownerGate->allows('viewAny', ProposalLineItem::class))->toBeTrue()
         ->and($ownerGate->allows('create', ProposalLineItem::class))->toBeTrue()
         ->and($ownerGate->allows('view', $proposalLineItem))->toBeTrue()
