@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\SocialNetwork;
 use App\Http\Controllers\Auth\SocialAuthController;
 use App\Livewire\Analytics\Index as AnalyticsIndex;
 use App\Livewire\Clients\Create as ClientsCreate;
@@ -23,6 +24,11 @@ use App\Livewire\Proposals\Show as ProposalsShow;
 use App\Livewire\SocialAccounts\Index as SocialAccountsIndex;
 use Illuminate\Support\Facades\Route;
 
+$socialProviders = array_map(
+    static fn (SocialNetwork $network): string => $network->value,
+    SocialNetwork::cases(),
+);
+
 Route::get('/', function () {
     return view('welcome');
 })->name('home');
@@ -30,13 +36,15 @@ Route::get('/', function () {
 Route::view('/terms', 'terms')->name('terms');
 Route::view('/privacy-policy', 'privacy-policy')->name('privacy-policy');
 
-Route::group(['prefix' => '/auth', 'as' => 'auth.'], function (): void {
-    Route::get('instagram', [SocialAuthController::class, 'redirect'])
+Route::prefix('/auth')->group(function () use ($socialProviders): void {
+    Route::get('{provider}', [SocialAuthController::class, 'redirect'])
         ->middleware('guest')
-        ->name('instagram');
-    Route::get('instagram/callback', [SocialAuthController::class, 'callback'])
+        ->whereIn('provider', $socialProviders)
+        ->name('social.auth');
+    Route::get('{provider}/callback', [SocialAuthController::class, 'callback'])
         ->middleware('throttle:instagram-oauth-callback')
-        ->name('instagram.callback');
+        ->whereIn('provider', $socialProviders)
+        ->name('social.callback');
 });
 
 Route::middleware(['auth'])->group(function (): void {
