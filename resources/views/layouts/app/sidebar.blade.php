@@ -37,7 +37,9 @@
                     <flux:sidebar.item icon="banknotes" :href="route('invoices.index')" :current="request()->routeIs('invoices.*')" wire:navigate>
                         {{ __('Invoices') }}
                     </flux:sidebar.item>
+                </flux:sidebar.group>
 
+                <flux:sidebar.group :heading="__('Settings')" class="grid">
                     <flux:sidebar.item icon="tag" :href="route('pricing.products.index')" :current="request()->routeIs('pricing.products.*')" wire:navigate>
                         {{ __('Pricing Products') }}
                     </flux:sidebar.item>
