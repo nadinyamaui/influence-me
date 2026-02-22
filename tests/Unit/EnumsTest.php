@@ -18,6 +18,7 @@ use App\Enums\ProposalStatus;
 use App\Enums\ScheduledPostStatus;
 use App\Enums\SocialNetwork;
 use App\Enums\SyncStatus;
+use App\Services\SocialMedia\Instagram\Client as InstagramClient;
 
 it('defines all media type enum cases', function (): void {
     expect(MediaType::cases())->toHaveCount(3)
@@ -219,6 +220,19 @@ it('defines all social network enum cases', function (): void {
         ->and(SocialNetwork::Youtube->value)->toBe('youtube')
         ->and(SocialNetwork::Twitch->value)->toBe('twitch');
 });
+
+it('builds the instagram socialite client from social network enum', function (): void {
+    $instagramClient = Mockery::mock(InstagramClient::class);
+    app()->bind(InstagramClient::class, fn (): InstagramClient => $instagramClient);
+
+    $client = SocialNetwork::Instagram->socialiteClient('access-token', 'user-id');
+
+    expect($client)->toBe($instagramClient);
+});
+
+it('throws when socialite client is requested for unsupported social network', function (): void {
+    SocialNetwork::Tiktok->socialiteClient('access-token', 'user-id');
+})->throws(\LogicException::class, 'TikTok social login client is not configured.');
 
 it('defines all sync status enum cases', function (): void {
     expect(SyncStatus::cases())->toHaveCount(3)
