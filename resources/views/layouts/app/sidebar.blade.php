@@ -45,11 +45,15 @@
                     <flux:sidebar.item icon="squares-2x2" :href="route('pricing.plans.index')" :current="request()->routeIs('pricing.plans.*')" wire:navigate>
                         {{ __('Pricing Plans') }}
                     </flux:sidebar.item>
+
+                    <flux:sidebar.item icon="receipt-percent" :href="route('pricing.tax-rates.index')" :current="request()->routeIs('pricing.tax-rates.*')" wire:navigate>
+                        {{ __('Tax Rates') }}
+                    </flux:sidebar.item>
                 </flux:sidebar.group>
 
-                <flux:sidebar.group :heading="__('Instagram')" class="grid">
+                <flux:sidebar.group :heading="__('Social Accounts')" class="grid">
                     <flux:sidebar.item icon="at-symbol" :href="route('instagram-accounts.index')" :current="request()->routeIs('instagram-accounts.index')" wire:navigate>
-                        {{ __('Accounts') }}
+                        {{ __('Instagram') }}
                     </flux:sidebar.item>
                 </flux:sidebar.group>
             </flux:sidebar.nav>

@@ -4,6 +4,7 @@ use App\Enums\InvoiceStatus;
 use App\Models\Client;
 use App\Models\Invoice;
 use App\Models\InvoiceItem;
+use App\Models\TaxRate;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -33,7 +34,10 @@ it('supports draft sent paid and overdue factory states', function (): void {
 });
 
 it('defines user client and items relationships with typed returns', function (): void {
-    $invoice = Invoice::factory()->create();
+    $taxRate = TaxRate::factory()->create();
+    $invoice = Invoice::factory()->create([
+        'tax_id' => $taxRate->id,
+    ]);
     InvoiceItem::factory()->for($invoice)->create();
 
     $itemsReturnType = (new ReflectionMethod(Invoice::class, 'items'))
@@ -41,6 +45,8 @@ it('defines user client and items relationships with typed returns', function ()
 
     expect($invoice->user())->toBeInstanceOf(BelongsTo::class)
         ->and($invoice->client())->toBeInstanceOf(BelongsTo::class)
+        ->and($invoice->tax())->toBeInstanceOf(BelongsTo::class)
+        ->and($invoice->tax)->toBeInstanceOf(TaxRate::class)
         ->and($itemsReturnType)->toBe(HasMany::class)
         ->and($invoice->items)->toHaveCount(1)
         ->and($invoice->items->first())->toBeInstanceOf(InvoiceItem::class);

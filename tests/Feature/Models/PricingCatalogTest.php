@@ -9,6 +9,7 @@ use App\Models\CatalogPlanItem;
 use App\Models\CatalogProduct;
 use App\Models\Proposal;
 use App\Models\ProposalLineItem;
+use App\Models\TaxRate;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -32,10 +33,13 @@ it('defines user catalog product and plan relationships', function (): void {
 
     CatalogProduct::factory()->for($user)->create();
     CatalogPlan::factory()->for($user)->create();
+    TaxRate::factory()->for($user)->create();
 
     $catalogProductsReturnType = (new ReflectionMethod(User::class, 'catalogProducts'))
         ->getReturnType()?->getName();
     $catalogPlansReturnType = (new ReflectionMethod(User::class, 'catalogPlans'))
+        ->getReturnType()?->getName();
+    $taxRatesReturnType = (new ReflectionMethod(User::class, 'taxRates'))
         ->getReturnType()?->getName();
 
     expect($user->catalogProducts())->toBeInstanceOf(HasMany::class)
@@ -43,7 +47,21 @@ it('defines user catalog product and plan relationships', function (): void {
         ->and($catalogProductsReturnType)->toBe(HasMany::class)
         ->and($user->catalogPlans())->toBeInstanceOf(HasMany::class)
         ->and($user->catalogPlans)->toHaveCount(1)
-        ->and($catalogPlansReturnType)->toBe(HasMany::class);
+        ->and($catalogPlansReturnType)->toBe(HasMany::class)
+        ->and($user->taxRates())->toBeInstanceOf(HasMany::class)
+        ->and($user->taxRates)->toHaveCount(1)
+        ->and($taxRatesReturnType)->toBe(HasMany::class);
+});
+
+it('creates tax rates with casts and user relationship', function (): void {
+    $taxRate = TaxRate::factory()->create([
+        'rate' => 8.5,
+        'is_active' => true,
+    ]);
+
+    expect($taxRate->user)->toBeInstanceOf(User::class)
+        ->and($taxRate->rate)->toBe('8.50')
+        ->and($taxRate->is_active)->toBeTrue();
 });
 
 it('defines catalog plan and plan item relationships', function (): void {
