@@ -38,12 +38,6 @@
                 <flux:input wire:model="due_date" name="due_date" type="date" required />
                 <flux:error name="due_date" />
             </flux:field>
-
-            <flux:field class="md:col-span-2">
-                <flux:label>Notes</flux:label>
-                <flux:textarea wire:model="notes" name="notes" rows="3" />
-                <flux:error name="notes" />
-            </flux:field>
         </div>
 
         <div class="space-y-4 rounded-xl border border-zinc-200 p-4 dark:border-zinc-700">
@@ -142,44 +136,47 @@
             </div>
         </div>
 
-        <section class="rounded-xl border border-zinc-200 p-4 dark:border-zinc-700">
-            <h2 class="text-base font-semibold text-zinc-900 dark:text-zinc-100">Tax</h2>
-            <p class="mt-1 text-xs text-zinc-500 dark:text-zinc-400">Select a saved tax rate to apply to this invoice.</p>
-
-            <div class="mt-3">
+        <div class="grid gap-5 lg:grid-cols-2">
+            <section class="rounded-xl border border-zinc-200 p-4 dark:border-zinc-700">
                 <flux:field>
-                    <flux:label>Tax Rate</flux:label>
-                    <flux:select wire:model.live="tax_id" name="tax_id">
-                        <option value="">No tax</option>
-                        @foreach ($taxRates as $taxRateOption)
-                            <option value="{{ $taxRateOption->id }}">
-                                {{ $taxRateOption->label }} ({{ number_format((float) $taxRateOption->rate, 2) }}%)
-                            </option>
-                        @endforeach
-                    </flux:select>
-                    <flux:error name="tax_id" />
-                    <flux:error name="tax_rate" />
+                    <flux:label>Notes</flux:label>
+                    <flux:textarea wire:model="notes" name="notes" rows="6" />
+                    <flux:error name="notes" />
                 </flux:field>
-            </div>
-        </section>
+            </section>
 
-        <section class="rounded-xl border border-zinc-200 p-4 dark:border-zinc-700">
-            <h2 class="text-base font-semibold text-zinc-900 dark:text-zinc-100">Totals</h2>
-            <dl class="mt-3 space-y-2 text-sm">
-                <div class="flex justify-between gap-3">
-                    <dt class="text-zinc-600 dark:text-zinc-300">Subtotal</dt>
-                    <dd class="font-medium text-zinc-900 dark:text-zinc-100">${{ number_format($this->subtotal, 2) }}</dd>
-                </div>
-                <div class="flex justify-between gap-3">
-                    <dt class="text-zinc-600 dark:text-zinc-300">Tax ({{ number_format((float) ($tax_rate !== '' ? $tax_rate : 0), 2) }}%)</dt>
-                    <dd class="font-medium text-zinc-900 dark:text-zinc-100">${{ number_format($this->taxAmount, 2) }}</dd>
-                </div>
-                <div class="flex justify-between gap-3 border-t border-zinc-200 pt-2 text-base dark:border-zinc-700">
-                    <dt class="font-semibold text-zinc-900 dark:text-zinc-100">Total</dt>
-                    <dd class="font-semibold text-zinc-900 dark:text-zinc-100">${{ number_format($this->totalAmount, 2) }}</dd>
-                </div>
-            </dl>
-        </section>
+            <section class="rounded-xl border border-zinc-200 p-4 dark:border-zinc-700">
+                <h2 class="text-base font-semibold text-zinc-900 dark:text-zinc-100">Totals</h2>
+                <dl class="mt-3 space-y-2 text-sm">
+                    <div class="flex justify-between gap-3">
+                        <dt class="text-zinc-600 dark:text-zinc-300">Subtotal</dt>
+                        <dd class="font-medium text-zinc-900 dark:text-zinc-100">${{ number_format($this->subtotal, 2) }}</dd>
+                    </div>
+                    <div class="flex items-start justify-between gap-3">
+                        <dt class="w-full max-w-xs text-zinc-600 dark:text-zinc-300">
+                            <flux:field>
+                                <flux:label class="sr-only">Tax Rate</flux:label>
+                                <flux:select wire:model.live="tax_id" name="tax_id">
+                                    <option value="">No tax</option>
+                                    @foreach ($taxRates as $taxRateOption)
+                                        <option value="{{ $taxRateOption->id }}">
+                                            {{ $taxRateOption->label }} ({{ number_format((float) $taxRateOption->rate, 2) }}%)
+                                        </option>
+                                    @endforeach
+                                </flux:select>
+                                <flux:error name="tax_id" />
+                                <flux:error name="tax_rate" />
+                            </flux:field>
+                        </dt>
+                        <dd class="pt-2 font-medium text-zinc-900 dark:text-zinc-100">${{ number_format($this->taxAmount, 2) }}</dd>
+                    </div>
+                    <div class="flex justify-between gap-3 border-t border-zinc-200 pt-2 text-base dark:border-zinc-700">
+                        <dt class="font-semibold text-zinc-900 dark:text-zinc-100">Total</dt>
+                        <dd class="font-semibold text-zinc-900 dark:text-zinc-100">${{ number_format($this->totalAmount, 2) }}</dd>
+                    </div>
+                </dl>
+            </section>
+        </div>
 
         <div class="flex items-center justify-end gap-3">
             <flux:button :href="route('invoices.index')" variant="filled" wire:navigate>
