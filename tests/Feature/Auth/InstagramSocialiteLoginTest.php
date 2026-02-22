@@ -6,12 +6,21 @@ use App\Models\User;
 use App\Services\Auth\SocialiteLoginService;
 use Laravel\Socialite\Facades\Socialite;
 
-it('renders a instagram oauth login button', function (): void {
+it('renders social oauth login buttons for all social networks', function (): void {
     $response = $this->get(route('login'));
 
     $response->assertOk();
-    $response->assertSee('Continue with Instagram');
     $response->assertSee(route('social.auth', ['provider' => SocialNetwork::Instagram]));
+
+    foreach (SocialNetwork::cases() as $network) {
+        if ($network === SocialNetwork::Instagram) {
+            $response->assertSee("Continue with {$network->label()}");
+
+            continue;
+        }
+
+        $response->assertSee("Continue with {$network->label()} (Coming soon)");
+    }
 });
 
 it('redirects to the facebook socialite provider', function (): void {
