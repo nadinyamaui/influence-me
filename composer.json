@@ -24,6 +24,7 @@
         "sentry/sentry-laravel": "^4.20.1",
         "socialiteproviders/tiktok": "^5.2",
         "socialiteproviders/twitch": "^5.4",
+        "spatie/browsershot": "^5.0",
         "symfony/http-client": "^8.0.5",
         "symfony/postmark-mailer": "^8.0.4"
     },
