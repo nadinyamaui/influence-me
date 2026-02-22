@@ -1,6 +1,6 @@
 <x-layouts::auth>
     <div class="flex flex-col gap-6">
-        <x-auth-header :title="__('Log in to your account')" :description="__('Use your email and password or continue with Instagram.')" />
+        <x-auth-header :title="__('Log in to your account')" :description="__('Use your email and password or continue with your social account.')" />
 
         <x-auth-session-status class="text-center" :status="session('status')" />
 
@@ -58,9 +58,17 @@
         @endif
 
         <div class="flex flex-col gap-3">
-            <flux:button :href="route('auth.instagram')" variant="primary" class="w-full" data-test="instagram-login-button">
-                {{ __('Continue with Instagram') }}
-            </flux:button>
+            @foreach (\App\Enums\SocialNetwork::cases() as $network)
+                @if ($network === \App\Enums\SocialNetwork::Instagram)
+                    <flux:button :href="route('auth.instagram')" variant="primary" class="w-full" data-test="{{ $network->value }}-login-button">
+                        {{ __('Continue with :network', ['network' => $network->label()]) }}
+                    </flux:button>
+                @else
+                    <flux:button type="button" variant="primary" class="w-full" :disabled="true" data-test="{{ $network->value }}-login-button">
+                        {{ __('Continue with :network (Coming soon)', ['network' => $network->label()]) }}
+                    </flux:button>
+                @endif
+            @endforeach
         </div>
 
         <div class="space-x-1 rtl:space-x-reverse text-center text-sm text-zinc-600 dark:text-zinc-400">
