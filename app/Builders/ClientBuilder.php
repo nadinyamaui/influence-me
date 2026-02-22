@@ -7,6 +7,13 @@ use Illuminate\Database\Eloquent\Builder;
 
 class ClientBuilder extends Builder
 {
+    public function forUser(?int $userId = null): self
+    {
+        $userId ??= auth()->id();
+
+        return $this->where('user_id', $userId);
+    }
+
     public function search(string $term): self
     {
         $search = trim($term);

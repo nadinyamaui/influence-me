@@ -9,7 +9,7 @@
             <p class="mt-1 text-sm text-zinc-600 dark:text-zinc-300">Track payment status and follow upcoming due dates.</p>
         </div>
 
-        <flux:button href="#" variant="primary" title="New Invoice" aria-label="New Invoice">
+        <flux:button :href="route('invoices.create')" variant="primary" title="New Invoice" aria-label="New Invoice" wire:navigate>
             <i class="fa-solid fa-plus" aria-hidden="true"></i>
         </flux:button>
     </div>
@@ -113,7 +113,7 @@
 
                             @if ($invoice->status === InvoiceStatus::Draft)
                                 <a
-                                    href="{{ url('/invoices/'.$invoice->id.'/edit') }}"
+                                    href="{{ route('invoices.edit', $invoice) }}"
                                     class="inline-flex h-11 w-11 items-center justify-center rounded-md border border-zinc-300 text-xs font-medium text-zinc-700 transition hover:bg-zinc-100 dark:border-zinc-600 dark:text-zinc-200 dark:hover:bg-zinc-800"
                                     title="Edit"
                                     aria-label="Edit"
@@ -185,7 +185,7 @@
 
                                         @if ($invoice->status === InvoiceStatus::Draft)
                                             <a
-                                                href="{{ url('/invoices/'.$invoice->id.'/edit') }}"
+                                                href="{{ route('invoices.edit', $invoice) }}"
                                                 class="inline-flex h-11 w-11 items-center justify-center rounded-md border border-zinc-300 text-xs font-medium text-zinc-700 transition hover:bg-zinc-100 sm:h-auto sm:w-auto sm:px-3 sm:py-1.5 dark:border-zinc-600 dark:text-zinc-200 dark:hover:bg-zinc-800"
                                                 title="Edit"
                                                 aria-label="Edit"

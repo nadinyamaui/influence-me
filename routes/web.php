@@ -9,6 +9,7 @@ use App\Livewire\Clients\Index as ClientsIndex;
 use App\Livewire\Clients\Show as ClientsShow;
 use App\Livewire\Content\Index as ContentIndex;
 use App\Livewire\Dashboard;
+use App\Livewire\Invoices\Form as InvoicesForm;
 use App\Livewire\Invoices\Index as InvoicesIndex;
 use App\Livewire\Pricing\Plans\Form as PricingPlansForm;
 use App\Livewire\Pricing\Plans\Index as PricingPlansIndex;
@@ -84,6 +85,12 @@ Route::middleware(['auth'])->group(function (): void {
 
     Route::livewire('invoices', InvoicesIndex::class)
         ->name('invoices.index');
+
+    Route::livewire('invoices/create', InvoicesForm::class)
+        ->name('invoices.create');
+
+    Route::livewire('invoices/{invoice}/edit', InvoicesForm::class)
+        ->name('invoices.edit');
 
     Route::livewire('pricing/products', PricingProductsIndex::class)
         ->name('pricing.products.index');
