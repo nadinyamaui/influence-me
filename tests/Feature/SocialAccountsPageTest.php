@@ -128,6 +128,37 @@ test('authenticated users can set a non-primary account as primary', function ()
         ->and($secondaryAccount->fresh()->is_primary)->toBeTrue();
 });
 
+test('setting primary for one provider does not clear primary on another provider', function (): void {
+    $user = User::factory()->create();
+
+    $instagramPrimary = SocialAccount::factory()
+        ->for($user)
+        ->primary()
+        ->create([
+            'social_network' => SocialNetwork::Instagram,
+        ]);
+    $instagramSecondary = SocialAccount::factory()
+        ->for($user)
+        ->create([
+            'social_network' => SocialNetwork::Instagram,
+            'is_primary' => false,
+        ]);
+    $tiktokPrimary = SocialAccount::factory()
+        ->for($user)
+        ->primary()
+        ->create([
+            'social_network' => SocialNetwork::Tiktok,
+        ]);
+
+    Livewire::actingAs($user)
+        ->test(Index::class, ['provider' => SocialNetwork::Instagram->value])
+        ->call('setPrimary', $instagramSecondary->id);
+
+    expect($instagramPrimary->fresh()->is_primary)->toBeFalse()
+        ->and($instagramSecondary->fresh()->is_primary)->toBeTrue()
+        ->and($tiktokPrimary->fresh()->is_primary)->toBeTrue();
+});
+
 test('authenticated users can disconnect an account after confirmation', function (): void {
     $user = User::factory()->create();
 
@@ -147,7 +178,7 @@ test('authenticated users can disconnect an account after confirmation', functio
     $this->assertDatabaseHas('social_accounts', ['id' => $firstAccount->id]);
 });
 
-test('users cannot disconnect their last instagram account', function (): void {
+test('users can disconnect their last instagram account', function (): void {
     $user = User::factory()->create();
 
     $account = SocialAccount::factory()
@@ -159,7 +190,7 @@ test('users cannot disconnect their last instagram account', function (): void {
         ->test(Index::class, ['provider' => SocialNetwork::Instagram->value])
         ->call('disconnect', $account->id);
 
-    $this->assertDatabaseHas('social_accounts', ['id' => $account->id]);
+    $this->assertDatabaseMissing('social_accounts', ['id' => $account->id]);
 });
 
 test('users can manually trigger sync from instagram accounts page', function (): void {

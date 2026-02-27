@@ -49,7 +49,9 @@ class Index extends Component
         $account = $this->resolveProviderAccount($accountId);
         $this->authorize('update', $account);
 
-        Auth::user()->socialAccounts()->update(['is_primary' => false]);
+        Auth::user()->socialAccounts()
+            ->where('social_network', $this->providerNetwork())
+            ->update(['is_primary' => false]);
         $account->update(['is_primary' => true]);
 
         session()->flash('status', "Primary {$this->providerNetwork()->label()} account updated.");
@@ -59,12 +61,6 @@ class Index extends Component
     {
         $account = $this->resolveProviderAccount($accountId);
         $this->authorize('delete', $account);
-
-        if (Auth::user()->socialAccounts()->where('social_network', $this->providerNetwork())->count() <= 1) {
-            $this->addError('disconnect', "You cannot disconnect your last {$this->providerNetwork()->label()} account.");
-
-            return;
-        }
 
         $this->resetErrorBag('disconnect');
 
