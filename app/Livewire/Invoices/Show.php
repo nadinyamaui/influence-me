@@ -19,7 +19,11 @@ class Show extends Component
     {
         $this->authorize('view', $invoice);
 
-        $this->invoice = $invoice->load(['client', 'user', 'items']);
+        $this->invoice = $invoice->load([
+            'user:id,name,email',
+            'client:id,name,company_name,email',
+            'items:id,invoice_id,description,quantity,unit_price,total',
+        ]);
     }
 
     public function send(InvoiceDeliveryService $invoiceDeliveryService): void
@@ -58,6 +62,18 @@ class Show extends Component
         session()->flash('status', 'Invoice re-sent to '.$this->invoice->client->name.'.');
     }
 
+    public function delete()
+    {
+        $this->authorize('delete', $this->invoice);
+
+        $invoiceNumber = $this->invoice->invoice_number;
+        $this->invoice->delete();
+
+        session()->flash('status', 'Invoice '.$invoiceNumber.' deleted.');
+
+        return $this->redirectRoute('invoices.index', navigate: true);
+    }
+
     public function canSend(): bool
     {
         return $this->invoice->status === InvoiceStatus::Draft;
@@ -70,8 +86,13 @@ class Show extends Component
 
     public function render()
     {
-        return view('pages.invoices.show')->layout('layouts.app', [
-            'title' => __('Invoice'),
+        return view('pages.invoices.show', [
+            'isDraft' => $this->invoice->status === InvoiceStatus::Draft,
+            'isSent' => $this->invoice->status === InvoiceStatus::Sent,
+            'isPaid' => $this->invoice->status === InvoiceStatus::Paid,
+            'isOverdue' => $this->invoice->status === InvoiceStatus::Overdue,
+        ])->layout('layouts.app', [
+            'title' => __('Invoice Preview'),
         ]);
     }
 }

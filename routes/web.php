@@ -2,6 +2,7 @@
 
 use App\Enums\SocialNetwork;
 use App\Http\Controllers\Auth\SocialAuthController;
+use App\Http\Controllers\Invoices\EditInvoiceController;
 use App\Livewire\Analytics\Index as AnalyticsIndex;
 use App\Livewire\Clients\Create as ClientsCreate;
 use App\Livewire\Clients\Edit as ClientsEdit;
@@ -84,7 +85,7 @@ Route::middleware(['auth'])->group(function (): void {
     Route::livewire('invoices/create', InvoicesForm::class)
         ->name('invoices.create');
 
-    Route::livewire('invoices/{invoice}/edit', InvoicesForm::class)
+    Route::get('invoices/{invoice}/edit', EditInvoiceController::class)
         ->name('invoices.edit');
 
     Route::livewire('invoices/{invoice}', InvoicesShow::class)
