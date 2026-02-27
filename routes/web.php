@@ -2,6 +2,7 @@
 
 use App\Enums\SocialNetwork;
 use App\Http\Controllers\Auth\SocialAuthController;
+use App\Http\Controllers\Invoices\EditInvoiceController;
 use App\Livewire\Analytics\Index as AnalyticsIndex;
 use App\Livewire\Clients\Create as ClientsCreate;
 use App\Livewire\Clients\Edit as ClientsEdit;
@@ -11,6 +12,7 @@ use App\Livewire\Content\Index as ContentIndex;
 use App\Livewire\Dashboard;
 use App\Livewire\Invoices\Form as InvoicesForm;
 use App\Livewire\Invoices\Index as InvoicesIndex;
+use App\Livewire\Invoices\Show as InvoicesShow;
 use App\Livewire\Proposals\Create as ProposalsCreate;
 use App\Livewire\Proposals\Edit as ProposalsEdit;
 use App\Livewire\Proposals\Index as ProposalsIndex;
@@ -92,8 +94,11 @@ Route::middleware(['auth'])->group(function (): void {
     Route::livewire('invoices/create', InvoicesForm::class)
         ->name('invoices.create');
 
-    Route::livewire('invoices/{invoice}/edit', InvoicesForm::class)
+    Route::get('invoices/{invoice}/edit', EditInvoiceController::class)
         ->name('invoices.edit');
+
+    Route::livewire('invoices/{invoice}', InvoicesShow::class)
+        ->name('invoices.show');
 
     Route::middleware(['verified'])->group(function (): void {
         Route::livewire('dashboard', Dashboard::class)
