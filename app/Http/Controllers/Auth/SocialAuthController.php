@@ -18,7 +18,7 @@ class SocialAuthController extends Controller
 
     public function redirect(Request $request, SocialNetwork $provider): RedirectResponse
     {
-        if ($provider === SocialNetwork::Tiktok) {
+        if (! $provider->supportsLogin()) {
             throw new SocialAuthenticationException('TikTok login is not supported. Connect TikTok after logging in.');
         }
 

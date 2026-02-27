@@ -41,6 +41,14 @@ enum SocialNetwork: string
         };
     }
 
+    public function supportsLogin(): bool
+    {
+        return match ($this) {
+            self::Instagram => true,
+            default => false,
+        };
+    }
+
     public function label(): string
     {
         return match ($this) {
