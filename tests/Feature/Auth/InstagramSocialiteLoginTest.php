@@ -59,6 +59,7 @@ it('redirects to the tiktok socialite provider', function (): void {
             'user.info.basic',
             'user.info.profile',
             'user.info.stats',
+            'video.list',
         ])
         ->andReturnSelf();
     Socialite::shouldReceive('redirect')

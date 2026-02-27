@@ -8,7 +8,7 @@ use App\Services\Auth\SocialiteLoginService;
 use Illuminate\Http\RedirectResponse;
 use Laravel\Socialite\Facades\Socialite;
 
-it('redirects to tiktok provider with read-only account scopes', function (): void {
+it('redirects to tiktok provider with read-only account and media scopes', function (): void {
     $expectedRedirect = redirect('https://www.tiktok.com/v2/auth/authorize');
 
     Socialite::shouldReceive('driver')
@@ -21,6 +21,7 @@ it('redirects to tiktok provider with read-only account scopes', function (): vo
             'user.info.basic',
             'user.info.profile',
             'user.info.stats',
+            'video.list',
         ])
         ->andReturnSelf();
     Socialite::shouldReceive('redirect')

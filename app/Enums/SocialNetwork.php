@@ -21,6 +21,7 @@ enum SocialNetwork: string
                 'user.info.basic',
                 'user.info.profile',
                 'user.info.stats',
+                'video.list',
             ],
             self::Instagram => [
                 'instagram_basic',
