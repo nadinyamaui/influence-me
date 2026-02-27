@@ -48,6 +48,7 @@ test('influencer can send a draft invoice to a client email', function (): void 
     Livewire::actingAs($owner)
         ->test(InvoiceShow::class, ['invoice' => $invoice])
         ->call('send')
+        ->assertSet('statusMessage', 'Invoice sent to Acme Client.')
         ->assertHasNoErrors();
 
     expect($invoice->fresh()->status)->toBe(InvoiceStatus::Sent);
@@ -88,11 +89,13 @@ test('influencer can resend sent and overdue invoices without changing status', 
     Livewire::actingAs($owner)
         ->test(InvoiceShow::class, ['invoice' => $sentInvoice])
         ->call('resend')
+        ->assertSet('statusMessage', 'Invoice re-sent to '.$sentInvoice->client->name.'.')
         ->assertHasNoErrors();
 
     Livewire::actingAs($owner)
         ->test(InvoiceShow::class, ['invoice' => $overdueInvoice])
         ->call('resend')
+        ->assertSet('statusMessage', 'Invoice re-sent to '.$overdueInvoice->client->name.'.')
         ->assertHasNoErrors();
 
     expect($sentInvoice->fresh()->status)->toBe(InvoiceStatus::Sent)

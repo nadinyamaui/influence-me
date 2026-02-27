@@ -3,9 +3,9 @@
 @endphp
 
 <div class="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-6">
-    @if (session('status'))
+    @if (filled($statusMessage))
         <div class="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-800 dark:border-emerald-900/40 dark:bg-emerald-950/50 dark:text-emerald-200">
-            {{ session('status') }}
+            {{ $statusMessage }}
         </div>
     @endif
 
@@ -41,18 +41,30 @@
                     type="button"
                     variant="primary"
                     wire:click="send"
+                    wire:loading.attr="disabled"
+                    wire:target="send"
                     wire:confirm="Send invoice #{{ $invoice->invoice_number }} (${{ number_format((float) $invoice->total, 2) }}) to {{ $invoice->client?->name ?? 'this client' }} at {{ $invoice->client?->email ?? 'no email' }}?"
                 >
-                    Send to Client
+                    <span wire:loading.remove wire:target="send">Send to Client</span>
+                    <span wire:loading wire:target="send" class="inline-flex items-center gap-2">
+                        <i class="fa-solid fa-spinner fa-spin" aria-hidden="true"></i>
+                        Sending...
+                    </span>
                 </flux:button>
             @elseif ($this->canResend())
                 <flux:button
                     type="button"
                     variant="primary"
                     wire:click="resend"
+                    wire:loading.attr="disabled"
+                    wire:target="resend"
                     wire:confirm="Resend invoice #{{ $invoice->invoice_number }} (${{ number_format((float) $invoice->total, 2) }}) to {{ $invoice->client?->name ?? 'this client' }} at {{ $invoice->client?->email ?? 'no email' }}?"
                 >
-                    Resend
+                    <span wire:loading.remove wire:target="resend">Resend</span>
+                    <span wire:loading wire:target="resend" class="inline-flex items-center gap-2">
+                        <i class="fa-solid fa-spinner fa-spin" aria-hidden="true"></i>
+                        Resending...
+                    </span>
                 </flux:button>
             @endif
         </div>

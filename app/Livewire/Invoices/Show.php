@@ -15,6 +15,8 @@ class Show extends Component
 
     public Invoice $invoice;
 
+    public ?string $statusMessage = null;
+
     public function mount(Invoice $invoice): void
     {
         $this->authorize('view', $invoice);
@@ -37,7 +39,7 @@ class Show extends Component
         }
 
         $this->resetErrorBag();
-        session()->flash('status', 'Invoice sent to '.$this->invoice->client->name.'.');
+        $this->statusMessage = 'Invoice sent to '.$this->invoice->client->name.'.';
     }
 
     public function resend(InvoiceDeliveryService $invoiceDeliveryService): void
@@ -55,7 +57,7 @@ class Show extends Component
         }
 
         $this->resetErrorBag();
-        session()->flash('status', 'Invoice re-sent to '.$this->invoice->client->name.'.');
+        $this->statusMessage = 'Invoice re-sent to '.$this->invoice->client->name.'.';
     }
 
     public function canSend(): bool
