@@ -27,7 +27,14 @@ class SocialAuthController extends Controller
     {
         $request->session()->put('social_account_auth_intent', 'add_account');
 
-        return $this->loginService->redirectToProvider();
+        return $this->loginService->usingDriver(SocialNetwork::Instagram)->redirectToProvider();
+    }
+
+    public function addTikTokAccount(Request $request): RedirectResponse
+    {
+        $request->session()->put('social_account_auth_intent', 'add_account');
+
+        return $this->loginService->usingDriver(SocialNetwork::Tiktok)->redirectToProvider();
     }
 
     public function callback(Request $request, SocialNetwork $provider): RedirectResponse

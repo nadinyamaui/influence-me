@@ -22,6 +22,9 @@ $socialProviders = array_map(
     static fn (SocialNetwork $network): string => $network->value,
     SocialNetwork::cases(),
 );
+$socialLoginProviders = [
+    SocialNetwork::Instagram->value,
+];
 
 Route::get('/', function () {
     return view('welcome');
@@ -30,10 +33,10 @@ Route::get('/', function () {
 Route::view('/terms', 'terms')->name('terms');
 Route::view('/privacy-policy', 'privacy-policy')->name('privacy-policy');
 
-Route::prefix('/auth')->group(function () use ($socialProviders): void {
+Route::prefix('/auth')->group(function () use ($socialLoginProviders, $socialProviders): void {
     Route::get('{provider}', [SocialAuthController::class, 'redirect'])
         ->middleware('guest')
-        ->whereIn('provider', $socialProviders)
+        ->whereIn('provider', $socialLoginProviders)
         ->name('social.auth');
     Route::get('{provider}/callback', [SocialAuthController::class, 'callback'])
         ->middleware('throttle:instagram-oauth-callback')
@@ -43,6 +46,7 @@ Route::prefix('/auth')->group(function () use ($socialProviders): void {
 
 Route::middleware(['auth'])->group(function (): void {
     Route::get('/auth/instagram/add', [SocialAuthController::class, 'addAccount'])->name('auth.instagram.add');
+    Route::get('/auth/tiktok/add', [SocialAuthController::class, 'addTikTokAccount'])->name('auth.tiktok.add');
 
     Route::livewire('instagram-accounts', SocialAccountsIndex::class)
         ->name('instagram-accounts.index');
