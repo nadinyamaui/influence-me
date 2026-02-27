@@ -11,7 +11,7 @@ use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
 use Throwable;
 
-class TikTokApiConnector
+class Connector
 {
     protected PendingRequest $client;
 

@@ -2,7 +2,7 @@
 
 use App\Exceptions\TikTokApiException;
 use App\Exceptions\TikTokTokenExpiredException;
-use App\Services\SocialMedia\Tiktok\TikTokApiConnector;
+use App\Services\SocialMedia\Tiktok\Connector;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Http;
 
@@ -20,7 +20,7 @@ it('sends requests with configured base url and bearer token', function (): void
         ]),
     ]);
 
-    $connector = new TikTokApiConnector('token-abc', 42);
+    $connector = new Connector('token-abc', 42);
 
     $response = $connector->get('/v2/user/info/', ['fields' => 'open_id']);
 
@@ -48,7 +48,7 @@ it('returns full payload when response does not include data key', function (): 
         ]),
     ]);
 
-    $connector = new TikTokApiConnector('token-abc');
+    $connector = new Connector('token-abc');
 
     $response = $connector->post('/v2/video/query/', ['max_count' => 1]);
 
@@ -72,7 +72,7 @@ it('maps unauthorized errors to token expired exception', function (): void {
         ], 401),
     ]);
 
-    $connector = new TikTokApiConnector('token-abc', 99);
+    $connector = new Connector('token-abc', 99);
 
     expect(fn () => $connector->get('/v2/user/info/'))
         ->toThrow(function (TikTokTokenExpiredException $exception): void {
@@ -95,7 +95,7 @@ it('flags rate limited failures on typed api exception', function (): void {
         ], 429),
     ]);
 
-    $connector = new TikTokApiConnector('token-abc', 7);
+    $connector = new Connector('token-abc', 7);
 
     expect(fn () => $connector->post('/v2/video/query/', ['max_count' => 5]))
         ->toThrow(function (TikTokApiException $exception): void {
@@ -119,7 +119,7 @@ it('does not map all forbidden responses to token expired exceptions', function 
         ], 403),
     ]);
 
-    $connector = new TikTokApiConnector('token-abc', 44);
+    $connector = new Connector('token-abc', 44);
 
     expect(fn () => $connector->get('/v2/user/info/'))
         ->toThrow(function (TikTokApiException $exception): void {
@@ -144,7 +144,7 @@ it('treats payloads with error code zero as successful responses', function (): 
         ], 200),
     ]);
 
-    $connector = new TikTokApiConnector('token-abc');
+    $connector = new Connector('token-abc');
 
     expect($connector->get('/v2/user/info/'))->toBe([
         'open_id' => 'open-xyz',

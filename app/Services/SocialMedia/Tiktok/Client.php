@@ -153,9 +153,9 @@ class Client implements SocialiteClient
             });
     }
 
-    protected function connector(): TikTokApiConnector
+    protected function connector(): Connector
     {
-        return app()->make(TikTokApiConnector::class, [
+        return app()->make(Connector::class, [
             'accessToken' => $this->access_token,
         ]);
     }

@@ -2,10 +2,10 @@
 
 use App\Enums\SocialNetwork;
 use App\Services\SocialMedia\Tiktok\Client;
-use App\Services\SocialMedia\Tiktok\TikTokApiConnector;
+use App\Services\SocialMedia\Tiktok\Connector;
 
 it('maps tiktok user info payload to social account attributes', function (): void {
-    $connector = \Mockery::mock(TikTokApiConnector::class);
+    $connector = \Mockery::mock(Connector::class);
     $connector->shouldReceive('get')
         ->once()
         ->with('/v2/user/info/', [
@@ -23,7 +23,7 @@ it('maps tiktok user info payload to social account attributes', function (): vo
             ],
         ]);
 
-    app()->bind(TikTokApiConnector::class, fn (): TikTokApiConnector => $connector);
+    app()->bind(Connector::class, fn (): Connector => $connector);
 
     $account = (new Client(access_token: 'token-123'))->accounts()->first();
 
@@ -37,7 +37,7 @@ it('maps tiktok user info payload to social account attributes', function (): vo
 });
 
 it('returns no accounts when tiktok response has no identifier', function (): void {
-    $connector = \Mockery::mock(TikTokApiConnector::class);
+    $connector = \Mockery::mock(Connector::class);
     $connector->shouldReceive('get')
         ->once()
         ->andReturn([
@@ -46,7 +46,7 @@ it('returns no accounts when tiktok response has no identifier', function (): vo
             ],
         ]);
 
-    app()->bind(TikTokApiConnector::class, fn (): TikTokApiConnector => $connector);
+    app()->bind(Connector::class, fn (): Connector => $connector);
 
     $accounts = (new Client(access_token: 'token-123'))->accounts();
 
@@ -54,7 +54,7 @@ it('returns no accounts when tiktok response has no identifier', function (): vo
 });
 
 it('retrieves all tiktok media across paginated responses', function (): void {
-    $connector = \Mockery::mock(TikTokApiConnector::class);
+    $connector = \Mockery::mock(Connector::class);
     $connector->shouldReceive('request')
         ->once()
         ->with('POST', '/v2/video/list/', [
@@ -93,7 +93,7 @@ it('retrieves all tiktok media across paginated responses', function (): void {
             'cursor' => 40,
         ]);
 
-    app()->bind(TikTokApiConnector::class, fn (): TikTokApiConnector => $connector);
+    app()->bind(Connector::class, fn (): Connector => $connector);
 
     $videos = (new Client(access_token: 'token-123'))->getAllMedia();
 
@@ -102,7 +102,7 @@ it('retrieves all tiktok media across paginated responses', function (): void {
 });
 
 it('retrieves per-post stats for tiktok media ids', function (): void {
-    $connector = \Mockery::mock(TikTokApiConnector::class);
+    $connector = \Mockery::mock(Connector::class);
     $connector->shouldReceive('request')
         ->once()
         ->with('POST', '/v2/video/query/', [
@@ -138,7 +138,7 @@ it('retrieves per-post stats for tiktok media ids', function (): void {
             ],
         ]);
 
-    app()->bind(TikTokApiConnector::class, fn (): TikTokApiConnector => $connector);
+    app()->bind(Connector::class, fn (): Connector => $connector);
 
     $stats = (new Client(access_token: 'token-123'))->getMediaStats(collect(['v1', 'v2']));
 
