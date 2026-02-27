@@ -47,10 +47,11 @@ it('redirects to the facebook socialite provider', function (): void {
     $response->assertSessionHas('social_account_auth_intent', 'login');
 });
 
-it('does not allow guest tiktok oauth login route', function (): void {
-    $response = $this->get('/auth/tiktok');
+it('throws when guest tiktok oauth login route is attempted', function (): void {
+    $this->withoutExceptionHandling();
 
-    $response->assertNotFound();
+    expect(fn () => $this->get('/auth/tiktok'))
+        ->toThrow(SocialAuthenticationException::class, 'TikTok login is not supported. Connect TikTok after logging in.');
 });
 
 it('requires authentication to connect additional instagram accounts', function (): void {

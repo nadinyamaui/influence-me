@@ -18,23 +18,20 @@ class SocialAuthController extends Controller
 
     public function redirect(Request $request, SocialNetwork $provider): RedirectResponse
     {
+        if ($provider === SocialNetwork::Tiktok) {
+            throw new SocialAuthenticationException('TikTok login is not supported. Connect TikTok after logging in.');
+        }
+
         $request->session()->put('social_account_auth_intent', 'login');
 
         return $this->loginService->usingDriver($provider)->redirectToProvider();
     }
 
-    public function addAccount(Request $request): RedirectResponse
+    public function addAccount(Request $request, SocialNetwork $provider): RedirectResponse
     {
         $request->session()->put('social_account_auth_intent', 'add_account');
 
-        return $this->loginService->usingDriver(SocialNetwork::Instagram)->redirectToProvider();
-    }
-
-    public function addTikTokAccount(Request $request): RedirectResponse
-    {
-        $request->session()->put('social_account_auth_intent', 'add_account');
-
-        return $this->loginService->usingDriver(SocialNetwork::Tiktok)->redirectToProvider();
+        return $this->loginService->usingDriver($provider)->redirectToProvider();
     }
 
     public function callback(Request $request, SocialNetwork $provider): RedirectResponse

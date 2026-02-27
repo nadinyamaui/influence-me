@@ -24,6 +24,7 @@ $socialProviders = array_map(
 );
 $socialLoginProviders = [
     SocialNetwork::Instagram->value,
+    SocialNetwork::Tiktok->value,
 ];
 
 Route::get('/', function () {
@@ -45,8 +46,12 @@ Route::prefix('/auth')->group(function () use ($socialLoginProviders, $socialPro
 });
 
 Route::middleware(['auth'])->group(function (): void {
-    Route::get('/auth/instagram/add', [SocialAuthController::class, 'addAccount'])->name('auth.instagram.add');
-    Route::get('/auth/tiktok/add', [SocialAuthController::class, 'addTikTokAccount'])->name('auth.tiktok.add');
+    Route::get('/auth/instagram/add', [SocialAuthController::class, 'addAccount'])
+        ->defaults('provider', SocialNetwork::Instagram->value)
+        ->name('auth.instagram.add');
+    Route::get('/auth/tiktok/add', [SocialAuthController::class, 'addAccount'])
+        ->defaults('provider', SocialNetwork::Tiktok->value)
+        ->name('auth.tiktok.add');
 
     Route::livewire('instagram-accounts', SocialAccountsIndex::class)
         ->name('instagram-accounts.index');
