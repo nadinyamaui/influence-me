@@ -11,6 +11,7 @@ use App\Livewire\Content\Index as ContentIndex;
 use App\Livewire\Dashboard;
 use App\Livewire\Invoices\Form as InvoicesForm;
 use App\Livewire\Invoices\Index as InvoicesIndex;
+use App\Livewire\Invoices\Show as InvoicesShow;
 use App\Livewire\Proposals\Create as ProposalsCreate;
 use App\Livewire\Proposals\Edit as ProposalsEdit;
 use App\Livewire\Proposals\Index as ProposalsIndex;
@@ -85,6 +86,9 @@ Route::middleware(['auth'])->group(function (): void {
 
     Route::livewire('invoices/{invoice}/edit', InvoicesForm::class)
         ->name('invoices.edit');
+
+    Route::livewire('invoices/{invoice}', InvoicesShow::class)
+        ->name('invoices.show');
 
     Route::middleware(['verified'])->group(function (): void {
         Route::livewire('dashboard', Dashboard::class)
