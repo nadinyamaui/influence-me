@@ -30,10 +30,7 @@ class SocialAuthController extends Controller
     public function addAccount(Request $request, SocialNetwork $provider): RedirectResponse
     {
         $request->session()->put('social_account_auth_intent', 'add_account');
-        $request->session()->put(
-            'social_account_redirect_route',
-            $provider === SocialNetwork::Tiktok ? 'tiktok-accounts.index' : 'instagram-accounts.index',
-        );
+        $request->session()->put('social_account_redirect_route', $provider->accountsRouteName());
 
         return $this->loginService->usingDriver($provider)->redirectToProvider();
     }
@@ -42,10 +39,7 @@ class SocialAuthController extends Controller
     {
         $loginService = $this->loginService->usingDriver($provider);
         $intent = $request->session()->pull('social_account_auth_intent', 'login');
-        $redirectRoute = $request->session()->pull(
-            'social_account_redirect_route',
-            $provider === SocialNetwork::Tiktok ? 'tiktok-accounts.index' : 'instagram-accounts.index',
-        );
+        $redirectRoute = $request->session()->pull('social_account_redirect_route', $provider->accountsRouteName());
         $isAddAccountFlow = $intent === 'add_account' && $request->user() !== null;
 
         try {

@@ -220,7 +220,9 @@ it('defines all social network enum cases', function (): void {
         ->and(SocialNetwork::Instagram->value)->toBe('instagram')
         ->and(SocialNetwork::Tiktok->value)->toBe('tiktok')
         ->and(SocialNetwork::Youtube->value)->toBe('youtube')
-        ->and(SocialNetwork::Twitch->value)->toBe('twitch');
+        ->and(SocialNetwork::Twitch->value)->toBe('twitch')
+        ->and(SocialNetwork::Instagram->accountsRouteName())->toBe('instagram-accounts.index')
+        ->and(SocialNetwork::Tiktok->accountsRouteName())->toBe('tiktok-accounts.index');
 });
 
 it('builds the instagram socialite client from social network enum', function (): void {

@@ -59,6 +59,15 @@ enum SocialNetwork: string
         };
     }
 
+    public function accountsRouteName(): string
+    {
+        return match ($this) {
+            self::Instagram => 'instagram-accounts.index',
+            self::Tiktok => 'tiktok-accounts.index',
+            default => 'instagram-accounts.index',
+        };
+    }
+
     public function socialiteClient(string $accessToken, ?string $userId = null): SocialiteClient
     {
         return match ($this) {
