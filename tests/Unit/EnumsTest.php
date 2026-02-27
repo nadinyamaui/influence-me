@@ -223,6 +223,11 @@ it('defines all social network enum cases', function (): void {
         ->and(SocialNetwork::Twitch->value)->toBe('twitch');
 });
 
+it('provides account connection redirect routes for social networks', function (): void {
+    expect(SocialNetwork::Instagram->accountConnectionRedirectRoute())->toBe('instagram-accounts.index')
+        ->and(SocialNetwork::Tiktok->accountConnectionRedirectRoute())->toBe('dashboard');
+});
+
 it('builds the instagram socialite client from social network enum', function (): void {
     $instagramClient = Mockery::mock(InstagramClient::class);
     app()->bind(InstagramClient::class, fn (): InstagramClient => $instagramClient);

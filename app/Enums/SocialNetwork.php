@@ -50,6 +50,14 @@ enum SocialNetwork: string
         };
     }
 
+    public function accountConnectionRedirectRoute(): string
+    {
+        return match ($this) {
+            self::Instagram => 'instagram-accounts.index',
+            default => 'dashboard',
+        };
+    }
+
     public function socialiteClient(string $accessToken, ?string $userId = null): SocialiteClient
     {
         return match ($this) {
