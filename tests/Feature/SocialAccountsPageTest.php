@@ -1,6 +1,7 @@
 <?php
 
 use App\Enums\SyncStatus;
+use App\Enums\SocialNetwork;
 use App\Jobs\SyncAllSocialMediaData;
 use App\Livewire\SocialAccounts\Index;
 use App\Models\SocialAccount;
@@ -75,7 +76,7 @@ test('instagram accounts page shows empty state and connect call to action', fun
         ->assertSee('No Instagram accounts connected.')
         ->assertSee('Click below to connect your first account.')
         ->assertSee('Connect Instagram Account')
-        ->assertSee(route('auth.instagram.add'));
+        ->assertSee(route('social.add', ['provider' => SocialNetwork::Instagram]));
 });
 
 test('authenticated users can set a non-primary account as primary', function (): void {

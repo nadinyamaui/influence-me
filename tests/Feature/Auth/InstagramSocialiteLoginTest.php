@@ -55,13 +55,13 @@ it('throws when guest tiktok oauth login route is attempted', function (): void 
 });
 
 it('requires authentication to connect additional instagram accounts', function (): void {
-    $response = $this->get(route('auth.instagram.add'));
+    $response = $this->get(route('social.add', ['provider' => SocialNetwork::Instagram]));
 
     $response->assertRedirect(route('login'));
 });
 
 it('requires authentication to connect additional tiktok accounts', function (): void {
-    $response = $this->get(route('auth.tiktok.add'));
+    $response = $this->get(route('social.add', ['provider' => SocialNetwork::Tiktok]));
 
     $response->assertRedirect(route('login'));
 });
@@ -86,7 +86,7 @@ it('redirects authenticated users to instagram provider for add-account flow', f
         ->once()
         ->andReturn(redirect('https://www.facebook.com/v18.0/dialog/oauth'));
 
-    $response = $this->actingAs($user)->get(route('auth.instagram.add'));
+    $response = $this->actingAs($user)->get(route('social.add', ['provider' => SocialNetwork::Instagram]));
 
     $response->assertRedirect('https://www.facebook.com/v18.0/dialog/oauth');
     $response->assertSessionHas('social_account_auth_intent', 'add_account');
@@ -112,7 +112,7 @@ it('redirects authenticated users to tiktok provider for add-account flow', func
         ->once()
         ->andReturn(redirect('https://www.tiktok.com/v2/auth/authorize'));
 
-    $response = $this->actingAs($user)->get(route('auth.tiktok.add'));
+    $response = $this->actingAs($user)->get(route('social.add', ['provider' => SocialNetwork::Tiktok]));
 
     $response->assertRedirect('https://www.tiktok.com/v2/auth/authorize');
     $response->assertSessionHas('social_account_auth_intent', 'add_account');

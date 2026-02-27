@@ -47,13 +47,10 @@ Route::prefix('/auth')->group(function () use ($socialLoginProviders, $socialPro
         ->name('social.callback');
 });
 
-Route::middleware(['auth'])->group(function (): void {
-    Route::get('/auth/instagram/add', [SocialAuthController::class, 'addAccount'])
-        ->defaults('provider', SocialNetwork::Instagram->value)
-        ->name('auth.instagram.add');
-    Route::get('/auth/tiktok/add', [SocialAuthController::class, 'addAccount'])
-        ->defaults('provider', SocialNetwork::Tiktok->value)
-        ->name('auth.tiktok.add');
+Route::middleware(['auth'])->group(function () use ($socialLoginProviders): void {
+    Route::get('/auth/{provider}/add', [SocialAuthController::class, 'addAccount'])
+        ->whereIn('provider', $socialLoginProviders)
+        ->name('social.add');
 
     Route::livewire('instagram-accounts', SocialAccountsIndex::class)
         ->name('instagram-accounts.index');
