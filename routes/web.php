@@ -53,7 +53,11 @@ Route::middleware(['auth'])->group(function () use ($socialLoginProviders): void
         ->name('social.add');
 
     Route::livewire('instagram-accounts', SocialAccountsIndex::class)
+        ->defaults('provider', SocialNetwork::Instagram->value)
         ->name('instagram-accounts.index');
+    Route::livewire('tiktok-accounts', SocialAccountsIndex::class)
+        ->defaults('provider', SocialNetwork::Tiktok->value)
+        ->name('tiktok-accounts.index');
 
     Route::livewire('content', ContentIndex::class)
         ->name('content.index');

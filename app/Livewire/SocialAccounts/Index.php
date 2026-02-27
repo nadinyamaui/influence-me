@@ -2,8 +2,10 @@
 
 namespace App\Livewire\SocialAccounts;
 
+use App\Enums\SocialNetwork;
 use App\Enums\SyncStatus;
 use App\Jobs\SyncAllSocialMediaData;
+use App\Models\SocialAccount;
 use App\Models\User;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Collection;
@@ -14,9 +16,20 @@ class Index extends Component
 {
     use AuthorizesRequests;
 
+    public string $provider;
+
+    public function mount(string $provider): void
+    {
+        $providerNetwork = SocialNetwork::tryFrom($provider);
+
+        abort_if($providerNetwork === null, 404);
+
+        $this->provider = $providerNetwork->value;
+    }
+
     public function syncNow(int $accountId): void
     {
-        $account = User::resolveSocialAccount($accountId);
+        $account = $this->resolveProviderAccount($accountId);
         $this->authorize('update', $account);
 
         if ($account->sync_status === SyncStatus::Syncing) {
@@ -33,22 +46,22 @@ class Index extends Component
 
     public function setPrimary(int $accountId): void
     {
-        $account = User::resolveSocialAccount($accountId);
+        $account = $this->resolveProviderAccount($accountId);
         $this->authorize('update', $account);
 
         Auth::user()->socialAccounts()->update(['is_primary' => false]);
         $account->update(['is_primary' => true]);
 
-        session()->flash('status', 'Primary Instagram account updated.');
+        session()->flash('status', "Primary {$this->providerNetwork()->label()} account updated.");
     }
 
     public function disconnect(int $accountId): void
     {
-        $account = User::resolveSocialAccount($accountId);
+        $account = $this->resolveProviderAccount($accountId);
         $this->authorize('delete', $account);
 
-        if (Auth::user()->socialAccounts()->count() <= 1) {
-            $this->addError('disconnect', 'You cannot disconnect your last Instagram account.');
+        if (Auth::user()->socialAccounts()->where('social_network', $this->providerNetwork())->count() <= 1) {
+            $this->addError('disconnect', "You cannot disconnect your last {$this->providerNetwork()->label()} account.");
 
             return;
         }
@@ -60,29 +73,52 @@ class Index extends Component
 
         if ($wasPrimary) {
             $nextAccount = Auth::user()->socialAccounts()
+                ->where('social_network', $this->providerNetwork())
                 ->orderBy('id')
                 ->first();
 
             $nextAccount?->update(['is_primary' => true]);
         }
 
-        session()->flash('status', 'Instagram account disconnected.');
+        session()->flash('status', "{$this->providerNetwork()->label()} account disconnected.");
     }
 
     public function render()
     {
-        return view('pages.instagram-accounts.index', [
+        $providerNetwork = $this->providerNetwork();
+
+        return view('pages.social-accounts.index', [
             'accounts' => $this->accounts(),
+            'providerNetwork' => $providerNetwork,
         ])->layout('layouts.app', [
-            'title' => __('Instagram Accounts'),
+            'title' => __($providerNetwork->label().' Accounts'),
         ]);
     }
 
     private function accounts(): Collection
     {
         return Auth::user()->socialAccounts()
+            ->where('social_network', $this->providerNetwork())
             ->orderByDesc('is_primary')
             ->orderBy('username')
             ->get();
+    }
+
+    private function providerNetwork(): SocialNetwork
+    {
+        $providerNetwork = SocialNetwork::tryFrom($this->provider);
+
+        abort_if($providerNetwork === null, 404);
+
+        return $providerNetwork;
+    }
+
+    private function resolveProviderAccount(int $accountId): SocialAccount
+    {
+        $account = User::resolveSocialAccount($accountId);
+
+        abort_if($account->social_network !== $this->providerNetwork(), 404);
+
+        return $account;
     }
 }

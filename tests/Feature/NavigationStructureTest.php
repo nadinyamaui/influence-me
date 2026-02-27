@@ -13,8 +13,8 @@ it('renders the app sidebar with all RFC 013 navigation groups and links', funct
         ->assertSeeText('Platform')
         ->assertSeeText('Manage')
         ->assertSeeText('Settings')
-        ->assertSeeText('Instagram')
-        ->assertSeeTextInOrder(['Dashboard', 'Content', 'Analytics', 'Clients', 'Proposals', 'Invoices', 'Pricing Products', 'Pricing Plans', 'Tax Rates', 'Accounts'])
+        ->assertSeeText('Social Accounts')
+        ->assertSeeTextInOrder(['Dashboard', 'Content', 'Analytics', 'Clients', 'Proposals', 'Invoices', 'Pricing Products', 'Pricing Plans', 'Tax Rates', 'Instagram', 'TikTok'])
         ->assertSee('href="'.route('dashboard').'"', false)
         ->assertSee('href="'.route('analytics.index').'"', false)
         ->assertSee('href="'.route('clients.index').'"', false)
@@ -24,6 +24,7 @@ it('renders the app sidebar with all RFC 013 navigation groups and links', funct
         ->assertSee('href="'.route('pricing.plans.index').'"', false)
         ->assertSee('href="'.route('pricing.tax-rates.index').'"', false)
         ->assertSee('href="'.route('instagram-accounts.index').'"', false)
+        ->assertSee('href="'.route('tiktok-accounts.index').'"', false)
         ->assertDontSee('Repository')
         ->assertDontSee('Documentation');
 
@@ -48,13 +49,14 @@ BLADE
         ->assertSeeText('Platform')
         ->assertSeeText('Manage')
         ->assertSeeText('Settings')
-        ->assertSeeText('Instagram')
-        ->assertSeeTextInOrder(['Dashboard', 'Content', 'Analytics', 'Clients', 'Proposals', 'Invoices', 'Pricing', 'Accounts'])
+        ->assertSeeText('Social Accounts')
+        ->assertSeeTextInOrder(['Dashboard', 'Content', 'Analytics', 'Clients', 'Proposals', 'Invoices', 'Pricing', 'Social Accounts'])
         ->assertSee('href="'.route('dashboard').'"', false)
         ->assertSee('href="'.route('analytics.index').'"', false)
         ->assertSee('href="'.route('proposals.index').'"', false)
         ->assertSee('href="'.route('pricing.products.index').'"', false)
         ->assertSee('href="'.route('instagram-accounts.index').'"', false)
+        ->assertSee('href="'.route('tiktok-accounts.index').'"', false)
         ->assertDontSee('Repository')
         ->assertDontSee('Documentation');
 

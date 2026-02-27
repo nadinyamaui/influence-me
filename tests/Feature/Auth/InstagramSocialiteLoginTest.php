@@ -90,6 +90,7 @@ it('redirects authenticated users to instagram provider for add-account flow', f
 
     $response->assertRedirect('https://www.facebook.com/v18.0/dialog/oauth');
     $response->assertSessionHas('social_account_auth_intent', 'add_account');
+    $response->assertSessionHas('social_account_redirect_route', 'instagram-accounts.index');
 });
 
 it('redirects authenticated users to tiktok provider for add-account flow', function (): void {
@@ -116,6 +117,7 @@ it('redirects authenticated users to tiktok provider for add-account flow', func
 
     $response->assertRedirect('https://www.tiktok.com/v2/auth/authorize');
     $response->assertSessionHas('social_account_auth_intent', 'add_account');
+    $response->assertSessionHas('social_account_redirect_route', 'tiktok-accounts.index');
 });
 
 it('redirects to dashboard after successful instagram callback', function (): void {
@@ -199,7 +201,10 @@ it('uses account-linking flow on callback for authenticated users with add-accou
     app()->instance(SocialiteLoginService::class, $loginService);
 
     $response = $this->actingAs($user)
-        ->withSession(['social_account_auth_intent' => 'add_account'])
+        ->withSession([
+            'social_account_auth_intent' => 'add_account',
+            'social_account_redirect_route' => 'instagram-accounts.index',
+        ])
         ->get(route('social.callback', ['provider' => SocialNetwork::Instagram]));
 
     $response->assertRedirect(route('instagram-accounts.index'));
@@ -221,13 +226,41 @@ it('returns to instagram accounts with oauth error on add-account callback socia
     app()->instance(SocialiteLoginService::class, $loginService);
 
     $response = $this->actingAs($user)
-        ->withSession(['social_account_auth_intent' => 'add_account'])
+        ->withSession([
+            'social_account_auth_intent' => 'add_account',
+            'social_account_redirect_route' => 'instagram-accounts.index',
+        ])
         ->get(route('social.callback', ['provider' => SocialNetwork::Instagram]));
 
     $response->assertRedirect(route('instagram-accounts.index'));
     $response->assertSessionHasErrors([
         'oauth' => 'Facebook denied account linking.',
     ]);
+});
+
+it('redirects to tiktok accounts after successful tiktok add-account callback', function (): void {
+    $user = User::factory()->create();
+
+    $loginService = \Mockery::mock(SocialiteLoginService::class);
+    $loginService->shouldReceive('usingDriver')
+        ->once()
+        ->with(SocialNetwork::Tiktok)
+        ->andReturnSelf();
+    $loginService->shouldReceive('createSocialAccountsForLoggedUser')
+        ->once()
+        ->andReturn($user);
+    $loginService->shouldNotReceive('createUserAndAccounts');
+    app()->instance(SocialiteLoginService::class, $loginService);
+
+    $response = $this->actingAs($user)
+        ->withSession([
+            'social_account_auth_intent' => 'add_account',
+            'social_account_redirect_route' => 'tiktok-accounts.index',
+        ])
+        ->get(route('social.callback', ['provider' => SocialNetwork::Tiktok]));
+
+    $response->assertRedirect(route('tiktok-accounts.index'));
+    $response->assertSessionHas('status', 'TikTok accounts connected successfully.');
 });
 
 it('rate limits instagram oauth callback to ten attempts per minute per ip', function (): void {

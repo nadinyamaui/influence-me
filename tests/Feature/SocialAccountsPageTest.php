@@ -13,6 +13,9 @@ use Livewire\Livewire;
 test('guests are redirected to login from instagram accounts page', function (): void {
     $this->get(route('instagram-accounts.index'))
         ->assertRedirect(route('login'));
+
+    $this->get(route('tiktok-accounts.index'))
+        ->assertRedirect(route('login'));
 });
 
 test('authenticated users can see their instagram accounts with statuses and token warnings', function (): void {
@@ -40,6 +43,10 @@ test('authenticated users can see their instagram accounts with statuses and tok
         'token_expires_at' => now()->addDays(30),
         'sync_status' => SyncStatus::Idle,
     ]);
+    SocialAccount::factory()->for($user)->create([
+        'social_network' => SocialNetwork::Tiktok,
+        'username' => 'hiddentiktok',
+    ]);
 
     SocialAccount::factory()->for($otherUser)->create([
         'username' => 'hiddenaccount',
@@ -51,6 +58,7 @@ test('authenticated users can see their instagram accounts with statuses and tok
         ->assertSee('Instagram Accounts')
         ->assertSee('@primarycreator')
         ->assertSee('@brandaccount')
+        ->assertDontSee('@hiddentiktok')
         ->assertDontSee('@hiddenaccount')
         ->assertSee('Primary')
         ->assertSee('12,345')
@@ -79,6 +87,28 @@ test('instagram accounts page shows empty state and connect call to action', fun
         ->assertSee(route('social.add', ['provider' => SocialNetwork::Instagram]));
 });
 
+test('authenticated users can see their tiktok accounts with tiktok-specific content', function (): void {
+    $user = User::factory()->create();
+
+    SocialAccount::factory()->for($user)->create([
+        'social_network' => SocialNetwork::Instagram,
+        'username' => 'hiddeninstagram',
+    ]);
+    SocialAccount::factory()->for($user)->create([
+        'social_network' => SocialNetwork::Tiktok,
+        'username' => 'tiktokcreator',
+    ]);
+
+    $response = $this->actingAs($user)->get(route('tiktok-accounts.index'));
+
+    $response->assertSuccessful()
+        ->assertSee('TikTok Accounts')
+        ->assertSee('@tiktokcreator')
+        ->assertDontSee('@hiddeninstagram')
+        ->assertSee(route('social.add', ['provider' => SocialNetwork::Tiktok]))
+        ->assertSee('Connect Another Account');
+});
+
 test('authenticated users can set a non-primary account as primary', function (): void {
     $user = User::factory()->create();
 
@@ -91,7 +121,7 @@ test('authenticated users can set a non-primary account as primary', function ()
         ->create(['is_primary' => false]);
 
     Livewire::actingAs($user)
-        ->test(Index::class)
+        ->test(Index::class, ['provider' => SocialNetwork::Instagram->value])
         ->call('setPrimary', $secondaryAccount->id);
 
     expect($primaryAccount->fresh()->is_primary)->toBeFalse()
@@ -110,7 +140,7 @@ test('authenticated users can disconnect an account after confirmation', functio
         ->create(['is_primary' => false]);
 
     Livewire::actingAs($user)
-        ->test(Index::class)
+        ->test(Index::class, ['provider' => SocialNetwork::Instagram->value])
         ->call('disconnect', $secondAccount->id);
 
     $this->assertDatabaseMissing('social_accounts', ['id' => $secondAccount->id]);
@@ -126,7 +156,7 @@ test('users cannot disconnect their last instagram account', function (): void {
         ->create();
 
     Livewire::actingAs($user)
-        ->test(Index::class)
+        ->test(Index::class, ['provider' => SocialNetwork::Instagram->value])
         ->call('disconnect', $account->id);
 
     $this->assertDatabaseHas('social_accounts', ['id' => $account->id]);
@@ -144,7 +174,7 @@ test('users can manually trigger sync from instagram accounts page', function ()
         ]);
 
     Livewire::actingAs($user)
-        ->test(Index::class)
+        ->test(Index::class, ['provider' => SocialNetwork::Instagram->value])
         ->call('syncNow', $account->id)
         ->assertSee('Syncing...');
 
@@ -167,7 +197,7 @@ test('manual sync action does not dispatch when account is already syncing', fun
         ]);
 
     Livewire::actingAs($user)
-        ->test(Index::class)
+        ->test(Index::class, ['provider' => SocialNetwork::Instagram->value])
         ->call('syncNow', $account->id);
 
     Bus::assertNotDispatched(SyncAllSocialMediaData::class);

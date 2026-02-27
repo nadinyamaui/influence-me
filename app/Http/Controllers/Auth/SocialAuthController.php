@@ -30,6 +30,10 @@ class SocialAuthController extends Controller
     public function addAccount(Request $request, SocialNetwork $provider): RedirectResponse
     {
         $request->session()->put('social_account_auth_intent', 'add_account');
+        $request->session()->put(
+            'social_account_redirect_route',
+            $provider === SocialNetwork::Tiktok ? 'tiktok-accounts.index' : 'instagram-accounts.index',
+        );
 
         return $this->loginService->usingDriver($provider)->redirectToProvider();
     }
@@ -38,6 +42,10 @@ class SocialAuthController extends Controller
     {
         $loginService = $this->loginService->usingDriver($provider);
         $intent = $request->session()->pull('social_account_auth_intent', 'login');
+        $redirectRoute = $request->session()->pull(
+            'social_account_redirect_route',
+            $provider === SocialNetwork::Tiktok ? 'tiktok-accounts.index' : 'instagram-accounts.index',
+        );
         $isAddAccountFlow = $intent === 'add_account' && $request->user() !== null;
 
         try {
@@ -45,8 +53,8 @@ class SocialAuthController extends Controller
                 $loginService->createSocialAccountsForLoggedUser();
 
                 return redirect()
-                    ->route('instagram-accounts.index')
-                    ->with('status', 'Instagram accounts connected successfully.');
+                    ->route($redirectRoute)
+                    ->with('status', "{$provider->label()} accounts connected successfully.");
             }
 
             $loginService->createUserAndAccounts();
@@ -57,7 +65,7 @@ class SocialAuthController extends Controller
 
             if ($isAddAccountFlow) {
                 return redirect()
-                    ->route('instagram-accounts.index')
+                    ->route($redirectRoute)
                     ->withErrors(['oauth' => $exception->getMessage()]);
             }
 
@@ -69,7 +77,7 @@ class SocialAuthController extends Controller
 
             if ($isAddAccountFlow) {
                 return redirect()
-                    ->route('instagram-accounts.index')
+                    ->route($redirectRoute)
                     ->withErrors(['oauth' => "Unable to connect {$loginService->driverLabel()} accounts. Please try again."]);
             }
 

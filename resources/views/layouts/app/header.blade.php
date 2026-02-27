@@ -31,8 +31,8 @@
                 <flux:navbar.item icon="tag" :href="route('pricing.products.index')" :current="request()->routeIs('pricing.products.*')" wire:navigate>
                     {{ __('Pricing') }}
                 </flux:navbar.item>
-                <flux:navbar.item icon="at-symbol" :href="route('instagram-accounts.index')" :current="request()->routeIs('instagram-accounts.index')" wire:navigate>
-                    {{ __('Accounts') }}
+                <flux:navbar.item icon="at-symbol" :href="route('instagram-accounts.index')" :current="request()->routeIs('instagram-accounts.index') || request()->routeIs('tiktok-accounts.index')" wire:navigate>
+                    {{ __('Social Accounts') }}
                 </flux:navbar.item>
             </flux:navbar>
 
@@ -85,9 +85,12 @@
                     </flux:sidebar.item>
                 </flux:sidebar.group>
 
-                <flux:sidebar.group :heading="__('Instagram')">
+                <flux:sidebar.group :heading="__('Social Accounts')">
                     <flux:sidebar.item icon="at-symbol" :href="route('instagram-accounts.index')" :current="request()->routeIs('instagram-accounts.index')" wire:navigate>
-                        {{ __('Accounts') }}
+                        {{ __('Instagram') }}
+                    </flux:sidebar.item>
+                    <flux:sidebar.item icon="musical-note" :href="route('tiktok-accounts.index')" :current="request()->routeIs('tiktok-accounts.index')" wire:navigate>
+                        {{ __('TikTok') }}
                     </flux:sidebar.item>
                 </flux:sidebar.group>
             </flux:sidebar.nav>

@@ -57,6 +57,9 @@
                     <flux:sidebar.item icon="at-symbol" :href="route('instagram-accounts.index')" :current="request()->routeIs('instagram-accounts.index')" wire:navigate>
                         {{ __('Instagram') }}
                     </flux:sidebar.item>
+                    <flux:sidebar.item icon="musical-note" :href="route('tiktok-accounts.index')" :current="request()->routeIs('tiktok-accounts.index')" wire:navigate>
+                        {{ __('TikTok') }}
+                    </flux:sidebar.item>
                 </flux:sidebar.group>
             </flux:sidebar.nav>
 
