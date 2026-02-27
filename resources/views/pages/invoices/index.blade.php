@@ -80,7 +80,7 @@
                     @endphp
                     <article wire:key="invoice-card-{{ $invoice->id }}" class="rounded-xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-700 dark:bg-zinc-800/60">
                         <a
-                            href="{{ url('/invoices/'.$invoice->id) }}"
+                            href="{{ route('invoices.show', $invoice) }}"
                             class="font-medium text-zinc-900 underline-offset-2 hover:underline dark:text-zinc-100"
                         >
                             INV-{{ $invoice->created_at->format('Y') }}-{{ str_pad((string) $invoice->id, 4, '0', STR_PAD_LEFT) }}
@@ -103,7 +103,7 @@
                         </dl>
                         <div class="mt-4 flex justify-end gap-2">
                             <a
-                                href="{{ url('/invoices/'.$invoice->id) }}"
+                                href="{{ route('invoices.show', $invoice) }}"
                                 class="inline-flex h-11 w-11 items-center justify-center rounded-md border border-zinc-300 text-xs font-medium text-zinc-700 transition hover:bg-zinc-100 dark:border-zinc-600 dark:text-zinc-200 dark:hover:bg-zinc-800"
                                 title="View"
                                 aria-label="View"
@@ -158,7 +158,7 @@
                             <tr wire:key="invoice-row-{{ $invoice->id }}">
                                 <td class="px-4 py-3">
                                     <a
-                                        href="{{ url('/invoices/'.$invoice->id) }}"
+                                        href="{{ route('invoices.show', $invoice) }}"
                                         class="font-medium text-zinc-900 underline-offset-2 hover:underline dark:text-zinc-100"
                                     >
                                         INV-{{ $invoice->created_at->format('Y') }}-{{ str_pad((string) $invoice->id, 4, '0', STR_PAD_LEFT) }}
@@ -175,7 +175,7 @@
                                 <td class="px-4 py-3">
                                     <div class="flex justify-end gap-2">
                                         <a
-                                            href="{{ url('/invoices/'.$invoice->id) }}"
+                                            href="{{ route('invoices.show', $invoice) }}"
                                             class="inline-flex h-11 w-11 items-center justify-center rounded-md border border-zinc-300 text-xs font-medium text-zinc-700 transition hover:bg-zinc-100 sm:h-auto sm:w-auto sm:px-3 sm:py-1.5 dark:border-zinc-600 dark:text-zinc-200 dark:hover:bg-zinc-800"
                                             title="View"
                                             aria-label="View"

@@ -252,7 +252,7 @@ test('invoice form validates mutual exclusivity and ownership for source relatio
         ]);
 });
 
-test('users cannot edit invoices they do not own or non-draft invoices', function (): void {
+test('users cannot edit invoices they do not own and owners are redirected for non-draft edits', function (): void {
     $owner = User::factory()->create();
     $outsider = User::factory()->create();
     $ownerClient = Client::factory()->for($owner)->create();
@@ -265,5 +265,5 @@ test('users cannot edit invoices they do not own or non-draft invoices', functio
 
     $this->actingAs($owner)
         ->get(route('invoices.edit', $sentInvoice))
-        ->assertForbidden();
+        ->assertRedirect(route('invoices.show', $sentInvoice));
 });
