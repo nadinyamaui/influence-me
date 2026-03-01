@@ -57,7 +57,7 @@ it('maps unauthorized errors to token expired exception', function (): void {
     Http::fake([
         'https://open.tiktokapis.com/v2/user/info/*' => Http::response([
             'error' => [
-                'code' => 'access_token_expired',
+                'code' => 'access_token_invalid',
                 'message' => 'Access token expired.',
             ],
         ], 401),
@@ -70,7 +70,7 @@ it('maps unauthorized errors to token expired exception', function (): void {
             expect($exception->getCode())->toBe(401)
                 ->and($exception->accountId)->toBe(99)
                 ->and($exception->endpoint)->toBe('/v2/user/info/')
-                ->and($exception->apiErrorCode)->toBe('access_token_expired');
+                ->and($exception->apiErrorCode)->toBe('access_token_invalid');
         });
 });
 

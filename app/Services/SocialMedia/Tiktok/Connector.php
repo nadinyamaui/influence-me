@@ -114,7 +114,7 @@ class Connector
         $apiErrorCode = $payload['error']['code'] ?? '1';
         $rateLimited = $this->isRateLimited(statusCode: $statusCode);
 
-        if ($this->isTokenExpired(statusCode: $statusCode, message: $message, apiErrorCode: $apiErrorCode)) {
+        if ($this->isTokenExpired(statusCode: $statusCode, apiErrorCode: $apiErrorCode)) {
             return new TikTokTokenExpiredException(
                 message: $message,
                 code: $statusCode,
@@ -135,18 +135,9 @@ class Connector
         );
     }
 
-    protected function isTokenExpired(int $statusCode, string $message, ?string $apiErrorCode): bool
+    protected function isTokenExpired(int $statusCode, ?string $apiErrorCode): bool
     {
-        if ($statusCode === 401) {
-            return true;
-        }
-
-        $normalizedMessage = strtolower($message);
-        if (str_contains($normalizedMessage, 'token') && (str_contains($normalizedMessage, 'expire') || str_contains($normalizedMessage, 'invalid'))) {
-            return true;
-        }
-
-        return in_array($apiErrorCode, ['access_token_invalid', 'access_token_expired', '40100', '40101'], true);
+        return $statusCode === 401 && $apiErrorCode === 'access_token_invalid';
     }
 
     protected function isRateLimited(int $statusCode): bool
