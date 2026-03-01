@@ -6,14 +6,13 @@ use App\Services\SocialMedia\Tiktok\Connector;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Http;
 
-it('sends requests with configured base url and bearer token', function (): void {
-    config()->set('services.tiktok.base_url', 'https://api.example.test');
+it('sends requests to the tiktok api and includes bearer token', function (): void {
     config()->set('services.tiktok.timeout', 12);
     config()->set('services.tiktok.retry_times', 2);
     config()->set('services.tiktok.retry_sleep_ms', 50);
 
     Http::fake([
-        'https://api.example.test/v2/user/info/*' => Http::response([
+        'https://open.tiktokapis.com/v2/user/info/*' => Http::response([
             'data' => [
                 'open_id' => 'open-123',
             ],
@@ -29,7 +28,7 @@ it('sends requests with configured base url and bearer token', function (): void
     ]);
 
     Http::assertSent(function (Request $request): bool {
-        return $request->url() === 'https://api.example.test/v2/user/info/?fields=open_id'
+        return $request->url() === 'https://open.tiktokapis.com/v2/user/info/?fields=open_id'
             && $request->method() === 'GET'
             && $request->hasHeader('Authorization', 'Bearer token-abc')
             && $request->hasHeader('Accept', 'application/json');
@@ -37,10 +36,8 @@ it('sends requests with configured base url and bearer token', function (): void
 });
 
 it('returns full payload when response does not include data key', function (): void {
-    config()->set('services.tiktok.base_url', 'https://api.example.test');
-
     Http::fake([
-        'https://api.example.test/v2/video/query/*' => Http::response([
+        'https://open.tiktokapis.com/v2/video/query/*' => Http::response([
             'videos' => [
                 ['id' => '1'],
             ],
@@ -61,10 +58,8 @@ it('returns full payload when response does not include data key', function (): 
 });
 
 it('maps unauthorized errors to token expired exception', function (): void {
-    config()->set('services.tiktok.base_url', 'https://api.example.test');
-
     Http::fake([
-        'https://api.example.test/v2/user/info/*' => Http::response([
+        'https://open.tiktokapis.com/v2/user/info/*' => Http::response([
             'error' => [
                 'code' => 'access_token_expired',
                 'message' => 'Access token expired.',
@@ -84,10 +79,8 @@ it('maps unauthorized errors to token expired exception', function (): void {
 });
 
 it('flags rate limited failures on typed api exception', function (): void {
-    config()->set('services.tiktok.base_url', 'https://api.example.test');
-
     Http::fake([
-        'https://api.example.test/v2/video/query/*' => Http::response([
+        'https://open.tiktokapis.com/v2/video/query/*' => Http::response([
             'error' => [
                 'code' => 42900,
                 'message' => 'Too many requests.',
@@ -108,10 +101,8 @@ it('flags rate limited failures on typed api exception', function (): void {
 });
 
 it('does not map all forbidden responses to token expired exceptions', function (): void {
-    config()->set('services.tiktok.base_url', 'https://api.example.test');
-
     Http::fake([
-        'https://api.example.test/v2/user/info/*' => Http::response([
+        'https://open.tiktokapis.com/v2/user/info/*' => Http::response([
             'error' => [
                 'code' => 'scope_permission_missing',
                 'message' => 'Permission denied for this endpoint.',
@@ -130,10 +121,8 @@ it('does not map all forbidden responses to token expired exceptions', function 
 });
 
 it('treats payloads with error code zero as successful responses', function (): void {
-    config()->set('services.tiktok.base_url', 'https://api.example.test');
-
     Http::fake([
-        'https://api.example.test/v2/user/info/*' => Http::response([
+        'https://open.tiktokapis.com/v2/user/info/*' => Http::response([
             'error' => [
                 'code' => 0,
                 'message' => 'ok',
