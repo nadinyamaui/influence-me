@@ -110,7 +110,7 @@ class SocialiteLoginService
     {
         $socialNetworkUserIds = $accounts
             ->filter(
-                fn (array $account): bool => ($account['social_network'] ?? SocialNetwork::Instagram->value) === SocialNetwork::Instagram->value
+                fn (array $account): bool => ($account['social_network'] ?? $this->driver->value) === $this->driver->value
             )
             ->pluck('social_network_user_id')
             ->filter()
@@ -120,7 +120,7 @@ class SocialiteLoginService
         }
 
         $conflictingAccount = SocialAccount::query()
-            ->where('social_network', SocialNetwork::Instagram->value)
+            ->where('social_network', $this->driver->value)
             ->whereIn('social_network_user_id', $socialNetworkUserIds)
             ->when(
                 $user,
@@ -150,7 +150,7 @@ class SocialiteLoginService
     {
         $accounts->each(function ($account) use ($user) {
             $user->socialAccounts()->updateOrCreate([
-                'social_network' => $account['social_network'] ?? SocialNetwork::Instagram->value,
+                'social_network' => $account['social_network'] ?? $this->driver->value,
                 'social_network_user_id' => $account['social_network_user_id'],
             ], $account);
         });

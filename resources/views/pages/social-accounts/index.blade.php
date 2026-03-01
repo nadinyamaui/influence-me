@@ -1,18 +1,21 @@
 @php
     use App\Enums\SyncStatus;
     use Illuminate\Support\Str;
+
+    $providerLabel = $providerNetwork->label();
+    $providerValue = $providerNetwork->value;
 @endphp
 
 <div class="flex h-full w-full flex-1 flex-col gap-6">
     <div class="flex flex-wrap items-start justify-between gap-3">
         <div>
-            <h1 class="text-2xl font-semibold text-zinc-900 dark:text-zinc-100">Instagram Accounts</h1>
-            <p class="mt-1 text-sm text-zinc-600 dark:text-zinc-300">View all connected Instagram accounts and their sync health.</p>
+            <h1 class="text-2xl font-semibold text-zinc-900 dark:text-zinc-100">{{ $providerLabel }} Accounts</h1>
+            <p class="mt-1 text-sm text-zinc-600 dark:text-zinc-300">View all connected {{ $providerLabel }} accounts and their sync health.</p>
         </div>
 
         @if ($accounts->isNotEmpty())
-            <a
-                href="{{ route('auth.instagram.add') }}"
+                <a
+                href="{{ route('social.add', ['provider' => $providerValue]) }}"
                 class="inline-flex min-h-11 items-center rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-zinc-700 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300"
             >
                 Connect Another Account
@@ -34,13 +37,13 @@
 
     @if ($accounts->isEmpty())
         <section class="rounded-2xl border border-dashed border-zinc-300 bg-white p-8 text-center dark:border-zinc-700 dark:bg-zinc-900/40">
-            <h2 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100">No Instagram accounts connected.</h2>
+            <h2 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100">No {{ $providerLabel }} accounts connected.</h2>
             <p class="mt-2 text-sm text-zinc-600 dark:text-zinc-300">Click below to connect your first account.</p>
             <a
-                href="{{ route('auth.instagram.add') }}"
+                href="{{ route('social.add', ['provider' => $providerValue]) }}"
                 class="mt-5 inline-flex min-h-11 items-center rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-zinc-700 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300"
             >
-                Connect Instagram Account
+                Connect {{ $providerLabel }} Account
             </a>
         </section>
     @else
@@ -54,7 +57,7 @@
                 @endphp
 
                 <article
-                    wire:key="instagram-account-{{ $account->id }}"
+                    wire:key="social-account-{{ $account->id }}"
                     @if ($accountIsSyncing)
                         wire:poll.5s
                     @endif
@@ -126,7 +129,7 @@
                                 <span class="font-medium text-rose-600 dark:text-rose-300">
                                     Expired
                                     <a
-                                        href="{{ route('auth.instagram.add') }}"
+                                        href="{{ route('social.add', ['provider' => $providerValue]) }}"
                                         class="underline underline-offset-2 hover:text-rose-700 dark:hover:text-rose-200"
                                     >
                                         Re-authenticate
@@ -136,7 +139,7 @@
                                 <span class="font-medium text-amber-600 dark:text-amber-300">
                                     Expires within 7 days
                                     <a
-                                        href="{{ route('auth.instagram.add') }}"
+                                        href="{{ route('social.add', ['provider' => $providerValue]) }}"
                                         class="underline underline-offset-2 hover:text-amber-700 dark:hover:text-amber-200"
                                     >
                                         Re-authenticate

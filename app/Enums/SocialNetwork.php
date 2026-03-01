@@ -2,7 +2,9 @@
 
 namespace App\Enums;
 
+use App\Services\Auth\SocialiteClient;
 use App\Services\SocialMedia\Instagram\Client as InstagramClient;
+use App\Services\SocialMedia\Tiktok\Client as TikTokClient;
 use LogicException;
 
 enum SocialNetwork: string
@@ -12,9 +14,40 @@ enum SocialNetwork: string
     case Youtube = 'youtube';
     case Twitch = 'twitch';
 
+    public static function fromProviderOrFail(string $provider): self
+    {
+        $providerNetwork = self::tryFrom($provider);
+
+        abort_if($providerNetwork === null, 404);
+
+        return $providerNetwork;
+    }
+
+    public static function values(): array
+    {
+        return array_map(
+            static fn (self $network): string => $network->value,
+            self::cases(),
+        );
+    }
+
+    public static function loginValues(): array
+    {
+        return [
+            self::Instagram->value,
+            self::Tiktok->value,
+        ];
+    }
+
     public function oauthScopes(): array
     {
         return match ($this) {
+            self::Tiktok => [
+                'user.info.basic',
+                'user.info.profile',
+                'user.info.stats',
+                'video.list',
+            ],
             self::Instagram => [
                 'instagram_basic',
                 'instagram_manage_insights',
@@ -33,6 +66,14 @@ enum SocialNetwork: string
         };
     }
 
+    public function supportsLogin(): bool
+    {
+        return match ($this) {
+            self::Instagram => true,
+            default => false,
+        };
+    }
+
     public function label(): string
     {
         return match ($this) {
@@ -43,10 +84,23 @@ enum SocialNetwork: string
         };
     }
 
-    public function socialiteClient(string $accessToken, ?string $userId = null): InstagramClient
+    public function accountsRouteName(): string
+    {
+        return match ($this) {
+            self::Instagram => 'instagram-accounts.index',
+            self::Tiktok => 'tiktok-accounts.index',
+            default => 'instagram-accounts.index',
+        };
+    }
+
+    public function socialiteClient(string $accessToken, ?string $userId = null): SocialiteClient
     {
         return match ($this) {
             self::Instagram => app()->make(InstagramClient::class, [
+                'access_token' => $accessToken,
+                'user_id' => $userId,
+            ]),
+            self::Tiktok => app()->make(TikTokClient::class, [
                 'access_token' => $accessToken,
                 'user_id' => $userId,
             ]),

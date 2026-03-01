@@ -2,25 +2,20 @@
 
 use App\Exceptions\TikTokApiException;
 use App\Exceptions\TikTokTokenExpiredException;
-use App\Services\SocialMedia\Tiktok\TikTokApiConnector;
+use App\Services\SocialMedia\Tiktok\Connector;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Http;
 
-it('sends requests with configured base url and bearer token', function (): void {
-    config()->set('services.tiktok.base_url', 'https://api.example.test');
-    config()->set('services.tiktok.timeout', 12);
-    config()->set('services.tiktok.retry_times', 2);
-    config()->set('services.tiktok.retry_sleep_ms', 50);
-
+it('sends requests to the tiktok api and includes bearer token', function (): void {
     Http::fake([
-        'https://api.example.test/v2/user/info/*' => Http::response([
+        'https://open.tiktokapis.com/v2/user/info/*' => Http::response([
             'data' => [
                 'open_id' => 'open-123',
             ],
         ]),
     ]);
 
-    $connector = new TikTokApiConnector('token-abc', 42);
+    $connector = new Connector('token-abc', 42);
 
     $response = $connector->get('/v2/user/info/', ['fields' => 'open_id']);
 
@@ -29,7 +24,7 @@ it('sends requests with configured base url and bearer token', function (): void
     ]);
 
     Http::assertSent(function (Request $request): bool {
-        return $request->url() === 'https://api.example.test/v2/user/info/?fields=open_id'
+        return $request->url() === 'https://open.tiktokapis.com/v2/user/info/?fields=open_id'
             && $request->method() === 'GET'
             && $request->hasHeader('Authorization', 'Bearer token-abc')
             && $request->hasHeader('Accept', 'application/json');
@@ -37,10 +32,8 @@ it('sends requests with configured base url and bearer token', function (): void
 });
 
 it('returns full payload when response does not include data key', function (): void {
-    config()->set('services.tiktok.base_url', 'https://api.example.test');
-
     Http::fake([
-        'https://api.example.test/v2/video/query/*' => Http::response([
+        'https://open.tiktokapis.com/v2/video/query/*' => Http::response([
             'videos' => [
                 ['id' => '1'],
             ],
@@ -48,7 +41,7 @@ it('returns full payload when response does not include data key', function (): 
         ]),
     ]);
 
-    $connector = new TikTokApiConnector('token-abc');
+    $connector = new Connector('token-abc');
 
     $response = $connector->post('/v2/video/query/', ['max_count' => 1]);
 
@@ -61,10 +54,8 @@ it('returns full payload when response does not include data key', function (): 
 });
 
 it('maps unauthorized errors to token expired exception', function (): void {
-    config()->set('services.tiktok.base_url', 'https://api.example.test');
-
     Http::fake([
-        'https://api.example.test/v2/user/info/*' => Http::response([
+        'https://open.tiktokapis.com/v2/user/info/*' => Http::response([
             'error' => [
                 'code' => 'access_token_expired',
                 'message' => 'Access token expired.',
@@ -72,7 +63,7 @@ it('maps unauthorized errors to token expired exception', function (): void {
         ], 401),
     ]);
 
-    $connector = new TikTokApiConnector('token-abc', 99);
+    $connector = new Connector('token-abc', 99);
 
     expect(fn () => $connector->get('/v2/user/info/'))
         ->toThrow(function (TikTokTokenExpiredException $exception): void {
@@ -84,10 +75,8 @@ it('maps unauthorized errors to token expired exception', function (): void {
 });
 
 it('flags rate limited failures on typed api exception', function (): void {
-    config()->set('services.tiktok.base_url', 'https://api.example.test');
-
     Http::fake([
-        'https://api.example.test/v2/video/query/*' => Http::response([
+        'https://open.tiktokapis.com/v2/video/query/*' => Http::response([
             'error' => [
                 'code' => 42900,
                 'message' => 'Too many requests.',
@@ -95,7 +84,7 @@ it('flags rate limited failures on typed api exception', function (): void {
         ], 429),
     ]);
 
-    $connector = new TikTokApiConnector('token-abc', 7);
+    $connector = new Connector('token-abc', 7);
 
     expect(fn () => $connector->post('/v2/video/query/', ['max_count' => 5]))
         ->toThrow(function (TikTokApiException $exception): void {
@@ -108,10 +97,8 @@ it('flags rate limited failures on typed api exception', function (): void {
 });
 
 it('does not map all forbidden responses to token expired exceptions', function (): void {
-    config()->set('services.tiktok.base_url', 'https://api.example.test');
-
     Http::fake([
-        'https://api.example.test/v2/user/info/*' => Http::response([
+        'https://open.tiktokapis.com/v2/user/info/*' => Http::response([
             'error' => [
                 'code' => 'scope_permission_missing',
                 'message' => 'Permission denied for this endpoint.',
@@ -119,7 +106,7 @@ it('does not map all forbidden responses to token expired exceptions', function 
         ], 403),
     ]);
 
-    $connector = new TikTokApiConnector('token-abc', 44);
+    $connector = new Connector('token-abc', 44);
 
     expect(fn () => $connector->get('/v2/user/info/'))
         ->toThrow(function (TikTokApiException $exception): void {
@@ -130,10 +117,8 @@ it('does not map all forbidden responses to token expired exceptions', function 
 });
 
 it('treats payloads with error code zero as successful responses', function (): void {
-    config()->set('services.tiktok.base_url', 'https://api.example.test');
-
     Http::fake([
-        'https://api.example.test/v2/user/info/*' => Http::response([
+        'https://open.tiktokapis.com/v2/user/info/*' => Http::response([
             'error' => [
                 'code' => 0,
                 'message' => 'ok',
@@ -144,7 +129,7 @@ it('treats payloads with error code zero as successful responses', function (): 
         ], 200),
     ]);
 
-    $connector = new TikTokApiConnector('token-abc');
+    $connector = new Connector('token-abc');
 
     expect($connector->get('/v2/user/info/'))->toBe([
         'open_id' => 'open-xyz',

@@ -130,7 +130,7 @@ it('applies instagram account policy rules', function (): void {
         ->and($outsiderGate->allows('view', $firstAccount))->toBeFalse()
         ->and($outsiderGate->allows('update', $firstAccount))->toBeFalse()
         ->and($outsiderGate->allows('delete', $firstAccount))->toBeFalse()
-        ->and($outsiderGate->allows('delete', $singleAccount))->toBeFalse();
+        ->and($outsiderGate->allows('delete', $singleAccount))->toBeTrue();
 
 });
 

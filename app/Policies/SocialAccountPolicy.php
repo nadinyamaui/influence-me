@@ -19,10 +19,6 @@ class SocialAccountPolicy
 
     public function delete(User $user, SocialAccount $socialAccount): bool
     {
-        if ($user->id !== $socialAccount->user_id) {
-            return false;
-        }
-
-        return $user->socialAccounts()->count() > 1;
+        return $user->id === $socialAccount->user_id;
     }
 }
