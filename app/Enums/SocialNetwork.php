@@ -14,6 +14,15 @@ enum SocialNetwork: string
     case Youtube = 'youtube';
     case Twitch = 'twitch';
 
+    public static function fromProviderOrFail(string $provider): self
+    {
+        $providerNetwork = self::tryFrom($provider);
+
+        abort_if($providerNetwork === null, 404);
+
+        return $providerNetwork;
+    }
+
     public function oauthScopes(): array
     {
         return match ($this) {

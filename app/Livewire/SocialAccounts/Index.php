@@ -20,11 +20,7 @@ class Index extends Component
 
     public function mount(string $provider): void
     {
-        $providerNetwork = SocialNetwork::tryFrom($provider);
-
-        abort_if($providerNetwork === null, 404);
-
-        $this->provider = $providerNetwork->value;
+        $this->provider = SocialNetwork::fromProviderOrFail($provider)->value;
     }
 
     public function syncNow(int $accountId): void
@@ -50,11 +46,11 @@ class Index extends Component
         $this->authorize('update', $account);
 
         Auth::user()->socialAccounts()
-            ->where('social_network', $this->providerNetwork())
+            ->where('social_network', SocialNetwork::fromProviderOrFail($this->provider))
             ->update(['is_primary' => false]);
         $account->update(['is_primary' => true]);
 
-        session()->flash('status', "Primary {$this->providerNetwork()->label()} account updated.");
+        session()->flash('status', 'Primary '.SocialNetwork::fromProviderOrFail($this->provider)->label().' account updated.');
     }
 
     public function disconnect(int $accountId): void
@@ -69,19 +65,19 @@ class Index extends Component
 
         if ($wasPrimary) {
             $nextAccount = Auth::user()->socialAccounts()
-                ->where('social_network', $this->providerNetwork())
+                ->where('social_network', SocialNetwork::fromProviderOrFail($this->provider))
                 ->orderBy('id')
                 ->first();
 
             $nextAccount?->update(['is_primary' => true]);
         }
 
-        session()->flash('status', "{$this->providerNetwork()->label()} account disconnected.");
+        session()->flash('status', SocialNetwork::fromProviderOrFail($this->provider)->label().' account disconnected.');
     }
 
     public function render()
     {
-        $providerNetwork = $this->providerNetwork();
+        $providerNetwork = SocialNetwork::fromProviderOrFail($this->provider);
 
         return view('pages.social-accounts.index', [
             'accounts' => $this->accounts(),
@@ -94,26 +90,17 @@ class Index extends Component
     private function accounts(): Collection
     {
         return Auth::user()->socialAccounts()
-            ->where('social_network', $this->providerNetwork())
+            ->where('social_network', SocialNetwork::fromProviderOrFail($this->provider))
             ->orderByDesc('is_primary')
             ->orderBy('username')
             ->get();
-    }
-
-    private function providerNetwork(): SocialNetwork
-    {
-        $providerNetwork = SocialNetwork::tryFrom($this->provider);
-
-        abort_if($providerNetwork === null, 404);
-
-        return $providerNetwork;
     }
 
     private function resolveProviderAccount(int $accountId): SocialAccount
     {
         $account = User::resolveSocialAccount($accountId);
 
-        abort_if($account->social_network !== $this->providerNetwork(), 404);
+        abort_if($account->social_network !== SocialNetwork::fromProviderOrFail($this->provider), 404);
 
         return $account;
     }
