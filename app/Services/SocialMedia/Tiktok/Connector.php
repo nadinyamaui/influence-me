@@ -14,6 +14,9 @@ use Throwable;
 class Connector
 {
     private const BASE_URL = 'https://open.tiktokapis.com';
+    private const TIMEOUT_SECONDS = 10;
+    private const RETRY_TIMES = 3;
+    private const RETRY_SLEEP_MILLISECONDS = 200;
 
     protected PendingRequest $client;
 
@@ -153,22 +156,16 @@ class Connector
 
     protected function timeoutSeconds(): int
     {
-        $timeout = (int) config('services.tiktok.timeout', 10);
-
-        return $timeout > 0 ? $timeout : 10;
+        return self::TIMEOUT_SECONDS;
     }
 
     protected function retryTimes(): int
     {
-        $retryTimes = (int) config('services.tiktok.retry_times', 3);
-
-        return $retryTimes >= 0 ? $retryTimes : 3;
+        return self::RETRY_TIMES;
     }
 
     protected function retrySleepMilliseconds(): int
     {
-        $retrySleepMs = (int) config('services.tiktok.retry_sleep_ms', 200);
-
-        return $retrySleepMs >= 0 ? $retrySleepMs : 200;
+        return self::RETRY_SLEEP_MILLISECONDS;
     }
 }

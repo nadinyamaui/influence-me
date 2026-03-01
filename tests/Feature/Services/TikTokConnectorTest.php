@@ -7,10 +7,6 @@ use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Http;
 
 it('sends requests to the tiktok api and includes bearer token', function (): void {
-    config()->set('services.tiktok.timeout', 12);
-    config()->set('services.tiktok.retry_times', 2);
-    config()->set('services.tiktok.retry_sleep_ms', 50);
-
     Http::fake([
         'https://open.tiktokapis.com/v2/user/info/*' => Http::response([
             'data' => [
