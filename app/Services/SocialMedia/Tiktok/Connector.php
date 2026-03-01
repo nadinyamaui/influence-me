@@ -26,8 +26,8 @@ class Connector
     ) {
         $this->client = Http::baseUrl(self::BASE_URL)
             ->acceptJson()
-            ->timeout($this->timeoutSeconds())
-            ->retry($this->retryTimes(), $this->retrySleepMilliseconds(), throw: false)
+            ->timeout(self::TIMEOUT_SECONDS)
+            ->retry(self::RETRY_TIMES, self::RETRY_SLEEP_MILLISECONDS, throw: false)
             ->withToken($this->accessToken ?? '');
     }
 
@@ -154,18 +154,4 @@ class Connector
         return $statusCode === 429;
     }
 
-    protected function timeoutSeconds(): int
-    {
-        return self::TIMEOUT_SECONDS;
-    }
-
-    protected function retryTimes(): int
-    {
-        return self::RETRY_TIMES;
-    }
-
-    protected function retrySleepMilliseconds(): int
-    {
-        return self::RETRY_SLEEP_MILLISECONDS;
-    }
 }
