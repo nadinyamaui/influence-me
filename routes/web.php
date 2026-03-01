@@ -20,15 +20,6 @@ use App\Livewire\Proposals\Show as ProposalsShow;
 use App\Livewire\SocialAccounts\Index as SocialAccountsIndex;
 use Illuminate\Support\Facades\Route;
 
-$socialProviders = array_map(
-    static fn (SocialNetwork $network): string => $network->value,
-    SocialNetwork::cases(),
-);
-$socialLoginProviders = [
-    SocialNetwork::Instagram->value,
-    SocialNetwork::Tiktok->value,
-];
-
 Route::get('/', function () {
     return view('welcome');
 })->name('home');
@@ -36,20 +27,20 @@ Route::get('/', function () {
 Route::view('/terms', 'terms')->name('terms');
 Route::view('/privacy-policy', 'privacy-policy')->name('privacy-policy');
 
-Route::prefix('/auth')->group(function () use ($socialLoginProviders, $socialProviders): void {
+Route::prefix('/auth')->group(function (): void {
     Route::get('{provider}', [SocialAuthController::class, 'redirect'])
         ->middleware('guest')
-        ->whereIn('provider', $socialLoginProviders)
+        ->whereIn('provider', SocialNetwork::loginValues())
         ->name('social.auth');
     Route::get('{provider}/callback', [SocialAuthController::class, 'callback'])
         ->middleware('throttle:instagram-oauth-callback')
-        ->whereIn('provider', $socialProviders)
+        ->whereIn('provider', SocialNetwork::values())
         ->name('social.callback');
 });
 
-Route::middleware(['auth'])->group(function () use ($socialLoginProviders): void {
+Route::middleware(['auth'])->group(function (): void {
     Route::get('/auth/{provider}/add', [SocialAuthController::class, 'addAccount'])
-        ->whereIn('provider', $socialLoginProviders)
+        ->whereIn('provider', SocialNetwork::loginValues())
         ->name('social.add');
 
     Route::livewire('instagram-accounts', SocialAccountsIndex::class)

@@ -23,6 +23,22 @@ enum SocialNetwork: string
         return $providerNetwork;
     }
 
+    public static function values(): array
+    {
+        return array_map(
+            static fn (self $network): string => $network->value,
+            self::cases(),
+        );
+    }
+
+    public static function loginValues(): array
+    {
+        return [
+            self::Instagram->value,
+            self::Tiktok->value,
+        ];
+    }
+
     public function oauthScopes(): array
     {
         return match ($this) {
