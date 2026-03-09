@@ -1,9 +1,12 @@
 <?php
 
 use App\Enums\SocialNetwork;
+use App\Http\Controllers\AthenasCodex\AthenasCodexCartController;
+use App\Http\Controllers\AthenasCodex\AthenasCodexPageController;
 use App\Http\Controllers\Auth\SocialAuthController;
 use App\Http\Controllers\Invoices\EditInvoiceController;
 use App\Livewire\Analytics\Index as AnalyticsIndex;
+use App\Livewire\Athenas\Storefront as AthenasStorefront;
 use App\Livewire\Clients\Create as ClientsCreate;
 use App\Livewire\Clients\Edit as ClientsEdit;
 use App\Livewire\Clients\Index as ClientsIndex;
@@ -17,7 +20,6 @@ use App\Livewire\Proposals\Create as ProposalsCreate;
 use App\Livewire\Proposals\Edit as ProposalsEdit;
 use App\Livewire\Proposals\Index as ProposalsIndex;
 use App\Livewire\Proposals\Show as ProposalsShow;
-use App\Livewire\Athenas\Storefront as AthenasStorefront;
 use App\Livewire\SocialAccounts\Index as SocialAccountsIndex;
 use Illuminate\Support\Facades\Route;
 
@@ -31,6 +33,16 @@ Route::get('/', function () {
 })->name('home');
 
 Route::livewire('athenas', AthenasStorefront::class)->name('athenas');
+Route::get('/AthenasCodex', AthenasCodexPageController::class)->name('athenas-codex.index');
+Route::controller(AthenasCodexCartController::class)
+    ->prefix('/AthenasCodex/cart')
+    ->name('athenas-codex.cart.')
+    ->group(function (): void {
+        Route::post('/items', 'store')->name('items.store');
+        Route::patch('/items/{product}', 'update')->name('items.update');
+        Route::delete('/items/{product}', 'destroy')->name('items.destroy');
+        Route::delete('/clear', 'clear')->name('clear');
+    });
 
 Route::view('/terms', 'terms')->name('terms');
 Route::view('/privacy-policy', 'privacy-policy')->name('privacy-policy');
