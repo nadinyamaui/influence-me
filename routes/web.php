@@ -17,6 +17,7 @@ use App\Livewire\Proposals\Create as ProposalsCreate;
 use App\Livewire\Proposals\Edit as ProposalsEdit;
 use App\Livewire\Proposals\Index as ProposalsIndex;
 use App\Livewire\Proposals\Show as ProposalsShow;
+use App\Livewire\Athenas\Storefront as AthenasStorefront;
 use App\Livewire\SocialAccounts\Index as SocialAccountsIndex;
 use Illuminate\Support\Facades\Route;
 
@@ -28,6 +29,8 @@ $socialProviders = array_map(
 Route::get('/', function () {
     return view('welcome');
 })->name('home');
+
+Route::livewire('athenas', AthenasStorefront::class)->name('athenas');
 
 Route::view('/terms', 'terms')->name('terms');
 Route::view('/privacy-policy', 'privacy-policy')->name('privacy-policy');
