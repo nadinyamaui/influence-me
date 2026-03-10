@@ -8,7 +8,7 @@ use App\Services\Auth\SocialiteLoginService;
 use Illuminate\Http\RedirectResponse;
 use Laravel\Socialite\Facades\Socialite;
 
-it('redirects to tiktok provider with read-only account scopes', function (): void {
+it('redirects to tiktok provider with read-only account and media scopes', function (): void {
     $expectedRedirect = redirect('https://www.tiktok.com/v2/auth/authorize');
 
     Socialite::shouldReceive('driver')
@@ -21,6 +21,7 @@ it('redirects to tiktok provider with read-only account scopes', function (): vo
             'user.info.basic',
             'user.info.profile',
             'user.info.stats',
+            'video.list',
         ])
         ->andReturnSelf();
     Socialite::shouldReceive('redirect')
@@ -35,7 +36,7 @@ it('redirects to tiktok provider with read-only account scopes', function (): vo
         ->and($response->getTargetUrl())->toBe('https://www.tiktok.com/v2/auth/authorize');
 });
 
-it('creates user and tiktok social account when provider email is unavailable', function (): void {
+it('creates user and tiktok social account with provider identity data', function (): void {
     $socialiteUser = new class
     {
         public string $token = 'tiktok-short-token';
@@ -45,14 +46,14 @@ it('creates user and tiktok social account when provider email is unavailable', 
             return 'tt-user-1';
         }
 
-        public function getName(): ?string
+        public function getName(): string
         {
-            return null;
+            return 'TikTok User';
         }
 
-        public function getEmail(): ?string
+        public function getEmail(): string
         {
-            return null;
+            return 'tiktok.user@example.com';
         }
     };
 
@@ -94,7 +95,7 @@ it('creates user and tiktok social account when provider email is unavailable', 
     expect($resolvedUser->socialite_user_type)->toBe('tiktok')
         ->and($resolvedUser->socialite_user_id)->toBe('tt-user-1')
         ->and($resolvedUser->name)->toBe('TikTok User')
-        ->and($resolvedUser->email)->toBe('tiktok-tt-user-1@okacrm.local');
+        ->and($resolvedUser->email)->toBe('tiktok.user@example.com');
     $this->assertAuthenticatedAs($resolvedUser);
     $this->assertDatabaseHas('social_accounts', [
         'user_id' => $resolvedUser->id,
@@ -126,9 +127,9 @@ it('prevents linking tiktok accounts that belong to another user', function (): 
             return 'TikTok User';
         }
 
-        public function getEmail(): ?string
+        public function getEmail(): string
         {
-            return null;
+            return 'tiktok.user@example.com';
         }
     };
 

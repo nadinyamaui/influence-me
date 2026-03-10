@@ -18,24 +18,28 @@ class SocialAuthController extends Controller
 
     public function redirect(Request $request, SocialNetwork $provider): RedirectResponse
     {
+        if (! $provider->supportsLogin()) {
+            throw new SocialAuthenticationException("{$provider->label()} login is not supported. Connect {$provider->label()} after logging in.");
+        }
+
         $request->session()->put('social_account_auth_intent', 'login');
 
         return $this->loginService->usingDriver($provider)->redirectToProvider();
     }
 
-    public function addAccount(Request $request): RedirectResponse
+    public function addAccount(Request $request, SocialNetwork $provider): RedirectResponse
     {
         $request->session()->put('social_account_auth_intent', 'add_account');
+        $request->session()->put('social_account_redirect_route', $provider->accountsRouteName());
 
-        return $this->loginService
-            ->usingDriver(SocialNetwork::Instagram)
-            ->redirectToProvider();
+        return $this->loginService->usingDriver($provider)->redirectToProvider();
     }
 
     public function callback(Request $request, SocialNetwork $provider): RedirectResponse
     {
         $loginService = $this->loginService->usingDriver($provider);
         $intent = $request->session()->pull('social_account_auth_intent', 'login');
+        $redirectRoute = $request->session()->pull('social_account_redirect_route', $provider->accountsRouteName());
         $isAddAccountFlow = $intent === 'add_account' && $request->user() !== null;
 
         try {
@@ -43,8 +47,8 @@ class SocialAuthController extends Controller
                 $loginService->createSocialAccountsForLoggedUser();
 
                 return redirect()
-                    ->route($provider->accountConnectionRedirectRoute())
-                    ->with('status', 'Instagram accounts connected successfully.');
+                    ->route($redirectRoute)
+                    ->with('status', "{$provider->label()} accounts connected successfully.");
             }
 
             $loginService->createUserAndAccounts();
@@ -55,7 +59,7 @@ class SocialAuthController extends Controller
 
             if ($isAddAccountFlow) {
                 return redirect()
-                    ->route($provider->accountConnectionRedirectRoute())
+                    ->route($redirectRoute)
                     ->withErrors(['oauth' => $exception->getMessage()]);
             }
 
@@ -67,7 +71,7 @@ class SocialAuthController extends Controller
 
             if ($isAddAccountFlow) {
                 return redirect()
-                    ->route($provider->accountConnectionRedirectRoute())
+                    ->route($redirectRoute)
                     ->withErrors(['oauth' => "Unable to connect {$loginService->driverLabel()} accounts. Please try again."]);
             }
 

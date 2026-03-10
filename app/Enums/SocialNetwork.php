@@ -14,6 +14,31 @@ enum SocialNetwork: string
     case Youtube = 'youtube';
     case Twitch = 'twitch';
 
+    public static function fromProviderOrFail(string $provider): self
+    {
+        $providerNetwork = self::tryFrom($provider);
+
+        abort_if($providerNetwork === null, 404);
+
+        return $providerNetwork;
+    }
+
+    public static function values(): array
+    {
+        return array_map(
+            static fn (self $network): string => $network->value,
+            self::cases(),
+        );
+    }
+
+    public static function loginValues(): array
+    {
+        return [
+            self::Instagram->value,
+            self::Tiktok->value,
+        ];
+    }
+
     public function oauthScopes(): array
     {
         return match ($this) {
@@ -21,6 +46,7 @@ enum SocialNetwork: string
                 'user.info.basic',
                 'user.info.profile',
                 'user.info.stats',
+                'video.list',
             ],
             self::Instagram => [
                 'instagram_basic',
@@ -40,6 +66,14 @@ enum SocialNetwork: string
         };
     }
 
+    public function supportsLogin(): bool
+    {
+        return match ($this) {
+            self::Instagram => true,
+            default => false,
+        };
+    }
+
     public function label(): string
     {
         return match ($this) {
@@ -50,11 +84,12 @@ enum SocialNetwork: string
         };
     }
 
-    public function accountConnectionRedirectRoute(): string
+    public function accountsRouteName(): string
     {
         return match ($this) {
             self::Instagram => 'instagram-accounts.index',
-            default => 'dashboard',
+            self::Tiktok => 'tiktok-accounts.index',
+            default => 'instagram-accounts.index',
         };
     }
 

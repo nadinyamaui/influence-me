@@ -62,7 +62,7 @@ TIKTOK_REDIRECT_URI=https://influence-me.test/auth/tiktok/callback
 
 Where they are consumed in the RFC roadmap:
 - `TIKTOK_CLIENT_ID`, `TIKTOK_CLIENT_SECRET`, `TIKTOK_REDIRECT_URI`: `config/services.php` in RFC `075`
-- TikTok OAuth scopes are hardcoded in `App\Enums\SocialNetwork::oauthScopes()` for read-only account details/stats
+- TikTok OAuth scopes are hardcoded in `App\Enums\SocialNetwork::oauthScopes()` for read-only account details/stats plus media listing
 - Access and refresh tokens returned by TikTok OAuth: TikTok account persistence and sync workflows (RFC `076`, `081`, `086`)
 
 ## 5. Security Notes
@@ -91,7 +91,7 @@ Before moving production TikTok auth live:
 - Confirm callback route path is `/auth/tiktok/callback` in all environments.
 
 ### `insufficient_scope`
-- Confirm OAuth redirect requests read-only scopes: `user.info.basic`, `user.info.profile`, `user.info.stats`.
+- Confirm OAuth redirect requests read-only scopes: `user.info.basic`, `user.info.profile`, `user.info.stats`, `video.list`.
 - Confirm production app review approved the required scopes.
 
 ### Sandbox login succeeds but production fails

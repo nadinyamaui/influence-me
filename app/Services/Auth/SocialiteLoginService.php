@@ -73,23 +73,19 @@ class SocialiteLoginService
 
     protected function createUpdateUser($socialiteUser): User
     {
-        $socialiteUserId = (string) $socialiteUser->getId();
-
         return User::updateOrCreate([
             'socialite_user_type' => $this->driver->socialiteDriver(),
-            'socialite_user_id' => $socialiteUserId,
+            'socialite_user_id' => $socialiteUser->getId(),
         ], [
-            'name' => $socialiteUser->getName() ?? "{$this->driverLabel()} User",
-            'email' => $socialiteUser->getEmail() ?? "{$this->driver->value}-{$socialiteUserId}@okacrm.local",
+            'name' => $socialiteUser->getName(),
+            'email' => $socialiteUser->getEmail(),
         ]);
     }
 
     protected function ensureNoConflictingEmailUser($socialiteUser): void
     {
-        $email = $socialiteUser->getEmail() ?? "{$this->driver->value}-{$socialiteUser->getId()}@okacrm.local";
-
         $existingUserByEmail = User::query()
-            ->where('email', $email)
+            ->where('email', $socialiteUser->getEmail())
             ->first();
         if (
             $existingUserByEmail !== null

@@ -1,12 +1,9 @@
 <?php
 
 use App\Enums\SocialNetwork;
-use App\Http\Controllers\AthenasCodex\AthenasCodexCartController;
-use App\Http\Controllers\AthenasCodex\AthenasCodexPageController;
 use App\Http\Controllers\Auth\SocialAuthController;
 use App\Http\Controllers\Invoices\EditInvoiceController;
 use App\Livewire\Analytics\Index as AnalyticsIndex;
-use App\Livewire\Athenas\Storefront as AthenasStorefront;
 use App\Livewire\Clients\Create as ClientsCreate;
 use App\Livewire\Clients\Edit as ClientsEdit;
 use App\Livewire\Clients\Index as ClientsIndex;
@@ -23,46 +20,35 @@ use App\Livewire\Proposals\Show as ProposalsShow;
 use App\Livewire\SocialAccounts\Index as SocialAccountsIndex;
 use Illuminate\Support\Facades\Route;
 
-$socialProviders = array_map(
-    static fn (SocialNetwork $network): string => $network->value,
-    SocialNetwork::cases(),
-);
-
 Route::get('/', function () {
     return view('welcome');
 })->name('home');
 
-Route::livewire('athenas', AthenasStorefront::class)->name('athenas');
-Route::get('/AthenasCodex', AthenasCodexPageController::class)->name('athenas-codex.index');
-Route::controller(AthenasCodexCartController::class)
-    ->prefix('/AthenasCodex/cart')
-    ->name('athenas-codex.cart.')
-    ->group(function (): void {
-        Route::post('/items', 'store')->name('items.store');
-        Route::patch('/items/{product}', 'update')->name('items.update');
-        Route::delete('/items/{product}', 'destroy')->name('items.destroy');
-        Route::delete('/clear', 'clear')->name('clear');
-    });
-
 Route::view('/terms', 'terms')->name('terms');
 Route::view('/privacy-policy', 'privacy-policy')->name('privacy-policy');
 
-Route::prefix('/auth')->group(function () use ($socialProviders): void {
+Route::prefix('/auth')->group(function (): void {
     Route::get('{provider}', [SocialAuthController::class, 'redirect'])
         ->middleware('guest')
-        ->whereIn('provider', $socialProviders)
+        ->whereIn('provider', SocialNetwork::loginValues())
         ->name('social.auth');
     Route::get('{provider}/callback', [SocialAuthController::class, 'callback'])
         ->middleware('throttle:instagram-oauth-callback')
-        ->whereIn('provider', $socialProviders)
+        ->whereIn('provider', SocialNetwork::values())
         ->name('social.callback');
 });
 
 Route::middleware(['auth'])->group(function (): void {
-    Route::get('/auth/instagram/add', [SocialAuthController::class, 'addAccount'])->name('auth.instagram.add');
+    Route::get('/auth/{provider}/add', [SocialAuthController::class, 'addAccount'])
+        ->whereIn('provider', SocialNetwork::loginValues())
+        ->name('social.add');
 
     Route::livewire('instagram-accounts', SocialAccountsIndex::class)
+        ->defaults('provider', SocialNetwork::Instagram->value)
         ->name('instagram-accounts.index');
+    Route::livewire('tiktok-accounts', SocialAccountsIndex::class)
+        ->defaults('provider', SocialNetwork::Tiktok->value)
+        ->name('tiktok-accounts.index');
 
     Route::livewire('content', ContentIndex::class)
         ->name('content.index');
